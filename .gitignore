@@ -1,0 +1,4 @@
+/bazel*
+/.vscode
+.cache
+.DS_Store
