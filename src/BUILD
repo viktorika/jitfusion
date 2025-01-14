@@ -1,7 +1,6 @@
 cc_binary(
     name = "test",
     srcs = ["test.cc"],
-    includes = ["."],
     visibility = ["//visibility:public"],
     deps = [
         "@llvm//:llvm"
