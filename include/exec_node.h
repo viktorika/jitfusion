@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-14 14:55:53
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-14 16:22:49
+ * @Last Modified time: 2025-01-16 16:44:13
  */
 #pragma once
 
@@ -32,6 +32,22 @@ class ExecNode {
   virtual std::string ToStringImpl(const std::string& prefix);
 
   ValueType return_type_{ValueType::kUnknown};
+};
+
+class EntryArgumentNode : public ExecNode {
+ public:
+  Status Accept(Visitor* visitor) override;
+
+ private:
+  std::string ToStringImpl(const std::string& prefix) override;
+};
+
+class ExecContextNode : public ExecNode {
+ public:
+  Status Accept(Visitor* visitor) override;
+
+ private:
+  std::string ToStringImpl(const std::string& prefix) override;
 };
 
 class ConstantValueNode : public ExecNode {
@@ -102,10 +118,10 @@ class BinaryOPNode : public ExecNode {
   std::unique_ptr<ExecNode> left_, right_;
 };
 
-class FunctionExprNode : public ExecNode {
+class FunctionNode : public ExecNode {
  public:
-  FunctionExprNode() = delete;
-  FunctionExprNode(std::string func_name, std::vector<std::unique_ptr<ExecNode>> args)
+  FunctionNode() = delete;
+  FunctionNode(std::string func_name, std::vector<std::unique_ptr<ExecNode>> args)
       : func_name_(std::move(func_name)), args_(std::move(args)) {}
   Status Accept(Visitor* visitor) override;
   void AppendArgs(std::unique_ptr<ExecNode>&& arg);
@@ -124,11 +140,14 @@ class Visitor {
  public:
   virtual ~Visitor() = default;
 
-  virtual Status visit(ConstantValueNode& const_node) = 0;
-  virtual Status visit(ConstantListValueNode& const_list_node) = 0;
-  virtual Status visit(UnaryOPNode& unary_) = 0;
-  virtual Status visit(BinaryOPNode& const_node) = 0;
-  virtual Status visit(FunctionExprNode& const_node) = 0;
+ private:
+  virtual Status Visit(EntryArgumentNode& entry_argument_node) = 0;
+  virtual Status Visit(ExecContextNode& exec_context_node) = 0;
+  virtual Status Visit(ConstantValueNode& const_node) = 0;
+  virtual Status Visit(ConstantListValueNode& const_list_node) = 0;
+  virtual Status Visit(UnaryOPNode& unary_op_node) = 0;
+  virtual Status Visit(BinaryOPNode& binary_op_node) = 0;
+  virtual Status Visit(FunctionNode& function_node) = 0;
 };
 
 }  // namespace jitfusion
