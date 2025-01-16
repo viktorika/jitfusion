@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-14 15:41:47
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-14 16:07:54
+ * @Last Modified time: 2025-01-16 17:06:48
  */
 #pragma once
 
@@ -24,6 +24,23 @@ class Status {
 
   static Status OK() { return {}; }
 
+  template <typename... Args>
+  static Status InvalidArgument(Args&&... args) {
+    return Status(Status::StatusCode::kInvalidArgument, std::forward<Args>(args)...);
+  }
+  template <typename... Args>
+  static Status RuntimeError(Args&&... args) {
+    return Status(Status::StatusCode::kRuntimeError, std::forward<Args>(args)...);
+  }
+  template <typename... Args>
+  static Status ParseError(Args&&... args) {
+    return Status(Status::StatusCode::kParseError, std::forward<Args>(args)...);
+  }
+  template <typename... Args>
+  static Status NotImplemented(Args&&... args) {
+    return Status(Status::StatusCode::kNotImplemented, std::forward<Args>(args)...);
+  }
+
   [[nodiscard]] bool ok() const { return (state_ == nullptr || state_->code_ == StatusCode::kOk); }
 
   [[nodiscard]] std::string ToString() const;
@@ -31,6 +48,10 @@ class Status {
  private:
   enum class StatusCode : uint8_t {
     kOk = 0,
+    kInvalidArgument = 1,
+    kRuntimeError = 2,
+    kParseError = 3,
+    kNotImplemented = 4,
   };
   template <typename... Args>
   explicit Status(StatusCode code, Args&&... args) {
@@ -48,11 +69,11 @@ class Status {
   std::unique_ptr<State> state_;
 };
 
-#define RE_RETURN_NOT_OK(expr) \
-  do {                         \
-    Status st = (expr);        \
-    if (!st.ok()) {            \
-      return st;               \
-    }                          \
+#define RETURN_NOT_OK(expr) \
+  do {                      \
+    Status st = (expr);     \
+    if (!st.ok()) {         \
+      return st;            \
+    }                       \
   } while (false)
 }  // namespace jitfusion
