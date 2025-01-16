@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-16 16:35:04
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-16 17:11:52
+ * @Last Modified time: 2025-01-16 17:27:19
  */
 #include "validator.h"
 #include <status.h>
@@ -66,7 +66,7 @@ Status Validator::Visit(UnaryOPNode& unary_op_node) {
   if (!TypeHelper::IsNumberType(child_return_type)) {
     return Status::ParseError("Unary OP only support number type");
   }
-  auto b = +a;
+
   switch (unary_op_node.GetOp()) {
     case UnaryOPType::kPlus:
       unary_op_node.SetReturnType(child_return_type);
