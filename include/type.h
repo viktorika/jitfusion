@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-14 16:21:53
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-14 16:22:46
+ * @Last Modified time: 2025-01-16 17:11:16
  */
 #pragma once
 
@@ -87,61 +87,13 @@ using ConstantListValueType =
                  std::vector<uint8_t>, std::vector<uint16_t>, std::vector<uint32_t>, std::vector<uint64_t>,
                  std::vector<float>, std::vector<double>, std::vector<std::string>>;
 
-inline std::string UnaryOPTypeToString(UnaryOPType type) {
-  switch (type) {
-    case UnaryOPType::kPlus:
-      return "+";
-    case UnaryOPType::kMinus:
-      return "-";
-    case UnaryOPType::kNot:
-      return "!";
-    case UnaryOPType::kBitwiseNot:
-      return "~";
-  }
-  return "unknown";
-}
-
-inline std::string BinaryOPTypeToString(BinaryOPType type) {
-  switch (type) {
-    case BinaryOPType::kAdd:
-      return "+";
-    case BinaryOPType::kSub:
-      return "-";
-    case BinaryOPType::kMul:
-      return "*";
-    case BinaryOPType::kDiv:
-      return "/";
-    case BinaryOPType::kMod:
-      return "%";
-    case BinaryOPType::kLarge:
-      return ">";
-    case BinaryOPType::kLargeEqual:
-      return ">=";
-    case BinaryOPType::kEqual:
-      return "==";
-    case BinaryOPType::kLess:
-      return "<";
-    case BinaryOPType::kLessEqual:
-      return "<=";
-    case BinaryOPType::kNotEqual:
-      return "!=";
-    case BinaryOPType::kAnd:
-      return "&&";
-    case BinaryOPType::kOr:
-      return "||";
-    case BinaryOPType::kBitwiseAnd:
-      return "&";
-    case BinaryOPType::kBitwiseOr:
-      return "|";
-    case BinaryOPType::kBitwiseXor:
-      return "^";
-    case BinaryOPType::kBitwiseShiftLeft:
-      return "<<";
-    case BinaryOPType::kBitwiseShiftRight:
-      return ">>";
-  }
-  return "unknown";
-}
-
+class TypeHelper {
+ public:
+  static std::string UnaryOPTypeToString(UnaryOPType type);
+  static std::string BinaryOPTypeToString(BinaryOPType type);
+  static std::string TypeToString(ValueType type);
+  static bool IsNumberType(ValueType type);
+  static bool IsIntegerType(ValueType type);
+};
 
 }  // namespace jitfusion
