@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-15 10:59:33
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-16 16:34:07
+ * @Last Modified time: 2025-01-17 16:07:11
  */
 #include "exec_engine.h"
 #include <status.h>
@@ -26,6 +26,7 @@
 #include "llvm/Support/CodeGen.h"
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Scalar/GVN.h"
+#include "validator.h"
 
 namespace jitfusion {
 
@@ -64,6 +65,8 @@ std::unique_ptr<llvm::TargetMachine> GetTargetMachine() {
 Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
                            const std::unique_ptr<FunctionRegistry>& func_registry) {
   // validator
+  Validator validator(func_registry);
+  RETURN_NOT_OK(validator.Validate(exec_node));
 
   // codegen
   llvm::LLVMContext context;
