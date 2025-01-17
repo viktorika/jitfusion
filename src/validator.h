@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-16 16:30:31
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-16 16:45:09
+ * @Last Modified time: 2025-01-17 14:35:58
  */
 #pragma once
 
@@ -18,7 +18,6 @@ class Validator : public Visitor {
 
   Status Validate(const std::unique_ptr<ExecNode>& node);
 
- private:
   Status Visit(EntryArgumentNode& entry_argument_node) override = 0;
   Status Visit(ExecContextNode& exec_context_node) override = 0;
   Status Visit(ConstantValueNode& const_node) override = 0;

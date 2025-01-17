@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-16 16:35:04
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-16 17:27:19
+ * @Last Modified time: 2025-01-17 16:05:09
  */
 #include "validator.h"
 #include <status.h>
@@ -105,6 +105,61 @@ Status Validator::Visit(UnaryOPNode& unary_op_node) {
       return Status::NotImplemented("UnaryOPType " + TypeHelper::UnaryOPTypeToString(unary_op_node.GetOp()) +
                                     " not implemented");
   }
+  return Status::OK();
+}
+
+namespace {
+
+struct DivZeroVisit {
+  bool operator()(int8_t v) { return 0 == v; }
+  bool operator()(int16_t v) { return 0 == v; }
+  bool operator()(int32_t v) { return 0 == v; }
+  bool operator()(int64_t v) { return 0 == v; }
+  bool operator()(uint8_t v) { return 0 == v; }
+  bool operator()(uint16_t v) { return 0 == v; }
+  bool operator()(uint32_t v) { return 0 == v; }
+  bool operator()(uint64_t v) { return 0 == v; }
+  bool operator()(float /*v*/) { return false; }
+  bool operator()(double /*v*/) { return false; }
+  bool operator()(const std::string& /*v*/) { return false; }
+};
+
+}  // namespace
+
+Status Validator::Visit(BinaryOPNode& binary_op_node) {
+  auto* left = binary_op_node.GetLeft();
+  auto* right = binary_op_node.GetRight();
+  RETURN_NOT_OK(left->Accept(this));
+  RETURN_NOT_OK(right->Accept(this));
+  auto op = binary_op_node.GetOp();
+
+  // extra check
+  if ((BinaryOPType::kDiv == op || BinaryOPType::kMod == op) &&
+      right->GetExecNodeType() == ExecNodeType::kConstValueNode &&
+      std::visit(DivZeroVisit(), static_cast<ConstantValueNode*>(right)->GetVal())) {
+    return Status::ParseError("Cant no div/mod zero");
+  }
+
+  if (TypeHelper::IsRelationalBinaryOPType(binary_op_node.GetOp()) ||
+      TypeHelper::IsLogicalBinaryOPType(binary_op_node.GetOp())) {
+    binary_op_node.SetReturnType(ValueType::kU8);
+    return Status::OK();
+  }
+  binary_op_node.SetReturnType(TypeHelper::GetPromotedType(left->GetReturnType(), right->GetReturnType()));
+  return Status::OK();
+}
+
+Status Validator::Visit(FunctionNode& function_node) {
+  std::vector<ValueType> arg_types;
+  arg_types.reserve(function_node.GetArgs().size());
+  for (const auto& arg : function_node.GetArgs()) {
+    RETURN_NOT_OK(arg->Accept(this));
+    arg_types.emplace_back(arg->GetReturnType());
+  }
+  FunctionSignature sign(function_node.GetFuncName(), arg_types, ValueType::kUnknown);
+  FunctionStructure function_structure;
+  RETURN_NOT_OK(func_registry_->GetFuncBySign(sign, &function_structure));
+  function_node.SetReturnType(sign.GetRetType());
   return Status::OK();
 }
 

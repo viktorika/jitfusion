@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-14 14:55:53
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-16 16:44:13
+ * @Last Modified time: 2025-01-17 14:16:51
  */
 #pragma once
 
@@ -24,6 +24,7 @@ class ExecNode {
   virtual ~ExecNode() = default;
   std::string ToString(const std::string& prefix = "");
   virtual Status Accept(Visitor* visitor) = 0;
+  virtual ExecNodeType GetExecNodeType() = 0;
 
   [[nodiscard]] ValueType GetReturnType() const { return return_type_; }
   void SetReturnType(ValueType return_type) { return_type_ = return_type; }
@@ -37,6 +38,7 @@ class ExecNode {
 class EntryArgumentNode : public ExecNode {
  public:
   Status Accept(Visitor* visitor) override;
+  ExecNodeType GetExecNodeType() override;
 
  private:
   std::string ToStringImpl(const std::string& prefix) override;
@@ -45,6 +47,7 @@ class EntryArgumentNode : public ExecNode {
 class ExecContextNode : public ExecNode {
  public:
   Status Accept(Visitor* visitor) override;
+  ExecNodeType GetExecNodeType() override;
 
  private:
   std::string ToStringImpl(const std::string& prefix) override;
@@ -55,6 +58,7 @@ class ConstantValueNode : public ExecNode {
   ConstantValueNode() = delete;
   explicit ConstantValueNode(ConstantValueType val) : val_(std::move(val)) {}
   Status Accept(Visitor* visitor) override;
+  ExecNodeType GetExecNodeType() override;
   [[nodiscard]] const ConstantValueType& GetVal() const { return val_; }
 
  private:
@@ -72,6 +76,7 @@ class ConstantListValueNode : public ExecNode {
     val_list_ = std::move(val_list);
   }
   Status Accept(Visitor* visitor) override;
+  ExecNodeType GetExecNodeType() override;
 
   [[nodiscard]] const ConstantListValueType& GetValList() const { return val_list_; }
   [[nodiscard]] const ConstantListValueType& GetSortValList() const { return sort_val_list_; }
@@ -88,6 +93,7 @@ class UnaryOPNode : public ExecNode {
   UnaryOPNode() = delete;
   UnaryOPNode(UnaryOPType op, std::unique_ptr<ExecNode> child) : op_(op), child_(std::move(child)) {}
   Status Accept(Visitor* visitor) override;
+  ExecNodeType GetExecNodeType() override;
 
   [[nodiscard]] ExecNode* GetChild() const { return child_.get(); }
   [[nodiscard]] UnaryOPType GetOp() const { return op_; }
@@ -105,6 +111,7 @@ class BinaryOPNode : public ExecNode {
   BinaryOPNode(BinaryOPType op, std::unique_ptr<ExecNode> left, std::unique_ptr<ExecNode> right)
       : op_(op), left_(std::move(left)), right_(std::move(right)) {}
   Status Accept(Visitor* visitor) override;
+  ExecNodeType GetExecNodeType() override;
 
   [[nodiscard]] ExecNode* GetLeft() const { return left_.get(); }
   [[nodiscard]] ExecNode* GetRight() const { return right_.get(); }
@@ -124,6 +131,7 @@ class FunctionNode : public ExecNode {
   FunctionNode(std::string func_name, std::vector<std::unique_ptr<ExecNode>> args)
       : func_name_(std::move(func_name)), args_(std::move(args)) {}
   Status Accept(Visitor* visitor) override;
+  ExecNodeType GetExecNodeType() override;
   void AppendArgs(std::unique_ptr<ExecNode>&& arg);
 
   [[nodiscard]] std::string GetFuncName() const { return func_name_; }
@@ -140,7 +148,6 @@ class Visitor {
  public:
   virtual ~Visitor() = default;
 
- private:
   virtual Status Visit(EntryArgumentNode& entry_argument_node) = 0;
   virtual Status Visit(ExecContextNode& exec_context_node) = 0;
   virtual Status Visit(ConstantValueNode& const_node) = 0;

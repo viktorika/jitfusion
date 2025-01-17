@@ -2,11 +2,12 @@
  * @Author: victorika
  * @Date: 2025-01-16 16:59:03
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-16 17:09:27
+ * @Last Modified time: 2025-01-17 16:00:22
  */
 #pragma once
 
 #include <type.h>
+#include <unordered_map>
 
 namespace jitfusion {
 
@@ -148,6 +149,47 @@ bool TypeHelper::IsIntegerType(ValueType type) {
     case ValueType::kU32:
     case ValueType::kU64:
       return true;
+    default:
+      return false;
+  }
+  return false;
+}
+
+ValueType TypeHelper::GetPromotedType(ValueType lhs, ValueType rhs) {
+  static const std::unordered_map<ValueType, int32_t> kWeight = {
+      {ValueType::kUnknown, -1}, {ValueType::kI8, 0},       {ValueType::kU8, 1},         {ValueType::kI16, 2},
+      {ValueType::kU16, 3},      {ValueType::kI32, 4},      {ValueType::kU32, 5},        {ValueType::kI64, 6},
+      {ValueType::kU64, 7},      {ValueType::kF32, 8},      {ValueType::kF64, 9},        {ValueType::kString, 10},
+      {ValueType::kI8List, 11},  {ValueType::kU8List, 12},  {ValueType::kI16List, 13},   {ValueType::kU16List, 14},
+      {ValueType::kI32List, 15}, {ValueType::kU32List, 16}, {ValueType::kI64List, 17},   {ValueType::kU64List, 18},
+      {ValueType::kF32List, 19}, {ValueType::kF64List, 20}, {ValueType::kStringList, 21}};
+  auto left_weight = kWeight.at(lhs);
+  auto right_weight = kWeight.at(rhs);
+  return left_weight > right_weight ? lhs : rhs;
+}
+
+bool TypeHelper::IsRelationalBinaryOPType(BinaryOPType type) {
+  switch (type) {
+    case BinaryOPType::kLarge:
+    case BinaryOPType::kLargeEqual:
+    case BinaryOPType::kEqual:
+    case BinaryOPType::kLess:
+    case BinaryOPType::kLessEqual:
+    case BinaryOPType::kNotEqual:
+      return true;
+      break;
+    default:
+      return false;
+  }
+  return false;
+}
+
+bool TypeHelper::IsLogicalBinaryOPType(BinaryOPType type) {
+  switch (type) {
+    case BinaryOPType::kAnd:
+    case BinaryOPType::kOr:
+      return true;
+      break;
     default:
       return false;
   }

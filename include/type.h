@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-14 16:21:53
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-16 17:11:16
+ * @Last Modified time: 2025-01-17 16:00:11
  */
 #pragma once
 
@@ -13,11 +13,13 @@
 namespace jitfusion {
 
 enum class ExecNodeType : uint8_t {
-  kConstValueNode = 1,
-  kConstListValueNode = 2,
-  kUnaryOPType = 3,
-  kBinaryOPNode = 4,
-  kFunctionNode = 5,
+  kEntryArgumentNode = 1,
+  kExecContextNode = 2,
+  kConstValueNode = 3,
+  kConstListValueNode = 4,
+  kUnaryOPType = 5,
+  kBinaryOPNode = 6,
+  kFunctionNode = 7,
 };
 
 enum class BinaryOPType : uint8_t {
@@ -92,8 +94,14 @@ class TypeHelper {
   static std::string UnaryOPTypeToString(UnaryOPType type);
   static std::string BinaryOPTypeToString(BinaryOPType type);
   static std::string TypeToString(ValueType type);
+
   static bool IsNumberType(ValueType type);
   static bool IsIntegerType(ValueType type);
+
+  static bool IsRelationalBinaryOPType(BinaryOPType type);
+  static bool IsLogicalBinaryOPType(BinaryOPType type);
+
+  static ValueType GetPromotedType(ValueType lhs, ValueType rhs);
 };
 
 }  // namespace jitfusion
