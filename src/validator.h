@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-16 16:30:31
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-17 16:06:50
+ * @Last Modified time: 2025-01-20 15:03:41
  */
 #pragma once
 
@@ -16,7 +16,7 @@ class Validator : public Visitor {
  public:
   explicit Validator(const std::unique_ptr<FunctionRegistry>& func_registry) : func_registry_(func_registry) {}
 
-  Status Validate(const std::unique_ptr<ExecNode>& node);
+  Status Validate(ExecNode* node);
 
   Status Visit(EntryArgumentNode& entry_argument_node) override;
   Status Visit(ExecContextNode& exec_context_node) override;

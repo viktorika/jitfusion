@@ -2,12 +2,11 @@
  * @Author: victorika
  * @Date: 2025-01-15 10:59:33
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-17 16:07:11
+ * @Last Modified time: 2025-01-20 15:12:03
  */
 #include "exec_engine.h"
 #include <status.h>
 #include <iostream>
-#include <optional>
 #include "llvm/ADT/StringMap.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
@@ -66,7 +65,7 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
                            const std::unique_ptr<FunctionRegistry>& func_registry) {
   // validator
   Validator validator(func_registry);
-  RETURN_NOT_OK(validator.Validate(exec_node));
+  RETURN_NOT_OK(validator.Validate(exec_node.get()));
 
   // codegen
   llvm::LLVMContext context;

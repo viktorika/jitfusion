@@ -2,15 +2,15 @@
  * @Author: victorika
  * @Date: 2025-01-16 16:35:04
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-17 16:05:09
+ * @Last Modified time: 2025-01-20 15:10:41
  */
 #include "validator.h"
-#include <status.h>
-#include <type.h>
+#include "status.h"
+#include "type.h"
 
 namespace jitfusion {
 
-Status Validator::Validate(const std::unique_ptr<ExecNode>& node) { return node->Accept(this); }
+Status Validator::Validate(ExecNode* node) { return node->Accept(this); }
 
 Status Validator::Visit(EntryArgumentNode& entry_argument_node) {
   entry_argument_node.SetReturnType(ValueType::kI64);

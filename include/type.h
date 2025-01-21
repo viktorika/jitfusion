@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-14 16:21:53
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-17 16:00:11
+ * @Last Modified time: 2025-01-21 16:23:17
  */
 #pragma once
 
@@ -88,6 +88,11 @@ using ConstantListValueType =
     std::variant<std::vector<int8_t>, std::vector<int16_t>, std::vector<int32_t>, std::vector<int64_t>,
                  std::vector<uint8_t>, std::vector<uint16_t>, std::vector<uint32_t>, std::vector<uint64_t>,
                  std::vector<float>, std::vector<double>, std::vector<std::string>>;
+
+struct LLVMComplexStruct {
+  int64_t data;
+  uint32_t len;
+};
 
 class TypeHelper {
  public:
