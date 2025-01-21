@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-14 16:21:53
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-21 16:23:17
+ * @Last Modified time: 2025-01-21 18:57:34
  */
 #pragma once
 
@@ -102,11 +102,14 @@ class TypeHelper {
 
   static bool IsNumberType(ValueType type);
   static bool IsIntegerType(ValueType type);
+  static bool IsSignedType(ValueType type);
+  static bool IsFloatType(ValueType type);
 
   static bool IsRelationalBinaryOPType(BinaryOPType type);
   static bool IsLogicalBinaryOPType(BinaryOPType type);
 
   static ValueType GetPromotedType(ValueType lhs, ValueType rhs);
+  static int GetBitWidthFromType(ValueType type);
 };
 
 }  // namespace jitfusion

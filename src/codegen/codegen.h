@@ -2,10 +2,11 @@
  * @Author: victorika
  * @Date: 2025-01-20 14:16:13
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-21 16:30:51
+ * @Last Modified time: 2025-01-21 19:05:52
  */
 #pragma once
 
+#include <type.h>
 #include <memory>
 #include "arena.h"
 #include "exec_node.h"
@@ -57,6 +58,9 @@ class CodeGen : public Visitor {
   Status Visit(UnaryOPNode &unary_op_node) override;
   Status Visit(BinaryOPNode &binary_op_node) override;
   Status Visit(FunctionNode &function_node) override;
+
+  Status NumericTypeConvert(ValueType from, ValueType to, llvm::Value **value);
+  Status ToBoolean(ValueType from, llvm::Value **value);
 
  private:
   IRCodeGenContext &ctx_;

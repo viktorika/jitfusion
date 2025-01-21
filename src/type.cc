@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-16 16:59:03
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-17 16:00:22
+ * @Last Modified time: 2025-01-21 18:57:16
  */
 #pragma once
 
@@ -194,6 +194,59 @@ bool TypeHelper::IsLogicalBinaryOPType(BinaryOPType type) {
       return false;
   }
   return false;
+}
+
+int TypeHelper::GetBitWidthFromType(ValueType type) {
+  switch (type) {
+    case ValueType::kI8:
+      return 8;
+    case ValueType::kI16:
+      return 16;
+    case ValueType::kI32:
+      return 32;
+    case ValueType::kI64:
+      return 64;
+    case ValueType::kU8:
+      return 8;
+    case ValueType::kU16:
+      return 16;
+    case ValueType::kU32:
+      return 32;
+    case ValueType::kU64:
+      return 64;
+    case ValueType::kF32:
+      return 32;
+    case ValueType::kF64:
+      return 64;
+    default:
+      return -1;
+  }
+  return -1;
+}
+
+bool TypeHelper::IsSignedType(ValueType type) {
+  switch (type) {
+    case ValueType::kI8:
+    case ValueType::kI16:
+    case ValueType::kI32:
+    case ValueType::kI64:
+    case ValueType::kF32:
+    case ValueType::kF64:
+      return true;
+    default:
+      return false;
+  }
+  return false;
+}
+
+bool TypeHelper::IsFloatType(ValueType type) {
+  switch (type) {
+    case ValueType::kF32:
+    case ValueType::kF64:
+      return true;
+    default:
+      return false;
+  }
 }
 
 }  // namespace jitfusion
