@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-20 14:47:10
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-21 19:08:45
+ * @Last Modified time: 2025-01-22 10:58:59
  */
 #include "codegen.h"
 #include <type.h>
@@ -39,7 +39,7 @@ Status CodeGen::ToBoolean(ValueType from, llvm::Value **value) {
       *value = ctx_.builder.CreateSExt(condition, llvm::Type::getInt8Ty(ctx_.context));
     } break;
     default:
-      return Status::RuntimeError("Unknown convert in ToBoolean, from " + TypeHelper::TypeToString(from) + " to uint8");
+      return Status::RuntimeError("Unknown convert in ToBoolean, from ", TypeHelper::TypeToString(from), " to uint8");
   }
   return Status::OK();
 }
@@ -89,7 +89,7 @@ Status CodeGen::NumericTypeConvert(ValueType from, ValueType to, llvm::Value **v
       return Status::OK();
     }
   }
-  return Status::RuntimeError("Unknown convert in TypeConvert, from " + TypeHelper::TypeToString(from) + " to " +
+  return Status::RuntimeError("Unknown convert in TypeConvert, from ", TypeHelper::TypeToString(from), " to ",
                               TypeHelper::TypeToString(to));
 }
 

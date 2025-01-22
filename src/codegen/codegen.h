@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-20 14:16:13
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-21 19:05:52
+ * @Last Modified time: 2025-01-22 11:10:16
  */
 #pragma once
 
@@ -47,6 +47,7 @@ struct IRCodeGenContext {
 };
 
 class CodeGen : public Visitor {
+ public:
   explicit CodeGen(IRCodeGenContext &ctx) : ctx_(ctx) {}
 
   Status GetValue(ExecNode *node, llvm::Value **ret_value);
@@ -63,6 +64,9 @@ class CodeGen : public Visitor {
   Status ToBoolean(ValueType from, llvm::Value **value);
 
  private:
+  Status SolveBinaryOpNumericType(BinaryOPNode &binary_node, llvm::Value *lhs_value, llvm::Value *rhs_value);
+  Status SolveBinaryOpComplexType(BinaryOPNode &binary_node, llvm::Value *lhs_value, llvm::Value *rhs_value);
+
   IRCodeGenContext &ctx_;
   llvm::Value *value_{nullptr};
 };

@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-16 16:59:03
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-21 18:57:16
+ * @Last Modified time: 2025-01-22 10:32:31
  */
 #pragma once
 
@@ -247,6 +247,27 @@ bool TypeHelper::IsFloatType(ValueType type) {
     default:
       return false;
   }
+}
+
+bool TypeHelper::IsComplexType(ValueType type) {
+  switch (type) {
+    case ValueType::kString:
+    case ValueType::kU8List:
+    case ValueType::kU16List:
+    case ValueType::kU32List:
+    case ValueType::kU64List:
+    case ValueType::kI8List:
+    case ValueType::kI16List:
+    case ValueType::kI32List:
+    case ValueType::kI64List:
+    case ValueType::kF32List:
+    case ValueType::kF64List:
+    case ValueType::kStringList:
+      return true;
+    default:
+      return false;
+  }
+  return false;
 }
 
 }  // namespace jitfusion

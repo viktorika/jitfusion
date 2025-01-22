@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-15 14:26:36
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-20 15:11:18
+ * @Last Modified time: 2025-01-22 10:56:19
  */
 #include "function_registry.h"
 #include <type_traits>
@@ -90,7 +90,7 @@ Status FunctionRegistry::RegisterFunc(const FunctionSignature& func_sign, Functi
 Status FunctionRegistry::GetFuncBySign(FunctionSignature& func_sign, FunctionStructure* func_struct) const {
   auto iter = name2funclist_.find(func_sign.GetName());
   if (iter == name2funclist_.end()) {
-    return Status::RuntimeError("function " + func_sign.ToString() + " not found");
+    return Status::RuntimeError("function ", func_sign.ToString(), " not found");
   }
   for (const auto& [sign, fs] : iter->second) {
     if (func_sign == sign) {
@@ -99,7 +99,7 @@ Status FunctionRegistry::GetFuncBySign(FunctionSignature& func_sign, FunctionStr
       return Status::OK();
     }
   }
-  return Status::RuntimeError("function " + func_sign.ToString() + " not found");
+  return Status::RuntimeError("function ", func_sign.ToString(), " not found");
 }
 
 }  // namespace jitfusion

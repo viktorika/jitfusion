@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-16 16:30:31
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-20 15:03:41
+ * @Last Modified time: 2025-01-22 10:40:20
  */
 #pragma once
 
@@ -26,6 +26,7 @@ class Validator : public Visitor {
   Status Visit(BinaryOPNode& binary_op_node) override;
   Status Visit(FunctionNode& function_node) override;
 
+ private:
   const std::unique_ptr<FunctionRegistry>& func_registry_;
 };
 

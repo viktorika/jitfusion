@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-16 16:35:04
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-20 15:10:41
+ * @Last Modified time: 2025-01-22 10:56:49
  */
 #include "validator.h"
 #include "status.h"
@@ -102,7 +102,7 @@ Status Validator::Visit(UnaryOPNode& unary_op_node) {
       unary_op_node.SetReturnType(child_return_type);
     } break;
     default:
-      return Status::NotImplemented("UnaryOPType " + TypeHelper::UnaryOPTypeToString(unary_op_node.GetOp()) +
+      return Status::NotImplemented("UnaryOPType ", TypeHelper::UnaryOPTypeToString(unary_op_node.GetOp()),
                                     " not implemented");
   }
   return Status::OK();

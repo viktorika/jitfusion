@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-14 16:21:53
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-21 18:57:34
+ * @Last Modified time: 2025-01-22 10:31:44
  */
 #pragma once
 
@@ -104,6 +104,7 @@ class TypeHelper {
   static bool IsIntegerType(ValueType type);
   static bool IsSignedType(ValueType type);
   static bool IsFloatType(ValueType type);
+  static bool IsComplexType(ValueType type);
 
   static bool IsRelationalBinaryOPType(BinaryOPType type);
   static bool IsLogicalBinaryOPType(BinaryOPType type);
