@@ -2,49 +2,15 @@
  * @Author: victorika
  * @Date: 2025-01-20 14:16:13
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-22 11:10:16
+ * @Last Modified time: 2025-01-22 15:14:49
  */
 #pragma once
 
-#include <type.h>
-#include <memory>
-#include "arena.h"
 #include "exec_node.h"
 #include "function_registry.h"
-#include "llvm/ExecutionEngine/ExecutionEngine.h"
-#include "llvm/IR/BasicBlock.h"
-#include "llvm/IR/DerivedTypes.h"
-#include "llvm/IR/Function.h"
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/Type.h"
-#include "llvm/IR/Verifier.h"
+#include "type.h"
 
 namespace jitfusion {
-
-struct IRCodeGenContext {
-  IRCodeGenContext(llvm::LLVMContext &context, llvm::Module &module, llvm::IRBuilder<> &builder,
-                   llvm::BasicBlock *entry_bb, llvm::Function *entry_function, llvm::StructType *complex_type,
-                   const std::unique_ptr<FunctionRegistry> &function_registry, Arena &const_value_arena)
-      : context(context),
-        module(module),
-        builder(builder),
-        entry_bb(entry_bb),
-        entry_function(entry_function),
-        complex_type(complex_type),
-        function_registry(function_registry),
-        const_value_arena(const_value_arena) {}
-
-  llvm::LLVMContext &context;
-  llvm::Module &module;
-  llvm::IRBuilder<> &builder;
-  llvm::BasicBlock *entry_bb;
-  llvm::Function *entry_function;
-  llvm::StructType *complex_type;
-  const std::unique_ptr<FunctionRegistry> &function_registry;
-  Arena &const_value_arena;
-};
 
 class CodeGen : public Visitor {
  public:
@@ -66,6 +32,7 @@ class CodeGen : public Visitor {
  private:
   Status SolveBinaryOpNumericType(BinaryOPNode &binary_node, llvm::Value *lhs_value, llvm::Value *rhs_value);
   Status SolveBinaryOpComplexType(BinaryOPNode &binary_node, llvm::Value *lhs_value, llvm::Value *rhs_value);
+  Status ValueTypeToLLVMType(ValueType value_type, llvm::Type **llvm_type);
 
   IRCodeGenContext &ctx_;
   llvm::Value *value_{nullptr};
