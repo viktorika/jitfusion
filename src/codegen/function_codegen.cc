@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-22 14:25:33
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-22 15:23:57
+ * @Last Modified time: 2025-01-22 16:50:36
  */
 #include <vector>
 #include "codegen.h"
@@ -79,8 +79,6 @@ Status CodeGen::Visit(FunctionNode& function_node) {
       std::string error_info;
       llvm::raw_string_ostream error_stream(error_info);
       if (llvm::verifyFunction(llvm::cast<llvm::Function>(*call_func_callee.getCallee()), &error_stream)) {
-        llvm::cast<llvm::Function>(*call_func_callee.getCallee()).print(error_stream);
-        error_stream.flush();
         return Status::RuntimeError("Verify function failed in function_codegen in call_func_callee: " + error_info);
       }
 

@@ -2,13 +2,14 @@
  * @Author: victorika
  * @Date: 2025-01-15 15:47:48
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-22 15:15:32
+ * @Last Modified time: 2025-01-22 16:28:29
  */
 #pragma once
 
 #include <functional>
 #include "arena.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
+#include "llvm/ExecutionEngine/MCJIT.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Function.h"
@@ -92,6 +93,7 @@ class FunctionRegistry {
  public:
   Status RegisterFunc(const FunctionSignature &func_sign, FunctionStructure func_struct);
   Status GetFuncBySign(FunctionSignature &func_sign, FunctionStructure *func_struct) const;
+  Status MappingToLLVM(llvm::ExecutionEngine *engine);
 
  private:
   FunctionRegistry() = default;

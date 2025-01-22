@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-16 16:35:04
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-22 10:56:49
+ * @Last Modified time: 2025-01-22 15:46:11
  */
 #include "validator.h"
 #include "status.h"
@@ -160,6 +160,14 @@ Status Validator::Visit(FunctionNode& function_node) {
   FunctionStructure function_structure;
   RETURN_NOT_OK(func_registry_->GetFuncBySign(sign, &function_structure));
   function_node.SetReturnType(sign.GetRetType());
+  return Status::OK();
+}
+
+Status Validator::Visit(NoOPNode& no_op_node) {
+  for (const auto& arg : no_op_node.GetArgs()) {
+    RETURN_NOT_OK(arg->Accept(this));
+  }
+  no_op_node.SetReturnType(ValueType::kI8);
   return Status::OK();
 }
 

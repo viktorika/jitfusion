@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-15 10:59:27
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-20 15:11:31
+ * @Last Modified time: 2025-01-22 15:43:50
  */
 #include "exec_node.h"
 #include "type.h"
@@ -90,8 +90,13 @@ inline std::string FunctionNode::ToStringImpl(const std::string& prefix) {
 }
 
 void FunctionNode::AppendArgs(std::unique_ptr<ExecNode>&& arg) { args_.emplace_back(std::move(arg)); }
-
 Status FunctionNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType FunctionNode::GetExecNodeType() { return ExecNodeType::kFunctionNode; }
+
+std::string NoOPNode::ToStringImpl(const std::string& prefix) { return prefix + "|--no_op\n"; }
+
+Status NoOPNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
+ExecNodeType NoOPNode::GetExecNodeType() { return ExecNodeType::kNoOPNode; }
+void NoOPNode::AppendArgs(std::unique_ptr<ExecNode>&& arg) { args_.emplace_back(std::move(arg)); }
 
 }  // namespace jitfusion

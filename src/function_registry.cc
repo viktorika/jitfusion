@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-15 14:26:36
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-22 10:56:19
+ * @Last Modified time: 2025-01-22 16:31:31
  */
 #include "function_registry.h"
 #include <type_traits>
@@ -100,6 +100,19 @@ Status FunctionRegistry::GetFuncBySign(FunctionSignature& func_sign, FunctionStr
     }
   }
   return Status::RuntimeError("function ", func_sign.ToString(), " not found");
+}
+
+Status FunctionRegistry::MappingToLLVM(llvm::ExecutionEngine* engine) {
+  if (engine == nullptr) {
+    return Status::RuntimeError("engine pointer is nullptr");
+  }
+  for (const auto& [sign, fc] : signature2funcstruct_) {
+    if (FunctionType::kLLVMIntrinicFunc == fc.func_type) {
+      continue;
+    }
+    engine->addGlobalMapping(sign.ToString(), reinterpret_cast<uint64_t>(fc.c_func_ptr));
+  }
+  return Status::OK();
 }
 
 }  // namespace jitfusion
