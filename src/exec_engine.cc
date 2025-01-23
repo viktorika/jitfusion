@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-15 10:59:33
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-22 16:52:16
+ * @Last Modified time: 2025-01-23 12:57:15
  */
 #include "exec_engine.h"
 #include <exec_node.h>
@@ -46,16 +46,12 @@ namespace jitfusion {
 
 namespace {
 
-std::once_flag llvm_target_initialized;
-
-std::unique_ptr<llvm::TargetMachine> GetTargetMachine() {
-  std::call_once(llvm_target_initialized, []() {
-    llvm::InitializeNativeTarget();
-    llvm::InitializeNativeTargetAsmPrinter();
-    llvm::InitializeNativeTargetAsmParser();
-    llvm::InitializeNativeTargetDisassembler();
-    llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
-  });
+llvm::TargetMachine* GetTargetMachine() {
+  llvm::InitializeNativeTarget();
+  llvm::InitializeNativeTargetAsmPrinter();
+  llvm::InitializeNativeTargetAsmParser();
+  llvm::InitializeNativeTargetDisassembler();
+  llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
 
   std::string error;
   auto* cpu = LLVMGetHostCPUName();
@@ -71,7 +67,7 @@ std::unique_ptr<llvm::TargetMachine> GetTargetMachine() {
   auto* target_machine = target->createTargetMachine(triple, cpu, features.getString(), options, std::nullopt,
                                                      std::nullopt, llvm::CodeGenOptLevel::Aggressive, true);
 
-  return std::unique_ptr<llvm::TargetMachine>(target_machine);
+  return target_machine;
 };
 
 }  // namespace
@@ -112,7 +108,7 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
   }
 
   // optimize
-  auto machine = GetTargetMachine();
+  static auto* machine = GetTargetMachine();
 
   llvm::PassBuilder pass_builder;
   llvm::ModulePassManager mpm;
@@ -127,8 +123,12 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
   pass_builder.registerLoopAnalyses(lam);
   pass_builder.crossRegisterProxies(lam, fam, cgam, mam);
 
+  auto tti = machine->getTargetIRAnalysis();
+  fam.registerPass([&] { return tti; });
+
   llvm::OptimizationLevel opt_level = llvm::OptimizationLevel::O3;
   mpm = pass_builder.buildPerModuleDefaultPipeline(opt_level);
+
   mpm.addPass(llvm::createFunctionToLoopPassAdaptor(llvm::LoopVectorizePass()));
   mpm.addPass(llvm::SLPVectorizerPass());
   mpm.addPass(llvm::SimplifyCFGPass());
@@ -153,7 +153,7 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
 }
 
 Status ExecEngine::Execute(void* entry_arguments) {
-  if (0 == entry_func_ptr_) {
+  if (nullptr == entry_func_ptr_) {
     return Status::RuntimeError("Please compile before execute");
   }
   ExecContext exec_ctx;
