@@ -2,10 +2,12 @@
  * @Author: victorika
  * @Date: 2025-01-15 14:26:36
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-22 16:31:31
+ * @Last Modified time: 2025-01-23 12:40:43
  */
 #include "function_registry.h"
+#include <status.h>
 #include <type_traits>
+#include "function/function_init.h"
 #include "type.h"
 
 namespace jitfusion {
@@ -112,6 +114,13 @@ Status FunctionRegistry::MappingToLLVM(llvm::ExecutionEngine* engine) {
     }
     engine->addGlobalMapping(sign.ToString(), reinterpret_cast<uint64_t>(fc.c_func_ptr));
   }
+  return Status::OK();
+}
+
+Status FunctionRegistry::Init() {
+  RETURN_NOT_OK(InitMathInternalFunc(this));
+  RETURN_NOT_OK(InitStringInternalFunc(this));
+  RETURN_NOT_OK(InitListInternalFunc(this));
   return Status::OK();
 }
 
