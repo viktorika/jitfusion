@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-15 10:59:27
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-23 14:57:59
+ * @Last Modified time: 2025-01-23 15:47:55
  */
 #include "exec_node.h"
 #include "type.h"
@@ -110,5 +110,17 @@ std::string IfNode::ToStringImpl(const std::string& prefix) {
 Status IfNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType IfNode::GetExecNodeType() { return ExecNodeType::kIfNode; }
 void IfNode::AppendArgs(std::unique_ptr<ExecNode>&& arg) { args_.emplace_back(std::move(arg)); }
+
+std::string SwitchNode::ToStringImpl(const std::string& prefix) {
+  std::string result = prefix + "|--switch\n";
+  for (const auto& child : args_) {
+    result += child->ToString(prefix + "|   ");
+  }
+  return result;
+}
+
+Status SwitchNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
+ExecNodeType SwitchNode::GetExecNodeType() { return ExecNodeType::kSwitchNode; }
+void SwitchNode::AppendArgs(std::unique_ptr<ExecNode>&& arg) { args_.emplace_back(std::move(arg)); }
 
 }  // namespace jitfusion

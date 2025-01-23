@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-14 16:21:53
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-23 14:56:52
+ * @Last Modified time: 2025-01-23 15:47:51
  */
 #pragma once
 
@@ -22,6 +22,7 @@ enum class ExecNodeType : uint8_t {
   kFunctionNode = 7,
   kNoOPNode = 8,
   kIfNode = 9,
+  kSwitchNode = 10,
 };
 
 enum class BinaryOPType : uint8_t {

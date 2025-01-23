@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-16 16:35:04
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-23 15:08:17
+ * @Last Modified time: 2025-01-23 15:59:47
  */
 #include "validator.h"
 #include "status.h"
@@ -191,6 +191,45 @@ Status Validator::Visit(IfNode& if_node) {
     return Status::ParseError("If node is support for child type ", TypeHelper::TypeToString(arg_types[1]), " ",
                               TypeHelper::TypeToString(arg_types[2]));
   }
+  return Status::OK();
+}
+
+Status Validator::Visit(SwitchNode& switch_node) {
+  std::vector<ValueType> arg_types;
+  arg_types.reserve(switch_node.GetArgs().size());
+  for (const auto& arg : switch_node.GetArgs()) {
+    RETURN_NOT_OK(arg->Accept(this));
+    arg_types.emplace_back(arg->GetReturnType());
+  }
+
+  ValueType basic_type = ValueType::kUnknown;
+  ValueType list_type = ValueType::kUnknown;
+  for (size_t i = 0; i < switch_node.GetArgs().size(); i++) {
+    if (i + 1 != switch_node.GetArgs().size() && i % 2 == 0 &&
+        !TypeHelper::IsNumberType(switch_node.GetArgs()[i]->GetReturnType())) {
+      // TODO(victorika): maybe condition can support complex struct
+      return Status::ParseError(
+          "Unspported type: ", TypeHelper::TypeToString(switch_node.GetArgs()[i]->GetReturnType()),
+          " in switch condition");
+    }
+    if (i % 2 != 0 || i + 1 == switch_node.GetArgs().size()) {
+      if (TypeHelper::IsNumberType(switch_node.GetArgs()[i]->GetReturnType())) {
+        basic_type = TypeHelper::GetPromotedType(basic_type, switch_node.GetArgs()[i]->GetReturnType());
+      } else {
+        if (list_type != ValueType::kUnknown && list_type != switch_node.GetArgs()[i]->GetReturnType()) {
+          return Status::ParseError("Unspported different type in switch: ",
+                                    TypeHelper::TypeToString(switch_node.GetArgs()[i]->GetReturnType()));
+        }
+        list_type = switch_node.GetArgs()[i]->GetReturnType();
+      }
+    }
+  }
+
+  if (list_type != ValueType::kUnknown && basic_type != ValueType::kUnknown) {
+    return Status::ParseError("Unspported different type in switch");
+  }
+  switch_node.SetReturnType(basic_type == ValueType::kUnknown ? list_type : basic_type);
+
   return Status::OK();
 }
 
