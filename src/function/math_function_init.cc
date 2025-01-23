@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-23 10:31:11
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-23 12:38:04
+ * @Last Modified time: 2025-01-23 17:05:56
  */
 #include <cstddef>
 #include "function_init.h"
@@ -82,6 +82,28 @@ inline double floor(double x) { return std::floor(x); }
 
 inline float round(float x) { return std::round(x); }
 inline double round(double x) { return std::round(x); }
+
+llvm::Value *CallBuiltinMinFunction(const FunctionSignature &sign,
+                                    const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,
+                                    const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  llvm::Value *condition = TypeHelper::IsIntegerType(sign.GetRetType())
+                               ? TypeHelper::IsSignedType(sign.GetRetType())
+                                     ? ctx.builder.CreateICmpSGT(arg_llvm_value_list.at(0), arg_llvm_value_list.at(1))
+                                     : ctx.builder.CreateICmpUGT(arg_llvm_value_list.at(0), arg_llvm_value_list.at(1))
+                               : ctx.builder.CreateFCmpUGT(arg_llvm_value_list.at(0), arg_llvm_value_list.at(1));
+  return ctx.builder.CreateSelect(condition, arg_llvm_value_list.at(1), arg_llvm_value_list.at(0), "min");
+};
+
+llvm::Value *CallBuiltinMaxFunction(const FunctionSignature &sign,
+                                    const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,
+                                    const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  llvm::Value *condition = TypeHelper::IsIntegerType(sign.GetRetType())
+                               ? TypeHelper::IsSignedType(sign.GetRetType())
+                                     ? ctx.builder.CreateICmpSGT(arg_llvm_value_list.at(0), arg_llvm_value_list.at(1))
+                                     : ctx.builder.CreateICmpUGT(arg_llvm_value_list.at(0), arg_llvm_value_list.at(1))
+                               : ctx.builder.CreateFCmpUGT(arg_llvm_value_list.at(0), arg_llvm_value_list.at(1));
+  return ctx.builder.CreateSelect(condition, arg_llvm_value_list.at(0), arg_llvm_value_list.at(1), "max");
+};
 
 Status InitExpFunc(FunctionRegistry *reg) {
   RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("exp", {ValueType::kI32}, ValueType::kF64),
@@ -284,12 +306,50 @@ Status InitRoundFunc(FunctionRegistry *reg) {
 }
 
 Status InitMinFunc(FunctionRegistry *reg) {
-  // TODO(victorika):
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kU8, ValueType::kU8}, ValueType::kU8),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kU16, ValueType::kU16}, ValueType::kU16),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kU32, ValueType::kU32}, ValueType::kU32),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kU64, ValueType::kU64}, ValueType::kU64),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kI8, ValueType::kI8}, ValueType::kI8),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kI16, ValueType::kI16}, ValueType::kI16),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kI32, ValueType::kI32}, ValueType::kI32),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kI64, ValueType::kI64}, ValueType::kI64),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kF32, ValueType::kF32}, ValueType::kF32),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kF64, ValueType::kF64}, ValueType::kF64),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
   return Status::OK();
 }
 
 Status InitMaxFunc(FunctionRegistry *reg) {
-  // TODO(victorika):
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kU8, ValueType::kU8}, ValueType::kU8),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kU16, ValueType::kU16}, ValueType::kU16),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kU32, ValueType::kU32}, ValueType::kU32),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kU64, ValueType::kU64}, ValueType::kU64),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kI8, ValueType::kI8}, ValueType::kI8),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kI16, ValueType::kI16}, ValueType::kI16),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kI32, ValueType::kI32}, ValueType::kI32),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kI64, ValueType::kI64}, ValueType::kI64),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kF32, ValueType::kF32}, ValueType::kF32),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kF64, ValueType::kF64}, ValueType::kF64),
+                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
   return Status::OK();
 }
 

@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-22 10:26:27
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-22 11:19:22
+ * @Last Modified time: 2025-01-23 16:50:19
  */
 #include "codegen.h"
 #include "type.h"
@@ -140,8 +140,8 @@ Status CodeGen::Visit(BinaryOPNode &binary_op_node) {
   llvm::Value *rhs_value{};
   RETURN_NOT_OK(GetValue(binary_op_node.GetRight(), &rhs_value));
 
-  if (TypeHelper::IsNumberType(binary_op_node.GetLeft()->GetReturnType()) &&
-      TypeHelper::IsNumberType(binary_op_node.GetRight()->GetReturnType())) {
+  if (TypeHelper::IsNumericType(binary_op_node.GetLeft()->GetReturnType()) &&
+      TypeHelper::IsNumericType(binary_op_node.GetRight()->GetReturnType())) {
     return SolveBinaryOpNumericType(binary_op_node, lhs_value, rhs_value);
   }
   return SolveBinaryOpComplexType(binary_op_node, lhs_value, rhs_value);

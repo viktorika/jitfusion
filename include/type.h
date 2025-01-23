@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-14 16:21:53
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-23 15:47:51
+ * @Last Modified time: 2025-01-23 16:58:32
  */
 #pragma once
 
@@ -103,7 +103,7 @@ class TypeHelper {
   static std::string BinaryOPTypeToString(BinaryOPType type);
   static std::string TypeToString(ValueType type);
 
-  static bool IsNumberType(ValueType type);
+  static bool IsNumericType(ValueType type);
   static bool IsIntegerType(ValueType type);
   static bool IsSignedType(ValueType type);
   static bool IsFloatType(ValueType type);

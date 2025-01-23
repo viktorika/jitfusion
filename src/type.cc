@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-16 16:59:03
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-22 10:32:31
+ * @Last Modified time: 2025-01-23 16:58:33
  */
 #pragma once
 
@@ -119,7 +119,7 @@ std::string TypeHelper::TypeToString(ValueType type) {
   return "unknown";
 }
 
-bool TypeHelper::IsNumberType(ValueType type) {
+bool TypeHelper::IsNumericType(ValueType type) {
   switch (type) {
     case ValueType::kF32:
     case ValueType::kF64:

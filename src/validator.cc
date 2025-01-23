@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-16 16:35:04
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-23 15:59:47
+ * @Last Modified time: 2025-01-23 16:49:59
  */
 #include "validator.h"
 #include "status.h"
@@ -63,8 +63,8 @@ Status Validator::Visit(ConstantListValueNode& list_node) {
 Status Validator::Visit(UnaryOPNode& unary_op_node) {
   RETURN_NOT_OK(unary_op_node.GetChild()->Accept(this));
   auto child_return_type = unary_op_node.GetChild()->GetReturnType();
-  if (!TypeHelper::IsNumberType(child_return_type)) {
-    return Status::ParseError("Unary OP only support number type");
+  if (!TypeHelper::IsNumericType(child_return_type)) {
+    return Status::ParseError("Unary OP only support numeric type");
   }
 
   switch (unary_op_node.GetOp()) {
@@ -183,7 +183,7 @@ Status Validator::Visit(IfNode& if_node) {
     return Status::ParseError("If node condition must be u8 type");
   }
 
-  if (TypeHelper::IsNumberType(arg_types[1]) && TypeHelper::IsNumberType(arg_types[2])) {
+  if (TypeHelper::IsNumericType(arg_types[1]) && TypeHelper::IsNumericType(arg_types[2])) {
     if_node.SetReturnType(TypeHelper::GetPromotedType(arg_types[0], arg_types[1]));
   } else if (arg_types[1] == arg_types[2]) {
     if_node.SetReturnType(arg_types[1]);
@@ -206,14 +206,14 @@ Status Validator::Visit(SwitchNode& switch_node) {
   ValueType list_type = ValueType::kUnknown;
   for (size_t i = 0; i < switch_node.GetArgs().size(); i++) {
     if (i + 1 != switch_node.GetArgs().size() && i % 2 == 0 &&
-        !TypeHelper::IsNumberType(switch_node.GetArgs()[i]->GetReturnType())) {
+        !TypeHelper::IsNumericType(switch_node.GetArgs()[i]->GetReturnType())) {
       // TODO(victorika): maybe condition can support complex struct
       return Status::ParseError(
           "Unspported type: ", TypeHelper::TypeToString(switch_node.GetArgs()[i]->GetReturnType()),
           " in switch condition");
     }
     if (i % 2 != 0 || i + 1 == switch_node.GetArgs().size()) {
-      if (TypeHelper::IsNumberType(switch_node.GetArgs()[i]->GetReturnType())) {
+      if (TypeHelper::IsNumericType(switch_node.GetArgs()[i]->GetReturnType())) {
         basic_type = TypeHelper::GetPromotedType(basic_type, switch_node.GetArgs()[i]->GetReturnType());
       } else {
         if (list_type != ValueType::kUnknown && list_type != switch_node.GetArgs()[i]->GetReturnType()) {

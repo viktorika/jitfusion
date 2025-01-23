@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-15 15:47:48
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-23 10:36:57
+ * @Last Modified time: 2025-01-23 16:20:05
  */
 #pragma once
 
@@ -58,8 +58,8 @@ struct IRCodeGenContext {
 struct FunctionStructure {
   FunctionType func_type;
   void *c_func_ptr;
-  std::function<llvm::Value *(const FunctionSignature &sign, const std::vector<llvm::Type *> &args_llvm_type_list,
-                              const std::vector<llvm::Value *> &args_llvm_value_list, IRCodeGenContext &)>
+  std::function<llvm::Value *(const FunctionSignature &, const std::vector<llvm::Type *> &,
+                              const std::vector<llvm::Value *> &, IRCodeGenContext &)>
       codegen_func;
 };
 
