@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-23 10:31:11
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-23 17:05:56
+ * @Last Modified time: 2025-01-23 17:09:36
  */
 #include <cstddef>
 #include "function_init.h"
@@ -353,6 +353,11 @@ Status InitMaxFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+Status InitCastFunc(FunctionRegistry *reg) {
+  // TODO(victorika):
+  return Status::OK();
+}
+
 }  // namespace
 
 Status InitMathInternalFunc(FunctionRegistry *reg) {
@@ -369,6 +374,7 @@ Status InitMathInternalFunc(FunctionRegistry *reg) {
   RETURN_NOT_OK(InitRoundFunc(reg));
   RETURN_NOT_OK(InitMinFunc(reg));
   RETURN_NOT_OK(InitMaxFunc(reg));
+  RETURN_NOT_OK(InitCastFunc(reg));
   return Status::OK();
 }
 
