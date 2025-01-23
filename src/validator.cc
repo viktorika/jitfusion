@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-16 16:35:04
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-22 15:46:11
+ * @Last Modified time: 2025-01-23 15:08:17
  */
 #include "validator.h"
 #include "status.h"
@@ -168,6 +168,29 @@ Status Validator::Visit(NoOPNode& no_op_node) {
     RETURN_NOT_OK(arg->Accept(this));
   }
   no_op_node.SetReturnType(ValueType::kI8);
+  return Status::OK();
+}
+
+Status Validator::Visit(IfNode& if_node) {
+  if (if_node.GetArgs().size() != 3) {
+    return Status::ParseError("If node must has 3 arguments");
+  }
+  std::vector<ValueType> arg_types;
+  for (const auto& arg : if_node.GetArgs()) {
+    RETURN_NOT_OK(arg->Accept(this));
+  }
+  if (arg_types[0] != ValueType::kU8) {
+    return Status::ParseError("If node condition must be u8 type");
+  }
+
+  if (TypeHelper::IsNumberType(arg_types[1]) && TypeHelper::IsNumberType(arg_types[2])) {
+    if_node.SetReturnType(TypeHelper::GetPromotedType(arg_types[0], arg_types[1]));
+  } else if (arg_types[1] == arg_types[2]) {
+    if_node.SetReturnType(arg_types[1]);
+  } else {
+    return Status::ParseError("If node is support for child type ", TypeHelper::TypeToString(arg_types[1]), " ",
+                              TypeHelper::TypeToString(arg_types[2]));
+  }
   return Status::OK();
 }
 

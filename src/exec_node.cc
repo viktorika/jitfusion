@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-15 10:59:27
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-22 15:43:50
+ * @Last Modified time: 2025-01-23 14:57:59
  */
 #include "exec_node.h"
 #include "type.h"
@@ -65,7 +65,7 @@ std::string ConstantListValueNode::ToStringImpl(const std::string& prefix) {
 Status ConstantListValueNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType ConstantListValueNode::GetExecNodeType() { return ExecNodeType::kConstListValueNode; }
 
-inline std::string UnaryOPNode::ToStringImpl(const std::string& prefix) {
+std::string UnaryOPNode::ToStringImpl(const std::string& prefix) {
   std::string result = prefix + "|--" + TypeHelper::UnaryOPTypeToString(op_) + "\n" + child_->ToString(prefix + "|   ");
   return result;
 }
@@ -81,7 +81,7 @@ std::string BinaryOPNode::ToStringImpl(const std::string& prefix) {
 Status BinaryOPNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType BinaryOPNode::GetExecNodeType() { return ExecNodeType::kBinaryOPNode; }
 
-inline std::string FunctionNode::ToStringImpl(const std::string& prefix) {
+std::string FunctionNode::ToStringImpl(const std::string& prefix) {
   std::string result = prefix + "|--" + func_name_ + "\n";
   for (const auto& child : args_) {
     result += child->ToString(prefix + "|   ");
@@ -98,5 +98,17 @@ std::string NoOPNode::ToStringImpl(const std::string& prefix) { return prefix + 
 Status NoOPNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType NoOPNode::GetExecNodeType() { return ExecNodeType::kNoOPNode; }
 void NoOPNode::AppendArgs(std::unique_ptr<ExecNode>&& arg) { args_.emplace_back(std::move(arg)); }
+
+std::string IfNode::ToStringImpl(const std::string& prefix) {
+  std::string result = prefix + "|--if\n";
+  for (const auto& child : args_) {
+    result += child->ToString(prefix + "|   ");
+  }
+  return result;
+}
+
+Status IfNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
+ExecNodeType IfNode::GetExecNodeType() { return ExecNodeType::kIfNode; }
+void IfNode::AppendArgs(std::unique_ptr<ExecNode>&& arg) { args_.emplace_back(std::move(arg)); }
 
 }  // namespace jitfusion

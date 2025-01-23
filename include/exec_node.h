@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-14 14:55:53
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-22 15:40:46
+ * @Last Modified time: 2025-01-23 14:57:37
  */
 #pragma once
 
@@ -160,6 +160,21 @@ class NoOPNode : public ExecNode {
   std::vector<std::unique_ptr<ExecNode>> args_;
 };
 
+class IfNode : public ExecNode {
+ public:
+  IfNode() = delete;
+  explicit IfNode(std::vector<std::unique_ptr<ExecNode>> args) : args_(std::move(args)) {}
+  Status Accept(Visitor* visitor) override;
+  ExecNodeType GetExecNodeType() override;
+  void AppendArgs(std::unique_ptr<ExecNode>&& arg);
+
+  [[nodiscard]] const std::vector<std::unique_ptr<ExecNode>>& GetArgs() const { return args_; }
+
+ private:
+  std::string ToStringImpl(const std::string& prefix) override;
+  std::vector<std::unique_ptr<ExecNode>> args_;
+};
+
 class Visitor {
  public:
   virtual ~Visitor() = default;
@@ -172,6 +187,7 @@ class Visitor {
   virtual Status Visit(BinaryOPNode& binary_op_node) = 0;
   virtual Status Visit(FunctionNode& function_node) = 0;
   virtual Status Visit(NoOPNode& no_op_node) = 0;
+  virtual Status Visit(IfNode& no_op_node) = 0;
 };
 
 }  // namespace jitfusion

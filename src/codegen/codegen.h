@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-20 14:16:13
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-22 15:47:05
+ * @Last Modified time: 2025-01-23 15:18:49
  */
 #pragma once
 
@@ -26,6 +26,7 @@ class CodeGen : public Visitor {
   Status Visit(BinaryOPNode &binary_op_node) override;
   Status Visit(FunctionNode &function_node) override;
   Status Visit(NoOPNode &no_op_node) override;
+  Status Visit(IfNode& if_node) override;
 
   Status NumericTypeConvert(ValueType from, ValueType to, llvm::Value **value);
   Status ToBoolean(ValueType from, llvm::Value **value);
