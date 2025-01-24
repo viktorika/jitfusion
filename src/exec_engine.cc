@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-15 10:59:33
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-24 11:11:57
+ * @Last Modified time: 2025-01-24 14:23:29
  */
 #include "exec_engine.h"
 #include <exec_node.h>
@@ -100,9 +100,6 @@ using return_list_multigroup_function_type = LLVMComplexStruct (*)(int64_t, int6
 
 Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
                            const std::unique_ptr<FunctionRegistry>& func_registry) {
-  // if (exec_node->GetExecNodeType() != ExecNodeType::kNoOPNode) {
-  //   return Status::InvalidArgument("Root node must be no op node");
-  // }
   // validator
   Validator validator(func_registry);
   RETURN_NOT_OK(validator.Validate(exec_node.get()));
@@ -164,14 +161,12 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
     default:
       return Status::ParseError("Unknown return type: ", TypeHelper::TypeToString(ret_type_));
   }
-  // auto entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getInt8Ty(context),
-  //                                                 llvm::Type::getInt64Ty(context), llvm::Type::getInt64Ty(context));
 
   auto* entry_function = llvm::cast<llvm::Function>(entry_func_callee.getCallee());
   llvm::BasicBlock* entry_bb = llvm::BasicBlock::Create(context, "entryBB", entry_function);
   llvm::IRBuilder<> builder(entry_bb);
   std::unique_ptr<IRCodeGenContext> codegen_ctx = std::make_unique<IRCodeGenContext>(
-      context, *m, builder, entry_bb, entry_function, complex_type, func_registry_, const_value_arena_);
+      context, *m, builder, entry_bb, entry_function, complex_type, func_registry, const_value_arena_);
   CodeGen codegen(*codegen_ctx);
   llvm::Value* ret_value;
   RETURN_NOT_OK(codegen.GetValue(exec_node.get(), &ret_value));
@@ -184,45 +179,31 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
     return Status::RuntimeError("Module verification failed: " + error_info);
   }
 
+  // debug
+  m->print(llvm::errs(), nullptr);
+
   // optimize
   static auto* machine = GetTargetMachine();
+  llvm::PassBuilder pb(machine);
 
-  llvm::PassBuilder pass_builder;
-  llvm::ModulePassManager mpm;
   llvm::LoopAnalysisManager lam;
   llvm::FunctionAnalysisManager fam;
   llvm::CGSCCAnalysisManager cgam;
   llvm::ModuleAnalysisManager mam;
 
-  pass_builder.registerModuleAnalyses(mam);
-  pass_builder.registerCGSCCAnalyses(cgam);
-  pass_builder.registerFunctionAnalyses(fam);
-  pass_builder.registerLoopAnalyses(lam);
-  pass_builder.crossRegisterProxies(lam, fam, cgam, mam);
+  // Register all the basic analyses with the managers.
+  pb.registerModuleAnalyses(mam);
+  pb.registerCGSCCAnalyses(cgam);
+  pb.registerFunctionAnalyses(fam);
+  pb.registerLoopAnalyses(lam);
+  pb.crossRegisterProxies(lam, fam, cgam, mam);
 
-  auto tti = machine->getTargetIRAnalysis();
-  fam.registerPass([&] { return tti; });
-
-  llvm::OptimizationLevel opt_level = llvm::OptimizationLevel::O3;
-  mpm = pass_builder.buildPerModuleDefaultPipeline(opt_level);
-
-  mpm.addPass(llvm::createFunctionToLoopPassAdaptor(llvm::LoopVectorizePass()));
-  mpm.addPass(llvm::SLPVectorizerPass());
-  mpm.addPass(llvm::SimplifyCFGPass());
-  mpm.addPass(llvm::EarlyCSEPass());
-  mpm.addPass(llvm::GVNPass());
-  mpm.addPass(llvm::ReassociatePass());
-  mpm.addPass(llvm::IndVarSimplifyPass());
-  mpm.addPass(llvm::MergedLoadStoreMotionPass());
-  mpm.addPass(llvm::AlwaysInlinerPass());
-  mpm.addPass(llvm::InlinerPass());
-  mpm.addPass(llvm::DeadArgumentEliminationPass());
-
+  llvm::ModulePassManager mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
   mpm.run(*m, mam);
 
   // Now we create the JIT.
   engine_ = llvm::EngineBuilder(std::move(owner)).setEngineKind(llvm::EngineKind::JIT).create();
-  func_registry_->MappingToLLVM(engine_);
+  func_registry->MappingToLLVM(engine_);
   engine_->finalizeObject();
 
   entry_func_ptr_ = engine_->getFunctionAddress("entry");
@@ -363,7 +344,7 @@ Status ExecEngine::Execute(void* entry_arguments, RetType* result) {
           reinterpret_cast<int64_t>(entry_arguments), reinterpret_cast<int64_t>(&exec_ctx));
       std::vector<std::string> res;
       res.resize(list.len);
-      for (int i = 0; i < list.len; ++i) {
+      for (uint32_t i = 0; i < list.len; ++i) {
         res[i] = std::string(reinterpret_cast<char*>(reinterpret_cast<LLVMComplexStruct*>(list.data)[i].data),
                              reinterpret_cast<LLVMComplexStruct*>(list.data)[i].len);
       }

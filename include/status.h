@@ -43,7 +43,15 @@ class Status {
 
   [[nodiscard]] bool ok() const { return (state_ == nullptr || state_->code_ == StatusCode::kOk); }
 
-  [[nodiscard]] std::string ToString() const;
+  [[nodiscard]] std::string ToString() const {
+    if (state_ == nullptr) {
+      return "OK";
+    }
+    std::string result(ErrName(ok() ? StatusCode::kOk : state_->code_));
+    result += ": ";
+    result += state_->msg_;
+    return result;
+  }
 
  private:
   enum class StatusCode : uint8_t {
@@ -53,6 +61,23 @@ class Status {
     kParseError = 3,
     kNotImplemented = 4,
   };
+  static std::string ErrName(StatusCode code) {
+    switch (code) {
+      case StatusCode::kOk:
+        return "OK";
+      case StatusCode::kRuntimeError:
+        return "Runtime Error";
+      case StatusCode::kInvalidArgument:
+        return "Argument Invalid";
+      case StatusCode::kNotImplemented:
+        return "NotImplemented";
+      case StatusCode::kParseError:
+        return "Parse Error";
+      default:
+        return "Unknown Code";
+    }
+  }
+
   template <typename... Args>
   explicit Status(StatusCode code, Args&&... args) {
     std::stringstream ss;

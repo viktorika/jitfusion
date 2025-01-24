@@ -353,7 +353,7 @@ Status InitMaxFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
-Status InitCastFunc(FunctionRegistry *reg) {
+Status InitCastFunc(FunctionRegistry * /*reg*/) {
   // TODO(victorika):
   return Status::OK();
 }

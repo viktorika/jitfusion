@@ -30,7 +30,7 @@ class ExecNode {
   void SetReturnType(ValueType return_type) { return_type_ = return_type; }
 
  private:
-  virtual std::string ToStringImpl(const std::string& prefix);
+  virtual std::string ToStringImpl(const std::string& prefix) = 0;
 
   ValueType return_type_{ValueType::kUnknown};
 };

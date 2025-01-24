@@ -5,9 +5,9 @@
  * @Last Modified time: 2025-01-23 12:40:43
  */
 #include "function_registry.h"
-#include <status.h>
 #include <type_traits>
 #include "function/function_init.h"
+#include "status.h"
 #include "type.h"
 
 namespace jitfusion {

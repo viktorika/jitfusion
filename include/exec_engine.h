@@ -21,13 +21,12 @@ struct ExecContext {
 
 class ExecEngine {
  public:
-  ExecEngine() { FunctionRegistryFactory::CreateFunctionRegistry(&func_registry_); }
+  ExecEngine() = default;
 
   Status Compile(const std::unique_ptr<ExecNode>& exec_node, const std::unique_ptr<FunctionRegistry>& func_registry);
   Status Execute(void* entry_arguments, RetType* result);
 
  private:
-  std::unique_ptr<FunctionRegistry> func_registry_;
   Arena const_value_arena_;
   llvm::ExecutionEngine* engine_;
   uint64_t entry_func_ptr_;
