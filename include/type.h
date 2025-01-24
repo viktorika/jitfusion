@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-14 16:21:53
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-23 16:58:32
+ * @Last Modified time: 2025-01-24 11:01:49
  */
 #pragma once
 
@@ -96,6 +96,11 @@ struct LLVMComplexStruct {
   int64_t data;
   uint32_t len;
 };
+
+using RetType = std::variant<uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, int32_t, int64_t, float, double,
+                             std::vector<uint8_t>, std::vector<uint16_t>, std::vector<uint32_t>, std::vector<uint64_t>,
+                             std::vector<int8_t>, std::vector<int16_t>, std::vector<int32_t>, std::vector<int64_t>,
+                             std::vector<float>, std::vector<double>, std::vector<std::string>, std::string>;
 
 class TypeHelper {
  public:
