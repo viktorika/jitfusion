@@ -2,12 +2,43 @@
  * @Author: victorika
  * @Date: 2025-01-22 10:26:27
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-23 16:50:19
+ * @Last Modified time: 2025-01-24 10:35:09
  */
 #include "codegen.h"
+#include "exec_node.h"
+#include "function_registry.h"
 #include "type.h"
 
 namespace jitfusion {
+
+namespace {
+Status ListOrStringConcat(BinaryOPNode &binary_node, ValueType type, llvm::Value *lhs, llvm::Value *rhs,
+                          IRCodeGenContext &ctx_, llvm::Value **ret_value) {
+  llvm::FunctionCallee add_func_callee;
+  FunctionSignature sign{
+      type == ValueType::kString ? "StringConcat" : "ListConcat",
+      {binary_node.GetLeft()->GetReturnType(), binary_node.GetRight()->GetReturnType(), ValueType::kI64},
+      ValueType::kUnknown};
+
+  FunctionStructure func_struct;
+  RETURN_NOT_OK(ctx_.function_registry->GetFuncBySign(sign, &func_struct));
+
+  add_func_callee = ctx_.module.getOrInsertFunction(sign.ToString(), ctx_.complex_type, ctx_.complex_type,
+                                                    ctx_.complex_type, llvm::Type::getInt64Ty(ctx_.context));
+
+  std::string error_info;
+  llvm::raw_string_ostream error_stream(error_info);
+  if (llvm::verifyFunction(llvm::cast<llvm::Function>(*add_func_callee.getCallee()), &error_stream)) {
+    llvm::cast<llvm::Function>(*add_func_callee.getCallee()).print(error_stream);
+    error_stream.flush();
+    return Status::RuntimeError("verify function failed in binary_op_codegen in add_func_callee: " + error_info);
+  }
+
+  *ret_value = ctx_.builder.CreateCall(add_func_callee, {lhs, rhs}, "calltmp");
+  return Status::OK();
+}
+
+}  // namespace
 
 Status CodeGen::SolveBinaryOpNumericType(BinaryOPNode &binary_node, llvm::Value *lhs_value, llvm::Value *rhs_value) {
   if (TypeHelper::IsRelationalBinaryOPType(binary_node.GetOp())) {  // relation Op
@@ -122,13 +153,66 @@ Status CodeGen::SolveBinaryOpNumericType(BinaryOPNode &binary_node, llvm::Value 
 
 Status CodeGen::SolveBinaryOpComplexType(BinaryOPNode &binary_node, llvm::Value *lhs_value, llvm::Value *rhs_value) {
   if (BinaryOPType::kAdd == binary_node.GetOp()) {  // String or List Concat
-    // TODO(victorika):
+    RETURN_NOT_OK(ListOrStringConcat(binary_node, binary_node.GetReturnType(), lhs_value, rhs_value, ctx_, &value_));
   } else {  // String Compare
     if (binary_node.GetLeft()->GetReturnType() != ValueType::kString ||
         binary_node.GetRight()->GetReturnType() != ValueType::kString) {
       return Status::RuntimeError("Unknown type in StringCmp", TypeHelper::TypeToString(binary_node.GetReturnType()));
     }
-    // TODO(victorika):
+
+    FunctionSignature sign{"StringCmp", {ValueType::kString, ValueType::kString, ValueType::kI64}, ValueType::kUnknown};
+    FunctionStructure func_struct;
+    RETURN_NOT_OK(ctx_.function_registry->GetFuncBySign(sign, &func_struct));
+
+    llvm::FunctionCallee string_call_func_callee = ctx_.module.getOrInsertFunction(
+        sign.ToString(), llvm::Type::getInt32Ty(ctx_.context), ctx_.complex_type, ctx_.complex_type);
+
+    std::string error_info;
+    llvm::raw_string_ostream error_stream(error_info);
+    if (llvm::verifyFunction(llvm::cast<llvm::Function>(*string_call_func_callee.getCallee()), &error_stream)) {
+      llvm::cast<llvm::Function>(*string_call_func_callee.getCallee()).print(error_stream);
+      error_stream.flush();
+      return Status::RuntimeError("verify function failed in binary_op_codegen in StringCmp: " + error_info);
+    }
+
+    switch (binary_node.GetOp()) {
+      case BinaryOPType::kLarge: {
+        value_ = ctx_.builder.CreateCall(string_call_func_callee, {lhs_value, rhs_value});
+        value_ =
+            ctx_.builder.CreateICmpSGT(value_, llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx_.context), 0, true));
+      } break;
+      case BinaryOPType::kLargeEqual: {
+        value_ = ctx_.builder.CreateCall(string_call_func_callee, {lhs_value, rhs_value});
+        value_ =
+            ctx_.builder.CreateICmpSGE(value_, llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx_.context), 0, true));
+      } break;
+      case BinaryOPType::kEqual: {
+        value_ = ctx_.builder.CreateCall(string_call_func_callee, {lhs_value, rhs_value});
+        value_ =
+            ctx_.builder.CreateICmpEQ(value_, llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx_.context), 0, true));
+      } break;
+      case BinaryOPType::kLess: {
+        value_ = ctx_.builder.CreateCall(string_call_func_callee, {lhs_value, rhs_value});
+        value_ =
+            ctx_.builder.CreateICmpSLT(value_, llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx_.context), 0, true));
+      } break;
+      case BinaryOPType::kLessEqual: {
+        value_ = ctx_.builder.CreateCall(string_call_func_callee, {lhs_value, rhs_value});
+        value_ =
+            ctx_.builder.CreateICmpSLE(value_, llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx_.context), 0, true));
+      } break;
+      case BinaryOPType::kNotEqual: {
+        value_ = ctx_.builder.CreateCall(string_call_func_callee, {lhs_value, rhs_value});
+        value_ =
+            ctx_.builder.CreateICmpNE(value_, llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx_.context), 0, true));
+      } break;
+      default:
+        return Status::RuntimeError(
+            "Unknown binary operator: ", TypeHelper::TypeToString(binary_node.GetLeft()->GetReturnType()), " ",
+            TypeHelper::BinaryOPTypeToString(binary_node.GetOp()), " ",
+            TypeHelper::TypeToString(binary_node.GetRight()->GetReturnType()));
+    }
+    value_ = ctx_.builder.CreateSExt(value_, ctx_.builder.getInt8Ty());
   }
   return Status::OK();
 }
