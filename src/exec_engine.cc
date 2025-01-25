@@ -59,13 +59,9 @@ llvm::TargetMachine* GetTargetMachine() {
   const auto* target = llvm::TargetRegistry::lookupTarget(triple, error);
 
   llvm::SubtargetFeatures features;
-  llvm::StringMap<bool> feature_map = llvm::sys::getHostCPUFeatures();
-  for (auto& f : feature_map) {
-    features.AddFeature(f.first(), f.second);
-  }
   llvm::TargetOptions options;
   auto* target_machine = target->createTargetMachine(triple, cpu, features.getString(), options, std::nullopt,
-                                                     std::nullopt, llvm::CodeGenOptLevel::Aggressive, true);
+                                                     std::nullopt, llvm::CodeGenOpt::Aggressive, true);
 
   return target_machine;
 };

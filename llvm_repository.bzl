@@ -19,7 +19,7 @@ cc_library(
     srcs = glob(["llvm/lib/*.a"]),
     includes = ["llvm/include"],
     visibility = ["//visibility:public"],
-    linkopts = ["-lpthread", "-lz", "-ldl", "-lzstd"],
+    linkopts = ["-lpthread", "-lz", "-ldl", "-lzstd", "-lncurses"],
     #deps=["@zstd//:zstd"],
 )
 """

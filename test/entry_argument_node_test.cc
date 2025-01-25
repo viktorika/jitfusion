@@ -5,7 +5,6 @@
  * @Last Modified time: 2025-01-24 14:36:23
  */
 #include <memory>
-#include "arena.h"
 #include "exec_engine.h"
 #include "exec_node.h"
 #include "function_registry.h"
@@ -19,34 +18,88 @@ namespace {
 
 template <class T>
 T LoadValue(int64_t data, uint32_t i) {
-  return reinterpret_cast<uint32_t*>(data)[i];
+  std::cout << "addr=" << data << std::endl;
+  std::cout << "value =" << reinterpret_cast<T*>(data)[i] << std::endl;
+  return reinterpret_cast<T*>(data)[i];
 }
-
-// extern "C" int32_t LoadValue(int64_t data, int32_t i) { return 1; }
 
 }  // namespace
 
 TEST(EntryArgsTest, LoadDataTest) {
-  std::unique_ptr<FunctionRegistry> func_registry;
-  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
-  FunctionSignature sign("load_i32", {ValueType::kI64, ValueType::kI32}, ValueType::kI32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(&LoadValue<int32_t>), nullptr};
-  func_registry->RegisterFunc(sign, func_struct);
+  std::vector<uint8_t> du8 = {1, 100};
+  std::vector<uint16_t> du16 = {1, 30000};
+  std::vector<uint32_t> du32 = {1, 1231231231};
+  std::vector<uint64_t> du64 = {1, 324321413241321};
+  std::vector<int8_t> ds8 = {1, -100};
+  std::vector<int16_t> ds16 = {1, -30000};
+  std::vector<int32_t> ds32 = {1, -1231231231};
+  std::vector<int64_t> ds64 = {1, -324321413241321};
+  std::vector<void*> data_list = {du8.data(), du16.data(), du32.data(), du64.data(),
+                                  ds8.data(), ds16.data(), ds32.data(), ds64.data()};
+  std::vector<ValueType> type_list = {ValueType::kU8, ValueType::kU16, ValueType::kU32, ValueType::kU64,
+                                      ValueType::kI8, ValueType::kI16, ValueType::kI32, ValueType::kI64};
+  std::vector<RetType> result_list = {
+      LoadValue<uint8_t>(reinterpret_cast<int64_t>(du8.data()), 1),
+      LoadValue<uint16_t>(reinterpret_cast<int64_t>(du16.data()), 1),
+      LoadValue<uint32_t>(reinterpret_cast<int64_t>(du32.data()), 1),
+      LoadValue<uint64_t>(reinterpret_cast<int64_t>(du64.data()), 1),
+      LoadValue<int8_t>(reinterpret_cast<int64_t>(ds8.data()), 1),
+      LoadValue<int16_t>(reinterpret_cast<int64_t>(ds16.data()), 1),
+      LoadValue<int32_t>(reinterpret_cast<int64_t>(ds32.data()), 1),
+      LoadValue<int64_t>(reinterpret_cast<int64_t>(ds64.data()), 1),
+  };
+  std::vector<void*> func_list = {
+      reinterpret_cast<void*>(LoadValue<uint8_t>),  reinterpret_cast<void*>(LoadValue<uint16_t>),
+      reinterpret_cast<void*>(LoadValue<uint32_t>), reinterpret_cast<void*>(LoadValue<uint64_t>),
+      reinterpret_cast<void*>(LoadValue<int8_t>),   reinterpret_cast<void*>(LoadValue<int16_t>),
+      reinterpret_cast<void*>(LoadValue<int32_t>),  reinterpret_cast<void*>(LoadValue<int64_t>),
+  };
+  for (size_t i = 0; i < 2; i++) {
+    std::unique_ptr<FunctionRegistry> func_registry;
+    EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+    std::string load_func_name = "load" + std::to_string(i);
+    FunctionSignature sign(load_func_name, {ValueType::kI64, ValueType::kI32}, type_list[i]);
+    FunctionStructure func_struct = {FunctionType::kCFunc, func_list[i], nullptr};
+    func_registry->RegisterFunc(sign, func_struct);
 
-  auto args_node = std::unique_ptr<ExecNode>(new EntryArgumentNode);
-  auto index_node = std::unique_ptr<ExecNode>(new ConstantValueNode(1));
-  std::vector<std::unique_ptr<ExecNode>> load_func_args;
-  load_func_args.emplace_back(std::move(args_node));
-  load_func_args.emplace_back(std::move(index_node));
-  auto load_func_node = std::unique_ptr<ExecNode>(new FunctionNode("load_i32", std::move(load_func_args)));
+    auto args_node = std::unique_ptr<ExecNode>(new EntryArgumentNode);
+    auto index_node = std::unique_ptr<ExecNode>(new ConstantValueNode(1));
+    std::vector<std::unique_ptr<ExecNode>> load_func_args;
+    load_func_args.emplace_back(std::move(args_node));
+    load_func_args.emplace_back(std::move(index_node));
+    auto load_func_node = std::unique_ptr<ExecNode>(new FunctionNode(load_func_name, std::move(load_func_args)));
 
-  std::vector<int32_t> data = {1, 2, 3, 4};
-  ExecEngine exec_engine;
-  ASSERT_TRUE(exec_engine.Compile(load_func_node, func_registry).ok());
-  RetType result;
-  EXPECT_TRUE(exec_engine.Execute(data.data(), &result).ok());
-  EXPECT_EQ(std::get<int32_t>(result), 2U);
+    ExecEngine exec_engine;
+    auto st = exec_engine.Compile(load_func_node, func_registry);
+    std::cout << st.ToString() << std::endl;
+    ASSERT_TRUE(st.ok());
+    RetType result;
+    EXPECT_TRUE(exec_engine.Execute(data_list[i], &result).ok());
+    EXPECT_EQ(result, result_list[i]);
+  }
 }
+
+// TEST(EntryArgsTest, StoreDataTest) {
+//   std::unique_ptr<FunctionRegistry> func_registry;
+//   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+//   FunctionSignature sign("load_i32", {ValueType::kI64, ValueType::kI32}, ValueType::kI32);
+//   FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(&LoadValue<int32_t>), nullptr};
+//   func_registry->RegisterFunc(sign, func_struct);
+
+//   auto args_node = std::unique_ptr<ExecNode>(new EntryArgumentNode);
+//   auto index_node = std::unique_ptr<ExecNode>(new ConstantValueNode(1));
+//   std::vector<std::unique_ptr<ExecNode>> load_func_args;
+//   load_func_args.emplace_back(std::move(args_node));
+//   load_func_args.emplace_back(std::move(index_node));
+//   auto load_func_node = std::unique_ptr<ExecNode>(new FunctionNode("load_i32", std::move(load_func_args)));
+
+//   std::vector<int32_t> data = {1, -2, 3, -4};
+//   ExecEngine exec_engine;
+//   ASSERT_TRUE(exec_engine.Compile(load_func_node, func_registry).ok());
+//   RetType result;
+//   EXPECT_TRUE(exec_engine.Execute(data.data(), &result).ok());
+//   EXPECT_EQ(std::get<int32_t>(result), -2);
+// }
 
 GTEST_API_ int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
