@@ -104,7 +104,7 @@ Status FunctionRegistry::GetFuncBySign(FunctionSignature& func_sign, FunctionStr
   return Status::RuntimeError("function ", func_sign.ToString(), " not found");
 }
 
-Status FunctionRegistry::MappingToLLVM(llvm::ExecutionEngine* engine) {
+Status FunctionRegistry::MappingToLLVM(llvm::ExecutionEngine* engine, llvm::Module* m) {
   if (engine == nullptr) {
     return Status::RuntimeError("engine pointer is nullptr");
   }
@@ -112,7 +112,13 @@ Status FunctionRegistry::MappingToLLVM(llvm::ExecutionEngine* engine) {
     if (FunctionType::kLLVMIntrinicFunc == fc.func_type) {
       continue;
     }
-    engine->addGlobalMapping(sign.ToString(), reinterpret_cast<uint64_t>(fc.c_func_ptr));
+    auto* func = m->getFunction(sign.ToString());
+    if (func == nullptr) {
+      continue;
+    }
+    engine->addGlobalMapping(func, fc.c_func_ptr);
+    // I don't know why I cant use sign string to add globalmapping
+    // engine->addGlobalMapping(sign.ToString(), reinterpret_cast<uint64_t>(fc.c_func_ptr));
   }
   return Status::OK();
 }

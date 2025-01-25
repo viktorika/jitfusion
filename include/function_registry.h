@@ -93,7 +93,7 @@ class FunctionRegistry {
  public:
   Status RegisterFunc(const FunctionSignature &func_sign, FunctionStructure func_struct);
   Status GetFuncBySign(FunctionSignature &func_sign, FunctionStructure *func_struct) const;
-  Status MappingToLLVM(llvm::ExecutionEngine *engine);
+  Status MappingToLLVM(llvm::ExecutionEngine *engine, llvm::Module* m);
 
  private:
   FunctionRegistry() = default;

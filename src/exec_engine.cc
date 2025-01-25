@@ -203,10 +203,12 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
 
   // Now we create the JIT.
   engine_ = llvm::EngineBuilder(std::move(owner)).setEngineKind(llvm::EngineKind::JIT).create();
-  func_registry->MappingToLLVM(engine_);
+  func_registry->MappingToLLVM(engine_, m);
+
   engine_->finalizeObject();
 
   entry_func_ptr_ = engine_->getFunctionAddress("entry");
+
   return Status::OK();
 }
 
