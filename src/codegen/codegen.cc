@@ -1,8 +1,8 @@
 /*
  * @Author: victorika
  * @Date: 2025-01-20 14:47:10
- * @Last Modified by: victorika
- * @Last Modified time: 2025-01-22 10:58:59
+ * @Last Modified by: viktorika
+ * @Last Modified time: 2025-01-28 21:52:50
  */
 #include "codegen.h"
 #include <type.h>
@@ -32,7 +32,7 @@ Status CodeGen::ToBoolean(ValueType from, llvm::Value **value) {
     case ValueType::kU64: {
       llvm::Value *condition = ctx_.builder.CreateICmpNE(*value, llvm::ConstantInt::get((*value)->getType(), 0, false));
       *value = ctx_.builder.CreateSExt(condition, llvm::Type::getInt8Ty(ctx_.context));
-    }
+    } break;
     case ValueType::kF32:
     case ValueType::kF64: {
       llvm::Value *condition = ctx_.builder.CreateFCmpUNE(*value, llvm::ConstantFP::get((*value)->getType(), 0));
