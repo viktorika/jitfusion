@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-24 10:40:25
  * @Last Modified by: viktorika
- * @Last Modified time: 2025-01-28 21:13:45
+ * @Last Modified time: 2025-01-28 22:21:11
  */
 #include <cstdint>
 #include <memory>
@@ -23,6 +23,7 @@ TEST(ConstValueTest, U8Test) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<uint8_t>(result), value);
@@ -35,6 +36,7 @@ TEST(ConstValueTest, I8Test) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<int8_t>(result), value);
@@ -47,6 +49,7 @@ TEST(ConstValueTest, U16Test) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<uint16_t>(result), value);
@@ -59,6 +62,7 @@ TEST(ConstValueTest, I16Test) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<int16_t>(result), value);
@@ -71,6 +75,7 @@ TEST(ConstValueTest, U32Test) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<uint32_t>(result), value);
@@ -83,6 +88,7 @@ TEST(ConstValueTest, I32Test) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<int32_t>(result), value);
@@ -95,6 +101,7 @@ TEST(ConstValueTest, U64Test) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<uint64_t>(result), value);
@@ -107,6 +114,7 @@ TEST(ConstValueTest, I64Test) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<int64_t>(result), value);
@@ -119,6 +127,7 @@ TEST(ConstValueTest, F32Test) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<float>(result), value);
@@ -131,6 +140,7 @@ TEST(ConstValueTest, F64Test) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<double>(result), value);
@@ -143,6 +153,7 @@ TEST(ConstValueTest, StringTest) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<std::string>(result), value);

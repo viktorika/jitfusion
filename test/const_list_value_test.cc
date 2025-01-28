@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-24 10:40:25
  * @Last Modified by: viktorika
- * @Last Modified time: 2025-01-28 21:20:20
+ * @Last Modified time: 2025-01-28 22:21:25
  */
 #include <cstdint>
 #include <memory>
@@ -23,6 +23,7 @@ TEST(ConstListValueTest, U8ListTest) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), value);
@@ -35,6 +36,7 @@ TEST(ConstListValueTest, I8ListTest) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<std::vector<int8_t>>(result), value);
@@ -47,6 +49,7 @@ TEST(ConstListValueTest, U16ListTest) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<std::vector<uint16_t>>(result), value);
@@ -59,6 +62,7 @@ TEST(ConstListValueTest, I16ListTest) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<std::vector<int16_t>>(result), value);
@@ -71,6 +75,7 @@ TEST(ConstListValueTest, U32ListTest) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<std::vector<uint32_t>>(result), value);
@@ -83,6 +88,7 @@ TEST(ConstListValueTest, I32ListTest) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<std::vector<int32_t>>(result), value);
@@ -95,6 +101,7 @@ TEST(ConstListValueTest, U64ListTest) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<std::vector<uint64_t>>(result), value);
@@ -107,6 +114,7 @@ TEST(ConstListValueTest, I64ListTest) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<std::vector<int64_t>>(result), value);
@@ -119,6 +127,7 @@ TEST(ConstListValueTest, F32ListTest) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<std::vector<float>>(result), value);
@@ -131,6 +140,7 @@ TEST(ConstListValueTest, F64ListTest) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<std::vector<double>>(result), value);
@@ -143,6 +153,7 @@ TEST(ConstListValueTest, StringListTest) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(value));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<std::vector<std::string>>(result), value);

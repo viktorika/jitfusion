@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-24 10:40:25
  * @Last Modified by: viktorika
- * @Last Modified time: 2025-01-28 21:56:29
+ * @Last Modified time: 2025-01-28 22:20:52
  */
 #include <cstdint>
 #include <memory>
@@ -24,6 +24,7 @@ TEST(UnaryOPTest, PlusTest) {
   auto op_node = std::unique_ptr<ExecNode>(new UnaryOPNode(UnaryOPType::kPlus, std::move(args_node)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<int64_t>(result), value);
@@ -37,6 +38,7 @@ TEST(UnaryOPTest, MinusTest) {
   auto op_node = std::unique_ptr<ExecNode>(new UnaryOPNode(UnaryOPType::kMinus, std::move(args_node)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<int32_t>(result), -value);
@@ -50,6 +52,7 @@ TEST(UnaryOPTest, NotTest) {
   auto op_node = std::unique_ptr<ExecNode>(new UnaryOPNode(UnaryOPType::kNot, std::move(args_node)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<uint8_t>(result), !value);
@@ -63,6 +66,7 @@ TEST(UnaryOPTest, BitwiseNotTest) {
   auto op_node = std::unique_ptr<ExecNode>(new UnaryOPNode(UnaryOPType::kBitwiseNot, std::move(args_node)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<int8_t>(result), ~value);
