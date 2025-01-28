@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-24 10:40:25
  * @Last Modified by: viktorika
- * @Last Modified time: 2025-01-28 20:54:51
+ * @Last Modified time: 2025-01-28 20:59:54
  */
 #include <cstdint>
 #include <memory>
@@ -47,7 +47,6 @@ TEST(ExecContextTest, CreateDataTest) {
 
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(create_func_node, func_registry);
-  std::cout << st.ToString() << std::endl;
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   std::vector<uint32_t> expect_result = {1, 2, 3, 4};
