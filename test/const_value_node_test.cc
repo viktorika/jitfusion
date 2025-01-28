@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-24 10:40:25
  * @Last Modified by: viktorika
- * @Last Modified time: 2025-01-28 21:10:40
+ * @Last Modified time: 2025-01-28 21:13:45
  */
 #include <cstdint>
 #include <memory>
@@ -134,4 +134,16 @@ TEST(ConstValueTest, F64Test) {
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<double>(result), value);
+}
+
+TEST(ConstValueTest, StringTest) {
+  const std::string value = "abc";
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(value));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(args_node, func_registry);
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<std::string>(result), value);
 }
