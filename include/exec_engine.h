@@ -22,12 +22,14 @@ struct ExecContext {
 class ExecEngine {
  public:
   ExecEngine() = default;
+  ~ExecEngine() { delete engine_; }
 
   Status Compile(const std::unique_ptr<ExecNode>& exec_node, const std::unique_ptr<FunctionRegistry>& func_registry);
   Status Execute(void* entry_arguments, RetType* result);
 
  private:
   Arena const_value_arena_;
+  llvm::LLVMContext llvm_context_;
   llvm::ExecutionEngine* engine_;
   uint64_t entry_func_ptr_;
   ValueType ret_type_;

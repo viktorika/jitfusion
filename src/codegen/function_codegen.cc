@@ -7,41 +7,54 @@
 #include <vector>
 #include "codegen.h"
 #include "function_registry.h"
+#include "llvm/IR/Type.h"
 #include "status.h"
 #include "type.h"
 
 namespace jitfusion {
 
 Status CodeGen::ValueTypeToLLVMType(ValueType value_type, llvm::Type** llvm_type) {
-  static const std::unordered_map<ValueType, llvm::Type*> kValuetype2llvmtype{
-      {ValueType::kU8, llvm::Type::getInt8Ty(ctx_.context)},
-      {ValueType::kI8, llvm::Type::getInt8Ty(ctx_.context)},
-      {ValueType::kU16, llvm::Type::getInt16Ty(ctx_.context)},
-      {ValueType::kI16, llvm::Type::getInt16Ty(ctx_.context)},
-      {ValueType::kU32, llvm::Type::getInt32Ty(ctx_.context)},
-      {ValueType::kI32, llvm::Type::getInt32Ty(ctx_.context)},
-      {ValueType::kU64, llvm::Type::getInt64Ty(ctx_.context)},
-      {ValueType::kI64, llvm::Type::getInt64Ty(ctx_.context)},
-      {ValueType::kF32, llvm::Type::getFloatTy(ctx_.context)},
-      {ValueType::kF64, llvm::Type::getDoubleTy(ctx_.context)},
-      {ValueType::kString, ctx_.complex_type},
-      {ValueType::kU8List, ctx_.complex_type},
-      {ValueType::kI8List, ctx_.complex_type},
-      {ValueType::kU16List, ctx_.complex_type},
-      {ValueType::kI16List, ctx_.complex_type},
-      {ValueType::kU32List, ctx_.complex_type},
-      {ValueType::kI32List, ctx_.complex_type},
-      {ValueType::kU64List, ctx_.complex_type},
-      {ValueType::kI64List, ctx_.complex_type},
-      {ValueType::kF32List, ctx_.complex_type},
-      {ValueType::kF64List, ctx_.complex_type},
-      {ValueType::kStringList, ctx_.complex_type}};
-  auto it = kValuetype2llvmtype.find(value_type);
-  if (it == kValuetype2llvmtype.end()) {
-    return Status::RuntimeError("ValueType ", TypeHelper::TypeToString(value_type), " ",
-                                "can not convert to llvm type");
+  switch (value_type) {
+    case ValueType::kU8:
+    case ValueType::kI8: {
+      *llvm_type = llvm::Type::getInt8Ty(ctx_.context);
+    } break;
+    case ValueType::kU16:
+    case ValueType::kI16: {
+      *llvm_type = llvm::Type::getInt16Ty(ctx_.context);
+    } break;
+    case ValueType::kU32:
+    case ValueType::kI32: {
+      *llvm_type = llvm::Type::getInt32Ty(ctx_.context);
+    } break;
+    case ValueType::kU64:
+    case ValueType::kI64: {
+      *llvm_type = llvm::Type::getInt64Ty(ctx_.context);
+    } break;
+    case ValueType::kF32: {
+      *llvm_type = llvm::Type::getFloatTy(ctx_.context);
+    } break;
+    case ValueType::kF64: {
+      *llvm_type = llvm::Type::getDoubleTy(ctx_.context);
+    }
+    case ValueType::kString:
+    case ValueType::kU8List:
+    case ValueType::kI8List:
+    case ValueType::kU16List:
+    case ValueType::kI16List:
+    case ValueType::kU32List:
+    case ValueType::kI32List:
+    case ValueType::kU64List:
+    case ValueType::kI64List:
+    case ValueType::kF32List:
+    case ValueType::kF64List:
+    case ValueType::kStringList: {
+      *llvm_type = ctx_.complex_type;
+    }
+    default:
+      return Status::RuntimeError("ValueType ", TypeHelper::TypeToString(value_type), " ",
+                                  "can not convert to llvm type");
   }
-  *llvm_type = it->second;
   return Status::OK();
 }
 

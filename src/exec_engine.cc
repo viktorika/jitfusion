@@ -5,12 +5,12 @@
  * @Last Modified time: 2025-01-24 14:23:29
  */
 #include "exec_engine.h"
-#include <exec_node.h>
-#include <status.h>
-#include <type.h>
 #include <memory>
+#include <optional>
+#include <string>
 #include <vector>
 #include "codegen/codegen.h"
+#include "exec_node.h"
 #include "llvm/ADT/StringMap.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
@@ -40,6 +40,8 @@
 #include "llvm/Transforms/Scalar/SimplifyCFG.h"
 #include "llvm/Transforms/Vectorize/LoopVectorize.h"
 #include "llvm/Transforms/Vectorize/SLPVectorizer.h"
+#include "status.h"
+#include "type.h"
 #include "validator.h"
 
 namespace jitfusion {
@@ -61,7 +63,7 @@ llvm::TargetMachine* GetTargetMachine() {
   llvm::SubtargetFeatures features;
   llvm::TargetOptions options;
   auto* target_machine = target->createTargetMachine(triple, cpu, features.getString(), options, std::nullopt,
-                                                     std::nullopt, llvm::CodeGenOpt::Aggressive, true);
+                                                     std::nullopt, llvm::CodeGenOptLevel::Aggressive, true);
 
   return target_machine;
 };
@@ -102,42 +104,41 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
   ret_type_ = exec_node->GetReturnType();
 
   // codegen
-  llvm::LLVMContext context;
-  std::unique_ptr<llvm::Module> owner = std::make_unique<llvm::Module>("module", context);
+  std::unique_ptr<llvm::Module> owner = std::make_unique<llvm::Module>("module", llvm_context_);
   llvm::Module* m = owner.get();
 
-  std::vector<llvm::Type*> complex_type_fields = {llvm::Type::getInt64Ty(context), llvm::Type::getInt32Ty(context)};
-  llvm::StructType* complex_type = llvm::StructType::create(context, complex_type_fields, "ComplexSruct");
+  std::vector<llvm::Type*> complex_type_fields = {llvm::Type::getInt64Ty(llvm_context_), llvm::Type::getInt32Ty(llvm_context_)};
+  llvm::StructType* complex_type = llvm::StructType::create(llvm_context_, complex_type_fields, "ComplexSruct");
 
   llvm::FunctionCallee entry_func_callee;
   switch (ret_type_) {
     case ValueType::kU8:
     case ValueType::kI8:
-      entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getInt8Ty(context),
-                                                 llvm::Type::getInt64Ty(context), llvm::Type::getInt64Ty(context));
+      entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getInt8Ty(llvm_context_),
+                                                 llvm::Type::getInt64Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_));
       break;
     case ValueType::kU16:
     case ValueType::kI16:
-      entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getInt16Ty(context),
-                                                 llvm::Type::getInt64Ty(context), llvm::Type::getInt64Ty(context));
+      entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getInt16Ty(llvm_context_),
+                                                 llvm::Type::getInt64Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_));
       break;
     case ValueType::kU32:
     case ValueType::kI32:
-      entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getInt32Ty(context),
-                                                 llvm::Type::getInt64Ty(context), llvm::Type::getInt64Ty(context));
+      entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getInt32Ty(llvm_context_),
+                                                 llvm::Type::getInt64Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_));
       break;
     case ValueType::kU64:
     case ValueType::kI64:
-      entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getInt64Ty(context),
-                                                 llvm::Type::getInt64Ty(context), llvm::Type::getInt64Ty(context));
+      entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getInt64Ty(llvm_context_),
+                                                 llvm::Type::getInt64Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_));
       break;
     case ValueType::kF32:
-      entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getFloatTy(context),
-                                                 llvm::Type::getInt64Ty(context), llvm::Type::getInt64Ty(context));
+      entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getFloatTy(llvm_context_),
+                                                 llvm::Type::getInt64Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_));
       break;
     case ValueType::kF64:
-      entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getDoubleTy(context),
-                                                 llvm::Type::getInt64Ty(context), llvm::Type::getInt64Ty(context));
+      entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getDoubleTy(llvm_context_),
+                                                 llvm::Type::getInt64Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_));
       break;
     case ValueType::kString:
     case ValueType::kU8List:
@@ -151,18 +152,18 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
     case ValueType::kF32List:
     case ValueType::kF64List:
     case ValueType::kStringList:
-      entry_func_callee = m->getOrInsertFunction("entry", complex_type, llvm::Type::getInt64Ty(context),
-                                                 llvm::Type::getInt64Ty(context));
+      entry_func_callee = m->getOrInsertFunction("entry", complex_type, llvm::Type::getInt64Ty(llvm_context_),
+                                                 llvm::Type::getInt64Ty(llvm_context_));
       break;
     default:
       return Status::ParseError("Unknown return type: ", TypeHelper::TypeToString(ret_type_));
   }
 
   auto* entry_function = llvm::cast<llvm::Function>(entry_func_callee.getCallee());
-  llvm::BasicBlock* entry_bb = llvm::BasicBlock::Create(context, "entryBB", entry_function);
+  llvm::BasicBlock* entry_bb = llvm::BasicBlock::Create(llvm_context_, "entryBB", entry_function);
   llvm::IRBuilder<> builder(entry_bb);
   std::unique_ptr<IRCodeGenContext> codegen_ctx = std::make_unique<IRCodeGenContext>(
-      context, *m, builder, entry_bb, entry_function, complex_type, func_registry, const_value_arena_);
+      llvm_context_, *m, builder, entry_bb, entry_function, complex_type, func_registry, const_value_arena_);
   CodeGen codegen(*codegen_ctx);
   llvm::Value* ret_value;
   RETURN_NOT_OK(codegen.GetValue(exec_node.get(), &ret_value));
@@ -176,7 +177,7 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
   }
 
   // debug
-  m->print(llvm::errs(), nullptr);
+  // m->print(llvm::errs(), nullptr);
 
   // optimize
   static auto* machine = GetTargetMachine();
