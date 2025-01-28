@@ -36,7 +36,7 @@ Status CodeGen::ValueTypeToLLVMType(ValueType value_type, llvm::Type** llvm_type
     } break;
     case ValueType::kF64: {
       *llvm_type = llvm::Type::getDoubleTy(ctx_.context);
-    }
+    } break;
     case ValueType::kString:
     case ValueType::kU8List:
     case ValueType::kI8List:
@@ -50,7 +50,7 @@ Status CodeGen::ValueTypeToLLVMType(ValueType value_type, llvm::Type** llvm_type
     case ValueType::kF64List:
     case ValueType::kStringList: {
       *llvm_type = ctx_.complex_type;
-    }
+    } break;
     default:
       return Status::RuntimeError("ValueType ", TypeHelper::TypeToString(value_type), " ",
                                   "can not convert to llvm type");
