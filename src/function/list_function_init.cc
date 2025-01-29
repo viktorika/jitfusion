@@ -1,8 +1,8 @@
 /*
  * @Author: victorika
  * @Date: 2025-01-23 12:39:23
- * @Last Modified by: victorika
- * @Last Modified time: 2025-01-23 19:01:23
+ * @Last Modified by: viktorika
+ * @Last Modified time: 2025-01-29 22:44:35
  */
 #include "exec_engine.h"
 #include "function_init.h"
@@ -62,7 +62,7 @@ inline uint8_t IsInStringList(LLVMComplexStruct a, LLVMComplexStruct b) {
   return static_cast<uint8_t>(0);
 }
 
-inline size_t Len(LLVMComplexStruct a) { return a.len; }
+inline uint32_t Len(LLVMComplexStruct a) { return a.len; }
 
 }  // namespace
 

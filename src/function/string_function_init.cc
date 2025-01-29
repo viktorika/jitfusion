@@ -1,8 +1,8 @@
 /*
  * @Author: victorika
  * @Date: 2025-01-23 12:36:51
- * @Last Modified by: victorika
- * @Last Modified time: 2025-01-23 18:42:49
+ * @Last Modified by: viktorika
+ * @Last Modified time: 2025-01-29 22:44:52
  */
 #include "exec_engine.h"
 #include "function_init.h"
@@ -26,11 +26,11 @@ inline LLVMComplexStruct StringConcat(LLVMComplexStruct a, LLVMComplexStruct b, 
   return result;
 }
 
-inline int StringCmp(LLVMComplexStruct a, LLVMComplexStruct b) {
+inline int32_t StringCmp(LLVMComplexStruct a, LLVMComplexStruct b) {
   return strcmp(reinterpret_cast<char *>(a.data), reinterpret_cast<char *>(b.data));
 }
 
-inline size_t StringLen(LLVMComplexStruct a) { return a.len; }
+inline uint32_t StringLen(LLVMComplexStruct a) { return a.len; }
 
 }  // namespace
 
@@ -41,10 +41,8 @@ Status InitStringInternalFunc(FunctionRegistry *reg) {
   RETURN_NOT_OK(
       reg->RegisterFunc(FunctionSignature("StringCmp", {ValueType::kString, ValueType::kString}, ValueType::kI32),
                         {FunctionType::kCFunc, reinterpret_cast<void *>(StringCmp), nullptr}));
-  RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("StringLen", {ValueType::kString}, ValueType::kU32),
-                        {FunctionType::kCFunc,
-                         reinterpret_cast<void *>(static_cast<size_t (*)(LLVMComplexStruct)>(StringLen)), nullptr}));
+  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("StringLen", {ValueType::kString}, ValueType::kU32),
+                                  {FunctionType::kCFunc, reinterpret_cast<void *>(StringLen), nullptr}));
   return Status::OK();
 }
 
