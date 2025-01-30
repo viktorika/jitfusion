@@ -1,8 +1,8 @@
 /*
  * @Author: victorika
  * @Date: 2025-01-16 16:35:04
- * @Last Modified by: victorika
- * @Last Modified time: 2025-01-23 16:49:59
+ * @Last Modified by: viktorika
+ * @Last Modified time: 2025-01-30 22:22:27
  */
 #include "validator.h"
 #include "status.h"
@@ -176,8 +176,10 @@ Status Validator::Visit(IfNode& if_node) {
     return Status::ParseError("If node must has 3 arguments");
   }
   std::vector<ValueType> arg_types;
+  arg_types.reserve(if_node.GetArgs().size());
   for (const auto& arg : if_node.GetArgs()) {
     RETURN_NOT_OK(arg->Accept(this));
+    arg_types.emplace_back(arg->GetReturnType());
   }
   if (arg_types[0] != ValueType::kU8) {
     return Status::ParseError("If node condition must be u8 type");
