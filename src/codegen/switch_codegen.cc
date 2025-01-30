@@ -1,8 +1,8 @@
 /*
  * @Author: victorika
  * @Date: 2025-01-23 16:00:20
- * @Last Modified by: victorika
- * @Last Modified time: 2025-01-23 16:08:01
+ * @Last Modified by: viktorika
+ * @Last Modified time: 2025-01-30 22:36:45
  */
 #include "codegen.h"
 #include "type.h"
@@ -72,7 +72,8 @@ Status CodeGen::Visit(SwitchNode &switch_node) {
     return Status::RuntimeError("verify function failed in function_codegen in switch_func: " + error_info);
   }
 
-  value_ = ctx_.builder.CreateCall(switch_func, {ctx_.entry_function->getArg(0)}, "switch");
+  value_ =
+      ctx_.builder.CreateCall(switch_func, {ctx_.entry_function->getArg(0), ctx_.entry_function->getArg(1)}, "switch");
   return Status::OK();
 }
 
