@@ -21,7 +21,7 @@ TEST(SwitchTest, Test1) {
   std::vector<uint8_t> condition_list = {0, 1, 0, 1};
   std::vector<int32_t> value_list = {100, 200, 300, 400};
   std::vector<std::unique_ptr<ExecNode>> child;
-  for (int i = 0; i < condition_list.size(); i++) {
+  for (size_t i = 0; i < condition_list.size(); i++) {
     child.emplace_back(std::unique_ptr<ExecNode>(new ConstantValueNode(condition_list[i])));
     child.emplace_back(std::unique_ptr<ExecNode>(new ConstantValueNode(value_list[i])));
   }
@@ -41,7 +41,7 @@ TEST(SwitchTest, Test2) {
   std::vector<uint8_t> condition_list = {0, 0, 0, 1};
   std::vector<int32_t> value_list = {100, 200, 300, 400};
   std::vector<std::unique_ptr<ExecNode>> child;
-  for (int i = 0; i < condition_list.size(); i++) {
+  for (size_t i = 0; i < condition_list.size(); i++) {
     child.emplace_back(std::unique_ptr<ExecNode>(new ConstantValueNode(condition_list[i])));
     child.emplace_back(std::unique_ptr<ExecNode>(new ConstantValueNode(value_list[i])));
   }
@@ -61,7 +61,7 @@ TEST(SwitchTest, Test3) {
   std::vector<uint8_t> condition_list = {0, 0, 0, 0};
   std::vector<int32_t> value_list = {100, 200, 300, 400};
   std::vector<std::unique_ptr<ExecNode>> child;
-  for (int i = 0; i < condition_list.size(); i++) {
+  for (size_t i = 0; i < condition_list.size(); i++) {
     child.emplace_back(std::unique_ptr<ExecNode>(new ConstantValueNode(condition_list[i])));
     child.emplace_back(std::unique_ptr<ExecNode>(new ConstantValueNode(value_list[i])));
   }
