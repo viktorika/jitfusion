@@ -34,7 +34,7 @@ Status ListOrStringConcat(BinaryOPNode &binary_node, ValueType type, llvm::Value
     return Status::RuntimeError("verify function failed in binary_op_codegen in add_func_callee: " + error_info);
   }
 
-  *ret_value = ctx_.builder.CreateCall(add_func_callee, {lhs, rhs}, "calltmp");
+  *ret_value = ctx_.builder.CreateCall(add_func_callee, {lhs, rhs, ctx_.entry_function->getArg(1)}, "calltmp");
   return Status::OK();
 }
 

@@ -313,3 +313,19 @@ TEST(BinaryOPTest, BitwiseShiftRightTest) {
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<uint64_t>(result), l >> r);
 }
+
+TEST(BinaryOPTest, StringConcatTest) {
+  std::string l = "123";
+  std::string r = "456";
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto l_node = std::unique_ptr<ExecNode>(new ConstantValueNode(l));
+  auto r_node = std::unique_ptr<ExecNode>(new ConstantValueNode(r));
+  auto op_node = std::unique_ptr<ExecNode>(new BinaryOPNode(BinaryOPType::kAdd, std::move(l_node), std::move(r_node)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<std::string>(result), l + r);
+}
