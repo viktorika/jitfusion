@@ -42,24 +42,3 @@ cc_binary(
         "-lgtest",
     ],
 )
-
-cc_binary(
-    name = "a",
-    srcs = [
-        "a.cc",
-    ],
-    visibility = ["//visibility:public"],
-    deps = [
-        "@llvm//:llvm"
-    ],
-    copts = [
-        "-Wall",
-        "-Wextra",
-        "-Wno-float-equal",
-        # "-Werror",
-        "-std=c++17",
-        #"-mavx2",
-        "-O2",
-        "-ftree-vectorize",
-    ],
-)
