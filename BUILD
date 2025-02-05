@@ -2,7 +2,7 @@ cc_library(
     name = "jitfusion",
     srcs = glob(["src/**/*.cc"] + ["src/**/*.h"]),
     hdrs = glob(["include/*.h"]),
-    includes = ["include"],
+    includes = ["include", "src"],
     visibility = ["//visibility:public"],
     deps = [
         "@llvm//:llvm"

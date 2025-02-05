@@ -45,8 +45,8 @@ Status CodeGen::SolveBinaryOpNumericType(BinaryOPNode &binary_node, llvm::Value 
     auto tmp_type =
         TypeHelper::GetPromotedType(binary_node.GetLeft()->GetReturnType(), binary_node.GetRight()->GetReturnType());
 
-    RETURN_NOT_OK(NumericTypeConvert(binary_node.GetLeft()->GetReturnType(), tmp_type, &lhs_value));
-    RETURN_NOT_OK(NumericTypeConvert(binary_node.GetRight()->GetReturnType(), tmp_type, &rhs_value));
+    RETURN_NOT_OK(NumericTypeConvert(ctx_, binary_node.GetLeft()->GetReturnType(), tmp_type, &lhs_value));
+    RETURN_NOT_OK(NumericTypeConvert(ctx_, binary_node.GetRight()->GetReturnType(), tmp_type, &rhs_value));
 
     switch (binary_node.GetOp()) {
       case BinaryOPType::kLarge: {
@@ -94,8 +94,10 @@ Status CodeGen::SolveBinaryOpNumericType(BinaryOPNode &binary_node, llvm::Value 
             TypeHelper::TypeToString(binary_node.GetRight()->GetReturnType()));
     }
   } else {  // calc Op
-    RETURN_NOT_OK(NumericTypeConvert(binary_node.GetLeft()->GetReturnType(), binary_node.GetReturnType(), &lhs_value));
-    RETURN_NOT_OK(NumericTypeConvert(binary_node.GetRight()->GetReturnType(), binary_node.GetReturnType(), &rhs_value));
+    RETURN_NOT_OK(
+        NumericTypeConvert(ctx_, binary_node.GetLeft()->GetReturnType(), binary_node.GetReturnType(), &lhs_value));
+    RETURN_NOT_OK(
+        NumericTypeConvert(ctx_, binary_node.GetRight()->GetReturnType(), binary_node.GetReturnType(), &rhs_value));
 
     switch (binary_node.GetOp()) {
       case BinaryOPType::kAdd: {

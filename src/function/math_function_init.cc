@@ -7,6 +7,7 @@
 #include <cmath>
 #include "function_init.h"
 #include "function_registry.h"
+#include "codegen/codegen.h"
 #include "status.h"
 #include "type.h"
 
@@ -103,6 +104,14 @@ llvm::Value *CallBuiltinMaxFunction(const FunctionSignature &sign,
                                      : ctx.builder.CreateICmpUGT(arg_llvm_value_list.at(0), arg_llvm_value_list.at(1))
                                : ctx.builder.CreateFCmpUGT(arg_llvm_value_list.at(0), arg_llvm_value_list.at(1));
   return ctx.builder.CreateSelect(condition, arg_llvm_value_list.at(0), arg_llvm_value_list.at(1), "max");
+};
+
+llvm::Value *CallBuiltinCastFunction(const FunctionSignature &sign,
+                                     const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,
+                                     const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  auto *result = arg_llvm_value_list.back();
+  CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().back(), sign.GetRetType(), &result);
+  return result;
 };
 
 Status InitExpFunc(FunctionRegistry *reg) {
@@ -353,8 +362,24 @@ Status InitMaxFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
-Status InitCastFunc(FunctionRegistry * /*reg*/) {
-  // TODO(victorika):
+Status InitCastFunc(FunctionRegistry *reg) {
+  static const std::vector<ValueType> kTypeVec{ValueType::kU8,  ValueType::kI8,  ValueType::kU16, ValueType::kI16,
+                                               ValueType::kU32, ValueType::kI32, ValueType::kU64, ValueType::kI64,
+                                               ValueType::kF32, ValueType::kF64};
+
+  static const std::vector<std::pair<std::string, ValueType>> kNameWithType{
+      {"CastU8", ValueType::kU8},   {"CastI8", ValueType::kI8},   {"CastU16", ValueType::kU16},
+      {"CastI16", ValueType::kI16}, {"CastU32", ValueType::kU32}, {"CastI32", ValueType::kI32},
+      {"CastU64", ValueType::kU64}, {"CastI64", ValueType::kI64}, {"CastF32", ValueType::kF32},
+      {"CastF64", ValueType::kF64}};
+
+  for (const auto &[func_name, ret_type] : kNameWithType) {
+    for (auto args_type : kTypeVec) {
+      RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature(func_name, {args_type}, ret_type),
+                                      {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinCastFunction}));
+    }
+  }
+
   return Status::OK();
 }
 
