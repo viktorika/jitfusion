@@ -186,7 +186,7 @@ Status Validator::Visit(IfNode& if_node) {
   }
 
   if (TypeHelper::IsNumericType(arg_types[1]) && TypeHelper::IsNumericType(arg_types[2])) {
-    if_node.SetReturnType(TypeHelper::GetPromotedType(arg_types[0], arg_types[1]));
+    if_node.SetReturnType(TypeHelper::GetPromotedType(arg_types[1], arg_types[2]));
   } else if (arg_types[1] == arg_types[2]) {
     if_node.SetReturnType(arg_types[1]);
   } else {

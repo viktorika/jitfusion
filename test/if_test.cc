@@ -54,3 +54,22 @@ TEST(IfTest, FalseTest) {
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<int32_t>(result), -1000);
 }
+
+TEST(IfTest, Test1) {
+  auto condition_node = std::unique_ptr<ExecNode>(new ConstantValueNode(static_cast<uint8_t>(0)));
+  auto true_node = std::unique_ptr<ExecNode>(new ConstantValueNode(static_cast<uint64_t>(100)));
+  auto false_node = std::unique_ptr<ExecNode>(new ConstantValueNode(0.1024));
+  std::vector<std::unique_ptr<ExecNode>> child;
+  child.emplace_back(std::move(condition_node));
+  child.emplace_back(std::move(true_node));
+  child.emplace_back(std::move(false_node));
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto node = std::unique_ptr<ExecNode>(new IfNode(std::move(child)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<double>(result), 0.1024);
+}
