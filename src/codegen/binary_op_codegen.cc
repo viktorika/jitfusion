@@ -162,7 +162,7 @@ Status CodeGen::SolveBinaryOpComplexType(BinaryOPNode &binary_node, llvm::Value 
       return Status::RuntimeError("Unknown type in StringCmp", TypeHelper::TypeToString(binary_node.GetReturnType()));
     }
 
-    FunctionSignature sign{"StringCmp", {ValueType::kString, ValueType::kString, ValueType::kI64}, ValueType::kUnknown};
+    FunctionSignature sign{"StringCmp", {ValueType::kString, ValueType::kString}, ValueType::kUnknown};
     FunctionStructure func_struct;
     RETURN_NOT_OK(ctx_.function_registry->GetFuncBySign(sign, &func_struct));
 

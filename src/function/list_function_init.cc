@@ -30,24 +30,24 @@ uint8_t IsInList(T a, LLVMComplexStruct b) {
   if constexpr (std::is_same_v<float, T>) {
     for (size_t i = 0; i < b.len; ++i) {
       if (std::abs(a - reinterpret_cast<T *>(b.data)[i]) < std::numeric_limits<float>::epsilon()) {
-        return static_cast<uint8_t>(255);
+        return 1;
       }
     }
-    return static_cast<uint8_t>(0);
+    return 0;
   } else if constexpr (std::is_same_v<double, T>) {
     for (size_t i = 0; i < b.len; ++i) {
       if (std::abs(a - reinterpret_cast<T *>(b.data)[i]) < std::numeric_limits<double>::epsilon()) {
-        return static_cast<uint8_t>(255);
+        return 1;
       }
     }
-    return static_cast<uint8_t>(0);
+    return 0;
   } else {
     for (size_t i = 0; i < b.len; ++i) {
       if (a == reinterpret_cast<T *>(b.data)[i]) {
-        return static_cast<uint8_t>(255);
+        return 1;
       }
     }
-    return static_cast<uint8_t>(0);
+    return 0;
   }
 }
 

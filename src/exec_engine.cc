@@ -107,38 +107,45 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
   std::unique_ptr<llvm::Module> owner = std::make_unique<llvm::Module>("module", llvm_context_);
   llvm::Module* m = owner.get();
 
-  std::vector<llvm::Type*> complex_type_fields = {llvm::Type::getInt64Ty(llvm_context_), llvm::Type::getInt32Ty(llvm_context_)};
+  std::vector<llvm::Type*> complex_type_fields = {llvm::Type::getInt64Ty(llvm_context_),
+                                                  llvm::Type::getInt32Ty(llvm_context_)};
   llvm::StructType* complex_type = llvm::StructType::create(llvm_context_, complex_type_fields, "ComplexSruct");
 
   llvm::FunctionCallee entry_func_callee;
   switch (ret_type_) {
     case ValueType::kU8:
     case ValueType::kI8:
-      entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getInt8Ty(llvm_context_),
-                                                 llvm::Type::getInt64Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_));
+      entry_func_callee =
+          m->getOrInsertFunction("entry", llvm::Type::getInt8Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_),
+                                 llvm::Type::getInt64Ty(llvm_context_));
       break;
     case ValueType::kU16:
     case ValueType::kI16:
-      entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getInt16Ty(llvm_context_),
-                                                 llvm::Type::getInt64Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_));
+      entry_func_callee =
+          m->getOrInsertFunction("entry", llvm::Type::getInt16Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_),
+                                 llvm::Type::getInt64Ty(llvm_context_));
       break;
     case ValueType::kU32:
     case ValueType::kI32:
-      entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getInt32Ty(llvm_context_),
-                                                 llvm::Type::getInt64Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_));
+      entry_func_callee =
+          m->getOrInsertFunction("entry", llvm::Type::getInt32Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_),
+                                 llvm::Type::getInt64Ty(llvm_context_));
       break;
     case ValueType::kU64:
     case ValueType::kI64:
-      entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getInt64Ty(llvm_context_),
-                                                 llvm::Type::getInt64Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_));
+      entry_func_callee =
+          m->getOrInsertFunction("entry", llvm::Type::getInt64Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_),
+                                 llvm::Type::getInt64Ty(llvm_context_));
       break;
     case ValueType::kF32:
-      entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getFloatTy(llvm_context_),
-                                                 llvm::Type::getInt64Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_));
+      entry_func_callee =
+          m->getOrInsertFunction("entry", llvm::Type::getFloatTy(llvm_context_), llvm::Type::getInt64Ty(llvm_context_),
+                                 llvm::Type::getInt64Ty(llvm_context_));
       break;
     case ValueType::kF64:
-      entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getDoubleTy(llvm_context_),
-                                                 llvm::Type::getInt64Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_));
+      entry_func_callee =
+          m->getOrInsertFunction("entry", llvm::Type::getDoubleTy(llvm_context_), llvm::Type::getInt64Ty(llvm_context_),
+                                 llvm::Type::getInt64Ty(llvm_context_));
       break;
     case ValueType::kString:
     case ValueType::kU8List:
@@ -187,6 +194,7 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
   llvm::FunctionAnalysisManager fam;
   llvm::CGSCCAnalysisManager cgam;
   llvm::ModuleAnalysisManager mam;
+  llvm::FunctionPassManager fpm;
 
   // Register all the basic analyses with the managers.
   pb.registerModuleAnalyses(mam);
@@ -195,7 +203,15 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
   pb.registerLoopAnalyses(lam);
   pb.crossRegisterProxies(lam, fam, cgam, mam);
 
+  // 添加 Pass 到 FunctionPassManager
+  fpm.addPass(llvm::ReassociatePass());  // 重新关联表达式
+  fpm.addPass(llvm::GVNPass());          // 全局值编号优化
+  fpm.addPass(llvm::SimplifyCFGPass());  // 简化控制流图
+
   llvm::ModulePassManager mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
+  for (auto& function : *m) {
+    fpm.run(function, fam);
+  }
   mpm.run(*m, mam);
 
   // Now we create the JIT.
