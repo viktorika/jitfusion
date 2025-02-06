@@ -194,7 +194,6 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
   llvm::FunctionAnalysisManager fam;
   llvm::CGSCCAnalysisManager cgam;
   llvm::ModuleAnalysisManager mam;
-  llvm::FunctionPassManager fpm;
 
   // Register all the basic analyses with the managers.
   pb.registerModuleAnalyses(mam);
@@ -203,15 +202,7 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
   pb.registerLoopAnalyses(lam);
   pb.crossRegisterProxies(lam, fam, cgam, mam);
 
-  // 添加 Pass 到 FunctionPassManager
-  fpm.addPass(llvm::ReassociatePass());  // 重新关联表达式
-  fpm.addPass(llvm::GVNPass());          // 全局值编号优化
-  fpm.addPass(llvm::SimplifyCFGPass());  // 简化控制流图
-
   llvm::ModulePassManager mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
-  for (auto& function : *m) {
-    fpm.run(function, fam);
-  }
   mpm.run(*m, mam);
 
   // Now we create the JIT.
