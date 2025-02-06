@@ -71,7 +71,7 @@ std::string UnaryOPNode::ToStringImpl(const std::string& prefix) {
 }
 
 Status UnaryOPNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
-ExecNodeType UnaryOPNode::GetExecNodeType() { return ExecNodeType::kUnaryOPType; }
+ExecNodeType UnaryOPNode::GetExecNodeType() { return ExecNodeType::kUnaryOPNode; }
 
 std::string BinaryOPNode::ToStringImpl(const std::string& prefix) {
   return prefix + "|--" + TypeHelper::BinaryOPTypeToString(op_) + "\n" + left_->ToString(prefix + "|   ") +

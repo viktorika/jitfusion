@@ -7,6 +7,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 #include <variant>
 #include <vector>
 
@@ -17,7 +18,7 @@ enum class ExecNodeType : uint8_t {
   kExecContextNode = 2,
   kConstValueNode = 3,
   kConstListValueNode = 4,
-  kUnaryOPType = 5,
+  kUnaryOPNode = 5,
   kBinaryOPNode = 6,
   kFunctionNode = 7,
   kNoOPNode = 8,
