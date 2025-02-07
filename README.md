@@ -80,6 +80,44 @@ The EntryArgumentNode will consistently return a u64 value, which is the input p
 
 The intermediate processes can all be converted into corresponding op nodes, function nodes, condition nodes, etc. Additionally, there are usually multiple execution flows within a single task, and these flows may use the same variables. To achieve maximum optimization, you can have all the store nodes ultimately point to a NoOP node, allowing LLVM to perform the optimization for you.
 
+## Attention
+If you need to allocate memory that you cannot manage yourself and require the execution engine to manage it for you, you need to use the ExecContextNode. The ExecContext structure corresponding to ExecContextNode contains an arena. By using it to allocate memory, the memory will be automatically released when the execution is complete.
+
+You can refer to test/exec_context_node_test.cc for more details. for example:
+
+```c++
+LLVMComplexStruct CreateU32List(int64_t ctx) {
+  auto* exec_ctx = reinterpret_cast<ExecContext*>(ctx);
+  LLVMComplexStruct u32_list;
+  auto* data = reinterpret_cast<uint32_t*>(exec_ctx->arena.Allocate(sizeof(uint32_t) * 4));
+  data[0] = 1;
+  data[1] = 2;
+  data[2] = 3;
+  data[3] = 4;
+  u32_list.data = reinterpret_cast<int64_t>(data);
+  u32_list.len = 4;
+  return u32_list;
+}
+
+int main() {
+  std::unique_ptr<FunctionRegistry> func_registry;
+  FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok();
+  FunctionSignature sign("create_u32_list", {ValueType::kI64}, ValueType::kU32List);
+  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(CreateU32List), nullptr};
+  func_registry->RegisterFunc(sign, func_struct);
+
+  auto args_node = std::unique_ptr<ExecNode>(new ExecContextNode);
+  std::vector<std::unique_ptr<ExecNode>> create_func_args;
+  create_func_args.emplace_back(std::move(args_node));
+  auto create_func_node = std::unique_ptr<ExecNode>(new FunctionNode("create_u32_list", std::move(create_func_args)));
+
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(create_func_node, func_registry);
+  RetType result;
+  exec_engine.Execute(nullptr, &result).ok();
+}
+```
+
 
 
 
