@@ -71,7 +71,18 @@ inline double sqrt(double x) { return std::sqrt(x); }
 inline float abs(float x) { return std::abs(x); }
 inline double abs(double x) { return std::abs(x); }
 
-__attribute__((optnone)) inline int32_t abs(int8_t x) { return std::abs(x); }
+#if defined(__clang__)
+#  define NO_OPTIMIZE __attribute__((optnone))
+#elif defined(__GNUC__)
+#  define NO_OPTIMIZE __attribute__((optimize("O0")))
+#elif defined(_MSC_VER)
+#  define NO_OPTIMIZE
+#  pragma optimize("", off)
+#else
+#  define NO_OPTIMIZE
+#endif
+NO_OPTIMIZE inline int32_t abs(int8_t x) { return std::abs(x); }
+
 inline int32_t abs(int16_t x) { return std::abs(x); }
 inline int32_t abs(int32_t x) { return std::abs(x); }
 inline int64_t abs(int64_t x) { return std::abs(x); }
