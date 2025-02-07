@@ -5,9 +5,9 @@
  * @Last Modified time: 2025-01-23 17:09:36
  */
 #include <cmath>
+#include "codegen/codegen.h"
 #include "function_init.h"
 #include "function_registry.h"
-#include "codegen/codegen.h"
 #include "status.h"
 #include "type.h"
 
@@ -70,7 +70,8 @@ inline double sqrt(double x) { return std::sqrt(x); }
 
 inline float abs(float x) { return std::abs(x); }
 inline double abs(double x) { return std::abs(x); }
-inline int32_t abs(int8_t x) { return std::abs(x); }
+
+__attribute__((optnone)) inline int32_t abs(int8_t x) { return std::abs(x); }
 inline int32_t abs(int16_t x) { return std::abs(x); }
 inline int32_t abs(int32_t x) { return std::abs(x); }
 inline int64_t abs(int64_t x) { return std::abs(x); }
