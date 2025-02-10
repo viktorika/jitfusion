@@ -56,7 +56,7 @@ inline uint8_t IsInStringList(LLVMComplexStruct a, LLVMComplexStruct b) {
     if (a.len == reinterpret_cast<LLVMComplexStruct *>(b.data)[i].len &&
         strcmp(reinterpret_cast<char *>(a.data),
                reinterpret_cast<char *>(reinterpret_cast<LLVMComplexStruct *>(b.data)[i].data)) == 0) {
-      return static_cast<uint8_t>(255);
+      return static_cast<uint8_t>(1);
     }
   }
   return static_cast<uint8_t>(0);
