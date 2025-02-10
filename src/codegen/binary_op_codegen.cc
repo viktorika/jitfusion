@@ -54,38 +54,38 @@ Status CodeGen::SolveBinaryOpNumericType(BinaryOPNode &binary_node, llvm::Value 
                                                            ? ctx_.builder.CreateICmpSGT(lhs_value, rhs_value)
                                                            : ctx_.builder.CreateICmpUGT(lhs_value, rhs_value)
                                                      : ctx_.builder.CreateFCmpUGT(lhs_value, rhs_value);
-        value_ = ctx_.builder.CreateSExt(value_, ctx_.builder.getInt8Ty());
+        value_ = ctx_.builder.CreateZExt(value_, ctx_.builder.getInt8Ty());
       } break;
       case BinaryOPType::kLargeEqual: {
         value_ = TypeHelper::IsIntegerType(tmp_type) ? TypeHelper::IsSignedType(tmp_type)
                                                            ? ctx_.builder.CreateICmpSGE(lhs_value, rhs_value)
                                                            : ctx_.builder.CreateICmpUGE(lhs_value, rhs_value)
                                                      : ctx_.builder.CreateFCmpUGE(lhs_value, rhs_value);
-        value_ = ctx_.builder.CreateSExt(value_, ctx_.builder.getInt8Ty());
+        value_ = ctx_.builder.CreateZExt(value_, ctx_.builder.getInt8Ty());
       } break;
       case BinaryOPType::kEqual: {
         value_ = TypeHelper::IsIntegerType(tmp_type) ? ctx_.builder.CreateICmpEQ(lhs_value, rhs_value)
                                                      : ctx_.builder.CreateFCmpUEQ(lhs_value, rhs_value);
-        value_ = ctx_.builder.CreateSExt(value_, ctx_.builder.getInt8Ty());
+        value_ = ctx_.builder.CreateZExt(value_, ctx_.builder.getInt8Ty());
       } break;
       case BinaryOPType::kLess: {
         value_ = TypeHelper::IsIntegerType(tmp_type) ? TypeHelper::IsSignedType(tmp_type)
                                                            ? ctx_.builder.CreateICmpSLT(lhs_value, rhs_value)
                                                            : ctx_.builder.CreateICmpULT(lhs_value, rhs_value)
                                                      : ctx_.builder.CreateFCmpULT(lhs_value, rhs_value);
-        value_ = ctx_.builder.CreateSExt(value_, ctx_.builder.getInt8Ty());
+        value_ = ctx_.builder.CreateZExt(value_, ctx_.builder.getInt8Ty());
       } break;
       case BinaryOPType::kLessEqual: {
         value_ = TypeHelper::IsIntegerType(tmp_type) ? TypeHelper::IsSignedType(tmp_type)
                                                            ? ctx_.builder.CreateICmpSLE(lhs_value, rhs_value)
                                                            : ctx_.builder.CreateICmpULE(lhs_value, rhs_value)
                                                      : ctx_.builder.CreateFCmpULE(lhs_value, rhs_value);
-        value_ = ctx_.builder.CreateSExt(value_, ctx_.builder.getInt8Ty());
+        value_ = ctx_.builder.CreateZExt(value_, ctx_.builder.getInt8Ty());
       } break;
       case BinaryOPType::kNotEqual: {
         value_ = TypeHelper::IsIntegerType(tmp_type) ? ctx_.builder.CreateICmpNE(lhs_value, rhs_value)
                                                      : ctx_.builder.CreateFCmpUNE(lhs_value, rhs_value);
-        value_ = ctx_.builder.CreateSExt(value_, ctx_.builder.getInt8Ty());
+        value_ = ctx_.builder.CreateZExt(value_, ctx_.builder.getInt8Ty());
       } break;
       default:
         return Status::RuntimeError(
@@ -214,7 +214,7 @@ Status CodeGen::SolveBinaryOpComplexType(BinaryOPNode &binary_node, llvm::Value 
             TypeHelper::BinaryOPTypeToString(binary_node.GetOp()), " ",
             TypeHelper::TypeToString(binary_node.GetRight()->GetReturnType()));
     }
-    value_ = ctx_.builder.CreateSExt(value_, ctx_.builder.getInt8Ty());
+    value_ = ctx_.builder.CreateZExt(value_, ctx_.builder.getInt8Ty());
   }
   return Status::OK();
 }

@@ -4,8 +4,8 @@
  * @Last Modified by: victorika
  * @Last Modified time: 2025-01-22 11:18:28
  */
-#include <status.h>
 #include "codegen.h"
+#include "status.h"
 #include "type.h"
 
 namespace jitfusion {
@@ -27,7 +27,7 @@ Status CodeGen::Visit(UnaryOPNode &unary_op_node) {
     case UnaryOPType::kNot: {
       auto *false_value = llvm::ConstantInt::get(llvm::Type::getInt8Ty(ctx_.context), 0, false);
       value_ = ctx_.builder.CreateICmpEQ(child_value, false_value, "not_x_icmp");
-      value_ = ctx_.builder.CreateSExt(value_, ctx_.builder.getInt8Ty());
+      value_ = ctx_.builder.CreateZExt(value_, ctx_.builder.getInt8Ty());
     } break;
     case UnaryOPType::kBitwiseNot: {
       value_ = ctx_.builder.CreateNot(child_value, "bitwise_not");
