@@ -1,5 +1,5 @@
 # jitfusion
-A computing engine completely based on llvm jit.
+A execution engine completely based on llvm jit.
 
 
 # Build
