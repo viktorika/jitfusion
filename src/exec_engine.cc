@@ -98,6 +98,8 @@ using return_list_multigroup_function_type = LLVMComplexStruct (*)(int64_t, int6
 
 Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
                            const std::unique_ptr<FunctionRegistry>& func_registry) {
+  delete engine_;
+  engine_ = nullptr;
   // validator
   Validator validator(func_registry);
   RETURN_NOT_OK(validator.Validate(exec_node.get()));

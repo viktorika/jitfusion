@@ -6,12 +6,12 @@
  */
 #pragma once
 
-#include <type.h>
 #include <memory>
 #include "arena.h"
 #include "exec_node.h"
 #include "function_registry.h"
 #include "status.h"
+#include "type.h"
 
 namespace jitfusion {
 
@@ -30,7 +30,7 @@ class ExecEngine {
  private:
   Arena const_value_arena_;
   llvm::LLVMContext llvm_context_;
-  llvm::ExecutionEngine* engine_;
+  llvm::ExecutionEngine* engine_{nullptr};
   uint64_t entry_func_ptr_;
   ValueType ret_type_;
 };
