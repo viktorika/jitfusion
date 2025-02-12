@@ -79,6 +79,11 @@ inline T Max(LLVMComplexStruct a) {
   return *std::max_element(reinterpret_cast<T *>(a.data), reinterpret_cast<T *>(a.data) + a.len);
 }
 
+template <typename T>
+inline T Min(LLVMComplexStruct a) {
+  return *std::min_element(reinterpret_cast<T *>(a.data), reinterpret_cast<T *>(a.data) + a.len);
+}
+
 Status InitListConcatFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(
       FunctionSignature("ListConcat", {ValueType::kU8List, ValueType::kU8List, ValueType::kI64}, ValueType::kU8List),
@@ -223,6 +228,30 @@ Status InitMaxFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+Status InitMinFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kU8List}, ValueType::kU8),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<uint8_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kI8List}, ValueType::kI8),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<int8_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kU16List}, ValueType::kU16),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<uint16_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kI16List}, ValueType::kI16),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<int16_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kU32List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<uint32_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kI32List}, ValueType::kI32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<int32_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kU64List}, ValueType::kU64),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<uint64_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kI64List}, ValueType::kI64),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<int64_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kF32List}, ValueType::kF32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<float>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kF64List}, ValueType::kF64),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<double>), nullptr}));
+  return Status::OK();
+}
+
 }  // namespace
 
 Status InitListInternalFunc(FunctionRegistry *reg) {
@@ -231,6 +260,7 @@ Status InitListInternalFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitLenFunc(reg));
   JF_RETURN_NOT_OK(InitSumFunc(reg));
   JF_RETURN_NOT_OK(InitMaxFunc(reg));
+  JF_RETURN_NOT_OK(InitMinFunc(reg));
   return Status::OK();
 }
 
