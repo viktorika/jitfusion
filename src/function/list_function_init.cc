@@ -64,9 +64,16 @@ inline uint8_t IsInStringList(LLVMComplexStruct a, LLVMComplexStruct b) {
 
 inline uint32_t Len(LLVMComplexStruct a) { return a.len; }
 
-}  // namespace
+template <typename Ret, typename DType>
+inline Ret Sum(LLVMComplexStruct a) {
+  Ret sum = 0;
+  for (size_t i = 0; i < a.len; ++i) {
+    sum += static_cast<Ret>(reinterpret_cast<DType *>(a.data)[i]);
+  }
+  return sum;
+}
 
-Status InitListInternalFunc(FunctionRegistry *reg) {
+Status InitListConcatFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(
       FunctionSignature("ListConcat", {ValueType::kU8List, ValueType::kU8List, ValueType::kI64}, ValueType::kU8List),
       {FunctionType::kCFunc, reinterpret_cast<void *>(ListConcat<uint8_t>), nullptr}));
@@ -101,52 +108,98 @@ Status InitListInternalFunc(FunctionRegistry *reg) {
       FunctionSignature("ListConcat", {ValueType::kStringList, ValueType::kStringList, ValueType::kI64},
                         ValueType::kStringList),
       {FunctionType::kCFunc, reinterpret_cast<void *>(ListConcat<LLVMComplexStruct>), nullptr}));
+  return Status::OK();
+}
 
+Status InitInFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kU8, ValueType::kU8List}, ValueType::kU8),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<uint8_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<uint8_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kU16, ValueType::kU16List}, ValueType::kU8),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<uint16_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<uint16_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kU32, ValueType::kU32List}, ValueType::kU8),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<uint32_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<uint32_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kU64, ValueType::kU64List}, ValueType::kU8),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<uint64_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<uint64_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kI8, ValueType::kI8List}, ValueType::kU8),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<int8_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<int8_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kI16, ValueType::kI16List}, ValueType::kU8),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<int16_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<int16_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kI32, ValueType::kI32List}, ValueType::kU8),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<int32_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<int32_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kI64, ValueType::kI64List}, ValueType::kU8),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<int64_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<int64_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kF32, ValueType::kF32List}, ValueType::kU8),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<float>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<float>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kF64, ValueType::kF64List}, ValueType::kU8),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<double>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kString, ValueType::kStringList}, ValueType::kU8),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(IsInStringList), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<double>), nullptr}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("in", {ValueType::kString, ValueType::kStringList}, ValueType::kU8),
+                        {FunctionType::kCFunc, reinterpret_cast<void *>(IsInStringList), nullptr}));
+  return Status::OK();
+}
 
+Status InitLenFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kU8List}, ValueType::kU32),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kU16List}, ValueType::kU32),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kU32List}, ValueType::kU32),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kU64List}, ValueType::kU32),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kI8List}, ValueType::kU32),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kI16List}, ValueType::kU32),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kI32List}, ValueType::kU32),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kI64List}, ValueType::kU32),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kF32List}, ValueType::kU32),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kF64List}, ValueType::kU32),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kStringList}, ValueType::kU32),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+  return Status::OK();
+}
+
+Status InitSumFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kU8List}, ValueType::kU64),
+                        {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<uint64_t, uint8_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kI8List}, ValueType::kI64),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<int64_t, int8_t>), nullptr}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kU16List}, ValueType::kU64),
+                        {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<uint64_t, uint16_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kI16List}, ValueType::kI64),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<int64_t, int16_t>), nullptr}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kU32List}, ValueType::kU64),
+                        {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<uint64_t, uint32_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kI32List}, ValueType::kI64),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<int64_t, int32_t>), nullptr}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kU64List}, ValueType::kU64),
+                        {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<uint64_t, uint64_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kI64List}, ValueType::kI64),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<int64_t, int64_t>), nullptr}));
+
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kF32List}, ValueType::kF64),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<double, float>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kF64List}, ValueType::kF64),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<double, double>), nullptr}));
+  return Status::OK();
+}
+
+}  // namespace
+
+Status InitListInternalFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(InitListConcatFunc(reg));
+  JF_RETURN_NOT_OK(InitInFunc(reg));
+  JF_RETURN_NOT_OK(InitLenFunc(reg));
+  JF_RETURN_NOT_OK(InitSumFunc(reg));
   return Status::OK();
 }
 
