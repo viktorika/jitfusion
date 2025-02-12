@@ -5,6 +5,7 @@
  * @Last Modified time: 2025-01-29 22:44:35
  */
 #include <algorithm>
+#include <unordered_set>
 #include "exec_engine.h"
 #include "function_init.h"
 #include "function_registry.h"
@@ -82,6 +83,12 @@ inline T Max(LLVMComplexStruct a) {
 template <typename T>
 inline T Min(LLVMComplexStruct a) {
   return *std::min_element(reinterpret_cast<T *>(a.data), reinterpret_cast<T *>(a.data) + a.len);
+}
+
+template <typename T>
+inline uint32_t CountDistinct(LLVMComplexStruct a) {
+  std::unordered_set<T> unique_set(reinterpret_cast<T *>(a.data), reinterpret_cast<T *>(a.data) + a.len);
+  return unique_set.size();
 }
 
 Status InitListConcatFunc(FunctionRegistry *reg) {
@@ -252,6 +259,37 @@ Status InitMinFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+Status InitCountDistinct(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kU8List}, ValueType::kU32),
+                        {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<uint8_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kI8List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<int8_t>), nullptr}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kU16List}, ValueType::kU32),
+                        {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<uint16_t>), nullptr}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kI16List}, ValueType::kU32),
+                        {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<int16_t>), nullptr}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kU32List}, ValueType::kU32),
+                        {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<uint32_t>), nullptr}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kI32List}, ValueType::kU32),
+                        {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<int32_t>), nullptr}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kU64List}, ValueType::kU32),
+                        {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<uint64_t>), nullptr}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kI64List}, ValueType::kU32),
+                        {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<int64_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kF32List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<float>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kF64List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<double>), nullptr}));
+  return Status::OK();
+}
+
 }  // namespace
 
 Status InitListInternalFunc(FunctionRegistry *reg) {
@@ -261,6 +299,7 @@ Status InitListInternalFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitSumFunc(reg));
   JF_RETURN_NOT_OK(InitMaxFunc(reg));
   JF_RETURN_NOT_OK(InitMinFunc(reg));
+  JF_RETURN_NOT_OK(InitCountDistinct(reg));
   return Status::OK();
 }
 
