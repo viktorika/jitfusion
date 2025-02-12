@@ -21,7 +21,7 @@ Status ListOrStringConcat(BinaryOPNode &binary_node, ValueType type, llvm::Value
       ValueType::kUnknown};
 
   FunctionStructure func_struct;
-  RETURN_NOT_OK(ctx_.function_registry->GetFuncBySign(sign, &func_struct));
+  JF_RETURN_NOT_OK(ctx_.function_registry->GetFuncBySign(sign, &func_struct));
 
   add_func_callee = ctx_.module.getOrInsertFunction(sign.ToString(), ctx_.complex_type, ctx_.complex_type,
                                                     ctx_.complex_type, llvm::Type::getInt64Ty(ctx_.context));
@@ -45,8 +45,8 @@ Status CodeGen::SolveBinaryOpNumericType(BinaryOPNode &binary_node, llvm::Value 
     auto tmp_type =
         TypeHelper::GetPromotedType(binary_node.GetLeft()->GetReturnType(), binary_node.GetRight()->GetReturnType());
 
-    RETURN_NOT_OK(NumericTypeConvert(ctx_, binary_node.GetLeft()->GetReturnType(), tmp_type, &lhs_value));
-    RETURN_NOT_OK(NumericTypeConvert(ctx_, binary_node.GetRight()->GetReturnType(), tmp_type, &rhs_value));
+    JF_RETURN_NOT_OK(NumericTypeConvert(ctx_, binary_node.GetLeft()->GetReturnType(), tmp_type, &lhs_value));
+    JF_RETURN_NOT_OK(NumericTypeConvert(ctx_, binary_node.GetRight()->GetReturnType(), tmp_type, &rhs_value));
 
     switch (binary_node.GetOp()) {
       case BinaryOPType::kLarge: {
@@ -94,9 +94,9 @@ Status CodeGen::SolveBinaryOpNumericType(BinaryOPNode &binary_node, llvm::Value 
             TypeHelper::TypeToString(binary_node.GetRight()->GetReturnType()));
     }
   } else {  // calc Op
-    RETURN_NOT_OK(
+    JF_RETURN_NOT_OK(
         NumericTypeConvert(ctx_, binary_node.GetLeft()->GetReturnType(), binary_node.GetReturnType(), &lhs_value));
-    RETURN_NOT_OK(
+    JF_RETURN_NOT_OK(
         NumericTypeConvert(ctx_, binary_node.GetRight()->GetReturnType(), binary_node.GetReturnType(), &rhs_value));
 
     switch (binary_node.GetOp()) {
@@ -155,7 +155,7 @@ Status CodeGen::SolveBinaryOpNumericType(BinaryOPNode &binary_node, llvm::Value 
 
 Status CodeGen::SolveBinaryOpComplexType(BinaryOPNode &binary_node, llvm::Value *lhs_value, llvm::Value *rhs_value) {
   if (BinaryOPType::kAdd == binary_node.GetOp()) {  // String or List Concat
-    RETURN_NOT_OK(ListOrStringConcat(binary_node, binary_node.GetReturnType(), lhs_value, rhs_value, ctx_, &value_));
+    JF_RETURN_NOT_OK(ListOrStringConcat(binary_node, binary_node.GetReturnType(), lhs_value, rhs_value, ctx_, &value_));
   } else {  // String Compare
     if (binary_node.GetLeft()->GetReturnType() != ValueType::kString ||
         binary_node.GetRight()->GetReturnType() != ValueType::kString) {
@@ -164,7 +164,7 @@ Status CodeGen::SolveBinaryOpComplexType(BinaryOPNode &binary_node, llvm::Value 
 
     FunctionSignature sign{"StringCmp", {ValueType::kString, ValueType::kString}, ValueType::kUnknown};
     FunctionStructure func_struct;
-    RETURN_NOT_OK(ctx_.function_registry->GetFuncBySign(sign, &func_struct));
+    JF_RETURN_NOT_OK(ctx_.function_registry->GetFuncBySign(sign, &func_struct));
 
     llvm::FunctionCallee string_call_func_callee = ctx_.module.getOrInsertFunction(
         sign.ToString(), llvm::Type::getInt32Ty(ctx_.context), ctx_.complex_type, ctx_.complex_type);
@@ -221,10 +221,10 @@ Status CodeGen::SolveBinaryOpComplexType(BinaryOPNode &binary_node, llvm::Value 
 
 Status CodeGen::Visit(BinaryOPNode &binary_op_node) {
   llvm::Value *lhs_value{};
-  RETURN_NOT_OK(GetValue(binary_op_node.GetLeft(), &lhs_value));
+  JF_RETURN_NOT_OK(GetValue(binary_op_node.GetLeft(), &lhs_value));
 
   llvm::Value *rhs_value{};
-  RETURN_NOT_OK(GetValue(binary_op_node.GetRight(), &rhs_value));
+  JF_RETURN_NOT_OK(GetValue(binary_op_node.GetRight(), &rhs_value));
 
   if (TypeHelper::IsNumericType(binary_op_node.GetLeft()->GetReturnType()) &&
       TypeHelper::IsNumericType(binary_op_node.GetRight()->GetReturnType())) {

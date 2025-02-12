@@ -117,7 +117,7 @@ class FunctionRegistryFactory {
  public:
   static Status CreateFunctionRegistry(std::unique_ptr<FunctionRegistry> *func_registry) {
     *func_registry = std::unique_ptr<FunctionRegistry>(new FunctionRegistry());
-    RETURN_NOT_OK((*func_registry)->Init());
+    JF_RETURN_NOT_OK((*func_registry)->Init());
     return Status::OK();
   }
 };

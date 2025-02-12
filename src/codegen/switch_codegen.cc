@@ -11,7 +11,7 @@ namespace jitfusion {
 
 Status CodeGen::Visit(SwitchNode &switch_node) {
   llvm::Type *ret_type_llvm;
-  RETURN_NOT_OK(ValueTypeToLLVMType(switch_node.GetReturnType(), &ret_type_llvm));
+  JF_RETURN_NOT_OK(ValueTypeToLLVMType(switch_node.GetReturnType(), &ret_type_llvm));
 
   llvm::BasicBlock *cur_block = ctx_.entry_bb;
   llvm::Function *cur_function = ctx_.entry_function;
@@ -34,11 +34,11 @@ Status CodeGen::Visit(SwitchNode &switch_node) {
     llvm::Value *cond_value;
     llvm::Value *tmp_value;
     if (prev_block == nullptr) {
-      RETURN_NOT_OK(GetValue(switch_node.GetArgs()[i].get(), &tmp_value));
+      JF_RETURN_NOT_OK(GetValue(switch_node.GetArgs()[i].get(), &tmp_value));
       NumericTypeConvert(ctx_, switch_node.GetArgs()[i]->GetReturnType(), switch_node.GetReturnType(), &tmp_value);
       ctx_.builder.CreateRet(tmp_value);
     } else {
-      RETURN_NOT_OK(GetValue(switch_node.GetArgs()[i].get(), &cond_value));
+      JF_RETURN_NOT_OK(GetValue(switch_node.GetArgs()[i].get(), &cond_value));
       NumericTypeConvert(ctx_, switch_node.GetArgs()[i]->GetReturnType(), ValueType::kU8, &cond_value);
       cond_value = ctx_.builder.CreateTruncOrBitCast(cond_value, llvm::Type::getInt1Ty(ctx_.context), "i1");
 
@@ -49,7 +49,7 @@ Status CodeGen::Visit(SwitchNode &switch_node) {
       ctx_.entry_bb = then_block;
       ctx_.entry_function = switch_func;
       ctx_.builder.SetInsertPoint(then_block);
-      RETURN_NOT_OK(GetValue(switch_node.GetArgs()[i + 1].get(), &tmp_value));
+      JF_RETURN_NOT_OK(GetValue(switch_node.GetArgs()[i + 1].get(), &tmp_value));
       NumericTypeConvert(ctx_, switch_node.GetArgs()[i + 1]->GetReturnType(), switch_node.GetReturnType(), &tmp_value);
       ctx_.builder.CreateRet(tmp_value);
     }

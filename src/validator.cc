@@ -61,7 +61,7 @@ Status Validator::Visit(ConstantListValueNode& list_node) {
 }
 
 Status Validator::Visit(UnaryOPNode& unary_op_node) {
-  RETURN_NOT_OK(unary_op_node.GetChild()->Accept(this));
+  JF_RETURN_NOT_OK(unary_op_node.GetChild()->Accept(this));
   auto child_return_type = unary_op_node.GetChild()->GetReturnType();
   if (!TypeHelper::IsNumericType(child_return_type)) {
     return Status::ParseError("Unary OP only support numeric type");
@@ -129,8 +129,8 @@ struct DivZeroVisit {
 Status Validator::Visit(BinaryOPNode& binary_op_node) {
   auto* left = binary_op_node.GetLeft();
   auto* right = binary_op_node.GetRight();
-  RETURN_NOT_OK(left->Accept(this));
-  RETURN_NOT_OK(right->Accept(this));
+  JF_RETURN_NOT_OK(left->Accept(this));
+  JF_RETURN_NOT_OK(right->Accept(this));
   auto op = binary_op_node.GetOp();
 
   // extra check
@@ -153,19 +153,19 @@ Status Validator::Visit(FunctionNode& function_node) {
   std::vector<ValueType> arg_types;
   arg_types.reserve(function_node.GetArgs().size());
   for (const auto& arg : function_node.GetArgs()) {
-    RETURN_NOT_OK(arg->Accept(this));
+    JF_RETURN_NOT_OK(arg->Accept(this));
     arg_types.emplace_back(arg->GetReturnType());
   }
   FunctionSignature sign(function_node.GetFuncName(), arg_types, ValueType::kUnknown);
   FunctionStructure function_structure;
-  RETURN_NOT_OK(func_registry_->GetFuncBySign(sign, &function_structure));
+  JF_RETURN_NOT_OK(func_registry_->GetFuncBySign(sign, &function_structure));
   function_node.SetReturnType(sign.GetRetType());
   return Status::OK();
 }
 
 Status Validator::Visit(NoOPNode& no_op_node) {
   for (const auto& arg : no_op_node.GetArgs()) {
-    RETURN_NOT_OK(arg->Accept(this));
+    JF_RETURN_NOT_OK(arg->Accept(this));
   }
   no_op_node.SetReturnType(ValueType::kI8);
   return Status::OK();
@@ -178,7 +178,7 @@ Status Validator::Visit(IfNode& if_node) {
   std::vector<ValueType> arg_types;
   arg_types.reserve(if_node.GetArgs().size());
   for (const auto& arg : if_node.GetArgs()) {
-    RETURN_NOT_OK(arg->Accept(this));
+    JF_RETURN_NOT_OK(arg->Accept(this));
     arg_types.emplace_back(arg->GetReturnType());
   }
   if (arg_types[0] != ValueType::kU8) {
@@ -200,7 +200,7 @@ Status Validator::Visit(SwitchNode& switch_node) {
   std::vector<ValueType> arg_types;
   arg_types.reserve(switch_node.GetArgs().size());
   for (const auto& arg : switch_node.GetArgs()) {
-    RETURN_NOT_OK(arg->Accept(this));
+    JF_RETURN_NOT_OK(arg->Accept(this));
     arg_types.emplace_back(arg->GetReturnType());
   }
 

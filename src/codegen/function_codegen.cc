@@ -69,21 +69,21 @@ Status CodeGen::Visit(FunctionNode& function_node) {
   for (const auto& args : args_list) {
     args_type_list.emplace_back(args->GetReturnType());
     llvm::Value* args_value;
-    RETURN_NOT_OK(GetValue(args.get(), &args_value));
+    JF_RETURN_NOT_OK(GetValue(args.get(), &args_value));
     args_llvm_type_list.emplace_back(args_value->getType());
     args_llvm_value_list.emplace_back(args_value);
   }
 
   FunctionSignature sign(function_node.GetFuncName(), args_type_list, ValueType::kUnknown);
   FunctionStructure func_struct;
-  RETURN_NOT_OK(ctx_.function_registry->GetFuncBySign(sign, &func_struct));
+  JF_RETURN_NOT_OK(ctx_.function_registry->GetFuncBySign(sign, &func_struct));
   switch (func_struct.func_type) {
     case FunctionType::kLLVMIntrinicFunc: {
       value_ = func_struct.codegen_func(sign, args_llvm_type_list, args_llvm_value_list, ctx_);
     } break;
     case FunctionType::kCFunc: {
       llvm::Type* llvm_ret_type;
-      RETURN_NOT_OK(ValueTypeToLLVMType(function_node.GetReturnType(), &llvm_ret_type));
+      JF_RETURN_NOT_OK(ValueTypeToLLVMType(function_node.GetReturnType(), &llvm_ret_type));
       llvm::FunctionType* func_type =
           llvm::FunctionType::get(llvm_ret_type, llvm::ArrayRef<llvm::Type*>(args_llvm_type_list), false);
 

@@ -35,13 +35,13 @@ inline uint32_t StringLen(LLVMComplexStruct a) { return a.len; }
 }  // namespace
 
 Status InitStringInternalFunc(FunctionRegistry *reg) {
-  RETURN_NOT_OK(reg->RegisterFunc(
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
       FunctionSignature("StringConcat", {ValueType::kString, ValueType::kString, ValueType::kI64}, ValueType::kString),
       {FunctionType::kCFunc, reinterpret_cast<void *>(StringConcat), nullptr}));
-  RETURN_NOT_OK(
+  JF_RETURN_NOT_OK(
       reg->RegisterFunc(FunctionSignature("StringCmp", {ValueType::kString, ValueType::kString}, ValueType::kI32),
                         {FunctionType::kCFunc, reinterpret_cast<void *>(StringCmp), nullptr}));
-  RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("StringLen", {ValueType::kString}, ValueType::kU32),
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("StringLen", {ValueType::kString}, ValueType::kU32),
                                   {FunctionType::kCFunc, reinterpret_cast<void *>(StringLen), nullptr}));
   return Status::OK();
 }

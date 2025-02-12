@@ -12,9 +12,9 @@ namespace jitfusion {
 
 Status CodeGen::Visit(UnaryOPNode &unary_op_node) {
   llvm::Value *child_value{};
-  RETURN_NOT_OK(GetValue(unary_op_node.GetChild(), &child_value));
+  JF_RETURN_NOT_OK(GetValue(unary_op_node.GetChild(), &child_value));
 
-  RETURN_NOT_OK(
+  JF_RETURN_NOT_OK(
       NumericTypeConvert(ctx_, unary_op_node.GetChild()->GetReturnType(), unary_op_node.GetReturnType(), &child_value));
   switch (unary_op_node.GetOp()) {
     case UnaryOPType::kPlus: {

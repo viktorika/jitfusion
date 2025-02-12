@@ -11,7 +11,7 @@
 namespace jitfusion {
 
 Status CodeGen::GetValue(ExecNode *node, llvm::Value **ret_value) {
-  RETURN_NOT_OK(node->Accept(this));
+  JF_RETURN_NOT_OK(node->Accept(this));
   *ret_value = value_;
   return Status::OK();
 }

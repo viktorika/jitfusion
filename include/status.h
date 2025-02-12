@@ -94,7 +94,7 @@ class Status {
   std::unique_ptr<State> state_;
 };
 
-#define RETURN_NOT_OK(expr) \
+#define JF_RETURN_NOT_OK(expr) \
   do {                      \
     Status st = (expr);     \
     if (!st.ok()) {         \

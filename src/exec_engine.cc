@@ -102,7 +102,7 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
   engine_ = nullptr;
   // validator
   Validator validator(func_registry);
-  RETURN_NOT_OK(validator.Validate(exec_node.get()));
+  JF_RETURN_NOT_OK(validator.Validate(exec_node.get()));
   ret_type_ = exec_node->GetReturnType();
 
   // codegen
@@ -175,7 +175,7 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
       llvm_context_, *m, builder, entry_bb, entry_function, complex_type, func_registry, const_value_arena_);
   CodeGen codegen(*codegen_ctx);
   llvm::Value* ret_value;
-  RETURN_NOT_OK(codegen.GetValue(exec_node.get(), &ret_value));
+  JF_RETURN_NOT_OK(codegen.GetValue(exec_node.get(), &ret_value));
   builder.CreateRet(ret_value);
 
   // verify

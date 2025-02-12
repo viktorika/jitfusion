@@ -124,9 +124,9 @@ Status FunctionRegistry::MappingToLLVM(llvm::ExecutionEngine* engine, llvm::Modu
 }
 
 Status FunctionRegistry::Init() {
-  RETURN_NOT_OK(InitMathInternalFunc(this));
-  RETURN_NOT_OK(InitStringInternalFunc(this));
-  RETURN_NOT_OK(InitListInternalFunc(this));
+  JF_RETURN_NOT_OK(InitMathInternalFunc(this));
+  JF_RETURN_NOT_OK(InitStringInternalFunc(this));
+  JF_RETURN_NOT_OK(InitListInternalFunc(this));
   return Status::OK();
 }
 
