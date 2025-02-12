@@ -4,6 +4,7 @@
  * @Last Modified by: viktorika
  * @Last Modified time: 2025-01-29 22:44:35
  */
+#include <algorithm>
 #include "exec_engine.h"
 #include "function_init.h"
 #include "function_registry.h"
@@ -71,6 +72,11 @@ inline Ret Sum(LLVMComplexStruct a) {
     sum += static_cast<Ret>(reinterpret_cast<DType *>(a.data)[i]);
   }
   return sum;
+}
+
+template <typename T>
+inline T Max(LLVMComplexStruct a) {
+  return *std::max_element(reinterpret_cast<T *>(a.data), reinterpret_cast<T *>(a.data) + a.len);
 }
 
 Status InitListConcatFunc(FunctionRegistry *reg) {
@@ -193,6 +199,30 @@ Status InitSumFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+Status InitMaxFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kU8List}, ValueType::kU8),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<uint8_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kI8List}, ValueType::kI8),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<int8_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kU16List}, ValueType::kU16),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<uint16_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kI16List}, ValueType::kI16),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<int16_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kU32List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<uint32_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kI32List}, ValueType::kI32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<int32_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kU64List}, ValueType::kU64),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<uint64_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kI64List}, ValueType::kI64),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<int64_t>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kF32List}, ValueType::kF32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<float>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kF64List}, ValueType::kF64),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<double>), nullptr}));
+  return Status::OK();
+}
+
 }  // namespace
 
 Status InitListInternalFunc(FunctionRegistry *reg) {
@@ -200,6 +230,7 @@ Status InitListInternalFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitInFunc(reg));
   JF_RETURN_NOT_OK(InitLenFunc(reg));
   JF_RETURN_NOT_OK(InitSumFunc(reg));
+  JF_RETURN_NOT_OK(InitMaxFunc(reg));
   return Status::OK();
 }
 

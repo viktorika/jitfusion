@@ -441,11 +441,12 @@ TEST(FunctionTest, SumTest1) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  EXPECT_EQ(std::get<uint64_t>(result), std::accumulate(data.begin(), data.end(), 0));
+  uint64_t expect = std::accumulate(data.begin(), data.end(), 0);
+  EXPECT_EQ(std::get<uint64_t>(result), expect);
 }
 
 TEST(FunctionTest, SumTest2) {
-  std::vector<float> data = {1.2, 2.3, 10.12321, 11.32423432};
+  std::vector<float> data = {1.2F, 2.3F, 10.12321F, 11.32423432F};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
@@ -458,4 +459,52 @@ TEST(FunctionTest, SumTest2) {
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<double>(result), std::accumulate(data.begin(), data.end(), 0.0));
+}
+
+TEST(FunctionTest, MaxTest1) {
+  std::vector<uint8_t> data = {1, 2, 11, 10};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Max", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<uint8_t>(result), 11);
+}
+
+TEST(FunctionTest, MaxTest2) {
+  std::vector<uint32_t> data = {1, 22131321, 11, 10};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Max", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<uint32_t>(result), 22131321U);
+}
+
+TEST(FunctionTest, MaxTest3) {
+  std::vector<float> data = {1.2F, 2.3F, 10.12321F, 11.32423432F};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Max", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<float>(result), 11.32423432F);
 }
