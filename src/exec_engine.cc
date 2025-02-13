@@ -96,6 +96,10 @@ using return_list_multigroup_function_type = LLVMComplexStruct (*)(int64_t, int6
 
 }  // namespace
 
+ExecEngine::ExecEngine(ExecEngineOption option)
+    : const_value_arena_(option.const_value_arena_alloc_min_chunk_size), option_(option) {}
+ExecEngine::~ExecEngine() { delete engine_; }
+
 Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
                            const std::unique_ptr<FunctionRegistry>& func_registry) {
   delete engine_;
@@ -219,7 +223,7 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
 }
 
 Status ExecEngine::Execute(void* entry_arguments, RetType* result) {
-  ExecContext exec_ctx;
+  ExecContext exec_ctx(option_.exec_ctx_arena_alloc_min_chunk_size);
   switch (ret_type_) {
     case ValueType::kU8:
       *result = reinterpret_cast<return_u8_function_type>(entry_func_ptr_)(reinterpret_cast<int64_t>(entry_arguments),
