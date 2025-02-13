@@ -7,7 +7,6 @@
 #pragma once
 
 #include <memory>
-#include <optional>
 #include "arena.h"
 #include "exec_node.h"
 #include "function_registry.h"
