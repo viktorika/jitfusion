@@ -30,7 +30,13 @@ inline int32_t StringCmp(LLVMComplexStruct a, LLVMComplexStruct b) {
   return strcmp(reinterpret_cast<char *>(a.data), reinterpret_cast<char *>(b.data));
 }
 
-inline uint32_t StringLen(LLVMComplexStruct a) { return a.len; }
+llvm::Value *CallBuiltinStringLenFunction(const FunctionSignature & /*sign*/,
+                                          const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,
+                                          const std::vector<llvm::Value *> &arg_llvm_value_list,
+                                          IRCodeGenContext &ctx) {
+  llvm::Value *len_value = ctx.builder.CreateExtractValue(arg_llvm_value_list[0], {1}, "len_value");
+  return len_value;
+}
 
 }  // namespace
 
@@ -42,7 +48,7 @@ Status InitStringInternalFunc(FunctionRegistry *reg) {
       reg->RegisterFunc(FunctionSignature("StringCmp", {ValueType::kString, ValueType::kString}, ValueType::kI32),
                         {FunctionType::kCFunc, reinterpret_cast<void *>(StringCmp), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("StringLen", {ValueType::kString}, ValueType::kU32),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(StringLen), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinStringLenFunction}));
   return Status::OK();
 }
 

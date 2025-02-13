@@ -64,7 +64,12 @@ inline uint8_t IsInStringList(LLVMComplexStruct a, LLVMComplexStruct b) {
   return static_cast<uint8_t>(0);
 }
 
-inline uint32_t Len(LLVMComplexStruct a) { return a.len; }
+llvm::Value *CallBuiltinLenFunction(const FunctionSignature & /*sign*/,
+                                    const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,
+                                    const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  llvm::Value *len_value = ctx.builder.CreateExtractValue(arg_llvm_value_list[0], {1}, "len_value");
+  return len_value;
+}
 
 template <typename Ret, typename DType>
 inline Ret Sum(LLVMComplexStruct a) {
@@ -158,27 +163,27 @@ Status InitInFunc(FunctionRegistry *reg) {
 
 Status InitLenFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kU8List}, ValueType::kU32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLenFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kU16List}, ValueType::kU32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLenFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kU32List}, ValueType::kU32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLenFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kU64List}, ValueType::kU32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLenFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kI8List}, ValueType::kU32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLenFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kI16List}, ValueType::kU32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLenFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kI32List}, ValueType::kU32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLenFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kI64List}, ValueType::kU32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLenFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kF32List}, ValueType::kU32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLenFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kF64List}, ValueType::kU32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLenFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Len", {ValueType::kStringList}, ValueType::kU32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Len), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLenFunction}));
   return Status::OK();
 }
 
