@@ -118,6 +118,22 @@ inline LLVMComplexStruct SortDesc(LLVMComplexStruct a, int64_t exec_context) {
   return result;
 }
 
+llvm::Value *CallBuiltinTruncateFunction(const FunctionSignature & /*sign*/,
+                                         const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,
+                                         const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  llvm::Value *result_ptr = ctx.builder.CreateAlloca(ctx.complex_type, nullptr, "create result ptr");
+  ctx.builder.CreateStore(arg_llvm_value_list[0], result_ptr);
+  llvm::Value *len_ptr = ctx.builder.CreateGEP(ctx.complex_type, result_ptr,
+                                               {llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx.context), 0),
+                                                llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx.context), 1)},
+                                               "load len_ptr");
+
+  llvm::Value *new_len = arg_llvm_value_list[1];
+  ctx.builder.CreateStore(new_len, len_ptr);
+  llvm::Value *result = ctx.builder.CreateLoad(ctx.complex_type, result_ptr, "result");
+  return result;
+}
+
 Status InitListConcatFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(
       FunctionSignature("ListConcat", {ValueType::kU8List, ValueType::kU8List, ValueType::kI64}, ValueType::kU8List),
@@ -382,6 +398,43 @@ Status InitSortFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+Status InitTruncateFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("Truncate", {ValueType::kU8List, ValueType::kU32}, ValueType::kU8List),
+                        {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinTruncateFunction}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("Truncate", {ValueType::kU16List, ValueType::kU32}, ValueType::kU16List),
+                        {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinTruncateFunction}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("Truncate", {ValueType::kU32List, ValueType::kU32}, ValueType::kU32List),
+                        {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinTruncateFunction}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("Truncate", {ValueType::kU64List, ValueType::kU32}, ValueType::kU64List),
+                        {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinTruncateFunction}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("Truncate", {ValueType::kI8List, ValueType::kU32}, ValueType::kI8List),
+                        {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinTruncateFunction}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("Truncate", {ValueType::kI16List, ValueType::kU32}, ValueType::kI16List),
+                        {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinTruncateFunction}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("Truncate", {ValueType::kI32List, ValueType::kU32}, ValueType::kI32List),
+                        {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinTruncateFunction}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("Truncate", {ValueType::kI64List, ValueType::kU32}, ValueType::kI64List),
+                        {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinTruncateFunction}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("Truncate", {ValueType::kF32List, ValueType::kU32}, ValueType::kF32List),
+                        {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinTruncateFunction}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("Truncate", {ValueType::kF64List, ValueType::kU32}, ValueType::kF64List),
+                        {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinTruncateFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Truncate", {ValueType::kStringList, ValueType::kU32}, ValueType::kStringList),
+      {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinTruncateFunction}));
+  return Status::OK();
+}
+
 }  // namespace
 
 Status InitListInternalFunc(FunctionRegistry *reg) {
@@ -393,6 +446,7 @@ Status InitListInternalFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitMinFunc(reg));
   JF_RETURN_NOT_OK(InitCountDistinctFunc(reg));
   JF_RETURN_NOT_OK(InitSortFunc(reg));
+  JF_RETURN_NOT_OK(InitTruncateFunc(reg));
   return Status::OK();
 }
 

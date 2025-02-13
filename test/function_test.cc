@@ -664,3 +664,63 @@ TEST(FunctionTest, SortAscTest3) {
   std::sort(expect.begin(), expect.end());
   EXPECT_EQ(std::get<std::vector<double>>(result), expect);
 }
+
+TEST(FunctionTest, TruncateTest1) {
+  std::vector<double> data = {-1231.12321, 3241321.111, -234233.444, 212312312.12312, 4324.12312};
+  uint32_t size = 2;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto size_node = std::unique_ptr<ExecNode>(new ConstantValueNode(size));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(size_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Truncate", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<double> expect(data.begin(), data.begin() + size);
+  EXPECT_EQ(std::get<std::vector<double>>(result), expect);
+}
+
+TEST(FunctionTest, TruncateTest2) {
+  std::vector<uint8_t> data = {12, 1, 3, 2, 4};
+  uint32_t size = 3;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto size_node = std::unique_ptr<ExecNode>(new ConstantValueNode(size));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(size_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Truncate", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<uint8_t> expect(data.begin(), data.begin() + size);
+  EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
+}
+
+TEST(FunctionTest, TruncateTest3) {
+  std::vector<std::string> data = {"abc", "edg", "sda", "a", "c"};
+  uint32_t size = 4;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto size_node = std::unique_ptr<ExecNode>(new ConstantValueNode(size));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(size_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Truncate", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<std::string> expect(data.begin(), data.begin() + size);
+  EXPECT_EQ(std::get<std::vector<std::string>>(result), expect);
+}
