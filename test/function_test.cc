@@ -557,7 +557,7 @@ TEST(FunctionTest, MinTest3) {
   EXPECT_EQ(std::get<float>(result), 2.3F);
 }
 
-TEST(FunctionTest, CountDistinct1) {
+TEST(FunctionTest, CountDistinctTest1) {
   std::vector<float> data = {1.1, 2.2, 1.1, 3.3, 3.3, 4.4};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
@@ -573,7 +573,7 @@ TEST(FunctionTest, CountDistinct1) {
   EXPECT_EQ(std::get<uint32_t>(result), 4U);
 }
 
-TEST(FunctionTest, CountDistinct2) {
+TEST(FunctionTest, CountDistinctTest2) {
   std::vector<int64_t> data = {-1, -1, -2, -2, 100, 100};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
@@ -589,7 +589,7 @@ TEST(FunctionTest, CountDistinct2) {
   EXPECT_EQ(std::get<uint32_t>(result), 3U);
 }
 
-TEST(FunctionTest, CountDistinct3) {
+TEST(FunctionTest, CountDistinctTest3) {
   std::vector<double> data = {1.1, 2.2, 1.1, 3.3, 3.3, 4.4};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
@@ -603,4 +603,64 @@ TEST(FunctionTest, CountDistinct3) {
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<uint32_t>(result), 4U);
+}
+
+TEST(FunctionTest, SortAscTest1) {
+  std::vector<uint8_t> data = {12, 1, 3, 2, 4};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto exec_ctx_node = std::unique_ptr<ExecNode>(new ExecContextNode);
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(exec_ctx_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("SortAsc", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<uint8_t> expect = data;
+  std::sort(expect.begin(), expect.end());
+  EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
+}
+
+TEST(FunctionTest, SortAscTest2) {
+  std::vector<int64_t> data = {-1231, 3241321, -234233, 212312312, 4324};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto exec_ctx_node = std::unique_ptr<ExecNode>(new ExecContextNode);
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(exec_ctx_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("SortAsc", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<int64_t> expect = data;
+  std::sort(expect.begin(), expect.end());
+  EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
+}
+
+TEST(FunctionTest, SortAscTest3) {
+  std::vector<double> data = {-1231.12321, 3241321.111, -234233.444, 212312312.12312, 4324.12312};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto exec_ctx_node = std::unique_ptr<ExecNode>(new ExecContextNode);
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(exec_ctx_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("SortAsc", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<double> expect = data;
+  std::sort(expect.begin(), expect.end());
+  EXPECT_EQ(std::get<std::vector<double>>(result), expect);
 }
