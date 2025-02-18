@@ -81,19 +81,6 @@ using return_f64_function_type = double (*)(int64_t, int64_t);
 using return_string_function_type = LLVMComplexStruct (*)(int64_t, int64_t);
 using return_list_function_type = LLVMComplexStruct (*)(int64_t, int64_t);
 
-using return_u8_multigroup_function_type = uint8_t (*)(int64_t, int64_t);
-using return_u16_multigroup_function_type = uint16_t (*)(int64_t, int64_t);
-using return_u32_multigroup_function_type = uint32_t (*)(int64_t, int64_t);
-using return_u64_multigroup_function_type = uint64_t (*)(int64_t, int64_t);
-using return_i8_multigroup_function_type = int8_t (*)(int64_t, int64_t);
-using return_i16_multigroup_function_type = int16_t (*)(int64_t, int64_t);
-using return_i32_multigroup_function_type = int32_t (*)(int64_t, int64_t);
-using return_i64_multigroup_function_type = int64_t (*)(int64_t, int64_t);
-using return_f32_multigroup_function_type = float (*)(int64_t, int64_t);
-using return_f64_multigroup_function_type = double (*)(int64_t, int64_t);
-using return_string_multigroup_function_type = LLVMComplexStruct (*)(int64_t, int64_t);
-using return_list_multigroup_function_type = LLVMComplexStruct (*)(int64_t, int64_t);
-
 }  // namespace
 
 ExecEngine::ExecEngine(ExecEngineOption option)
