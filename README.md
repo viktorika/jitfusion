@@ -3,7 +3,12 @@ A execution engine completely based on llvm jit.
 
 
 # Build
-First, you need to have LLVM 19.1.7; other versions will not work. However, if you can only use other versions, you can modify the exec_engine.cc file to adapt it, and it shouldn't require too many changes. Additionally, currently, only Bazel is supported for compilation.
+Environment
+
+  * llvm 19.1.7
+  * bazel 7.4.1
+
+First, you need to have <span style="color:red">LLVM 19.1.7</span>; other versions will not work. However, if you can only use other versions, you can modify the exec_engine.cc file to adapt it, and it shouldn't require too many changes. Additionally, currently, only Bazel is supported for compilation.If you are using version <span style="color:red">Bazel 8</span> or above, you will need to use the --enable_workspace=true option.
 
 You can use the following command to check your version.
 ```bash
