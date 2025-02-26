@@ -8,6 +8,7 @@
 #include "codegen/codegen.h"
 #include "function_init.h"
 #include "function_registry.h"
+#include "llvm/IR/Type.h"
 #include "status.h"
 #include "type.h"
 
@@ -68,24 +69,23 @@ inline double tan(double x) { return std::tan(x); }
 inline float sqrt(float x) { return std::sqrt(x); }
 inline double sqrt(double x) { return std::sqrt(x); }
 
-inline float abs(float x) { return std::abs(x); }
-inline double abs(double x) { return std::abs(x); }
-
-#if defined(__clang__)
-#  define NO_OPTIMIZE __attribute__((optnone))
-#elif defined(__GNUC__)
-#  define NO_OPTIMIZE __attribute__((optimize("O0")))
-#elif defined(_MSC_VER)
-#  define NO_OPTIMIZE
-#  pragma optimize("", off)
-#else
-#  define NO_OPTIMIZE
-#endif
-NO_OPTIMIZE inline int32_t abs(int8_t x) { return std::abs(x); }
-
-inline int32_t abs(int16_t x) { return std::abs(x); }
-inline int32_t abs(int32_t x) { return std::abs(x); }
-inline int64_t abs(int64_t x) { return std::abs(x); }
+llvm::Value *CallBuiltinAbsFunction(const FunctionSignature &sign, const std::vector<llvm::Type *> &arg_llvm_type_list,
+                                    const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  auto *value = arg_llvm_value_list.at(0);
+  if (TypeHelper::IsIntegerType(sign.GetRetType())) {
+    CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), sign.GetRetType(), &value);
+    llvm::Type *new_args_llvm_type;
+    CodeGen::ValueTypeToLLVMType(ctx, sign.GetRetType(), &new_args_llvm_type);
+    std::vector<llvm::Type *> abs_func_args_list = {new_args_llvm_type};
+    llvm::Function *abs_func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::abs, abs_func_args_list);
+    llvm::Value *nsw = llvm::ConstantInt::get(llvm::Type::getInt1Ty(ctx.context), 1);
+    llvm::Value *result = ctx.builder.CreateCall(abs_func, {value, nsw}, "abs");
+    return result;
+  }
+  llvm::Function *fabs_func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::fabs,
+                                                              llvm::ArrayRef<llvm::Type *>(arg_llvm_type_list));
+  return ctx.builder.CreateCall(fabs_func, arg_llvm_value_list, "fabs");
+}
 
 inline float ceil(float x) { return std::ceil(x); }
 inline double ceil(double x) { return std::ceil(x); }
@@ -128,13 +128,13 @@ llvm::Value *CallBuiltinCastFunction(const FunctionSignature &sign,
 
 Status InitExpFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("exp", {ValueType::kI32}, ValueType::kF64),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(exp<int32_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(exp<int32_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("exp", {ValueType::kI64}, ValueType::kF64),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(exp<int64_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(exp<int64_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("exp", {ValueType::kU32}, ValueType::kF64),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(exp<uint32_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(exp<uint32_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("exp", {ValueType::kU64}, ValueType::kF64),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(exp<uint64_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(exp<uint64_t>), nullptr}));
 
   JF_RETURN_NOT_OK(
       reg->RegisterFunc(FunctionSignature("exp", {ValueType::kF32}, ValueType::kF32),
@@ -147,13 +147,13 @@ Status InitExpFunc(FunctionRegistry *reg) {
 
 Status InitLogFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log", {ValueType::kI32}, ValueType::kF64),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(log<int32_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log<int32_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log", {ValueType::kI64}, ValueType::kF64),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(log<int64_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log<int64_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log", {ValueType::kU32}, ValueType::kF64),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(log<uint32_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log<uint32_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log", {ValueType::kU64}, ValueType::kF64),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(log<uint64_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log<uint64_t>), nullptr}));
 
   JF_RETURN_NOT_OK(
       reg->RegisterFunc(FunctionSignature("log", {ValueType::kF32}, ValueType::kF32),
@@ -163,13 +163,13 @@ Status InitLogFunc(FunctionRegistry *reg) {
       {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(double)>(log)), nullptr}));
 
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log2", {ValueType::kI32}, ValueType::kF64),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(log2<int32_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log2<int32_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log2", {ValueType::kI64}, ValueType::kF64),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(log2<int64_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log2<int64_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log2", {ValueType::kU32}, ValueType::kF64),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(log2<uint32_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log2<uint32_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log2", {ValueType::kU64}, ValueType::kF64),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(log2<uint64_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log2<uint64_t>), nullptr}));
 
   JF_RETURN_NOT_OK(reg->RegisterFunc(
       FunctionSignature("log2", {ValueType::kF32}, ValueType::kF32),
@@ -179,13 +179,13 @@ Status InitLogFunc(FunctionRegistry *reg) {
       {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(double)>(log2)), nullptr}));
 
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log10", {ValueType::kI32}, ValueType::kF64),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(log10<int32_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log10<int32_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log10", {ValueType::kI64}, ValueType::kF64),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(log10<int64_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log10<int64_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log10", {ValueType::kU32}, ValueType::kF64),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(log10<uint32_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log10<uint32_t>), nullptr}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log10", {ValueType::kU64}, ValueType::kF64),
-                                  {FunctionType::kCFunc, reinterpret_cast<void *>(log10<uint64_t>), nullptr}));
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log10<uint64_t>), nullptr}));
 
   JF_RETURN_NOT_OK(reg->RegisterFunc(
       FunctionSignature("log10", {ValueType::kF32}, ValueType::kF32),
@@ -274,25 +274,19 @@ Status InitSqrtFunc(FunctionRegistry *reg) {
 }
 
 Status InitAbsFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("abs", {ValueType::kF32}, ValueType::kF32),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<float (*)(float)>(abs)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("abs", {ValueType::kF64}, ValueType::kF64),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(double)>(abs)), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("abs", {ValueType::kF32}, ValueType::kF32),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinAbsFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("abs", {ValueType::kF64}, ValueType::kF64),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinAbsFunction}));
 
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("abs", {ValueType::kI8}, ValueType::kI32),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<int32_t (*)(int8_t)>(abs)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("abs", {ValueType::kI16}, ValueType::kI32),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<int32_t (*)(int16_t)>(abs)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("abs", {ValueType::kI32}, ValueType::kI32),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<int32_t (*)(int32_t)>(abs)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("abs", {ValueType::kI64}, ValueType::kI64),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<int64_t (*)(int64_t)>(abs)), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("abs", {ValueType::kI8}, ValueType::kI32),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinAbsFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("abs", {ValueType::kI16}, ValueType::kI32),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinAbsFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("abs", {ValueType::kI32}, ValueType::kI32),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinAbsFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("abs", {ValueType::kI64}, ValueType::kI64),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinAbsFunction}));
   return Status::OK();
 }
 
@@ -328,49 +322,49 @@ Status InitRoundFunc(FunctionRegistry *reg) {
 
 Status InitMinFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kU8, ValueType::kU8}, ValueType::kU8),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kU16, ValueType::kU16}, ValueType::kU16),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kU32, ValueType::kU32}, ValueType::kU32),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kU64, ValueType::kU64}, ValueType::kU64),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kI8, ValueType::kI8}, ValueType::kI8),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kI16, ValueType::kI16}, ValueType::kI16),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kI32, ValueType::kI32}, ValueType::kI32),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kI64, ValueType::kI64}, ValueType::kI64),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kF32, ValueType::kF32}, ValueType::kF32),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("min", {ValueType::kF64, ValueType::kF64}, ValueType::kF64),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMinFunction}));
   return Status::OK();
 }
 
 Status InitMaxFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kU8, ValueType::kU8}, ValueType::kU8),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kU16, ValueType::kU16}, ValueType::kU16),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kU32, ValueType::kU32}, ValueType::kU32),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kU64, ValueType::kU64}, ValueType::kU64),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kI8, ValueType::kI8}, ValueType::kI8),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kI16, ValueType::kI16}, ValueType::kI16),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kI32, ValueType::kI32}, ValueType::kI32),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kI64, ValueType::kI64}, ValueType::kI64),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kF32, ValueType::kF32}, ValueType::kF32),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("max", {ValueType::kF64, ValueType::kF64}, ValueType::kF64),
-                                  {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinMaxFunction}));
   return Status::OK();
 }
 
@@ -388,7 +382,7 @@ Status InitCastFunc(FunctionRegistry *reg) {
   for (const auto &[func_name, ret_type] : kNameWithType) {
     for (auto args_type : kTypeVec) {
       JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature(func_name, {args_type}, ret_type),
-                                      {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinCastFunction}));
+                                         {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinCastFunction}));
     }
   }
 
