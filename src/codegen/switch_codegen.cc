@@ -11,7 +11,7 @@ namespace jitfusion {
 
 Status CodeGen::Visit(SwitchNode &switch_node) {
   llvm::Type *ret_type_llvm;
-  JF_RETURN_NOT_OK(ValueTypeToLLVMType(switch_node.GetReturnType(), &ret_type_llvm));
+  JF_RETURN_NOT_OK(ValueTypeToLLVMType(ctx_, switch_node.GetReturnType(), &ret_type_llvm));
 
   llvm::BasicBlock *cur_block = ctx_.entry_bb;
   llvm::Function *cur_function = ctx_.entry_function;

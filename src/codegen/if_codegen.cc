@@ -11,7 +11,7 @@ namespace jitfusion {
 
 Status CodeGen::Visit(IfNode &if_node) {
   llvm::Type *ret_type_llvm;
-  JF_RETURN_NOT_OK(ValueTypeToLLVMType(if_node.GetReturnType(), &ret_type_llvm));
+  JF_RETURN_NOT_OK(ValueTypeToLLVMType(ctx_, if_node.GetReturnType(), &ret_type_llvm));
 
   llvm::BasicBlock *cur_block = ctx_.entry_bb;
   llvm::Function *cur_function = ctx_.entry_function;
@@ -52,7 +52,7 @@ Status CodeGen::Visit(IfNode &if_node) {
   ctx_.builder.SetInsertPoint(else_block);
   llvm::Value *else_value{};
   JF_RETURN_NOT_OK(GetValue(if_node.GetArgs()[2].get(), &else_value));
-  NumericTypeConvert(ctx_,if_node.GetArgs()[2]->GetReturnType(), if_node.GetReturnType(), &else_value);
+  NumericTypeConvert(ctx_, if_node.GetArgs()[2]->GetReturnType(), if_node.GetReturnType(), &else_value);
   ctx_.builder.CreateBr(merge_block);
 
   // 创建 merge 块
