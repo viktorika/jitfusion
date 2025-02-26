@@ -13,51 +13,6 @@
 
 namespace jitfusion {
 
-Status CodeGen::ValueTypeToLLVMType(ValueType value_type, llvm::Type** llvm_type) {
-  switch (value_type) {
-    case ValueType::kU8:
-    case ValueType::kI8: {
-      *llvm_type = llvm::Type::getInt8Ty(ctx_.context);
-    } break;
-    case ValueType::kU16:
-    case ValueType::kI16: {
-      *llvm_type = llvm::Type::getInt16Ty(ctx_.context);
-    } break;
-    case ValueType::kU32:
-    case ValueType::kI32: {
-      *llvm_type = llvm::Type::getInt32Ty(ctx_.context);
-    } break;
-    case ValueType::kU64:
-    case ValueType::kI64: {
-      *llvm_type = llvm::Type::getInt64Ty(ctx_.context);
-    } break;
-    case ValueType::kF32: {
-      *llvm_type = llvm::Type::getFloatTy(ctx_.context);
-    } break;
-    case ValueType::kF64: {
-      *llvm_type = llvm::Type::getDoubleTy(ctx_.context);
-    } break;
-    case ValueType::kString:
-    case ValueType::kU8List:
-    case ValueType::kI8List:
-    case ValueType::kU16List:
-    case ValueType::kI16List:
-    case ValueType::kU32List:
-    case ValueType::kI32List:
-    case ValueType::kU64List:
-    case ValueType::kI64List:
-    case ValueType::kF32List:
-    case ValueType::kF64List:
-    case ValueType::kStringList: {
-      *llvm_type = ctx_.complex_type;
-    } break;
-    default:
-      return Status::RuntimeError("ValueType ", TypeHelper::TypeToString(value_type), " ",
-                                  "can not convert to llvm type");
-  }
-  return Status::OK();
-}
-
 Status CodeGen::Visit(FunctionNode& function_node) {
   std::vector<ValueType> args_type_list;
   std::vector<llvm::Type*> args_llvm_type_list;
@@ -83,7 +38,7 @@ Status CodeGen::Visit(FunctionNode& function_node) {
     } break;
     case FunctionType::kCFunc: {
       llvm::Type* llvm_ret_type;
-      JF_RETURN_NOT_OK(ValueTypeToLLVMType(function_node.GetReturnType(), &llvm_ret_type));
+      JF_RETURN_NOT_OK(ValueTypeToLLVMType(ctx_, function_node.GetReturnType(), &llvm_ret_type));
       llvm::FunctionType* func_type =
           llvm::FunctionType::get(llvm_ret_type, llvm::ArrayRef<llvm::Type*>(args_llvm_type_list), false);
 

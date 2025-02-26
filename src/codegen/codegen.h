@@ -30,11 +30,11 @@ class CodeGen : public Visitor {
   Status Visit(SwitchNode &switch_node) override;
 
   static Status NumericTypeConvert(IRCodeGenContext &ctx, ValueType from, ValueType to, llvm::Value **value);
+  static Status ValueTypeToLLVMType(IRCodeGenContext &ctx, ValueType value_type, llvm::Type **llvm_type);
 
  private:
   Status SolveBinaryOpNumericType(BinaryOPNode &binary_node, llvm::Value *lhs_value, llvm::Value *rhs_value);
   Status SolveBinaryOpComplexType(BinaryOPNode &binary_node, llvm::Value *lhs_value, llvm::Value *rhs_value);
-  Status ValueTypeToLLVMType(ValueType value_type, llvm::Type **llvm_type);
 
   IRCodeGenContext &ctx_;
   llvm::Value *value_{nullptr};
