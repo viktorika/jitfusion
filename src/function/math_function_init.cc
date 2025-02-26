@@ -15,13 +15,17 @@
 namespace jitfusion {
 
 namespace {
-// Numeric
-template <typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
-inline double exp(T x) {
-  return std::exp(x);
+
+llvm::Value *CallBuiltinExpFunction(const FunctionSignature &sign,
+                                    const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,
+                                    const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  auto *value = arg_llvm_value_list.at(0);
+  CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), sign.GetRetType(), &value);
+  llvm::Type *new_args_llvm_type;
+  CodeGen::ValueTypeToLLVMType(ctx, sign.GetRetType(), &new_args_llvm_type);
+  llvm::Function *exp_func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::exp, new_args_llvm_type);
+  return ctx.builder.CreateCall(exp_func, value, "fabs");
 }
-inline float exp(float x) { return std::exp(x); }
-inline double exp(double x) { return std::exp(x); }
 
 template <typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
 inline double log(T x) {
@@ -128,20 +132,18 @@ llvm::Value *CallBuiltinCastFunction(const FunctionSignature &sign,
 
 Status InitExpFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("exp", {ValueType::kI32}, ValueType::kF64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(exp<int32_t>), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinExpFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("exp", {ValueType::kI64}, ValueType::kF64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(exp<int64_t>), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinExpFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("exp", {ValueType::kU32}, ValueType::kF64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(exp<uint32_t>), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinExpFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("exp", {ValueType::kU64}, ValueType::kF64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(exp<uint64_t>), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinExpFunction}));
 
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("exp", {ValueType::kF32}, ValueType::kF32),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<float (*)(float)>(exp)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("exp", {ValueType::kF64}, ValueType::kF64),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(double)>(exp)), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("exp", {ValueType::kF32}, ValueType::kF32),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinExpFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("exp", {ValueType::kF64}, ValueType::kF64),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinExpFunction}));
   return Status::OK();
 }
 
