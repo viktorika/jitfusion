@@ -68,7 +68,7 @@ llvm::Value *CallBuiltinTruncFunction(const FunctionSignature & /*sign*/,
                                       const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
   auto *value = arg_llvm_value_list.at(0);
   llvm::Function *exp_func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::trunc, arg_llvm_type_list);
-  return ctx.builder.CreateCall(exp_func, value, "log10");
+  return ctx.builder.CreateCall(exp_func, value, "trunc");
 }
 
 inline double pow(float x, int32_t y) { return std::pow(x, y); }
