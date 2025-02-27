@@ -38,19 +38,27 @@ llvm::Value *CallBuiltinLogFunction(const FunctionSignature &sign,
   return ctx.builder.CreateCall(exp_func, value, "log");
 }
 
-template <typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
-inline double log2(T x) {
-  return std::log2(x);
+llvm::Value *CallBuiltinLog2Function(const FunctionSignature &sign,
+                                     const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,
+                                     const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  auto *value = arg_llvm_value_list.at(0);
+  CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), sign.GetRetType(), &value);
+  llvm::Type *new_args_llvm_type;
+  CodeGen::ValueTypeToLLVMType(ctx, sign.GetRetType(), &new_args_llvm_type);
+  llvm::Function *exp_func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::log2, new_args_llvm_type);
+  return ctx.builder.CreateCall(exp_func, value, "log2");
 }
-inline float log2(float x) { return std::log2(x); }
-inline double log2(double x) { return std::log2(x); }
 
-template <typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
-inline double log10(T x) {
-  return std::log10(x);
+llvm::Value *CallBuiltinLog10Function(const FunctionSignature &sign,
+                                      const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,
+                                      const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  auto *value = arg_llvm_value_list.at(0);
+  CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), sign.GetRetType(), &value);
+  llvm::Type *new_args_llvm_type;
+  CodeGen::ValueTypeToLLVMType(ctx, sign.GetRetType(), &new_args_llvm_type);
+  llvm::Function *exp_func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::log10, new_args_llvm_type);
+  return ctx.builder.CreateCall(exp_func, value, "log10");
 }
-inline float log10(float x) { return std::log10(x); }
-inline double log10(double x) { return std::log10(x); }
 
 inline float frac(float x) { return x - std::trunc(x); }
 inline double frac(double x) { return x - std::trunc(x); }
@@ -167,36 +175,32 @@ Status InitLogFunc(FunctionRegistry *reg) {
                                      {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLogFunction}));
 
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log2", {ValueType::kI32}, ValueType::kF64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log2<int32_t>), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLog2Function}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log2", {ValueType::kI64}, ValueType::kF64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log2<int64_t>), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLog2Function}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log2", {ValueType::kU32}, ValueType::kF64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log2<uint32_t>), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLog2Function}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log2", {ValueType::kU64}, ValueType::kF64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log2<uint64_t>), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLog2Function}));
 
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("log2", {ValueType::kF32}, ValueType::kF32),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<float (*)(float)>(log2)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("log2", {ValueType::kF64}, ValueType::kF64),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(double)>(log2)), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log2", {ValueType::kF32}, ValueType::kF32),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLog2Function}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log2", {ValueType::kF64}, ValueType::kF64),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLog2Function}));
 
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log10", {ValueType::kI32}, ValueType::kF64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log10<int32_t>), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLog10Function}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log10", {ValueType::kI64}, ValueType::kF64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log10<int64_t>), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLog10Function}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log10", {ValueType::kU32}, ValueType::kF64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log10<uint32_t>), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLog10Function}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log10", {ValueType::kU64}, ValueType::kF64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(log10<uint64_t>), nullptr}));
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLog10Function}));
 
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("log10", {ValueType::kF32}, ValueType::kF32),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<float (*)(float)>(log10)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("log10", {ValueType::kF64}, ValueType::kF64),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(double)>(log10)), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log10", {ValueType::kF32}, ValueType::kF32),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLog10Function}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("log10", {ValueType::kF64}, ValueType::kF64),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinLog10Function}));
 
   return Status::OK();
 }
