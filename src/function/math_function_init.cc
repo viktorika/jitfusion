@@ -60,8 +60,14 @@ llvm::Value *CallBuiltinLog10Function(const FunctionSignature &sign,
   return ctx.builder.CreateCall(exp_func, value, "log10");
 }
 
-inline float frac(float x) { return x - std::trunc(x); }
-inline double frac(double x) { return x - std::trunc(x); }
+llvm::Value *CallBuiltinFracFunction(const FunctionSignature & /*sign*/,
+                                     const std::vector<llvm::Type *> &arg_llvm_type_list,
+                                     const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  auto *value = arg_llvm_value_list.at(0);
+  llvm::Function *exp_func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::trunc, arg_llvm_type_list);
+  llvm::Value *trunc = ctx.builder.CreateCall(exp_func, value, "trunc");
+  return ctx.builder.CreateFSub(value, trunc, "frac");
+}
 
 llvm::Value *CallBuiltinTruncFunction(const FunctionSignature & /*sign*/,
                                       const std::vector<llvm::Type *> &arg_llvm_type_list,
@@ -211,12 +217,10 @@ Status InitLogFunc(FunctionRegistry *reg) {
 }
 
 Status InitFracFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("frac", {ValueType::kF32}, ValueType::kF32),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<float (*)(float)>(frac)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("frac", {ValueType::kF64}, ValueType::kF64),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(double)>(frac)), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("frac", {ValueType::kF32}, ValueType::kF32),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinFracFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("frac", {ValueType::kF64}, ValueType::kF64),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinFracFunction}));
   return Status::OK();
 }
 
