@@ -63,8 +63,13 @@ llvm::Value *CallBuiltinLog10Function(const FunctionSignature &sign,
 inline float frac(float x) { return x - std::trunc(x); }
 inline double frac(double x) { return x - std::trunc(x); }
 
-inline float trunc(float x) { return std::trunc(x); }
-inline double trunc(double x) { return std::trunc(x); }
+llvm::Value *CallBuiltinTruncFunction(const FunctionSignature & /*sign*/,
+                                      const std::vector<llvm::Type *> &arg_llvm_type_list,
+                                      const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  auto *value = arg_llvm_value_list.at(0);
+  llvm::Function *exp_func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::trunc, arg_llvm_type_list);
+  return ctx.builder.CreateCall(exp_func, value, "log10");
+}
 
 inline double pow(float x, int32_t y) { return std::pow(x, y); }
 inline float pow(float x, float y) { return std::pow(x, y); }
@@ -216,12 +221,10 @@ Status InitFracFunc(FunctionRegistry *reg) {
 }
 
 Status InitTruncFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("trunc", {ValueType::kF32}, ValueType::kF32),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<float (*)(float)>(trunc)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("trunc", {ValueType::kF64}, ValueType::kF64),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(double)>(trunc)), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("trunc", {ValueType::kF32}, ValueType::kF32),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinTruncFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("trunc", {ValueType::kF64}, ValueType::kF64),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinTruncFunction}));
   return Status::OK();
 }
 
