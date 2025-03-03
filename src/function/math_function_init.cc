@@ -98,13 +98,17 @@ llvm::Value *CallBuiltinPowFunction(const FunctionSignature & /*sign*/,
                                     const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
   auto *value = arg_llvm_value_list.at(0);
   auto *power = arg_llvm_value_list.at(1);
-  llvm::Function *func =
-      llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::pow, {value->getType()});
+  llvm::Function *func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::pow, {value->getType()});
   return ctx.builder.CreateCall(func, {value, power}, "pow");
 }
 
-inline float sin(float x) { return std::sin(x); }
-inline double sin(double x) { return std::sin(x); }
+llvm::Value *CallBuiltinSinFunction(const FunctionSignature & /*sign*/,
+                                    const std::vector<llvm::Type *> &arg_llvm_type_list,
+                                    const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  auto *value = arg_llvm_value_list.at(0);
+  llvm::Function *func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::sin, arg_llvm_type_list);
+  return ctx.builder.CreateCall(func, value, "sin");
+}
 
 inline float cos(float x) { return std::cos(x); }
 inline double cos(double x) { return std::cos(x); }
@@ -268,12 +272,10 @@ Status InitPowFunc(FunctionRegistry *reg) {
 }
 
 Status InitTrigonometricFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("sin", {ValueType::kF32}, ValueType::kF32),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<float (*)(float)>(sin)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("sin", {ValueType::kF64}, ValueType::kF64),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(double)>(sin)), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("sin", {ValueType::kF32}, ValueType::kF32),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinSinFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("sin", {ValueType::kF64}, ValueType::kF64),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinSinFunction}));
 
   JF_RETURN_NOT_OK(
       reg->RegisterFunc(FunctionSignature("cos", {ValueType::kF32}, ValueType::kF32),
