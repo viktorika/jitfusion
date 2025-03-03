@@ -23,8 +23,8 @@ llvm::Value *CallBuiltinExpFunction(const FunctionSignature &sign,
   CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), sign.GetRetType(), &value);
   llvm::Type *new_args_llvm_type;
   CodeGen::ValueTypeToLLVMType(ctx, sign.GetRetType(), &new_args_llvm_type);
-  llvm::Function *exp_func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::exp, new_args_llvm_type);
-  return ctx.builder.CreateCall(exp_func, value, "fabs");
+  llvm::Function *func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::exp, new_args_llvm_type);
+  return ctx.builder.CreateCall(func, value, "fabs");
 }
 
 llvm::Value *CallBuiltinLogFunction(const FunctionSignature &sign,
@@ -34,8 +34,8 @@ llvm::Value *CallBuiltinLogFunction(const FunctionSignature &sign,
   CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), sign.GetRetType(), &value);
   llvm::Type *new_args_llvm_type;
   CodeGen::ValueTypeToLLVMType(ctx, sign.GetRetType(), &new_args_llvm_type);
-  llvm::Function *exp_func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::log, new_args_llvm_type);
-  return ctx.builder.CreateCall(exp_func, value, "log");
+  llvm::Function *func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::log, new_args_llvm_type);
+  return ctx.builder.CreateCall(func, value, "log");
 }
 
 llvm::Value *CallBuiltinLog2Function(const FunctionSignature &sign,
@@ -45,8 +45,8 @@ llvm::Value *CallBuiltinLog2Function(const FunctionSignature &sign,
   CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), sign.GetRetType(), &value);
   llvm::Type *new_args_llvm_type;
   CodeGen::ValueTypeToLLVMType(ctx, sign.GetRetType(), &new_args_llvm_type);
-  llvm::Function *exp_func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::log2, new_args_llvm_type);
-  return ctx.builder.CreateCall(exp_func, value, "log2");
+  llvm::Function *func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::log2, new_args_llvm_type);
+  return ctx.builder.CreateCall(func, value, "log2");
 }
 
 llvm::Value *CallBuiltinLog10Function(const FunctionSignature &sign,
@@ -56,8 +56,8 @@ llvm::Value *CallBuiltinLog10Function(const FunctionSignature &sign,
   CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), sign.GetRetType(), &value);
   llvm::Type *new_args_llvm_type;
   CodeGen::ValueTypeToLLVMType(ctx, sign.GetRetType(), &new_args_llvm_type);
-  llvm::Function *exp_func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::log10, new_args_llvm_type);
-  return ctx.builder.CreateCall(exp_func, value, "log10");
+  llvm::Function *func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::log10, new_args_llvm_type);
+  return ctx.builder.CreateCall(func, value, "log10");
 }
 
 llvm::Value *CallBuiltinFracFunction(const FunctionSignature & /*sign*/,
@@ -73,16 +73,35 @@ llvm::Value *CallBuiltinTruncFunction(const FunctionSignature & /*sign*/,
                                       const std::vector<llvm::Type *> &arg_llvm_type_list,
                                       const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
   auto *value = arg_llvm_value_list.at(0);
-  llvm::Function *exp_func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::trunc, arg_llvm_type_list);
-  return ctx.builder.CreateCall(exp_func, value, "trunc");
+  llvm::Function *func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::trunc, arg_llvm_type_list);
+  return ctx.builder.CreateCall(func, value, "trunc");
 }
 
-inline double pow(float x, int32_t y) { return std::pow(x, y); }
-inline float pow(float x, float y) { return std::pow(x, y); }
-inline double pow(double x, int32_t y) { return std::pow(x, y); }
-inline double pow(double x, double y) { return std::pow(x, y); }
-inline double pow(int32_t x, int32_t y) { return std::pow(x, y); }
-inline double pow(int64_t x, int32_t y) { return std::pow(x, y); }
+llvm::Value *CallBuiltinPowIFunction(const FunctionSignature &sign,
+                                     const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,
+                                     const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  auto *value = arg_llvm_value_list.at(0);
+  auto *power = arg_llvm_value_list.at(1);
+  if (value->getType()->isIntegerTy()) {
+    CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), ValueType::kF64, &value);
+  }
+  if (value->getType()->isDoubleTy()) {
+    CodeGen::NumericTypeConvert(ctx, ValueType::kI32, ValueType::kI16, &power);
+  }
+  llvm::Function *func =
+      llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::powi, {value->getType(), power->getType()});
+  return ctx.builder.CreateCall(func, {value, power}, "powi");
+}
+
+llvm::Value *CallBuiltinPowFunction(const FunctionSignature & /*sign*/,
+                                    const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,
+                                    const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  auto *value = arg_llvm_value_list.at(0);
+  auto *power = arg_llvm_value_list.at(1);
+  llvm::Function *func =
+      llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::pow, {value->getType()});
+  return ctx.builder.CreateCall(func, {value, power}, "pow");
+}
 
 inline float sin(float x) { return std::sin(x); }
 inline double sin(double x) { return std::sin(x); }
@@ -233,24 +252,18 @@ Status InitTruncFunc(FunctionRegistry *reg) {
 }
 
 Status InitPowFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("pow", {ValueType::kF32, ValueType::kI32}, ValueType::kF64),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(float, int32_t)>(pow)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("pow", {ValueType::kF64, ValueType::kI32}, ValueType::kF64),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(double, int32_t)>(pow)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("pow", {ValueType::kI32, ValueType::kI32}, ValueType::kF64),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(int32_t, int32_t)>(pow)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("pow", {ValueType::kI64, ValueType::kI32}, ValueType::kF64),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(int64_t, int32_t)>(pow)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("pow", {ValueType::kF32, ValueType::kF32}, ValueType::kF32),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<float (*)(float, float)>(pow)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("pow", {ValueType::kF64, ValueType::kF64}, ValueType::kF64),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(double, double)>(pow)), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("pow", {ValueType::kF32, ValueType::kI32}, ValueType::kF32),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinPowIFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("pow", {ValueType::kF64, ValueType::kI32}, ValueType::kF64),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinPowIFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("pow", {ValueType::kI32, ValueType::kI32}, ValueType::kF64),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinPowIFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("pow", {ValueType::kI64, ValueType::kI32}, ValueType::kF64),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinPowIFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("pow", {ValueType::kF32, ValueType::kF32}, ValueType::kF32),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinPowFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("pow", {ValueType::kF64, ValueType::kF64}, ValueType::kF64),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinPowFunction}));
   return Status::OK();
 }
 
