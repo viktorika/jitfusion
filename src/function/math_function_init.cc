@@ -110,11 +110,21 @@ llvm::Value *CallBuiltinSinFunction(const FunctionSignature & /*sign*/,
   return ctx.builder.CreateCall(func, value, "sin");
 }
 
-inline float cos(float x) { return std::cos(x); }
-inline double cos(double x) { return std::cos(x); }
+llvm::Value *CallBuiltinCosFunction(const FunctionSignature & /*sign*/,
+                                    const std::vector<llvm::Type *> &arg_llvm_type_list,
+                                    const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  auto *value = arg_llvm_value_list.at(0);
+  llvm::Function *func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::cos, arg_llvm_type_list);
+  return ctx.builder.CreateCall(func, value, "cos");
+}
 
-inline float tan(float x) { return std::tan(x); }
-inline double tan(double x) { return std::tan(x); }
+llvm::Value *CallBuiltinTanFunction(const FunctionSignature & /*sign*/,
+                                    const std::vector<llvm::Type *> &arg_llvm_type_list,
+                                    const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  auto *value = arg_llvm_value_list.at(0);
+  llvm::Function *func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::tan, arg_llvm_type_list);
+  return ctx.builder.CreateCall(func, value, "tan");
+}
 
 inline float sqrt(float x) { return std::sqrt(x); }
 inline double sqrt(double x) { return std::sqrt(x); }
@@ -277,19 +287,15 @@ Status InitTrigonometricFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("sin", {ValueType::kF64}, ValueType::kF64),
                                      {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinSinFunction}));
 
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("cos", {ValueType::kF32}, ValueType::kF32),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<float (*)(float)>(cos)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("cos", {ValueType::kF64}, ValueType::kF64),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(double)>(cos)), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("cos", {ValueType::kF32}, ValueType::kF32),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinCosFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("cos", {ValueType::kF64}, ValueType::kF64),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinCosFunction}));
 
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("tan", {ValueType::kF32}, ValueType::kF32),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<float (*)(float)>(tan)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("tan", {ValueType::kF64}, ValueType::kF64),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(double)>(tan)), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("tan", {ValueType::kF32}, ValueType::kF32),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinTanFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("tan", {ValueType::kF64}, ValueType::kF64),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinTanFunction}));
   return Status::OK();
 }
 
