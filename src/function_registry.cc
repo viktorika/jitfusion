@@ -116,6 +116,9 @@ Status FunctionRegistry::MappingToLLVM(llvm::ExecutionEngine* engine, llvm::Modu
     if (func == nullptr) {
       continue;
     }
+    for (const auto& [idx, attr] : fc.attributes) {
+      func->addAttributeAtIndex(idx, attr);
+    }
     engine->addGlobalMapping(func, fc.c_func_ptr);
     // I don't know why I cant use sign string to add globalmapping
     // engine->addGlobalMapping(sign.ToString(), reinterpret_cast<uint64_t>(fc.c_func_ptr));

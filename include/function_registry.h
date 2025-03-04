@@ -11,6 +11,7 @@
 #include "arena.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/ExecutionEngine/MCJIT.h"
+#include "llvm/IR/Attributes.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Function.h"
@@ -21,6 +22,8 @@
 #include "llvm/IR/Verifier.h"
 #include "status.h"
 #include "type.h"
+#include <utility>
+#include <vector>
 
 namespace jitfusion {
 
@@ -62,6 +65,7 @@ struct FunctionStructure {
   std::function<llvm::Value *(const FunctionSignature &, const std::vector<llvm::Type *> &,
                               const std::vector<llvm::Value *> &, IRCodeGenContext &)>
       codegen_func;
+  std::vector<std::pair<unsigned, llvm::Attribute>> attributes;
 };
 
 class FunctionSignature {
