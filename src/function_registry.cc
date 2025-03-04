@@ -116,7 +116,7 @@ Status FunctionRegistry::MappingToLLVM(llvm::ExecutionEngine* engine, llvm::Modu
     if (func == nullptr) {
       continue;
     }
-    for (const auto& [idx, attr] : fc.attributes) {
+    for (const auto& [idx, attr] : sign.GetAttributes()) {
       func->addAttributeAtIndex(idx, attr);
     }
     engine->addGlobalMapping(func, fc.c_func_ptr);

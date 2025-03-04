@@ -8,6 +8,8 @@
 
 #include <functional>
 #include <unordered_map>
+#include <utility>
+#include <vector>
 #include "arena.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/ExecutionEngine/MCJIT.h"
@@ -22,8 +24,6 @@
 #include "llvm/IR/Verifier.h"
 #include "status.h"
 #include "type.h"
-#include <utility>
-#include <vector>
 
 namespace jitfusion {
 
@@ -65,14 +65,17 @@ struct FunctionStructure {
   std::function<llvm::Value *(const FunctionSignature &, const std::vector<llvm::Type *> &,
                               const std::vector<llvm::Value *> &, IRCodeGenContext &)>
       codegen_func;
-  std::vector<std::pair<unsigned, llvm::Attribute>> attributes;
 };
 
 class FunctionSignature {
  public:
   FunctionSignature() = delete;
-  FunctionSignature(std::string func_name, std::vector<ValueType> param_types, ValueType ret_type)
-      : func_name_(std::move(func_name)), param_types_(std::move(param_types)), ret_type_(ret_type) {}
+  FunctionSignature(std::string func_name, std::vector<ValueType> param_types, ValueType ret_type,
+                    std::vector<std::pair<unsigned, llvm::Attribute>> attributes = {})
+      : func_name_(std::move(func_name)),
+        param_types_(std::move(param_types)),
+        ret_type_(ret_type),
+        attributes_(std::move(attributes)) {}
 
   bool operator==(const FunctionSignature &other) const;
 
@@ -86,12 +89,15 @@ class FunctionSignature {
 
   [[nodiscard]] const std::vector<ValueType> &GetparamTypes() const { return param_types_; }
 
+  [[nodiscard]] const std::vector<std::pair<unsigned, llvm::Attribute>> &GetAttributes() const { return attributes_; }
+
   [[nodiscard]] std::string ToString() const;
 
  private:
   std::string func_name_;
   std::vector<ValueType> param_types_;
   ValueType ret_type_;
+  std::vector<std::pair<unsigned, llvm::Attribute>> attributes_;
 };
 
 class FunctionRegistry {
