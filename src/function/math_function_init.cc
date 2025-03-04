@@ -8,6 +8,7 @@
 #include "codegen/codegen.h"
 #include "function_init.h"
 #include "function_registry.h"
+#include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/Type.h"
 #include "status.h"
 #include "type.h"
@@ -126,8 +127,13 @@ llvm::Value *CallBuiltinTanFunction(const FunctionSignature & /*sign*/,
   return ctx.builder.CreateCall(func, value, "tan");
 }
 
-inline float sqrt(float x) { return std::sqrt(x); }
-inline double sqrt(double x) { return std::sqrt(x); }
+llvm::Value *CallBuiltinSqrtFunction(const FunctionSignature & /*sign*/,
+                                     const std::vector<llvm::Type *> &arg_llvm_type_list,
+                                     const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  auto *value = arg_llvm_value_list.at(0);
+  llvm::Function *func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::sqrt, arg_llvm_type_list);
+  return ctx.builder.CreateCall(func, value, "sqrt");
+}
 
 llvm::Value *CallBuiltinAbsFunction(const FunctionSignature &sign, const std::vector<llvm::Type *> &arg_llvm_type_list,
                                     const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
@@ -300,12 +306,10 @@ Status InitTrigonometricFunc(FunctionRegistry *reg) {
 }
 
 Status InitSqrtFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("sqrt", {ValueType::kF32}, ValueType::kF32),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<float (*)(float)>(sqrt)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("sqrt", {ValueType::kF64}, ValueType::kF64),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(double)>(sqrt)), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("sqrt", {ValueType::kF32}, ValueType::kF32),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinSqrtFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("sqrt", {ValueType::kF64}, ValueType::kF64),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinSqrtFunction}));
   return Status::OK();
 }
 
