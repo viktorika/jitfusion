@@ -153,14 +153,29 @@ llvm::Value *CallBuiltinAbsFunction(const FunctionSignature &sign, const std::ve
   return ctx.builder.CreateCall(fabs_func, arg_llvm_value_list, "fabs");
 }
 
-inline float ceil(float x) { return std::ceil(x); }
-inline double ceil(double x) { return std::ceil(x); }
+llvm::Value *CallBuiltinCeilFunction(const FunctionSignature & /*sign*/,
+                                     const std::vector<llvm::Type *> &arg_llvm_type_list,
+                                     const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  auto *value = arg_llvm_value_list.at(0);
+  llvm::Function *func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::ceil, arg_llvm_type_list);
+  return ctx.builder.CreateCall(func, value, "ceil");
+}
 
-inline float floor(float x) { return std::floor(x); }
-inline double floor(double x) { return std::floor(x); }
+llvm::Value *CallBuiltinFloorFunction(const FunctionSignature & /*sign*/,
+                                      const std::vector<llvm::Type *> &arg_llvm_type_list,
+                                      const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  auto *value = arg_llvm_value_list.at(0);
+  llvm::Function *func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::floor, arg_llvm_type_list);
+  return ctx.builder.CreateCall(func, value, "floor");
+}
 
-inline float round(float x) { return std::round(x); }
-inline double round(double x) { return std::round(x); }
+llvm::Value *CallBuiltinRoundFunction(const FunctionSignature & /*sign*/,
+                                      const std::vector<llvm::Type *> &arg_llvm_type_list,
+                                      const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  auto *value = arg_llvm_value_list.at(0);
+  llvm::Function *func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::round, arg_llvm_type_list);
+  return ctx.builder.CreateCall(func, value, "round");
+}
 
 llvm::Value *CallBuiltinMinFunction(const FunctionSignature &sign,
                                     const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,
@@ -331,32 +346,26 @@ Status InitAbsFunc(FunctionRegistry *reg) {
 }
 
 Status InitCeilFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ceil", {ValueType::kF32}, ValueType::kF32),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<float (*)(float)>(ceil)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ceil", {ValueType::kF64}, ValueType::kF64),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(double)>(ceil)), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("ceil", {ValueType::kF32}, ValueType::kF32),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinCeilFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("ceil", {ValueType::kF64}, ValueType::kF64),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinCeilFunction}));
   return Status::OK();
 }
 
 Status InitFloorFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("floor", {ValueType::kF32}, ValueType::kF32),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<float (*)(float)>(floor)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("floor", {ValueType::kF64}, ValueType::kF64),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(double)>(floor)), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("floor", {ValueType::kF32}, ValueType::kF32),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinFloorFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("floor", {ValueType::kF64}, ValueType::kF64),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinFloorFunction}));
   return Status::OK();
 }
 
 Status InitRoundFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("round", {ValueType::kF32}, ValueType::kF32),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<float (*)(float)>(round)), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("round", {ValueType::kF64}, ValueType::kF64),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(static_cast<double (*)(double)>(round)), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("round", {ValueType::kF32}, ValueType::kF32),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinRoundFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("round", {ValueType::kF64}, ValueType::kF64),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinRoundFunction}));
   return Status::OK();
 }
 
