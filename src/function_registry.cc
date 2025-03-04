@@ -119,6 +119,27 @@ Status FunctionRegistry::MappingToLLVM(llvm::ExecutionEngine* engine, llvm::Modu
     for (const auto& [idx, attr] : sign.GetAttributes()) {
       func->addAttributeAtIndex(idx, attr);
     }
+    switch (sign.GetMemoryAttr()) {
+      case MemoryAttribute::kNotAccessMem:
+        break;
+      case MemoryAttribute::kOnlyRead: {
+        func->setOnlyReadsMemory();
+      } break;
+      case MemoryAttribute::kOnlyWrite: {
+        func->setOnlyWritesMemory();
+      } break;
+      case MemoryAttribute::kOnlyAccessesArgMemory: {
+        func->setOnlyAccessesArgMemory();
+      } break;
+      case MemoryAttribute::kOnlyAccessesInaccessibleMemory: {
+        func->setOnlyAccessesInaccessibleMemory();
+      } break;
+      case MemoryAttribute::kOnlyAccessesInaccessibleMemOrArgMem: {
+        func->setOnlyAccessesInaccessibleMemOrArgMem();
+      } break;
+      default:
+        return Status::RuntimeError("Unsupported memory attribute");
+    }
     engine->addGlobalMapping(func, fc.c_func_ptr);
     // I don't know why I cant use sign string to add globalmapping
     // engine->addGlobalMapping(sign.ToString(), reinterpret_cast<uint64_t>(fc.c_func_ptr));
