@@ -12,5 +12,6 @@ namespace jitfusion {
 Status InitMathInternalFunc(FunctionRegistry *reg);
 Status InitStringInternalFunc(FunctionRegistry *reg);
 Status InitListInternalFunc(FunctionRegistry *reg);
+Status InitMemoryInternalFunc(FunctionRegistry *reg);
 
 }  // namespace jitfusion

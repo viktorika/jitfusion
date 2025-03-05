@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-15 15:47:48
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-23 16:20:05
+ * @Last Modified time: 2025-03-04 19:02:45
  */
 #pragma once
 
@@ -36,15 +36,6 @@ enum class FunctionType : uint8_t {
   kCFunc = 2,
 };
 
-enum class MemoryAttribute : uint8_t {
-  kNotAccessMem = 1,
-  kOnlyRead = 2,
-  kOnlyWrite = 3,
-  kOnlyAccessesArgMemory = 4,
-  kOnlyAccessesInaccessibleMemory = 5,
-  kOnlyAccessesInaccessibleMemOrArgMem = 6,
-};
-
 struct IRCodeGenContext {
   IRCodeGenContext(llvm::LLVMContext &context, llvm::Module &module, llvm::IRBuilder<> &builder,
                    llvm::BasicBlock *entry_bb, llvm::Function *entry_function, llvm::StructType *complex_type,
@@ -74,19 +65,14 @@ struct FunctionStructure {
   std::function<llvm::Value *(const FunctionSignature &, const std::vector<llvm::Type *> &,
                               const std::vector<llvm::Value *> &, IRCodeGenContext &)>
       codegen_func;
+  std::function<void(llvm::ExecutionEngine *, llvm::Module *, llvm::Function *)> func_attr_setter{nullptr};
 };
 
 class FunctionSignature {
  public:
   FunctionSignature() = delete;
-  FunctionSignature(std::string func_name, std::vector<ValueType> param_types, ValueType ret_type,
-                    std::vector<std::pair<unsigned, llvm::Attribute>> attributes = {},
-                    MemoryAttribute memory_attr = MemoryAttribute::kNotAccessMem)
-      : func_name_(std::move(func_name)),
-        param_types_(std::move(param_types)),
-        ret_type_(ret_type),
-        attributes_(std::move(attributes)),
-        memory_attr_(memory_attr) {}
+  FunctionSignature(std::string func_name, std::vector<ValueType> param_types, ValueType ret_type)
+      : func_name_(std::move(func_name)), param_types_(std::move(param_types)), ret_type_(ret_type) {}
 
   bool operator==(const FunctionSignature &other) const;
 
@@ -100,18 +86,12 @@ class FunctionSignature {
 
   [[nodiscard]] const std::vector<ValueType> &GetparamTypes() const { return param_types_; }
 
-  [[nodiscard]] const std::vector<std::pair<unsigned, llvm::Attribute>> &GetAttributes() const { return attributes_; }
-
-  [[nodiscard]] MemoryAttribute GetMemoryAttr() const { return memory_attr_; }
-
   [[nodiscard]] std::string ToString() const;
 
  private:
   std::string func_name_;
   std::vector<ValueType> param_types_;
   ValueType ret_type_;
-  std::vector<std::pair<unsigned, llvm::Attribute>> attributes_;
-  MemoryAttribute memory_attr_;
 };
 
 class FunctionRegistry {
