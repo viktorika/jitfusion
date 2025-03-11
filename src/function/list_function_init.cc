@@ -4,11 +4,13 @@
  * @Last Modified by: viktorika
  * @Last Modified time: 2025-01-29 22:44:35
  */
+#include <codegen/codegen.h>
 #include <algorithm>
 #include <unordered_set>
 #include "exec_engine.h"
 #include "function_init.h"
 #include "function_registry.h"
+#include "llvm/IR/Value.h"
 #include "status.h"
 #include "type.h"
 
@@ -16,14 +18,49 @@ namespace jitfusion {
 
 namespace {
 
-template <typename T>
-LLVMComplexStruct ListConcat(LLVMComplexStruct a, LLVMComplexStruct b, int64_t exec_context) {
-  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
-  LLVMComplexStruct result;
-  result.data = reinterpret_cast<int64_t>(exec_ctx->arena.Allocate((a.len + b.len) * sizeof(T)));
-  result.len = a.len + b.len;
-  memcpy(reinterpret_cast<T *>(result.data), reinterpret_cast<T *>(a.data), a.len * sizeof(T));
-  memcpy(reinterpret_cast<T *>(result.data) + a.len, reinterpret_cast<T *>(b.data), b.len * sizeof(T));
+llvm::Value *CallBuiltinListConcatFunction(const FunctionSignature &sign,
+                                           const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,
+                                           const std::vector<llvm::Value *> &arg_llvm_value_list,
+                                           IRCodeGenContext &ctx) {
+  llvm::Value *a = arg_llvm_value_list[0];
+  llvm::Value *b = arg_llvm_value_list[1];
+  llvm::Value *a_data_ptr = ctx.builder.CreateExtractValue(a, {0});
+  llvm::Value *a_len = ctx.builder.CreateExtractValue(a, {1});
+  llvm::Value *b_data_ptr = ctx.builder.CreateExtractValue(b, {0});
+  llvm::Value *b_len = ctx.builder.CreateExtractValue(b, {1});
+  llvm::Value *result_len = ctx.builder.CreateAdd(a_len, b_len);
+  int64_t element_size = TypeHelper::GetElementSizeFromType(sign.GetparamTypes().at(0));
+  llvm::Value *result_data_ptr = CallAllocFunc(
+      ctx, ctx.builder.CreateMul(result_len,
+                                 llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx.context), element_size, true)));
+
+  llvm::Value *result_ptr = ctx.builder.CreateAlloca(ctx.complex_type, nullptr, "create result ptr");
+  llvm::Value *initial = llvm::UndefValue::get(ctx.complex_type);
+  initial = ctx.builder.CreateInsertValue(initial, result_data_ptr, {0});
+  initial = ctx.builder.CreateInsertValue(initial, result_len, {1});
+  ctx.builder.CreateStore(initial, result_ptr);
+  llvm::Value *result = ctx.builder.CreateLoad(ctx.complex_type, result_ptr, "result");
+
+  llvm::Value *copy_a_size =
+      ctx.builder.CreateMul(a_len, llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx.context), element_size, true));
+
+  copy_a_size = ctx.builder.CreateIntCast(copy_a_size, llvm::IntegerType::get(ctx.context, 64), true);
+  llvm::Value *copy_b_start_ptr = ctx.builder.CreateAdd(result_data_ptr, copy_a_size);
+
+  a_data_ptr = ctx.builder.CreateBitOrPointerCast(a_data_ptr, llvm::Type::getInt64Ty(ctx.context)->getPointerTo(),
+                                                  "cast a_data_ptr");
+  b_data_ptr = ctx.builder.CreateBitOrPointerCast(b_data_ptr, llvm::Type::getInt64Ty(ctx.context)->getPointerTo(),
+                                                  "cast b_data_ptr");
+  result_data_ptr = ctx.builder.CreateBitOrPointerCast(
+      result_data_ptr, llvm::Type::getInt64Ty(ctx.context)->getPointerTo(), "cast result_data_ptr");
+  copy_b_start_ptr = ctx.builder.CreateBitOrPointerCast(
+      copy_b_start_ptr, llvm::Type::getInt64Ty(ctx.context)->getPointerTo(), "cast copy_b_start_ptr");
+
+  ctx.builder.CreateMemCpy(result_data_ptr, llvm::Align(1), a_data_ptr, llvm::Align(1), copy_a_size);
+  ctx.builder.CreateMemCpy(
+      copy_b_start_ptr, llvm::Align(1), b_data_ptr, llvm::Align(1),
+      ctx.builder.CreateMul(b_len, llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx.context), element_size, true)));
+
   return result;
 }
 
@@ -135,40 +172,42 @@ llvm::Value *CallBuiltinTruncateFunction(const FunctionSignature & /*sign*/,
 }
 
 Status InitListConcatFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("ListConcat", {ValueType::kU8List, ValueType::kU8List}, ValueType::kU8List),
+                        {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinListConcatFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ListConcat", {ValueType::kU8List, ValueType::kU8List, ValueType::kI64}, ValueType::kU8List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListConcat<uint8_t>), nullptr}));
+      FunctionSignature("ListConcat", {ValueType::kU16List, ValueType::kU16List}, ValueType::kU16List),
+      {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinListConcatFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ListConcat", {ValueType::kU16List, ValueType::kU16List, ValueType::kI64}, ValueType::kU16List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListConcat<uint16_t>), nullptr}));
+      FunctionSignature("ListConcat", {ValueType::kU32List, ValueType::kU32List}, ValueType::kU32List),
+      {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinListConcatFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ListConcat", {ValueType::kU32List, ValueType::kU32List, ValueType::kI64}, ValueType::kU32List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListConcat<uint32_t>), nullptr}));
+      FunctionSignature("ListConcat", {ValueType::kU64List, ValueType::kU64List}, ValueType::kU64List),
+      {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinListConcatFunction}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("ListConcat", {ValueType::kI8List, ValueType::kI8List}, ValueType::kI8List),
+                        {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinListConcatFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ListConcat", {ValueType::kU64List, ValueType::kU64List, ValueType::kI64}, ValueType::kU64List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListConcat<uint64_t>), nullptr}));
+      FunctionSignature("ListConcat", {ValueType::kI16List, ValueType::kI16List}, ValueType::kI16List),
+      {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinListConcatFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ListConcat", {ValueType::kI8List, ValueType::kI8List, ValueType::kI64}, ValueType::kI8List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListConcat<int8_t>), nullptr}));
+      FunctionSignature("ListConcat", {ValueType::kI32List, ValueType::kI32List}, ValueType::kI32List),
+      {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinListConcatFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ListConcat", {ValueType::kI16List, ValueType::kI16List, ValueType::kI64}, ValueType::kI16List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListConcat<int16_t>), nullptr}));
+      FunctionSignature("ListConcat", {ValueType::kI64List, ValueType::kI64List}, ValueType::kI64List),
+      {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinListConcatFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ListConcat", {ValueType::kI32List, ValueType::kI32List, ValueType::kI64}, ValueType::kI32List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListConcat<int32_t>), nullptr}));
+      FunctionSignature("ListConcat", {ValueType::kF32List, ValueType::kF32List}, ValueType::kF32List),
+      {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinListConcatFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ListConcat", {ValueType::kI64List, ValueType::kI64List, ValueType::kI64}, ValueType::kI64List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListConcat<int64_t>), nullptr}));
+      FunctionSignature("ListConcat", {ValueType::kF64List, ValueType::kF64List}, ValueType::kF64List),
+      {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinListConcatFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ListConcat", {ValueType::kF32List, ValueType::kF32List, ValueType::kI64}, ValueType::kF32List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListConcat<float>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ListConcat", {ValueType::kF64List, ValueType::kF64List, ValueType::kI64}, ValueType::kF64List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListConcat<double>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ListConcat", {ValueType::kStringList, ValueType::kStringList, ValueType::kI64},
-                        ValueType::kStringList),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListConcat<LLVMComplexStruct>), nullptr}));
+      FunctionSignature("ListConcat", {ValueType::kStringList, ValueType::kStringList}, ValueType::kStringList),
+      {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinListConcatFunction}));
+  JF_RETURN_NOT_OK(
+      reg->RegisterFunc(FunctionSignature("StringConcat", {ValueType::kString, ValueType::kString}, ValueType::kString),
+                        {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinListConcatFunction}));
   return Status::OK();
 }
 

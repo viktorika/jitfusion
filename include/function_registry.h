@@ -2,15 +2,18 @@
  * @Author: victorika
  * @Date: 2025-01-15 15:47:48
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-23 16:20:05
+ * @Last Modified time: 2025-03-04 19:02:45
  */
 #pragma once
 
 #include <functional>
 #include <unordered_map>
+#include <utility>
+#include <vector>
 #include "arena.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/ExecutionEngine/MCJIT.h"
+#include "llvm/IR/Attributes.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Function.h"
@@ -62,6 +65,7 @@ struct FunctionStructure {
   std::function<llvm::Value *(const FunctionSignature &, const std::vector<llvm::Type *> &,
                               const std::vector<llvm::Value *> &, IRCodeGenContext &)>
       codegen_func;
+  std::function<void(llvm::ExecutionEngine *, llvm::Module *, llvm::Function *)> func_attr_setter{nullptr};
 };
 
 class FunctionSignature {

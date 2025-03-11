@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-15 14:26:36
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-23 12:40:43
+ * @Last Modified time: 2025-03-04 19:03:28
  */
 #include "function_registry.h"
 #include <type_traits>
@@ -116,6 +116,9 @@ Status FunctionRegistry::MappingToLLVM(llvm::ExecutionEngine* engine, llvm::Modu
     if (func == nullptr) {
       continue;
     }
+    if (fc.func_attr_setter) {
+      fc.func_attr_setter(engine, m, func);
+    }
     engine->addGlobalMapping(func, fc.c_func_ptr);
     // I don't know why I cant use sign string to add globalmapping
     // engine->addGlobalMapping(sign.ToString(), reinterpret_cast<uint64_t>(fc.c_func_ptr));
@@ -127,6 +130,7 @@ Status FunctionRegistry::Init() {
   JF_RETURN_NOT_OK(InitMathInternalFunc(this));
   JF_RETURN_NOT_OK(InitStringInternalFunc(this));
   JF_RETURN_NOT_OK(InitListInternalFunc(this));
+  JF_RETURN_NOT_OK(InitMemoryInternalFunc(this));
   return Status::OK();
 }
 
