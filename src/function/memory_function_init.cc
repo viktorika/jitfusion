@@ -10,6 +10,7 @@
 #include "exec_engine.h"
 #include "function_registry.h"
 #include "llvm/IR/Attributes.h"
+#include "llvm/IR/Type.h"
 #include "status.h"
 #include "type.h"
 
@@ -41,6 +42,15 @@ Status InitMemoryInternalFunc(FunctionRegistry *reg) {
       reg->RegisterFunc(FunctionSignature("alloc", {ValueType::kI64, ValueType::kU32}, ValueType::kI64),
                         {FunctionType::kCFunc, reinterpret_cast<void *>(Alloc), nullptr, AllocAttributeSetter}));
   return Status::OK();
+}
+
+llvm::Value *CallAllocFunc(IRCodeGenContext &ctx, llvm::Value *size) {
+  FunctionSignature sign{"alloc", {ValueType::kI64, ValueType::kU32}, ValueType::kI64};
+  llvm::FunctionType *func_type =
+      llvm::FunctionType::get(llvm::Type::getInt64Ty(ctx.context),
+                              {llvm::Type::getInt64Ty(ctx.context), llvm::Type::getInt32Ty(ctx.context)}, false);
+  auto func_callee = ctx.module.getOrInsertFunction(sign.ToString(), func_type);
+  return ctx.builder.CreateCall(func_callee, {ctx.entry_function->getArg(1), size}, "call_alloc");
 }
 
 }  // namespace jitfusion

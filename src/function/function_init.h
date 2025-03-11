@@ -14,4 +14,6 @@ Status InitStringInternalFunc(FunctionRegistry *reg);
 Status InitListInternalFunc(FunctionRegistry *reg);
 Status InitMemoryInternalFunc(FunctionRegistry *reg);
 
+llvm::Value *CallAllocFunc(IRCodeGenContext &ctx, llvm::Value *size);
+
 }  // namespace jitfusion

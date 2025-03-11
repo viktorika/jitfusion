@@ -120,6 +120,7 @@ class TypeHelper {
 
   static ValueType GetPromotedType(ValueType lhs, ValueType rhs);
   static int GetBitWidthFromType(ValueType type);
+  static int GetElementSizeFromType(ValueType type);
 };
 
 }  // namespace jitfusion

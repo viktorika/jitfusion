@@ -5,8 +5,8 @@
  * @Last Modified time: 2025-01-23 16:58:33
  */
 #include "type.h"
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 
 namespace jitfusion {
 
@@ -221,6 +221,37 @@ int TypeHelper::GetBitWidthFromType(ValueType type) {
       return -1;
   }
   return -1;
+}
+
+int TypeHelper::GetElementSizeFromType(ValueType type) {
+  switch (type) {
+    case ValueType::kI8List:
+      return 1;
+    case ValueType::kI16List:
+      return 2;
+    case ValueType::kI32List:
+      return 4;
+    case ValueType::kI64List:
+      return 8;
+    case ValueType::kU8List:
+      return 1;
+    case ValueType::kU16List:
+      return 2;
+    case ValueType::kU32List:
+      return 4;
+    case ValueType::kU64List:
+      return 8;
+    case ValueType::kF32List:
+      return 4;
+    case ValueType::kF64List:
+      return 8;
+    case ValueType::kString:
+      return 1;
+    case ValueType::kStringList:
+      return sizeof(LLVMComplexStruct);
+    default:
+      return -1;
+  }
 }
 
 bool TypeHelper::IsSignedType(ValueType type) {
