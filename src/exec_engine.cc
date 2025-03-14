@@ -30,6 +30,7 @@
 #include "llvm/Transforms/IPO/DeadArgumentElimination.h"
 #include "llvm/Transforms/IPO/Inliner.h"
 #include "llvm/Transforms/Scalar.h"
+#include "llvm/Transforms/Scalar/CallSiteSplitting.h"
 #include "llvm/Transforms/Scalar/DCE.h"
 #include "llvm/Transforms/Scalar/EarlyCSE.h"
 #include "llvm/Transforms/Scalar/GVN.h"
@@ -55,16 +56,23 @@ llvm::TargetMachine* GetTargetMachine() {
   llvm::InitializeNativeTargetDisassembler();
   llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
 
-  std::string error;
-  auto* cpu = LLVMGetHostCPUName();
-  auto* triple = LLVMGetDefaultTargetTriple();
-  const auto* target = llvm::TargetRegistry::lookupTarget(triple, error);
+  llvm::StringRef cpu = llvm::sys::getHostCPUName();
 
   llvm::SubtargetFeatures features;
+  auto host_features = llvm::sys::getHostCPUFeatures();
+  for (auto& f : host_features) {
+    features.AddFeature(f.first(), f.second);
+  }
+
+  std::string error;
+  auto triple = llvm::sys::getDefaultTargetTriple();
+  const auto* target = llvm::TargetRegistry::lookupTarget(triple, error);
+
   llvm::TargetOptions options;
+  options.AllowFPOpFusion = llvm::FPOpFusion::Fast;
+  options.UnsafeFPMath = true;
   auto* target_machine = target->createTargetMachine(triple, cpu, features.getString(), options, std::nullopt,
                                                      std::nullopt, llvm::CodeGenOptLevel::Aggressive, true);
-
   return target_machine;
 };
 
@@ -164,6 +172,7 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
   llvm::IRBuilder<> builder(entry_bb);
   std::unique_ptr<IRCodeGenContext> codegen_ctx = std::make_unique<IRCodeGenContext>(
       llvm_context_, *m, builder, entry_bb, entry_function, complex_type, func_registry, const_value_arena_);
+
   CodeGen codegen(*codegen_ctx);
   llvm::Value* ret_value;
   JF_RETURN_NOT_OK(codegen.GetValue(exec_node.get(), &ret_value));
@@ -173,12 +182,12 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
   std::string error_info;
   llvm::raw_string_ostream error_stream(error_info);
   if (llvm::verifyModule(*m, &error_stream)) {
-    return Status::RuntimeError("Module verification failed: " + error_info);
+    // m->print(llvm::errs(), nullptr);
+    return Status::RuntimeError("Module verification failed: ", error_info);
   }
 
   // debug
   // m->print(llvm::errs(), nullptr);
-
   // optimize
   static auto* machine = GetTargetMachine();
   llvm::PassBuilder pb(machine);
@@ -187,23 +196,33 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
   llvm::FunctionAnalysisManager fam;
   llvm::CGSCCAnalysisManager cgam;
   llvm::ModuleAnalysisManager mam;
+  llvm::MachineFunctionAnalysisManager mfm;
+
+  fam.registerPass([] { return machine->getTargetIRAnalysis(); });
 
   // Register all the basic analyses with the managers.
   pb.registerModuleAnalyses(mam);
   pb.registerCGSCCAnalyses(cgam);
   pb.registerFunctionAnalyses(fam);
   pb.registerLoopAnalyses(lam);
-  pb.crossRegisterProxies(lam, fam, cgam, mam);
+  pb.registerMachineFunctionAnalyses(mfm);
 
-  llvm::ModulePassManager mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
-  mpm.run(*m, mam);
+  pb.crossRegisterProxies(lam, fam, cgam, mam, &mfm);
 
   // Now we create the JIT.
   engine_ = llvm::EngineBuilder(std::move(owner)).setEngineKind(llvm::EngineKind::JIT).create();
   func_registry->MappingToLLVM(engine_, m);
 
-  engine_->finalizeObject();
+  auto mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
+  mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::CallSiteSplittingPass()));
+  mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::SLPVectorizerPass()));
+  mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::VerifierPass()));
 
+  mpm.run(*m, mam);
+
+  // m->print(llvm::errs(), nullptr);
+
+  engine_->finalizeObject();
   entry_func_ptr_ = engine_->getFunctionAddress("entry");
 
   return Status::OK();
