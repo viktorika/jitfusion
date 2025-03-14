@@ -25,8 +25,6 @@ int64_t Alloc(int64_t exec_context, int64_t size) {
 
 void AllocAttributeSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llvm::Function *f) {
   f->setDoesNotThrow();
-  f->addAttributeAtIndex(llvm::AttributeList::ReturnIndex,
-                         llvm::Attribute::get(f->getContext(), llvm::Attribute::NoAlias));
   f->setMemoryEffects(llvm::MemoryEffects::inaccessibleMemOnly());
   f->addAttributeAtIndex(llvm::AttributeList::FunctionIndex,
                          llvm::Attribute::get(f->getContext(), "alloc-family", "jitfusion"));
