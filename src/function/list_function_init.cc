@@ -90,6 +90,11 @@ uint8_t IsInList(T a, LLVMComplexStruct b) {
   }
 }
 
+void IsInListAttributeSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llvm::Function *f) {
+  f->setDoesNotThrow();
+  f->setMemoryEffects(llvm::MemoryEffects::readOnly());
+}
+
 inline uint8_t IsInStringList(LLVMComplexStruct a, LLVMComplexStruct b) {
   for (size_t i = 0; i < b.len; ++i) {
     if (a.len == reinterpret_cast<LLVMComplexStruct *>(b.data)[i].len &&
@@ -212,29 +217,39 @@ Status InitListConcatFunc(FunctionRegistry *reg) {
 }
 
 Status InitInFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kU8, ValueType::kU8List}, ValueType::kU8),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<uint8_t>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kU16, ValueType::kU16List}, ValueType::kU8),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<uint16_t>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kU32, ValueType::kU32List}, ValueType::kU8),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<uint32_t>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kU64, ValueType::kU64List}, ValueType::kU8),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<uint64_t>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kI8, ValueType::kI8List}, ValueType::kU8),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<int8_t>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kI16, ValueType::kI16List}, ValueType::kU8),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<int16_t>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kI32, ValueType::kI32List}, ValueType::kU8),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<int32_t>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kI64, ValueType::kI64List}, ValueType::kU8),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<int64_t>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kF32, ValueType::kF32List}, ValueType::kU8),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<float>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("in", {ValueType::kF64, ValueType::kF64List}, ValueType::kU8),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<double>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("in", {ValueType::kString, ValueType::kStringList}, ValueType::kU8),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(IsInStringList), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("in", {ValueType::kU8, ValueType::kU8List}, ValueType::kU8),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<uint8_t>), nullptr, IsInListAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("in", {ValueType::kU16, ValueType::kU16List}, ValueType::kU8),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<uint16_t>), nullptr, IsInListAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("in", {ValueType::kU32, ValueType::kU32List}, ValueType::kU8),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<uint32_t>), nullptr, IsInListAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("in", {ValueType::kU64, ValueType::kU64List}, ValueType::kU8),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<uint64_t>), nullptr, IsInListAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("in", {ValueType::kI8, ValueType::kI8List}, ValueType::kU8),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<int8_t>), nullptr, IsInListAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("in", {ValueType::kI16, ValueType::kI16List}, ValueType::kU8),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<int16_t>), nullptr, IsInListAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("in", {ValueType::kI32, ValueType::kI32List}, ValueType::kU8),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<int32_t>), nullptr, IsInListAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("in", {ValueType::kI64, ValueType::kI64List}, ValueType::kU8),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<int64_t>), nullptr, IsInListAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("in", {ValueType::kF32, ValueType::kF32List}, ValueType::kU8),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<float>), nullptr, IsInListAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("in", {ValueType::kF64, ValueType::kF64List}, ValueType::kU8),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(IsInList<double>), nullptr, IsInListAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("in", {ValueType::kString, ValueType::kStringList}, ValueType::kU8),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(IsInStringList), nullptr, IsInListAttributeSetter}));
   return Status::OK();
 }
 
