@@ -61,12 +61,12 @@ Typically, the initial node is a data loading node. After a series of operations
 The data reading and writing nodes can both be implemented using EntryArgumentNode and FunctionNode. You can refer to test/entry_argument_node_test.cc for more details. for example:
 
 ```c++
-int32_t LoadValue(int64_t data, uint32_t i) { return reinterpret_cast<int32_t*>(data)[i]; }
+int32_t LoadValue(void* data, uint32_t i) { return reinterpret_cast<int32_t*>(data)[i]; }
 
 int main() {
   std::unique_ptr<FunctionRegistry> func_registry;
   FunctionRegistryFactory::CreateFunctionRegistry(&func_registry);
-  FunctionSignature sign("load", {ValueType::kI64, ValueType::kI32}, ValueType::kI32);
+  FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32);
   FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadValue), nullptr};
   func_registry->RegisterFunc(sign, func_struct);
 
@@ -79,6 +79,7 @@ int main() {
 
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(load_func_node, func_registry);
+  std::cout << st.ToString() << std::endl;
   RetType result;
   std::vector<int32_t> data_list = {100, 200, 300, 400};
   exec_engine.Execute(data_list.data(), &result);
@@ -95,23 +96,22 @@ If you need to allocate memory that you cannot manage yourself and require the e
 You can refer to test/exec_context_node_test.cc for more details. for example:
 
 ```c++
-LLVMComplexStruct CreateU32List(int64_t ctx) {
+U32ListStruct CreateU32List(void* ctx) {
   auto* exec_ctx = reinterpret_cast<ExecContext*>(ctx);
-  LLVMComplexStruct u32_list;
-  auto* data = reinterpret_cast<uint32_t*>(exec_ctx->arena.Allocate(sizeof(uint32_t) * 4));
-  data[0] = 1;
-  data[1] = 2;
-  data[2] = 3;
-  data[3] = 4;
-  u32_list.data = reinterpret_cast<int64_t>(data);
+  U32ListStruct u32_list;
+  u32_list.data = reinterpret_cast<uint32_t*>(exec_ctx->arena.Allocate(sizeof(uint32_t) * 4));
+  u32_list.data[0] = 1;
+  u32_list.data[1] = 2;
+  u32_list.data[2] = 3;
+  u32_list.data[3] = 4;
   u32_list.len = 4;
   return u32_list;
 }
 
 int main() {
   std::unique_ptr<FunctionRegistry> func_registry;
-  FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok();
-  FunctionSignature sign("create_u32_list", {ValueType::kI64}, ValueType::kU32List);
+  FunctionRegistryFactory::CreateFunctionRegistry(&func_registry);
+  FunctionSignature sign("create_u32_list", {ValueType::kPtr}, ValueType::kU32List);
   FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(CreateU32List), nullptr};
   func_registry->RegisterFunc(sign, func_struct);
 
@@ -123,7 +123,7 @@ int main() {
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(create_func_node, func_registry);
   RetType result;
-  exec_engine.Execute(nullptr, &result).ok();
+  exec_engine.Execute(nullptr, &result);
 }
 ```
 
