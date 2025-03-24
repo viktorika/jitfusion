@@ -83,6 +83,7 @@ enum class ValueType : uint8_t {
   kF32List,
   kF64List,
   kStringList,
+  kPtr,
 };
 
 using ConstantValueType =
@@ -93,8 +94,99 @@ using ConstantListValueType =
                  std::vector<uint8_t>, std::vector<uint16_t>, std::vector<uint32_t>, std::vector<uint64_t>,
                  std::vector<float>, std::vector<double>, std::vector<std::string>>;
 
-struct LLVMComplexStruct {
-  int64_t data;
+struct StringStruct {
+  using CElementType = char;
+  static constexpr ValueType kElementType = ValueType::kI8;
+  static constexpr uint32_t kElementSize = sizeof(char);
+  char* data;
+  uint32_t len;
+};
+
+struct U8ListStruct {
+  using CElementType = uint8_t;
+  static constexpr ValueType kElementType = ValueType::kU8;
+  static constexpr uint32_t kElementSize = sizeof(uint8_t);
+  uint8_t* data;
+  uint32_t len;
+};
+
+struct U16ListStruct {
+  using CElementType = uint16_t;
+  static constexpr ValueType kElementType = ValueType::kU16;
+  static constexpr uint32_t kElementSize = sizeof(uint16_t);
+  uint16_t* data;
+  uint32_t len;
+};
+
+struct U32ListStruct {
+  using CElementType = uint32_t;
+  static constexpr ValueType kElementType = ValueType::kU32;
+  static constexpr uint32_t kElementSize = sizeof(uint32_t);
+  uint32_t* data;
+  uint32_t len;
+};
+
+struct U64ListStruct {
+  using CElementType = uint64_t;
+  static constexpr ValueType kElementType = ValueType::kU64;
+  static constexpr uint32_t kElementSize = sizeof(uint64_t);
+  uint64_t* data;
+  uint32_t len;
+};
+
+struct I8ListStruct {
+  using CElementType = int8_t;
+  static constexpr ValueType kElementType = ValueType::kI8;
+  static constexpr uint32_t kElementSize = sizeof(int8_t);
+  int8_t* data;
+  uint32_t len;
+};
+
+struct I16ListStruct {
+  using CElementType = int16_t;
+  static constexpr ValueType kElementType = ValueType::kI16;
+  static constexpr uint32_t kElementSize = sizeof(int16_t);
+  int16_t* data;
+  uint32_t len;
+};
+
+struct I32ListStruct {
+  using CElementType = int32_t;
+  static constexpr ValueType kElementType = ValueType::kI32;
+  static constexpr uint32_t kElementSize = sizeof(int32_t);
+  int32_t* data;
+  uint32_t len;
+};
+
+struct I64ListStruct {
+  using CElementType = int64_t;
+  static constexpr ValueType kElementType = ValueType::kI64;
+  static constexpr uint32_t kElementSize = sizeof(int64_t);
+  int64_t* data;
+  uint32_t len;
+};
+
+struct F32ListStruct {
+  using CElementType = float;
+  static constexpr ValueType kElementType = ValueType::kF32;
+  static constexpr uint32_t kElementSize = sizeof(float);
+  float* data;
+  uint32_t len;
+};
+
+struct F64ListStruct {
+  using CElementType = double;
+  static constexpr ValueType kElementType = ValueType::kF64;
+  static constexpr uint32_t kElementSize = sizeof(double);
+  double* data;
+  uint32_t len;
+};
+
+struct StringListStruct {
+  using CElementType = StringStruct;
+  static constexpr ValueType kElementType = ValueType::kStringList;
+  static constexpr uint32_t kElementSize = sizeof(StringStruct);
+  StringStruct* data;
   uint32_t len;
 };
 
@@ -120,7 +212,9 @@ class TypeHelper {
 
   static ValueType GetPromotedType(ValueType lhs, ValueType rhs);
   static int GetBitWidthFromType(ValueType type);
-  static int GetElementSizeFromType(ValueType type);
+
+  static uint32_t GetElementSize(ValueType type);
+  static ValueType GetElementType(ValueType type);
 };
 
 }  // namespace jitfusion

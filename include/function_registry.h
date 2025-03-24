@@ -36,9 +36,24 @@ enum class FunctionType : uint8_t {
   kCFunc = 2,
 };
 
+struct LLVMStructType {
+  llvm::StructType *string_type;
+  llvm::StructType *u8list_type;
+  llvm::StructType *u16list_type;
+  llvm::StructType *u32list_type;
+  llvm::StructType *u64list_type;
+  llvm::StructType *i8list_type;
+  llvm::StructType *i16list_type;
+  llvm::StructType *i32list_type;
+  llvm::StructType *i64list_type;
+  llvm::StructType *f32list_type;
+  llvm::StructType *f64list_type;
+  llvm::StructType *stringlist_type;
+};
+
 struct IRCodeGenContext {
   IRCodeGenContext(llvm::LLVMContext &context, llvm::Module &module, llvm::IRBuilder<> &builder,
-                   llvm::BasicBlock *entry_bb, llvm::Function *entry_function, llvm::StructType *complex_type,
+                   llvm::BasicBlock *entry_bb, llvm::Function *entry_function, LLVMStructType complex_type,
                    const std::unique_ptr<FunctionRegistry> &function_registry, Arena &const_value_arena)
       : context(context),
         module(module),
@@ -54,7 +69,7 @@ struct IRCodeGenContext {
   llvm::IRBuilder<> &builder;
   llvm::BasicBlock *entry_bb;
   llvm::Function *entry_function;
-  llvm::StructType *complex_type;
+  LLVMStructType complex_type;
   const std::unique_ptr<FunctionRegistry> &function_registry;
   Arena &const_value_arena;
 };

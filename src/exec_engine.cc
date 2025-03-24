@@ -11,6 +11,8 @@
 #include <vector>
 #include "codegen/codegen.h"
 #include "exec_node.h"
+#include "function/function_init.h"
+#include "function_registry.h"
 #include "llvm/ADT/StringMap.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
@@ -21,9 +23,11 @@
 #include "llvm/MC/MCSubtargetInfo.h"
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/Passes/PassBuilder.h"
+#include "llvm/Support/Casting.h"
 #include "llvm/Support/CodeGen.h"
 #include "llvm/Support/DynamicLibrary.h"
 #include "llvm/Support/TargetSelect.h"
+#include "llvm/Support/raw_ostream.h"
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/TargetParser/Host.h"
 #include "llvm/Transforms/IPO/AlwaysInliner.h"
@@ -76,18 +80,161 @@ llvm::TargetMachine* GetTargetMachine() {
   return target_machine;
 };
 
-using return_u8_function_type = uint8_t (*)(int64_t, int64_t);
-using return_u16_function_type = uint16_t (*)(int64_t, int64_t);
-using return_u32_function_type = uint32_t (*)(int64_t, int64_t);
-using return_u64_function_type = uint64_t (*)(int64_t, int64_t);
-using return_i8_function_type = int8_t (*)(int64_t, int64_t);
-using return_i16_function_type = int16_t (*)(int64_t, int64_t);
-using return_i32_function_type = int32_t (*)(int64_t, int64_t);
-using return_i64_function_type = int64_t (*)(int64_t, int64_t);
-using return_f32_function_type = float (*)(int64_t, int64_t);
-using return_f64_function_type = double (*)(int64_t, int64_t);
-using return_string_function_type = LLVMComplexStruct (*)(int64_t, int64_t);
-using return_list_function_type = LLVMComplexStruct (*)(int64_t, int64_t);
+LLVMStructType CreateLLVMStructType(llvm::LLVMContext& context) {
+  LLVMStructType llvm_struct_type;
+  llvm_struct_type.string_type = llvm::StructType::create(
+      context, {llvm::Type::getInt8Ty(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "StringStruct");
+  llvm_struct_type.u8list_type = llvm::StructType::create(
+      context, {llvm::Type::getInt8Ty(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "U8ListStruct");
+  llvm_struct_type.u16list_type = llvm::StructType::create(
+      context, {llvm::Type::getInt16Ty(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "U16ListStruct");
+  llvm_struct_type.u32list_type = llvm::StructType::create(
+      context, {llvm::Type::getInt32Ty(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "U32ListStruct");
+  llvm_struct_type.u64list_type = llvm::StructType::create(
+      context, {llvm::Type::getInt64Ty(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "U64ListStruct");
+  llvm_struct_type.i8list_type = llvm::StructType::create(
+      context, {llvm::Type::getInt8Ty(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "I8ListStruct");
+  llvm_struct_type.i16list_type = llvm::StructType::create(
+      context, {llvm::Type::getInt16Ty(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "I16ListStruct");
+  llvm_struct_type.i32list_type = llvm::StructType::create(
+      context, {llvm::Type::getInt32Ty(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "I32ListStruct");
+  llvm_struct_type.i64list_type = llvm::StructType::create(
+      context, {llvm::Type::getInt64Ty(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "I64ListStruct");
+  llvm_struct_type.f32list_type = llvm::StructType::create(
+      context, {llvm::Type::getFloatTy(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "F32ListStruct");
+  llvm_struct_type.f64list_type = llvm::StructType::create(
+      context, {llvm::Type::getDoubleTy(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "F64ListStruct");
+  llvm_struct_type.stringlist_type = llvm::StructType::create(
+      context, {llvm_struct_type.string_type->getPointerTo(), llvm::Type::getInt32Ty(context)}, "StringListStruct");
+  return llvm_struct_type;
+}
+
+Status GetEntryFunctionCallee(llvm::LLVMContext& context, std::unique_ptr<llvm::Module>& m,
+                              LLVMStructType llvm_struct_type, ValueType ret_type,
+                              llvm::FunctionCallee* entry_func_callee) {
+  switch (ret_type) {
+    case ValueType::kU8:
+    case ValueType::kI8: {
+      *entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getInt8Ty(context),
+                                                  llvm::Type::getVoidTy(context)->getPointerTo(),
+                                                  llvm::Type::getVoidTy(context)->getPointerTo());
+    } break;
+    case ValueType::kU16:
+    case ValueType::kI16: {
+      *entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getInt16Ty(context),
+                                                  llvm::Type::getVoidTy(context)->getPointerTo(),
+                                                  llvm::Type::getVoidTy(context)->getPointerTo());
+    } break;
+    case ValueType::kU32:
+    case ValueType::kI32: {
+      *entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getInt32Ty(context),
+                                                  llvm::Type::getVoidTy(context)->getPointerTo(),
+                                                  llvm::Type::getVoidTy(context)->getPointerTo());
+    } break;
+    case ValueType::kU64:
+    case ValueType::kI64: {
+      *entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getInt64Ty(context),
+                                                  llvm::Type::getVoidTy(context)->getPointerTo(),
+                                                  llvm::Type::getVoidTy(context)->getPointerTo());
+    } break;
+    case ValueType::kF32: {
+      *entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getFloatTy(context),
+                                                  llvm::Type::getVoidTy(context)->getPointerTo(),
+                                                  llvm::Type::getVoidTy(context)->getPointerTo());
+    } break;
+    case ValueType::kF64: {
+      *entry_func_callee = m->getOrInsertFunction("entry", llvm::Type::getDoubleTy(context),
+                                                  llvm::Type::getVoidTy(context)->getPointerTo(),
+                                                  llvm::Type::getVoidTy(context)->getPointerTo());
+    } break;
+    case ValueType::kString: {
+      *entry_func_callee =
+          m->getOrInsertFunction("entry", llvm_struct_type.string_type, llvm::Type::getVoidTy(context)->getPointerTo(),
+                                 llvm::Type::getVoidTy(context)->getPointerTo());
+    } break;
+    case ValueType::kU8List: {
+      *entry_func_callee =
+          m->getOrInsertFunction("entry", llvm_struct_type.u8list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
+                                 llvm::Type::getVoidTy(context)->getPointerTo());
+    } break;
+    case ValueType::kU16List: {
+      *entry_func_callee =
+          m->getOrInsertFunction("entry", llvm_struct_type.u16list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
+                                 llvm::Type::getVoidTy(context)->getPointerTo());
+    } break;
+    case ValueType::kU32List: {
+      *entry_func_callee =
+          m->getOrInsertFunction("entry", llvm_struct_type.u32list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
+                                 llvm::Type::getVoidTy(context)->getPointerTo());
+    } break;
+    case ValueType::kU64List: {
+      *entry_func_callee =
+          m->getOrInsertFunction("entry", llvm_struct_type.u64list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
+                                 llvm::Type::getVoidTy(context)->getPointerTo());
+    } break;
+    case ValueType::kI8List: {
+      *entry_func_callee =
+          m->getOrInsertFunction("entry", llvm_struct_type.i8list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
+                                 llvm::Type::getVoidTy(context)->getPointerTo());
+    } break;
+    case ValueType::kI16List: {
+      *entry_func_callee =
+          m->getOrInsertFunction("entry", llvm_struct_type.i16list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
+                                 llvm::Type::getVoidTy(context)->getPointerTo());
+    } break;
+    case ValueType::kI32List: {
+      *entry_func_callee =
+          m->getOrInsertFunction("entry", llvm_struct_type.i32list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
+                                 llvm::Type::getVoidTy(context)->getPointerTo());
+    } break;
+    case ValueType::kI64List: {
+      *entry_func_callee =
+          m->getOrInsertFunction("entry", llvm_struct_type.i64list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
+                                 llvm::Type::getVoidTy(context)->getPointerTo());
+    } break;
+    case ValueType::kF32List: {
+      *entry_func_callee =
+          m->getOrInsertFunction("entry", llvm_struct_type.f32list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
+                                 llvm::Type::getVoidTy(context)->getPointerTo());
+    } break;
+    case ValueType::kF64List: {
+      *entry_func_callee =
+          m->getOrInsertFunction("entry", llvm_struct_type.f64list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
+                                 llvm::Type::getVoidTy(context)->getPointerTo());
+    } break;
+    case ValueType::kStringList: {
+      *entry_func_callee = m->getOrInsertFunction("entry", llvm_struct_type.stringlist_type,
+                                                  llvm::Type::getVoidTy(context)->getPointerTo(),
+                                                  llvm::Type::getVoidTy(context)->getPointerTo());
+    } break;
+    default:
+      return Status::ParseError("Unknown return type: ", TypeHelper::TypeToString(ret_type));
+  }
+  return Status::OK();
+}
+
+using return_u8_function_type = uint8_t (*)(void*, void*);
+using return_u16_function_type = uint16_t (*)(void*, void*);
+using return_u32_function_type = uint32_t (*)(void*, void*);
+using return_u64_function_type = uint64_t (*)(void*, void*);
+using return_i8_function_type = int8_t (*)(void*, void*);
+using return_i16_function_type = int16_t (*)(void*, void*);
+using return_i32_function_type = int32_t (*)(void*, void*);
+using return_i64_function_type = int64_t (*)(void*, void*);
+using return_f32_function_type = float (*)(void*, void*);
+using return_f64_function_type = double (*)(void*, void*);
+using return_string_function_type = StringStruct (*)(void*, void*);
+using return_u8list_function_type = U8ListStruct (*)(void*, void*);
+using return_u16list_function_type = U16ListStruct (*)(void*, void*);
+using return_u32list_function_type = U32ListStruct (*)(void*, void*);
+using return_u64list_function_type = U64ListStruct (*)(void*, void*);
+using return_i8list_function_type = I8ListStruct (*)(void*, void*);
+using return_i16list_function_type = I16ListStruct (*)(void*, void*);
+using return_i32list_function_type = I32ListStruct (*)(void*, void*);
+using return_i64list_function_type = I64ListStruct (*)(void*, void*);
+using return_f32list_function_type = F32ListStruct (*)(void*, void*);
+using return_f64list_function_type = F64ListStruct (*)(void*, void*);
+using return_stringlist_function_type = StringListStruct (*)(void*, void*);
 
 }  // namespace
 
@@ -108,72 +255,19 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
   std::unique_ptr<llvm::Module> owner = std::make_unique<llvm::Module>("module", llvm_context_);
   llvm::Module* m = owner.get();
 
-  std::vector<llvm::Type*> complex_type_fields = {llvm::Type::getInt64Ty(llvm_context_),
-                                                  llvm::Type::getInt32Ty(llvm_context_)};
-  llvm::StructType* complex_type = llvm::StructType::create(llvm_context_, complex_type_fields, "ComplexSruct");
+  LLVMStructType llvm_struct_type = CreateLLVMStructType(llvm_context_);
 
   llvm::FunctionCallee entry_func_callee;
-  switch (ret_type_) {
-    case ValueType::kU8:
-    case ValueType::kI8:
-      entry_func_callee =
-          m->getOrInsertFunction("entry", llvm::Type::getInt8Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_),
-                                 llvm::Type::getInt64Ty(llvm_context_));
-      break;
-    case ValueType::kU16:
-    case ValueType::kI16:
-      entry_func_callee =
-          m->getOrInsertFunction("entry", llvm::Type::getInt16Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_),
-                                 llvm::Type::getInt64Ty(llvm_context_));
-      break;
-    case ValueType::kU32:
-    case ValueType::kI32:
-      entry_func_callee =
-          m->getOrInsertFunction("entry", llvm::Type::getInt32Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_),
-                                 llvm::Type::getInt64Ty(llvm_context_));
-      break;
-    case ValueType::kU64:
-    case ValueType::kI64:
-      entry_func_callee =
-          m->getOrInsertFunction("entry", llvm::Type::getInt64Ty(llvm_context_), llvm::Type::getInt64Ty(llvm_context_),
-                                 llvm::Type::getInt64Ty(llvm_context_));
-      break;
-    case ValueType::kF32:
-      entry_func_callee =
-          m->getOrInsertFunction("entry", llvm::Type::getFloatTy(llvm_context_), llvm::Type::getInt64Ty(llvm_context_),
-                                 llvm::Type::getInt64Ty(llvm_context_));
-      break;
-    case ValueType::kF64:
-      entry_func_callee =
-          m->getOrInsertFunction("entry", llvm::Type::getDoubleTy(llvm_context_), llvm::Type::getInt64Ty(llvm_context_),
-                                 llvm::Type::getInt64Ty(llvm_context_));
-      break;
-    case ValueType::kString:
-    case ValueType::kU8List:
-    case ValueType::kU16List:
-    case ValueType::kU32List:
-    case ValueType::kU64List:
-    case ValueType::kI8List:
-    case ValueType::kI16List:
-    case ValueType::kI32List:
-    case ValueType::kI64List:
-    case ValueType::kF32List:
-    case ValueType::kF64List:
-    case ValueType::kStringList:
-      entry_func_callee = m->getOrInsertFunction("entry", complex_type, llvm::Type::getInt64Ty(llvm_context_),
-                                                 llvm::Type::getInt64Ty(llvm_context_));
-      break;
-    default:
-      return Status::ParseError("Unknown return type: ", TypeHelper::TypeToString(ret_type_));
-  }
+  JF_RETURN_NOT_OK(GetEntryFunctionCallee(llvm_context_, owner, llvm_struct_type, ret_type_, &entry_func_callee));
 
   auto* entry_function = llvm::cast<llvm::Function>(entry_func_callee.getCallee());
   llvm::BasicBlock* entry_bb = llvm::BasicBlock::Create(llvm_context_, "entryBB", entry_function);
   llvm::IRBuilder<> builder(entry_bb);
   std::unique_ptr<IRCodeGenContext> codegen_ctx = std::make_unique<IRCodeGenContext>(
-      llvm_context_, *m, builder, entry_bb, entry_function, complex_type, func_registry, const_value_arena_);
+      llvm_context_, *m, builder, entry_bb, entry_function, llvm_struct_type, func_registry, const_value_arena_);
 
   CodeGen codegen(*codegen_ctx);
+
   llvm::Value* ret_value;
   JF_RETURN_NOT_OK(codegen.GetValue(exec_node.get(), &ret_value));
   builder.CreateRet(ret_value);
@@ -186,8 +280,6 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
     return Status::RuntimeError("Module verification failed: ", error_info);
   }
 
-  // debug
-  // m->print(llvm::errs(), nullptr);
   // optimize
   static auto* machine = GetTargetMachine();
   llvm::PassBuilder pb(machine);
@@ -213,158 +305,139 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
   engine_ = llvm::EngineBuilder(std::move(owner)).setEngineKind(llvm::EngineKind::JIT).create();
   func_registry->MappingToLLVM(engine_, m);
 
+  // debug
+  // m->print(llvm::errs(), nullptr);
+
   auto mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
   mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::CallSiteSplittingPass()));
   mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::SLPVectorizerPass()));
   mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::VerifierPass()));
-
   mpm.run(*m, mam);
+  engine_->finalizeObject();
 
   // m->print(llvm::errs(), nullptr);
 
-  engine_->finalizeObject();
-  entry_func_ptr_ = engine_->getFunctionAddress("entry");
-
+  uintptr_t entry_func_offset = engine_->getFunctionAddress("entry");
+  entry_func_ptr_ = nullptr;
+  entry_func_ptr_ += entry_func_offset;
   return Status::OK();
 }
 
 Status ExecEngine::Execute(void* entry_arguments, RetType* result) {
   ExecContext exec_ctx(option_.exec_ctx_arena_alloc_min_chunk_size);
   switch (ret_type_) {
-    case ValueType::kU8:
-      *result = reinterpret_cast<return_u8_function_type>(entry_func_ptr_)(reinterpret_cast<int64_t>(entry_arguments),
-                                                                           reinterpret_cast<int64_t>(&exec_ctx));
-      break;
-    case ValueType::kI8:
-      *result = reinterpret_cast<return_i8_function_type>(entry_func_ptr_)(reinterpret_cast<int64_t>(entry_arguments),
-                                                                           reinterpret_cast<int64_t>(&exec_ctx));
-      break;
-    case ValueType::kU16:
-      *result = reinterpret_cast<return_u16_function_type>(entry_func_ptr_)(reinterpret_cast<int64_t>(entry_arguments),
-                                                                            reinterpret_cast<int64_t>(&exec_ctx));
-      break;
-    case ValueType::kI16:
-      *result = reinterpret_cast<return_i16_function_type>(entry_func_ptr_)(reinterpret_cast<int64_t>(entry_arguments),
-                                                                            reinterpret_cast<int64_t>(&exec_ctx));
-      break;
-    case ValueType::kU32:
-      *result = reinterpret_cast<return_u32_function_type>(entry_func_ptr_)(reinterpret_cast<int64_t>(entry_arguments),
-                                                                            reinterpret_cast<int64_t>(&exec_ctx));
-      break;
-    case ValueType::kI32:
-      *result = reinterpret_cast<return_i32_function_type>(entry_func_ptr_)(reinterpret_cast<int64_t>(entry_arguments),
-                                                                            reinterpret_cast<int64_t>(&exec_ctx));
-      break;
-    case ValueType::kU64:
-      *result = reinterpret_cast<return_u64_function_type>(entry_func_ptr_)(reinterpret_cast<int64_t>(entry_arguments),
-                                                                            reinterpret_cast<int64_t>(&exec_ctx));
-      break;
-    case ValueType::kI64:
-      *result = reinterpret_cast<return_i64_function_type>(entry_func_ptr_)(reinterpret_cast<int64_t>(entry_arguments),
-                                                                            reinterpret_cast<int64_t>(&exec_ctx));
-      break;
-    case ValueType::kF32:
-      *result = reinterpret_cast<return_f32_function_type>(entry_func_ptr_)(reinterpret_cast<int64_t>(entry_arguments),
-                                                                            reinterpret_cast<int64_t>(&exec_ctx));
-      break;
-    case ValueType::kF64:
-      *result = reinterpret_cast<return_f64_function_type>(entry_func_ptr_)(reinterpret_cast<int64_t>(entry_arguments),
-                                                                            reinterpret_cast<int64_t>(&exec_ctx));
-      break;
+    case ValueType::kU8: {
+      *result = reinterpret_cast<return_u8_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
+    } break;
+    case ValueType::kI8: {
+      *result = reinterpret_cast<return_i8_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
+    } break;
+    case ValueType::kU16: {
+      *result = reinterpret_cast<return_u16_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
+    } break;
+    case ValueType::kI16: {
+      *result = reinterpret_cast<return_i16_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
+    } break;
+    case ValueType::kU32: {
+      *result = reinterpret_cast<return_u32_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
+    } break;
+    case ValueType::kI32: {
+      *result = reinterpret_cast<return_i32_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
+    } break;
+    case ValueType::kU64: {
+      *result = reinterpret_cast<return_u64_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
+    } break;
+    case ValueType::kI64: {
+      *result = reinterpret_cast<return_i64_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
+    } break;
+    case ValueType::kF32: {
+      *result = reinterpret_cast<return_f32_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
+    } break;
+    case ValueType::kF64: {
+      *result = reinterpret_cast<return_f64_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
+    } break;
     case ValueType::kString: {
-      LLVMComplexStruct string = reinterpret_cast<return_string_function_type>(entry_func_ptr_)(
-          reinterpret_cast<int64_t>(entry_arguments), reinterpret_cast<int64_t>(&exec_ctx));
-      std::string res(reinterpret_cast<char*>(string.data), string.len);
+      StringStruct string = reinterpret_cast<return_string_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
+      std::string res(string.data, string.len);
       *result = std::move(res);
     } break;
     case ValueType::kU8List: {
-      LLVMComplexStruct list = reinterpret_cast<return_list_function_type>(entry_func_ptr_)(
-          reinterpret_cast<int64_t>(entry_arguments), reinterpret_cast<int64_t>(&exec_ctx));
+      U8ListStruct list = reinterpret_cast<return_u8list_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
       std::vector<uint8_t> res;
       res.resize(list.len);
-      memcpy(res.data(), reinterpret_cast<uint8_t*>(list.data), list.len * sizeof(uint8_t));
+      memcpy(res.data(), list.data, list.len * sizeof(uint8_t));
       *result = std::move(res);
     } break;
     case ValueType::kU16List: {
-      LLVMComplexStruct list = reinterpret_cast<return_list_function_type>(entry_func_ptr_)(
-          reinterpret_cast<int64_t>(entry_arguments), reinterpret_cast<int64_t>(&exec_ctx));
+      U16ListStruct list = reinterpret_cast<return_u16list_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
       std::vector<uint16_t> res;
       res.resize(list.len);
-      memcpy(res.data(), reinterpret_cast<uint16_t*>(list.data), list.len * sizeof(uint16_t));
+      memcpy(res.data(), list.data, list.len * sizeof(uint16_t));
       *result = std::move(res);
     } break;
     case ValueType::kU32List: {
-      LLVMComplexStruct list = reinterpret_cast<return_list_function_type>(entry_func_ptr_)(
-          reinterpret_cast<int64_t>(entry_arguments), reinterpret_cast<int64_t>(&exec_ctx));
+      U32ListStruct list = reinterpret_cast<return_u32list_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
       std::vector<uint32_t> res;
       res.resize(list.len);
-      memcpy(res.data(), reinterpret_cast<uint32_t*>(list.data), list.len * sizeof(uint32_t));
+      memcpy(res.data(), list.data, list.len * sizeof(uint32_t));
       *result = std::move(res);
     } break;
     case ValueType::kU64List: {
-      LLVMComplexStruct list = reinterpret_cast<return_list_function_type>(entry_func_ptr_)(
-          reinterpret_cast<int64_t>(entry_arguments), reinterpret_cast<int64_t>(&exec_ctx));
+      U64ListStruct list = reinterpret_cast<return_u64list_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
       std::vector<uint64_t> res;
       res.resize(list.len);
-      memcpy(res.data(), reinterpret_cast<uint64_t*>(list.data), list.len * sizeof(uint64_t));
+      memcpy(res.data(), list.data, list.len * sizeof(uint64_t));
       *result = std::move(res);
     } break;
     case ValueType::kI8List: {
-      LLVMComplexStruct list = reinterpret_cast<return_list_function_type>(entry_func_ptr_)(
-          reinterpret_cast<int64_t>(entry_arguments), reinterpret_cast<int64_t>(&exec_ctx));
+      I8ListStruct list = reinterpret_cast<return_i8list_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
       std::vector<int8_t> res;
       res.resize(list.len);
-      memcpy(res.data(), reinterpret_cast<int8_t*>(list.data), list.len * sizeof(int8_t));
+      memcpy(res.data(), list.data, list.len * sizeof(int8_t));
       *result = std::move(res);
     } break;
     case ValueType::kI16List: {
-      LLVMComplexStruct list = reinterpret_cast<return_list_function_type>(entry_func_ptr_)(
-          reinterpret_cast<int64_t>(entry_arguments), reinterpret_cast<int64_t>(&exec_ctx));
+      I16ListStruct list = reinterpret_cast<return_i16list_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
       std::vector<int16_t> res;
       res.resize(list.len);
-      memcpy(res.data(), reinterpret_cast<int16_t*>(list.data), list.len * sizeof(int16_t));
+      memcpy(res.data(), list.data, list.len * sizeof(int16_t));
       *result = std::move(res);
     } break;
     case ValueType::kI32List: {
-      LLVMComplexStruct list = reinterpret_cast<return_list_function_type>(entry_func_ptr_)(
-          reinterpret_cast<int64_t>(entry_arguments), reinterpret_cast<int64_t>(&exec_ctx));
+      I32ListStruct list = reinterpret_cast<return_i32list_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
       std::vector<int32_t> res;
       res.resize(list.len);
-      memcpy(res.data(), reinterpret_cast<int32_t*>(list.data), list.len * sizeof(int32_t));
+      memcpy(res.data(), list.data, list.len * sizeof(int32_t));
       *result = std::move(res);
     } break;
     case ValueType::kI64List: {
-      LLVMComplexStruct list = reinterpret_cast<return_list_function_type>(entry_func_ptr_)(
-          reinterpret_cast<int64_t>(entry_arguments), reinterpret_cast<int64_t>(&exec_ctx));
+      I64ListStruct list = reinterpret_cast<return_i64list_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
       std::vector<int64_t> res;
       res.resize(list.len);
-      memcpy(res.data(), reinterpret_cast<int64_t*>(list.data), list.len * sizeof(int64_t));
+      memcpy(res.data(), list.data, list.len * sizeof(int64_t));
       *result = std::move(res);
     } break;
     case ValueType::kF32List: {
-      LLVMComplexStruct list = reinterpret_cast<return_list_function_type>(entry_func_ptr_)(
-          reinterpret_cast<int64_t>(entry_arguments), reinterpret_cast<int64_t>(&exec_ctx));
+      F32ListStruct list = reinterpret_cast<return_f32list_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
       std::vector<float> res;
       res.resize(list.len);
-      memcpy(res.data(), reinterpret_cast<float*>(list.data), list.len * sizeof(float));
+      memcpy(res.data(), list.data, list.len * sizeof(float));
       *result = std::move(res);
     } break;
     case ValueType::kF64List: {
-      LLVMComplexStruct list = reinterpret_cast<return_list_function_type>(entry_func_ptr_)(
-          reinterpret_cast<int64_t>(entry_arguments), reinterpret_cast<int64_t>(&exec_ctx));
+      F64ListStruct list = reinterpret_cast<return_f64list_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
       std::vector<double> res;
       res.resize(list.len);
-      memcpy(res.data(), reinterpret_cast<double*>(list.data), list.len * sizeof(double));
+      memcpy(res.data(), list.data, list.len * sizeof(double));
       *result = std::move(res);
     } break;
     case ValueType::kStringList: {
-      LLVMComplexStruct list = reinterpret_cast<return_list_function_type>(entry_func_ptr_)(
-          reinterpret_cast<int64_t>(entry_arguments), reinterpret_cast<int64_t>(&exec_ctx));
+      StringListStruct list =
+          reinterpret_cast<return_stringlist_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx);
       std::vector<std::string> res;
       res.resize(list.len);
       for (uint32_t i = 0; i < list.len; ++i) {
-        res[i] = std::string(reinterpret_cast<char*>(reinterpret_cast<LLVMComplexStruct*>(list.data)[i].data),
-                             reinterpret_cast<LLVMComplexStruct*>(list.data)[i].len);
+        res[i] = std::string(list.data[i].data, list.data[i].len);
       }
       *result = std::move(res);
     } break;

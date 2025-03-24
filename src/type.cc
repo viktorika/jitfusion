@@ -114,6 +114,8 @@ std::string TypeHelper::TypeToString(ValueType type) {
       return "f64list";
     case ValueType::kStringList:
       return "stringlist";
+    case ValueType::kPtr:
+      return "ptr";
   }
   return "unknown";
 }
@@ -223,34 +225,65 @@ int TypeHelper::GetBitWidthFromType(ValueType type) {
   return -1;
 }
 
-int TypeHelper::GetElementSizeFromType(ValueType type) {
+uint32_t TypeHelper::GetElementSize(ValueType type) {
   switch (type) {
     case ValueType::kI8List:
-      return 1;
+      return I8ListStruct::kElementSize;
     case ValueType::kI16List:
-      return 2;
+      return I16ListStruct::kElementSize;
     case ValueType::kI32List:
-      return 4;
+      return I32ListStruct::kElementSize;
     case ValueType::kI64List:
-      return 8;
+      return I64ListStruct::kElementSize;
     case ValueType::kU8List:
-      return 1;
+      return U8ListStruct::kElementSize;
     case ValueType::kU16List:
-      return 2;
+      return U16ListStruct::kElementSize;
     case ValueType::kU32List:
-      return 4;
+      return U32ListStruct::kElementSize;
     case ValueType::kU64List:
-      return 8;
+      return U64ListStruct::kElementSize;
     case ValueType::kF32List:
-      return 4;
+      return F32ListStruct::kElementSize;
     case ValueType::kF64List:
-      return 8;
+      return F64ListStruct::kElementSize;
     case ValueType::kString:
-      return 1;
+      return StringStruct::kElementSize;
     case ValueType::kStringList:
-      return sizeof(LLVMComplexStruct);
+      return StringListStruct::kElementSize;
     default:
       return -1;
+  }
+}
+
+ValueType TypeHelper::GetElementType(ValueType type) {
+  switch (type) {
+    case ValueType::kI8List:
+      return I8ListStruct::kElementType;
+    case ValueType::kI16List:
+      return I16ListStruct::kElementType;
+    case ValueType::kI32List:
+      return I32ListStruct::kElementType;
+    case ValueType::kI64List:
+      return I64ListStruct::kElementType;
+    case ValueType::kU8List:
+      return U8ListStruct::kElementType;
+    case ValueType::kU16List:
+      return U16ListStruct::kElementType;
+    case ValueType::kU32List:
+      return U32ListStruct::kElementType;
+    case ValueType::kU64List:
+      return U64ListStruct::kElementType;
+    case ValueType::kF32List:
+      return F32ListStruct::kElementType;
+    case ValueType::kF64List:
+      return F64ListStruct::kElementType;
+    case ValueType::kString:
+      return StringStruct::kElementType;
+    case ValueType::kStringList:
+      return StringListStruct::kElementType;
+    default:
+      return ValueType::kUnknown;
   }
 }
 

@@ -16,10 +16,11 @@ Status CodeGen::Visit(IfNode &if_node) {
   llvm::BasicBlock *cur_block = ctx_.entry_bb;
   llvm::Function *cur_function = ctx_.entry_function;
 
-  llvm::FunctionType *func_type = llvm::FunctionType::get(
-      ret_type_llvm,
-      llvm::ArrayRef<llvm::Type *>({llvm::Type::getInt64Ty(ctx_.context), llvm::Type::getInt64Ty(ctx_.context)}),
-      false);
+  llvm::FunctionType *func_type =
+      llvm::FunctionType::get(ret_type_llvm,
+                              llvm::ArrayRef<llvm::Type *>({llvm::Type::getVoidTy(ctx_.context)->getPointerTo(),
+                                                            llvm::Type::getVoidTy(ctx_.context)->getPointerTo()}),
+                              false);
 
   llvm::Function *if_func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, "if", ctx_.module);
   llvm::BasicBlock *if_block = llvm::BasicBlock::Create(ctx_.context, "if", if_func);

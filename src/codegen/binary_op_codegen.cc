@@ -152,8 +152,9 @@ Status CodeGen::SolveBinaryOpComplexType(BinaryOPNode &binary_node, llvm::Value 
     FunctionStructure func_struct;
     JF_RETURN_NOT_OK(ctx_.function_registry->GetFuncBySign(sign, &func_struct));
 
-    llvm::FunctionCallee string_call_func_callee = ctx_.module.getOrInsertFunction(
-        sign.ToString(), llvm::Type::getInt32Ty(ctx_.context), ctx_.complex_type, ctx_.complex_type);
+    llvm::FunctionCallee string_call_func_callee =
+        ctx_.module.getOrInsertFunction(sign.ToString(), llvm::Type::getInt32Ty(ctx_.context),
+                                        ctx_.complex_type.string_type, ctx_.complex_type.string_type);
 
     std::string error_info;
     llvm::raw_string_ostream error_stream(error_info);
