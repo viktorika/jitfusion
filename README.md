@@ -47,7 +47,7 @@ I considered how many types of nodes are needed to represent a function in the e
 
 
 
-In jitfusion, there are the following data types: u8, u16, u32, u64, i8, i16, i32, i64, float, double, string, u8list, u16list, u32list, u64list, i8list, i16list, i32list, i64list, floatlist, doublelist, stringlist. The type u8 corresponds to uint8_t in C, and so on. Both string and list correspond to the LLVMComplexStruct structure, which can be found in the include/type.h file. The stringlist is a nested LLVMComplexStruct structure.
+In jitfusion, there are the following data types: u8, u16, u32, u64, i8, i16, i32, i64, float, double, string, u8list, u16list, u32list, u64list, i8list, i16list, i32list, i64list, floatlist, doublelist, stringlist. The type u8 corresponds to uint8_t in C, and so on. The C structures corresponding to all types can be found in the include/type.h file.
 
 
 For example, generally speaking, the process of an execution flow graph might look like this.
