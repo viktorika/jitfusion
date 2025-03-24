@@ -37,7 +37,7 @@ class ExecEngine {
   Arena const_value_arena_;
   llvm::LLVMContext llvm_context_;
   llvm::ExecutionEngine* engine_{nullptr};
-  uint64_t entry_func_ptr_;
+  char* entry_func_ptr_;
   ValueType ret_type_;
   ExecEngineOption option_;
 };

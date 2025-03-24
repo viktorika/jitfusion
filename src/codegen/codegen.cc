@@ -40,19 +40,44 @@ Status CodeGen::ValueTypeToLLVMType(IRCodeGenContext &ctx, ValueType value_type,
     case ValueType::kF64: {
       *llvm_type = llvm::Type::getDoubleTy(ctx.context);
     } break;
-    case ValueType::kString:
-    case ValueType::kU8List:
-    case ValueType::kI8List:
-    case ValueType::kU16List:
-    case ValueType::kI16List:
-    case ValueType::kU32List:
-    case ValueType::kI32List:
-    case ValueType::kU64List:
-    case ValueType::kI64List:
-    case ValueType::kF32List:
-    case ValueType::kF64List:
+    case ValueType::kString: {
+      *llvm_type = ctx.complex_type.string_type;
+    } break;
+    case ValueType::kU8List: {
+      *llvm_type = ctx.complex_type.u8list_type;
+    } break;
+    case ValueType::kI8List: {
+      *llvm_type = ctx.complex_type.i8list_type;
+    } break;
+    case ValueType::kU16List: {
+      *llvm_type = ctx.complex_type.u16list_type;
+    } break;
+    case ValueType::kI16List: {
+      *llvm_type = ctx.complex_type.i16list_type;
+    } break;
+    case ValueType::kU32List: {
+      *llvm_type = ctx.complex_type.u32list_type;
+    } break;
+    case ValueType::kI32List: {
+      *llvm_type = ctx.complex_type.i32list_type;
+    } break;
+    case ValueType::kU64List: {
+      *llvm_type = ctx.complex_type.u64list_type;
+    } break;
+    case ValueType::kI64List: {
+      *llvm_type = ctx.complex_type.i64list_type;
+    } break;
+    case ValueType::kF32List: {
+      *llvm_type = ctx.complex_type.f32list_type;
+    } break;
+    case ValueType::kF64List: {
+      *llvm_type = ctx.complex_type.f64list_type;
+    } break;
     case ValueType::kStringList: {
-      *llvm_type = ctx.complex_type;
+      *llvm_type = ctx.complex_type.stringlist_type;
+    } break;
+    case ValueType::kPtr: {
+      *llvm_type = llvm::Type::getVoidTy(ctx.context)->getPointerTo();
     } break;
     default:
       return Status::RuntimeError("ValueType ", TypeHelper::TypeToString(value_type), " ",

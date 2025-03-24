@@ -18,12 +18,12 @@ namespace jitfusion {
 
 namespace {
 
-int64_t Alloc(int64_t exec_context, int64_t size) {
+uint8_t *Alloc(void *exec_context, int64_t size) {
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
-  return reinterpret_cast<int64_t>(exec_ctx->arena.Allocate(size));
+  return exec_ctx->arena.Allocate(size);
 }
 
-void AllocAttributeSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llvm::Function *f) {
+void AllocAttributeSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module *m, llvm::Function *f) {
   f->setDoesNotThrow();
   f->setMemoryEffects(llvm::MemoryEffects::inaccessibleMemOnly());
   f->addAttributeAtIndex(llvm::AttributeList::FunctionIndex,
@@ -31,22 +31,25 @@ void AllocAttributeSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m
   f->addFnAttr(llvm::Attribute::getWithAllocSizeArgs(f->getContext(), 1, std::nullopt));
   f->addFnAttr(llvm::Attribute::get(f->getContext(), llvm::Attribute::AllocKind,
                                     static_cast<uint64_t>(llvm::AllocFnKind::Alloc)));
+  f->addAttributeAtIndex(llvm::AttributeList::ReturnIndex,
+                         llvm::Attribute::get(f->getContext(), llvm::Attribute::NoAlias));
+  f->addAttributeAtIndex(1, llvm::Attribute::get(f->getContext(), llvm::Attribute::NoAlias));
 }
 
 }  // namespace
 
 Status InitMemoryInternalFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("alloc", {ValueType::kI64, ValueType::kU32}, ValueType::kI64),
+      reg->RegisterFunc(FunctionSignature("alloc", {ValueType::kPtr, ValueType::kU32}, ValueType::kPtr),
                         {FunctionType::kCFunc, reinterpret_cast<void *>(Alloc), nullptr, AllocAttributeSetter}));
   return Status::OK();
 }
 
 llvm::Value *CallAllocFunc(IRCodeGenContext &ctx, llvm::Value *size) {
-  FunctionSignature sign{"alloc", {ValueType::kI64, ValueType::kU32}, ValueType::kI64};
-  llvm::FunctionType *func_type =
-      llvm::FunctionType::get(llvm::Type::getInt64Ty(ctx.context),
-                              {llvm::Type::getInt64Ty(ctx.context), llvm::Type::getInt32Ty(ctx.context)}, false);
+  FunctionSignature sign{"alloc", {ValueType::kPtr, ValueType::kU32}, ValueType::kPtr};
+  llvm::FunctionType *func_type = llvm::FunctionType::get(
+      llvm::Type::getVoidTy(ctx.context)->getPointerTo(),
+      {llvm::Type::getVoidTy(ctx.context)->getPointerTo(), llvm::Type::getInt32Ty(ctx.context)}, false);
   auto func_callee = ctx.module.getOrInsertFunction(sign.ToString(), func_type);
   return ctx.builder.CreateCall(func_callee, {ctx.entry_function->getArg(1), size}, "call_alloc");
 }

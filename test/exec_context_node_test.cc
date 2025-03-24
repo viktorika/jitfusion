@@ -18,15 +18,14 @@ using namespace jitfusion;
 
 namespace {
 
-LLVMComplexStruct CreateU32List(int64_t ctx) {
+U32ListStruct CreateU32List(void* ctx) {
   auto* exec_ctx = reinterpret_cast<ExecContext*>(ctx);
-  LLVMComplexStruct u32_list;
-  auto* data = reinterpret_cast<uint32_t*>(exec_ctx->arena.Allocate(sizeof(uint32_t) * 4));
-  data[0] = 1;
-  data[1] = 2;
-  data[2] = 3;
-  data[3] = 4;
-  u32_list.data = reinterpret_cast<int64_t>(data);
+  U32ListStruct u32_list;
+  u32_list.data = reinterpret_cast<uint32_t*>(exec_ctx->arena.Allocate(sizeof(uint32_t) * 4));
+  u32_list.data[0] = 1;
+  u32_list.data[1] = 2;
+  u32_list.data[2] = 3;
+  u32_list.data[3] = 4;
   u32_list.len = 4;
   return u32_list;
 }
@@ -36,7 +35,7 @@ LLVMComplexStruct CreateU32List(int64_t ctx) {
 TEST(ExecContextTest, CreateDataTest) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
-  FunctionSignature sign("create_u32_list", {ValueType::kI64}, ValueType::kU32List);
+  FunctionSignature sign("create_u32_list", {ValueType::kPtr}, ValueType::kU32List);
   FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(CreateU32List), nullptr};
   func_registry->RegisterFunc(sign, func_struct);
 

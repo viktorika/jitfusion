@@ -13,12 +13,12 @@ namespace jitfusion {
 Status Validator::Validate(ExecNode* node) { return node->Accept(this); }
 
 Status Validator::Visit(EntryArgumentNode& entry_argument_node) {
-  entry_argument_node.SetReturnType(ValueType::kI64);
+  entry_argument_node.SetReturnType(ValueType::kPtr);
   return Status::OK();
 }
 
 Status Validator::Visit(ExecContextNode& exec_context_node) {
-  exec_context_node.SetReturnType(ValueType::kI64);
+  exec_context_node.SetReturnType(ValueType::kPtr);
   return Status::OK();
 }
 

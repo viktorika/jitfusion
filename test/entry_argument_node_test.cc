@@ -17,7 +17,7 @@ using namespace jitfusion;
 namespace {
 
 template <class T>
-T LoadValue(int64_t data, uint32_t i) {
+T LoadValue(void* data, uint32_t i) {
   return reinterpret_cast<T*>(data)[i];
 }
 
@@ -37,14 +37,9 @@ TEST(EntryArgsTest, LoadDataTest) {
   std::vector<ValueType> type_list = {ValueType::kU8, ValueType::kU16, ValueType::kU32, ValueType::kU64,
                                       ValueType::kI8, ValueType::kI16, ValueType::kI32, ValueType::kI64};
   std::vector<RetType> result_list = {
-      LoadValue<uint8_t>(reinterpret_cast<int64_t>(du8.data()), 1),
-      LoadValue<uint16_t>(reinterpret_cast<int64_t>(du16.data()), 1),
-      LoadValue<uint32_t>(reinterpret_cast<int64_t>(du32.data()), 1),
-      LoadValue<uint64_t>(reinterpret_cast<int64_t>(du64.data()), 1),
-      LoadValue<int8_t>(reinterpret_cast<int64_t>(ds8.data()), 1),
-      LoadValue<int16_t>(reinterpret_cast<int64_t>(ds16.data()), 1),
-      LoadValue<int32_t>(reinterpret_cast<int64_t>(ds32.data()), 1),
-      LoadValue<int64_t>(reinterpret_cast<int64_t>(ds64.data()), 1),
+      LoadValue<uint8_t>(du8.data(), 1),   LoadValue<uint16_t>(du16.data(), 1), LoadValue<uint32_t>(du32.data(), 1),
+      LoadValue<uint64_t>(du64.data(), 1), LoadValue<int8_t>(ds8.data(), 1),    LoadValue<int16_t>(ds16.data(), 1),
+      LoadValue<int32_t>(ds32.data(), 1),  LoadValue<int64_t>(ds64.data(), 1),
   };
   std::vector<void*> func_list = {
       reinterpret_cast<void*>(LoadValue<uint8_t>),  reinterpret_cast<void*>(LoadValue<uint16_t>),
@@ -55,7 +50,7 @@ TEST(EntryArgsTest, LoadDataTest) {
   for (size_t i = 0; i < func_list.size(); i++) {
     std::unique_ptr<FunctionRegistry> func_registry;
     EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
-    FunctionSignature sign("load", {ValueType::kI64, ValueType::kI32}, type_list[i]);
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, type_list[i]);
     FunctionStructure func_struct = {FunctionType::kCFunc, func_list[i], nullptr};
     func_registry->RegisterFunc(sign, func_struct);
 

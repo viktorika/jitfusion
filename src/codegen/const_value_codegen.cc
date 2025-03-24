@@ -5,6 +5,7 @@
  * @Last Modified time: 2025-01-21 16:37:45
  */
 #include "codegen.h"
+#include "llvm/IR/Type.h"
 
 namespace jitfusion {
 
@@ -53,9 +54,10 @@ struct MakeValueVisitor {
     str[v.size()] = '\0';
     llvm::Constant *str_ptr =
         llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_.context), reinterpret_cast<int64_t>(str), false);
+    str_ptr = llvm::ConstantExpr::getIntToPtr(str_ptr, llvm::Type::getInt8Ty(ctx_.context)->getPointerTo());
     llvm::Constant *str_len = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx_.context), v.size(), false);
     std::vector<llvm::Constant *> struct_const_elements = {str_ptr, str_len};
-    llvm::Value *ret = llvm::ConstantStruct::get(ctx_.complex_type, struct_const_elements);
+    llvm::Value *ret = llvm::ConstantStruct::get(ctx_.complex_type.string_type, struct_const_elements);
     return ret;
   }
 };
