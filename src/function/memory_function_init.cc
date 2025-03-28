@@ -23,7 +23,7 @@ uint8_t *Alloc(void *exec_context, int64_t size) {
   return exec_ctx->arena.Allocate(size);
 }
 
-void AllocAttributeSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module *m, llvm::Function *f) {
+void AllocAttributeSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llvm::Function *f) {
   f->setDoesNotThrow();
   f->setMemoryEffects(llvm::MemoryEffects::inaccessibleMemOnly());
   f->addAttributeAtIndex(llvm::AttributeList::FunctionIndex,
