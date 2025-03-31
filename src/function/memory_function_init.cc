@@ -25,15 +25,9 @@ uint8_t *Alloc(void *exec_context, int64_t size) {
 
 void AllocAttributeSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llvm::Function *f) {
   f->setDoesNotThrow();
-  f->setMemoryEffects(llvm::MemoryEffects::inaccessibleMemOnly());
-  f->addAttributeAtIndex(llvm::AttributeList::FunctionIndex,
-                         llvm::Attribute::get(f->getContext(), "alloc-family", "jitfusion"));
-  f->addFnAttr(llvm::Attribute::getWithAllocSizeArgs(f->getContext(), 1, std::nullopt));
-  f->addFnAttr(llvm::Attribute::get(f->getContext(), llvm::Attribute::AllocKind,
-                                    static_cast<uint64_t>(llvm::AllocFnKind::Alloc)));
+  f->setMemoryEffects(llvm::MemoryEffects::readOnly());
   f->addAttributeAtIndex(llvm::AttributeList::ReturnIndex,
                          llvm::Attribute::get(f->getContext(), llvm::Attribute::NoAlias));
-  f->addAttributeAtIndex(1, llvm::Attribute::get(f->getContext(), llvm::Attribute::NoAlias));
 }
 
 }  // namespace
