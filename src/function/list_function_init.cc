@@ -351,26 +351,36 @@ Status InitMaxFunc(FunctionRegistry *reg) {
 }
 
 Status InitMinFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kU8List}, ValueType::kU8),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<U8ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kI8List}, ValueType::kI8),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<I8ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kU16List}, ValueType::kU16),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<U16ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kI16List}, ValueType::kI16),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<I16ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kU32List}, ValueType::kU32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<U32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kI32List}, ValueType::kI32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<I32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kU64List}, ValueType::kU64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<U64ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kI64List}, ValueType::kI64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<I64ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kF32List}, ValueType::kF32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<F32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kF64List}, ValueType::kF64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<F64ListStruct>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kU8List}, ValueType::kU8),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<U8ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kI8List}, ValueType::kI8),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<I8ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kU16List}, ValueType::kU16),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<U16ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kI16List}, ValueType::kI16),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<I16ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kU32List}, ValueType::kU32),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<U32ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kI32List}, ValueType::kI32),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<I32ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kU64List}, ValueType::kU64),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<U64ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kI64List}, ValueType::kI64),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<I64ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kF32List}, ValueType::kF32),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<F32ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kF64List}, ValueType::kF64),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<F64ListStruct>), nullptr, MinMaxAttributeSetter}));
   return Status::OK();
 }
 
