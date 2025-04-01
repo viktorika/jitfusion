@@ -165,6 +165,11 @@ inline ListType SortDesc(ListType a, void *exec_context) {
   return result;
 }
 
+void SortAttributeSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llvm::Function *f) {
+  f->setDoesNotThrow();
+  f->setMemoryEffects(llvm::MemoryEffects::readOnly());
+}
+
 llvm::Value *CallBuiltinTruncateFunction(const FunctionSignature & /*sign*/,
                                          const std::vector<llvm::Type *> &arg_llvm_type_list,
                                          const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
@@ -419,67 +424,67 @@ Status InitCountDistinctFunc(FunctionRegistry *reg) {
 }
 
 Status InitSortFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortAsc", {ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<U8ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortAsc", {ValueType::kU16List, ValueType::kPtr}, ValueType::kU16List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<U16ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortAsc", {ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<U32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortAsc", {ValueType::kU64List, ValueType::kPtr}, ValueType::kU64List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<U64ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortAsc", {ValueType::kI8List, ValueType::kPtr}, ValueType::kI8List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<I8ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortAsc", {ValueType::kI16List, ValueType::kPtr}, ValueType::kI16List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<I16ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortAsc", {ValueType::kI32List, ValueType::kPtr}, ValueType::kI32List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<I32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortAsc", {ValueType::kI64List, ValueType::kPtr}, ValueType::kI64List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<I64ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortAsc", {ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<F32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortAsc", {ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<F64ListStruct>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortAsc", {ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<U8ListStruct>), nullptr, SortAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortAsc", {ValueType::kU16List, ValueType::kPtr}, ValueType::kU16List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<U16ListStruct>), nullptr, SortAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortAsc", {ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<U32ListStruct>), nullptr, SortAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortAsc", {ValueType::kU64List, ValueType::kPtr}, ValueType::kU64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<U64ListStruct>), nullptr, SortAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortAsc", {ValueType::kI8List, ValueType::kPtr}, ValueType::kI8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<I8ListStruct>), nullptr, SortAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortAsc", {ValueType::kI16List, ValueType::kPtr}, ValueType::kI16List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<I16ListStruct>), nullptr, SortAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortAsc", {ValueType::kI32List, ValueType::kPtr}, ValueType::kI32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<I32ListStruct>), nullptr, SortAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortAsc", {ValueType::kI64List, ValueType::kPtr}, ValueType::kI64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<I64ListStruct>), nullptr, SortAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortAsc", {ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<F32ListStruct>), nullptr, SortAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortAsc", {ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortAsc<F64ListStruct>), nullptr, SortAttributeSetter}));
 
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortDesc", {ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<U8ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortDesc", {ValueType::kU16List, ValueType::kPtr}, ValueType::kU16List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<U16ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortDesc", {ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<U32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortDesc", {ValueType::kU64List, ValueType::kPtr}, ValueType::kU64List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<U64ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortDesc", {ValueType::kI8List, ValueType::kPtr}, ValueType::kI8List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<I8ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortDesc", {ValueType::kI16List, ValueType::kPtr}, ValueType::kI16List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<I16ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortDesc", {ValueType::kI32List, ValueType::kPtr}, ValueType::kI32List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<I32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortDesc", {ValueType::kI64List, ValueType::kPtr}, ValueType::kI64List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<I64ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortDesc", {ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<F32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("SortDesc", {ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<F64ListStruct>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortDesc", {ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<U8ListStruct>), nullptr, SortAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortDesc", {ValueType::kU16List, ValueType::kPtr}, ValueType::kU16List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<U16ListStruct>), nullptr, SortAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortDesc", {ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<U32ListStruct>), nullptr, SortAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortDesc", {ValueType::kU64List, ValueType::kPtr}, ValueType::kU64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<U64ListStruct>), nullptr, SortAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortDesc", {ValueType::kI8List, ValueType::kPtr}, ValueType::kI8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<I8ListStruct>), nullptr, SortAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortDesc", {ValueType::kI16List, ValueType::kPtr}, ValueType::kI16List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<I16ListStruct>), nullptr, SortAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortDesc", {ValueType::kI32List, ValueType::kPtr}, ValueType::kI32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<I32ListStruct>), nullptr, SortAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortDesc", {ValueType::kI64List, ValueType::kPtr}, ValueType::kI64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<I64ListStruct>), nullptr, SortAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortDesc", {ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<F32ListStruct>), nullptr, SortAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("SortDesc", {ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(SortDesc<F64ListStruct>), nullptr, SortAttributeSetter}));
   return Status::OK();
 }
 
