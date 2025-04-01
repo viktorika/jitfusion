@@ -5,7 +5,6 @@
  * @Last Modified time: 2025-03-04 19:04:03
  */
 
-#include <optional>
 #include <vector>
 #include "exec_engine.h"
 #include "function_registry.h"
