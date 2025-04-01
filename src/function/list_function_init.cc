@@ -110,6 +110,11 @@ inline RetType Sum(ListType a) {
   return sum;
 }
 
+void SumAttributeSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llvm::Function *f) {
+  f->setDoesNotThrow();
+  f->setMemoryEffects(llvm::MemoryEffects::readOnly());
+}
+
 template <typename ListType>
 inline typename ListType::CElementType Max(ListType a) {
   return *std::max_element(a.data, a.data + a.len);
@@ -120,10 +125,20 @@ inline typename ListType::CElementType Min(ListType a) {
   return *std::min_element(a.data, a.data + a.len);
 }
 
+void MinMaxAttributeSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llvm::Function *f) {
+  f->setDoesNotThrow();
+  f->setMemoryEffects(llvm::MemoryEffects::readOnly());
+}
+
 template <typename ListType>
 inline uint32_t CountDistinct(ListType a) {
   std::unordered_set<typename ListType::CElementType> unique_set(a.data, a.data + a.len);
   return unique_set.size();
+}
+
+void CountDistinctAttributeSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llvm::Function *f) {
+  f->setDoesNotThrow();
+  f->setMemoryEffects(llvm::MemoryEffects::readOnly());
 }
 
 template <typename ListType>
@@ -267,119 +282,139 @@ Status InitLenFunc(FunctionRegistry *reg) {
 }
 
 Status InitSumFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kU8List}, ValueType::kU64),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<uint64_t, U8ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kI8List}, ValueType::kI64),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<int64_t, I8ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kU16List}, ValueType::kU64),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<uint64_t, U16ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kI16List}, ValueType::kI64),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<int64_t, I16ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kU32List}, ValueType::kU64),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<uint64_t, U32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kI32List}, ValueType::kI64),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<int64_t, I32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kU64List}, ValueType::kU64),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<uint64_t, U64ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kI64List}, ValueType::kI64),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<int64_t, I64ListStruct>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Sum", {ValueType::kU8List}, ValueType::kU64),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<uint64_t, U8ListStruct>), nullptr, SumAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Sum", {ValueType::kI8List}, ValueType::kI64),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<int64_t, I8ListStruct>), nullptr, SumAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Sum", {ValueType::kU16List}, ValueType::kU64),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<uint64_t, U16ListStruct>), nullptr, SumAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Sum", {ValueType::kI16List}, ValueType::kI64),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<int64_t, I16ListStruct>), nullptr, SumAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Sum", {ValueType::kU32List}, ValueType::kU64),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<uint64_t, U32ListStruct>), nullptr, SumAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Sum", {ValueType::kI32List}, ValueType::kI64),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<int64_t, I32ListStruct>), nullptr, SumAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Sum", {ValueType::kU64List}, ValueType::kU64),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<uint64_t, U64ListStruct>), nullptr, SumAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Sum", {ValueType::kI64List}, ValueType::kI64),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<int64_t, I64ListStruct>), nullptr, SumAttributeSetter}));
 
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kF32List}, ValueType::kF64),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<double, F32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("Sum", {ValueType::kF64List}, ValueType::kF64),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<double, F64ListStruct>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Sum", {ValueType::kF32List}, ValueType::kF64),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<double, F32ListStruct>), nullptr, SumAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Sum", {ValueType::kF64List}, ValueType::kF64),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Sum<double, F64ListStruct>), nullptr, SumAttributeSetter}));
   return Status::OK();
 }
 
 Status InitMaxFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kU8List}, ValueType::kU8),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<U8ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kI8List}, ValueType::kI8),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<I8ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kU16List}, ValueType::kU16),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<U16ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kI16List}, ValueType::kI16),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<I16ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kU32List}, ValueType::kU32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<U32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kI32List}, ValueType::kI32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<I32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kU64List}, ValueType::kU64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<U64ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kI64List}, ValueType::kI64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<I64ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kF32List}, ValueType::kF32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<F32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Max", {ValueType::kF64List}, ValueType::kF64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Max<F64ListStruct>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Max", {ValueType::kU8List}, ValueType::kU8),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Max<U8ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Max", {ValueType::kI8List}, ValueType::kI8),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Max<I8ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Max", {ValueType::kU16List}, ValueType::kU16),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Max<U16ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Max", {ValueType::kI16List}, ValueType::kI16),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Max<I16ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Max", {ValueType::kU32List}, ValueType::kU32),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Max<U32ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Max", {ValueType::kI32List}, ValueType::kI32),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Max<I32ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Max", {ValueType::kU64List}, ValueType::kU64),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Max<U64ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Max", {ValueType::kI64List}, ValueType::kI64),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Max<I64ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Max", {ValueType::kF32List}, ValueType::kF32),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Max<F32ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Max", {ValueType::kF64List}, ValueType::kF64),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Max<F64ListStruct>), nullptr, MinMaxAttributeSetter}));
   return Status::OK();
 }
 
 Status InitMinFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kU8List}, ValueType::kU8),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<U8ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kI8List}, ValueType::kI8),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<I8ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kU16List}, ValueType::kU16),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<U16ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kI16List}, ValueType::kI16),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<I16ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kU32List}, ValueType::kU32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<U32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kI32List}, ValueType::kI32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<I32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kU64List}, ValueType::kU64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<U64ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kI64List}, ValueType::kI64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<I64ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kF32List}, ValueType::kF32),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<F32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("Min", {ValueType::kF64List}, ValueType::kF64),
-                                     {FunctionType::kCFunc, reinterpret_cast<void *>(Min<F64ListStruct>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kU8List}, ValueType::kU8),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<U8ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kI8List}, ValueType::kI8),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<I8ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kU16List}, ValueType::kU16),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<U16ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kI16List}, ValueType::kI16),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<I16ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kU32List}, ValueType::kU32),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<U32ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kI32List}, ValueType::kI32),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<I32ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kU64List}, ValueType::kU64),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<U64ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kI64List}, ValueType::kI64),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<I64ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kF32List}, ValueType::kF32),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<F32ListStruct>), nullptr, MinMaxAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("Min", {ValueType::kF64List}, ValueType::kF64),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(Min<F64ListStruct>), nullptr, MinMaxAttributeSetter}));
   return Status::OK();
 }
 
 Status InitCountDistinctFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kU8List}, ValueType::kU32),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<U8ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kI8List}, ValueType::kU32),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<I8ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kU16List}, ValueType::kU32),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<U16ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kI16List}, ValueType::kU32),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<I16ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kU32List}, ValueType::kU32),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<U32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kI32List}, ValueType::kU32),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<I32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kU64List}, ValueType::kU32),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<U64ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kI64List}, ValueType::kU32),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<I64ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kF32List}, ValueType::kU32),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<F32ListStruct>), nullptr}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kF64List}, ValueType::kU32),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<F64ListStruct>), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kU8List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<U8ListStruct>),
+                                      nullptr, CountDistinctAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kI8List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<I8ListStruct>),
+                                      nullptr, CountDistinctAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kU16List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<U16ListStruct>),
+                                      nullptr, CountDistinctAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kI16List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<I16ListStruct>),
+                                      nullptr, CountDistinctAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kU32List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<U32ListStruct>),
+                                      nullptr, CountDistinctAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kI32List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<I32ListStruct>),
+                                      nullptr, CountDistinctAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kU64List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<U64ListStruct>),
+                                      nullptr, CountDistinctAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kI64List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<I64ListStruct>),
+                                      nullptr, CountDistinctAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kF32List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<F32ListStruct>),
+                                      nullptr, CountDistinctAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("CountDistinct", {ValueType::kF64List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(CountDistinct<F64ListStruct>),
+                                      nullptr, CountDistinctAttributeSetter}));
   return Status::OK();
 }
 
