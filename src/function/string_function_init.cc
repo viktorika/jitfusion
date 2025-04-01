@@ -44,9 +44,9 @@ llvm::Value *CallBuiltinStringConcatFunction(const FunctionSignature & /*sign*/,
   auto *copy_b_start_ptr =
       ctx.builder.CreateGEP(llvm::Type::getInt8Ty(ctx.context), result_data_ptr, {a_len}, "copy_b_start_ptr");
 
-  ctx.builder.CreateMemCpy(result_data_ptr, llvm::Align(1), a_data_ptr, llvm::Align(1), copy_a_size);
-  ctx.builder.CreateMemCpy(copy_b_start_ptr, llvm::Align(1), b_data_ptr, llvm::Align(1),
-                           ctx.builder.CreateMul(b_len, llvm_element_size));
+  ctx.builder.CreateMemCpyInline(result_data_ptr, llvm::Align(1), a_data_ptr, llvm::Align(1), copy_a_size);
+  ctx.builder.CreateMemCpyInline(copy_b_start_ptr, llvm::Align(1), b_data_ptr, llvm::Align(1),
+                                 ctx.builder.CreateMul(b_len, llvm_element_size));
   // result_ptr[result_len] = '\0';
   ctx.builder.CreateStore(
       llvm::ConstantInt::get(llvm::Type::getInt8Ty(ctx.context), '\0', true),
