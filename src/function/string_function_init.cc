@@ -56,6 +56,11 @@ llvm::Value *CallBuiltinStringConcatFunction(const FunctionSignature & /*sign*/,
 
 inline int32_t StringCmp(StringStruct a, StringStruct b) { return strcmp(a.data, b.data); }
 
+void StringCmpAttributeSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llvm::Function *f) {
+  f->setDoesNotThrow();
+  f->setMemoryEffects(llvm::MemoryEffects::readOnly());
+}
+
 llvm::Value *CallBuiltinStringLenFunction(const FunctionSignature & /*sign*/,
                                           const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,
                                           const std::vector<llvm::Value *> &arg_llvm_value_list,
@@ -70,9 +75,9 @@ Status InitStringInternalFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(
       reg->RegisterFunc(FunctionSignature("StringConcat", {ValueType::kString, ValueType::kString}, ValueType::kString),
                         {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinStringConcatFunction}));
-  JF_RETURN_NOT_OK(
-      reg->RegisterFunc(FunctionSignature("StringCmp", {ValueType::kString, ValueType::kString}, ValueType::kI32),
-                        {FunctionType::kCFunc, reinterpret_cast<void *>(StringCmp), nullptr}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("StringCmp", {ValueType::kString, ValueType::kString}, ValueType::kI32),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(StringCmp), nullptr, StringCmpAttributeSetter}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("StringLen", {ValueType::kString}, ValueType::kU32),
                                      {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinStringLenFunction}));
   return Status::OK();
