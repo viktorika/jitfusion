@@ -48,9 +48,9 @@ llvm::Value *CallBuiltinListConcatFunction(const FunctionSignature &sign,
   CodeGen::ValueTypeToLLVMType(ctx, element_type, &ret_element_llvm_type);
   auto *copy_b_start_ptr = ctx.builder.CreateGEP(ret_element_llvm_type, result_data_ptr, {a_len}, "copy_b_start_ptr");
 
-  ctx.builder.CreateMemCpy(result_data_ptr, llvm::Align(1), a_data_ptr, llvm::Align(1), copy_a_size);
-  ctx.builder.CreateMemCpy(copy_b_start_ptr, llvm::Align(1), b_data_ptr, llvm::Align(1),
-                           ctx.builder.CreateMul(b_len, llvm_element_size));
+  ctx.builder.CreateMemCpyInline(result_data_ptr, llvm::Align(1), a_data_ptr, llvm::Align(1), copy_a_size);
+  ctx.builder.CreateMemCpyInline(copy_b_start_ptr, llvm::Align(1), b_data_ptr, llvm::Align(1),
+                                 ctx.builder.CreateMul(b_len, llvm_element_size));
   return result;
 }
 
