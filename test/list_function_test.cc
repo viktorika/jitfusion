@@ -677,3 +677,62 @@ TEST(FunctionTest, ListModTest2) {
   std::vector<int64_t> expect = {1000 % 7, 2000 % 7, 3000 % 7, 4000 % 7};
   EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
 }
+
+TEST(FunctionTest, ListExpTest1) {
+  std::vector<int8_t> data = {1, 2, 3, 4};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListExp", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<int8_t> expect = {static_cast<int8_t>(std::exp(1)), static_cast<int8_t>(std::exp(2)),
+                                static_cast<int8_t>(std::exp(3)), static_cast<int8_t>(std::exp(4))};
+  EXPECT_EQ(std::get<std::vector<int8_t>>(result), expect);
+}
+
+TEST(FunctionTest, ListExpTest2) {
+  std::vector<uint64_t> data = {10, 20, 30, 40};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListExp", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<uint64_t> expect = {static_cast<uint64_t>(std::exp(10)), static_cast<uint64_t>(std::exp(20)),
+                                  static_cast<uint64_t>(std::exp(30)), static_cast<uint64_t>(std::exp(40))};
+  EXPECT_EQ(std::get<std::vector<uint64_t>>(result), expect);
+}
+
+TEST(FunctionTest, ListExpTest3) {
+  std::vector<double> data = {100, 200, 300, 400};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListExp", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<double> expect = {std::exp(100), std::exp(200), std::exp(300), std::exp(400)};
+  EXPECT_EQ(std::get<std::vector<double>>(result), expect);
+}
