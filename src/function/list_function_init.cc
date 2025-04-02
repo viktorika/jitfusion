@@ -204,6 +204,24 @@ void ListAddSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llv
   f->setMemoryEffects(llvm::MemoryEffects::readOnly());
 }
 
+template <typename ListType>
+ListType ListSub(ListType a, typename ListType::CElementType b, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  ListType result;
+  result.data = reinterpret_cast<typename ListType::CElementType *>(
+      exec_ctx->arena.Allocate((a.len) * sizeof(typename ListType::CElementType)));
+  result.len = a.len;
+  for (uint32_t i = 0; i < a.len; i++) {
+    result.data[i] = a.data[i] - b;
+  }
+  return result;
+}
+
+void ListSubSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llvm::Function *f) {
+  f->setDoesNotThrow();
+  f->setMemoryEffects(llvm::MemoryEffects::readOnly());
+}
+
 Status InitListConcatFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(
       reg->RegisterFunc(FunctionSignature("ListConcat", {ValueType::kU8List, ValueType::kU8List}, ValueType::kU8List),
@@ -577,8 +595,43 @@ Status InitListAddFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+Status InitListSubFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListSub", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr}, ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListSub<U8ListStruct>), nullptr, ListSubSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListSub", {ValueType::kU16List, ValueType::kU16, ValueType::kPtr}, ValueType::kU16List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListSub<U16ListStruct>), nullptr, ListSubSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListSub", {ValueType::kU32List, ValueType::kU32, ValueType::kPtr}, ValueType::kU32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListSub<U32ListStruct>), nullptr, ListSubSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListSub", {ValueType::kU64List, ValueType::kU64, ValueType::kPtr}, ValueType::kU64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListSub<U64ListStruct>), nullptr, ListSubSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListSub", {ValueType::kI8List, ValueType::kI8, ValueType::kPtr}, ValueType::kI8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListSub<I8ListStruct>), nullptr, ListSubSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListSub", {ValueType::kI16List, ValueType::kI16, ValueType::kPtr}, ValueType::kI16List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListSub<I16ListStruct>), nullptr, ListSubSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListSub", {ValueType::kI32List, ValueType::kI32, ValueType::kPtr}, ValueType::kI32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListSub<I32ListStruct>), nullptr, ListSubSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListSub", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr}, ValueType::kI64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListSub<I64ListStruct>), nullptr, ListSubSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListSub", {ValueType::kF32List, ValueType::kF32, ValueType::kPtr}, ValueType::kF32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListSub<F32ListStruct>), nullptr, ListSubSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListSub", {ValueType::kF64List, ValueType::kF64, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListSub<F64ListStruct>), nullptr, ListSubSetter}));
+  return Status::OK();
+}
+
 Status InitOperationFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitListAddFunc(reg));
+  JF_RETURN_NOT_OK(InitListSubFunc(reg));
   return Status::OK();
 };
 
