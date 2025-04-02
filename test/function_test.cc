@@ -720,3 +720,69 @@ TEST(FunctionTest, TruncateTest3) {
   std::vector<std::string> expect(data.begin(), data.begin() + size);
   EXPECT_EQ(std::get<std::vector<std::string>>(result), expect);
 }
+
+TEST(FunctionTest, ListAddTest1) {
+  std::vector<uint8_t> data = {1, 2, 3, 4};
+  uint8_t add = 100;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto add_node = std::unique_ptr<ExecNode>(new ConstantValueNode(add));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(add_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListAdd", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<uint8_t> expect = {101, 102, 103, 104};
+  EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
+}
+
+TEST(FunctionTest, ListAddTest2) {
+  std::vector<int64_t> data = {1, 2, 3, 4};
+  int64_t add = -100;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto add_node = std::unique_ptr<ExecNode>(new ConstantValueNode(add));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(add_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListAdd", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<int64_t> expect = {-99, -98, -97, -96};
+  EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
+}
+
+TEST(FunctionTest, ListAddTest3) {
+  std::vector<float> data = {1, 2, 3, 4};
+  float add = -100;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto add_node = std::unique_ptr<ExecNode>(new ConstantValueNode(add));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(add_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListAdd", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<float> expect = {-99, -98, -97, -96};
+  EXPECT_EQ(std::get<std::vector<float>>(result), expect);
+}
