@@ -25,7 +25,7 @@ llvm::Value *CallBuiltinExpFunction(const FunctionSignature &sign,
   llvm::Type *new_args_llvm_type;
   CodeGen::ValueTypeToLLVMType(ctx, sign.GetRetType(), &new_args_llvm_type);
   llvm::Function *func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::exp, new_args_llvm_type);
-  return ctx.builder.CreateCall(func, value, "fabs");
+  return ctx.builder.CreateCall(func, value, "exp");
 }
 
 llvm::Value *CallBuiltinLogFunction(const FunctionSignature &sign,
