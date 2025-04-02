@@ -197,7 +197,7 @@ TEST(FunctionTest, SqrtTest) {
   EXPECT_EQ(std::get<double>(result), std::sqrt(arg));
 }
 
-TEST(FunctionTest, AbsTest) {
+TEST(FunctionTest, AbsTest1) {
   int8_t arg = -4;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
@@ -211,6 +211,22 @@ TEST(FunctionTest, AbsTest) {
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<int32_t>(result), std::abs(arg));
+}
+
+TEST(FunctionTest, AbsTest2) {
+  float arg = -4;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(arg));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("abs", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<float>(result), std::abs(arg));
 }
 
 TEST(FunctionTest, CeilTest) {

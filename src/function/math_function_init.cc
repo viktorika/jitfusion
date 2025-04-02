@@ -342,6 +342,10 @@ Status InitAbsFunc(FunctionRegistry *reg) {
                                      {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinAbsFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("abs", {ValueType::kI64}, ValueType::kI64),
                                      {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinAbsFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("abs", {ValueType::kF32}, ValueType::kF32),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinAbsFunction}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("abs", {ValueType::kF64}, ValueType::kF64),
+                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinAbsFunction}));
   return Status::OK();
 }
 
