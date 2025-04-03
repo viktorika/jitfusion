@@ -358,23 +358,6 @@ void ListCeilSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, ll
 }
 
 template <typename ListType>
-ListType ListMin(ListType a, typename ListType::CElementType b, void *exec_context) {
-  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
-  ListType result;
-  result.data = reinterpret_cast<typename ListType::CElementType *>(
-      exec_ctx->arena.Allocate((a.len) * sizeof(typename ListType::CElementType)));
-  result.len = a.len;
-  for (uint32_t i = 0; i < a.len; i++) {
-    result.data[i] = std::min(a.data[i], b);
-  }
-  return result;
-}
-
-void ListMinSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llvm::Function *f) {
-  f->setDoesNotThrow();
-  f->setMemoryEffects(llvm::MemoryEffects::readOnly());
-}
-template <typename ListType>
 ListType ListFloor(ListType a, void *exec_context) {
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
   ListType result;
@@ -406,6 +389,42 @@ ListType ListRound(ListType a, void *exec_context) {
 }
 
 void ListRoundSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llvm::Function *f) {
+  f->setDoesNotThrow();
+  f->setMemoryEffects(llvm::MemoryEffects::readOnly());
+}
+
+template <typename ListType>
+ListType ListMin(ListType a, typename ListType::CElementType b, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  ListType result;
+  result.data = reinterpret_cast<typename ListType::CElementType *>(
+      exec_ctx->arena.Allocate((a.len) * sizeof(typename ListType::CElementType)));
+  result.len = a.len;
+  for (uint32_t i = 0; i < a.len; i++) {
+    result.data[i] = std::min(a.data[i], b);
+  }
+  return result;
+}
+
+void ListMinSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llvm::Function *f) {
+  f->setDoesNotThrow();
+  f->setMemoryEffects(llvm::MemoryEffects::readOnly());
+}
+
+template <typename ListType>
+ListType ListMax(ListType a, typename ListType::CElementType b, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  ListType result;
+  result.data = reinterpret_cast<typename ListType::CElementType *>(
+      exec_ctx->arena.Allocate((a.len) * sizeof(typename ListType::CElementType)));
+  result.len = a.len;
+  for (uint32_t i = 0; i < a.len; i++) {
+    result.data[i] = std::max(a.data[i], b);
+  }
+  return result;
+}
+
+void ListMaxSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llvm::Function *f) {
   f->setDoesNotThrow();
   f->setMemoryEffects(llvm::MemoryEffects::readOnly());
 }
@@ -1131,6 +1150,40 @@ Status InitListMinFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+Status InitListMaxFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMax", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr}, ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMax<U8ListStruct>), nullptr, ListMaxSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMax", {ValueType::kU16List, ValueType::kU16, ValueType::kPtr}, ValueType::kU16List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMax<U16ListStruct>), nullptr, ListMaxSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMax", {ValueType::kU32List, ValueType::kU32, ValueType::kPtr}, ValueType::kU32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMax<U32ListStruct>), nullptr, ListMaxSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMax", {ValueType::kU64List, ValueType::kU64, ValueType::kPtr}, ValueType::kU64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMax<U64ListStruct>), nullptr, ListMaxSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMax", {ValueType::kI8List, ValueType::kI8, ValueType::kPtr}, ValueType::kI8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMax<I8ListStruct>), nullptr, ListMaxSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMax", {ValueType::kI16List, ValueType::kI16, ValueType::kPtr}, ValueType::kI16List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMax<I16ListStruct>), nullptr, ListMaxSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMax", {ValueType::kI32List, ValueType::kI32, ValueType::kPtr}, ValueType::kI32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMax<I32ListStruct>), nullptr, ListMaxSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMax", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr}, ValueType::kI64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMax<I64ListStruct>), nullptr, ListMaxSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMax", {ValueType::kF32List, ValueType::kF32, ValueType::kPtr}, ValueType::kF32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMax<F32ListStruct>), nullptr, ListMaxSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMax", {ValueType::kF64List, ValueType::kF64, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMax<F64ListStruct>), nullptr, ListMaxSetter}));
+  return Status::OK();
+}
+
 Status InitOperationFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitListAddFunc(reg));
   JF_RETURN_NOT_OK(InitListSubFunc(reg));
@@ -1145,6 +1198,7 @@ Status InitOperationFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitListFloorFunc(reg));
   JF_RETURN_NOT_OK(InitListRoundFunc(reg));
   JF_RETURN_NOT_OK(InitListMinFunc(reg));
+  JF_RETURN_NOT_OK(InitListMaxFunc(reg));
   return Status::OK();
 };
 

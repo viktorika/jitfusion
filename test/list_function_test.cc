@@ -1085,3 +1085,69 @@ TEST(FunctionTest, ListMinTest3) {
   std::vector<float> expect = {1, 2, 2, 2};
   EXPECT_EQ(std::get<std::vector<float>>(result), expect);
 }
+
+TEST(FunctionTest, ListMaxTest1) {
+  std::vector<uint16_t> data = {1, 2, 3, 4};
+  uint16_t value = 2;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(value));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(value_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMax", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<uint16_t> expect = {2, 2, 3, 4};
+  EXPECT_EQ(std::get<std::vector<uint16_t>>(result), expect);
+}
+
+TEST(FunctionTest, ListMaxTest2) {
+  std::vector<int32_t> data = {1, 2, 3, 4};
+  int32_t value = 2;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(value));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(value_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMax", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<int32_t> expect = {2, 2, 3, 4};
+  EXPECT_EQ(std::get<std::vector<int32_t>>(result), expect);
+}
+
+TEST(FunctionTest, ListMaxTest3) {
+  std::vector<float> data = {1, 2, 3, 4};
+  float value = 2;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(value));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(value_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMax", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<float> expect = {2, 2, 3, 4};
+  EXPECT_EQ(std::get<std::vector<float>>(result), expect);
+}
