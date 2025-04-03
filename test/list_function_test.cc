@@ -905,3 +905,41 @@ TEST(FunctionTest, ListLog10Test3) {
   std::vector<float> expect = {std::log10(100.0F), std::log10(200.0F), std::log10(300.0F), std::log10(400.0F)};
   EXPECT_EQ(std::get<std::vector<float>>(result), expect);
 }
+
+TEST(FunctionTest, ListCeilTest1) {
+  std::vector<float> data = {100.0F, 200.0F, 300.0F, 400.0F};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListCeil", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<float> expect = {std::ceil(100.0F), std::ceil(200.0F), std::ceil(300.0F), std::ceil(400.0F)};
+  EXPECT_EQ(std::get<std::vector<float>>(result), expect);
+}
+
+TEST(FunctionTest, ListCeilTest2) {
+  std::vector<double> data = {100.0F, 200.0F, 300.0F, 400.0F};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListCeil", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<double> expect = {std::ceil(100.0F), std::ceil(200.0F), std::ceil(300.0F), std::ceil(400.0F)};
+  EXPECT_EQ(std::get<std::vector<double>>(result), expect);
+}

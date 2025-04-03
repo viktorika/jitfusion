@@ -339,6 +339,24 @@ void ListLogSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llv
   f->setMemoryEffects(llvm::MemoryEffects::readOnly());
 }
 
+template <typename ListType>
+ListType ListCeil(ListType a, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  ListType result;
+  result.data = reinterpret_cast<typename ListType::CElementType *>(
+      exec_ctx->arena.Allocate((a.len) * sizeof(typename ListType::CElementType)));
+  result.len = a.len;
+  for (uint32_t i = 0; i < a.len; i++) {
+    result.data[i] = std::ceil(a.data[i]);
+  }
+  return result;
+}
+
+void ListCeilSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llvm::Function *f) {
+  f->setDoesNotThrow();
+  f->setMemoryEffects(llvm::MemoryEffects::readOnly());
+}
+
 Status InitListConcatFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(
       reg->RegisterFunc(FunctionSignature("ListConcat", {ValueType::kU8List, ValueType::kU8List}, ValueType::kU8List),
@@ -996,6 +1014,16 @@ Status InitListLog10Func(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+Status InitListCeilFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListCeil", {ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListCeil<F32ListStruct>), nullptr, ListCeilSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListCeil", {ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListCeil<F64ListStruct>), nullptr, ListCeilSetter}));
+  return Status::OK();
+}
+
 Status InitOperationFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitListAddFunc(reg));
   JF_RETURN_NOT_OK(InitListSubFunc(reg));
@@ -1006,6 +1034,7 @@ Status InitOperationFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitListLogFunc(reg));
   JF_RETURN_NOT_OK(InitListLog2Func(reg));
   JF_RETURN_NOT_OK(InitListLog10Func(reg));
+  JF_RETURN_NOT_OK(InitListCeilFunc(reg));
   return Status::OK();
 };
 
