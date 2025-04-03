@@ -693,9 +693,8 @@ TEST(FunctionTest, ListExpTest1) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<int8_t> expect = {static_cast<int8_t>(std::exp(1)), static_cast<int8_t>(std::exp(2)),
-                                static_cast<int8_t>(std::exp(3)), static_cast<int8_t>(std::exp(4))};
-  EXPECT_EQ(std::get<std::vector<int8_t>>(result), expect);
+  std::vector<double> expect = {std::exp(1), std::exp(2), std::exp(3), std::exp(4)};
+  EXPECT_EQ(std::get<std::vector<double>>(result), expect);
 }
 
 TEST(FunctionTest, ListExpTest2) {
@@ -713,9 +712,8 @@ TEST(FunctionTest, ListExpTest2) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<uint64_t> expect = {static_cast<uint64_t>(std::exp(10)), static_cast<uint64_t>(std::exp(20)),
-                                  static_cast<uint64_t>(std::exp(30)), static_cast<uint64_t>(std::exp(40))};
-  EXPECT_EQ(std::get<std::vector<uint64_t>>(result), expect);
+  std::vector<double> expect = {std::exp(10), std::exp(20), std::exp(30), std::exp(40)};
+  EXPECT_EQ(std::get<std::vector<double>>(result), expect);
 }
 
 TEST(FunctionTest, ListExpTest3) {
@@ -735,4 +733,61 @@ TEST(FunctionTest, ListExpTest3) {
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   std::vector<double> expect = {std::exp(100), std::exp(200), std::exp(300), std::exp(400)};
   EXPECT_EQ(std::get<std::vector<double>>(result), expect);
+}
+
+TEST(FunctionTest, ListLogTest1) {
+  std::vector<int16_t> data = {100, 200, 300, 400};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListLog", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<double> expect = {std::log(100), std::log(200), std::log(300), std::log(400)};
+  EXPECT_EQ(std::get<std::vector<double>>(result), expect);
+}
+
+TEST(FunctionTest, ListLogTest2) {
+  std::vector<uint64_t> data = {100, 200, 300, 400};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListLog", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<double> expect = {std::log(100), std::log(200), std::log(300), std::log(400)};
+  EXPECT_EQ(std::get<std::vector<double>>(result), expect);
+}
+
+TEST(FunctionTest, ListLogTest3) {
+  std::vector<float> data = {100.0F, 200.0F, 300.0F, 400.0F};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListLog", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<float> expect = {std::log(100.0F), std::log(200.0F), std::log(300.0F), std::log(400.0F)};
+  EXPECT_EQ(std::get<std::vector<float>>(result), expect);
 }

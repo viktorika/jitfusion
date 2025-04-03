@@ -277,12 +277,12 @@ void ListModSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llv
   f->setMemoryEffects(llvm::MemoryEffects::readOnly());
 }
 
-template <typename ListType>
-ListType ListExp(ListType a, void *exec_context) {
+template <typename ListType, typename ResultType>
+ResultType ListExp(ListType a, void *exec_context) {
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
-  ListType result;
-  result.data = reinterpret_cast<typename ListType::CElementType *>(
-      exec_ctx->arena.Allocate((a.len) * sizeof(typename ListType::CElementType)));
+  ResultType result;
+  result.data = reinterpret_cast<typename ResultType::CElementType *>(
+      exec_ctx->arena.Allocate((a.len) * sizeof(typename ResultType::CElementType)));
   result.len = a.len;
   for (uint32_t i = 0; i < a.len; i++) {
     result.data[i] = std::exp(a.data[i]);
@@ -291,6 +291,24 @@ ListType ListExp(ListType a, void *exec_context) {
 }
 
 void ListExpSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llvm::Function *f) {
+  f->setDoesNotThrow();
+  f->setMemoryEffects(llvm::MemoryEffects::readOnly());
+}
+
+template <typename ListType, typename ResultType>
+ResultType ListLog(ListType a, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  ResultType result;
+  result.data = reinterpret_cast<typename ResultType::CElementType *>(
+      exec_ctx->arena.Allocate((a.len) * sizeof(typename ResultType::CElementType)));
+  result.len = a.len;
+  for (uint32_t i = 0; i < a.len; i++) {
+    result.data[i] = std::log(a.data[i]);
+  }
+  return result;
+}
+
+void ListLogSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llvm::Function *f) {
   f->setDoesNotThrow();
   f->setMemoryEffects(llvm::MemoryEffects::readOnly());
 }
@@ -800,35 +818,69 @@ Status InitListModFunc(FunctionRegistry *reg) {
 
 Status InitListExpFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ListExp", {ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<U8ListStruct>), nullptr, ListExpSetter}));
+      FunctionSignature("ListExp", {ValueType::kU8List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<U8ListStruct, F64ListStruct>), nullptr, ListExpSetter}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ListExp", {ValueType::kU16List, ValueType::kPtr}, ValueType::kU16List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<U16ListStruct>), nullptr, ListExpSetter}));
+      FunctionSignature("ListExp", {ValueType::kU16List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<U16ListStruct, F64ListStruct>), nullptr, ListExpSetter}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ListExp", {ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<U32ListStruct>), nullptr, ListExpSetter}));
+      FunctionSignature("ListExp", {ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<U32ListStruct, F64ListStruct>), nullptr, ListExpSetter}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ListExp", {ValueType::kU64List, ValueType::kPtr}, ValueType::kU64List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<U64ListStruct>), nullptr, ListExpSetter}));
+      FunctionSignature("ListExp", {ValueType::kU64List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<U64ListStruct, F64ListStruct>), nullptr, ListExpSetter}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ListExp", {ValueType::kI8List, ValueType::kPtr}, ValueType::kI8List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<I8ListStruct>), nullptr, ListExpSetter}));
+      FunctionSignature("ListExp", {ValueType::kI8List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<I8ListStruct, F64ListStruct>), nullptr, ListExpSetter}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ListExp", {ValueType::kI16List, ValueType::kPtr}, ValueType::kI16List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<I16ListStruct>), nullptr, ListExpSetter}));
+      FunctionSignature("ListExp", {ValueType::kI16List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<I16ListStruct, F64ListStruct>), nullptr, ListExpSetter}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ListExp", {ValueType::kI32List, ValueType::kPtr}, ValueType::kI32List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<I32ListStruct>), nullptr, ListExpSetter}));
+      FunctionSignature("ListExp", {ValueType::kI32List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<I32ListStruct, F64ListStruct>), nullptr, ListExpSetter}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(
-      FunctionSignature("ListExp", {ValueType::kI64List, ValueType::kPtr}, ValueType::kI64List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<I64ListStruct>), nullptr, ListExpSetter}));
+      FunctionSignature("ListExp", {ValueType::kI64List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<I64ListStruct, F64ListStruct>), nullptr, ListExpSetter}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(
       FunctionSignature("ListExp", {ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<F32ListStruct>), nullptr, ListExpSetter}));
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<F32ListStruct, F32ListStruct>), nullptr, ListExpSetter}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(
       FunctionSignature("ListExp", {ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<F64ListStruct>), nullptr, ListExpSetter}));
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListExp<F64ListStruct, F64ListStruct>), nullptr, ListExpSetter}));
+  return Status::OK();
+}
+
+Status InitListLogFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListLog", {ValueType::kU8List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListLog<U8ListStruct, F64ListStruct>), nullptr, ListLogSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListLog", {ValueType::kU16List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListLog<U16ListStruct, F64ListStruct>), nullptr, ListLogSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListLog", {ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListLog<U32ListStruct, F64ListStruct>), nullptr, ListLogSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListLog", {ValueType::kU64List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListLog<U64ListStruct, F64ListStruct>), nullptr, ListLogSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListLog", {ValueType::kI8List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListLog<I8ListStruct, F64ListStruct>), nullptr, ListLogSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListLog", {ValueType::kI16List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListLog<I16ListStruct, F64ListStruct>), nullptr, ListLogSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListLog", {ValueType::kI32List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListLog<I32ListStruct, F64ListStruct>), nullptr, ListLogSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListLog", {ValueType::kI64List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListLog<I64ListStruct, F64ListStruct>), nullptr, ListLogSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListLog", {ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListLog<F32ListStruct, F32ListStruct>), nullptr, ListLogSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListLog", {ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListLog<F64ListStruct, F64ListStruct>), nullptr, ListLogSetter}));
   return Status::OK();
 }
 
@@ -839,6 +891,7 @@ Status InitOperationFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitListDivFunc(reg));
   JF_RETURN_NOT_OK(InitListModFunc(reg));
   JF_RETURN_NOT_OK(InitListExpFunc(reg));
+  JF_RETURN_NOT_OK(InitListLogFunc(reg));
   return Status::OK();
 };
 
