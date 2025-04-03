@@ -981,3 +981,41 @@ TEST(FunctionTest, ListFloorTest2) {
   std::vector<double> expect = {std::floor(100.5F), std::floor(200.5F), std::floor(300.5F), std::floor(400.5F)};
   EXPECT_EQ(std::get<std::vector<double>>(result), expect);
 }
+
+TEST(FunctionTest, ListRoundTest1) {
+  std::vector<float> data = {100.5F, 200.5F, 300.5F, 400.5F};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListRound", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<float> expect = {std::round(100.5F), std::round(200.5F), std::round(300.5F), std::round(400.5F)};
+  EXPECT_EQ(std::get<std::vector<float>>(result), expect);
+}
+
+TEST(FunctionTest, ListRoundTest2) {
+  std::vector<double> data = {100.5F, 200.5F, 300.5F, 400.5F};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListRound", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<double> expect = {std::round(100.5F), std::round(200.5F), std::round(300.5F), std::round(400.5F)};
+  EXPECT_EQ(std::get<std::vector<double>>(result), expect);
+}

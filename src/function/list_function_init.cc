@@ -375,6 +375,24 @@ void ListFloorSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, l
   f->setMemoryEffects(llvm::MemoryEffects::readOnly());
 }
 
+template <typename ListType>
+ListType ListRound(ListType a, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  ListType result;
+  result.data = reinterpret_cast<typename ListType::CElementType *>(
+      exec_ctx->arena.Allocate((a.len) * sizeof(typename ListType::CElementType)));
+  result.len = a.len;
+  for (uint32_t i = 0; i < a.len; i++) {
+    result.data[i] = std::round(a.data[i]);
+  }
+  return result;
+}
+
+void ListRoundSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/, llvm::Function *f) {
+  f->setDoesNotThrow();
+  f->setMemoryEffects(llvm::MemoryEffects::readOnly());
+}
+
 Status InitListConcatFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(
       reg->RegisterFunc(FunctionSignature("ListConcat", {ValueType::kU8List, ValueType::kU8List}, ValueType::kU8List),
@@ -1052,6 +1070,16 @@ Status InitListFloorFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+Status InitListRoundFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListRound", {ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListRound<F32ListStruct>), nullptr, ListRoundSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListRound", {ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListRound<F64ListStruct>), nullptr, ListRoundSetter}));
+  return Status::OK();
+}
+
 Status InitOperationFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitListAddFunc(reg));
   JF_RETURN_NOT_OK(InitListSubFunc(reg));
@@ -1064,6 +1092,7 @@ Status InitOperationFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitListLog10Func(reg));
   JF_RETURN_NOT_OK(InitListCeilFunc(reg));
   JF_RETURN_NOT_OK(InitListFloorFunc(reg));
+  JF_RETURN_NOT_OK(InitListRoundFunc(reg));
   return Status::OK();
 };
 
