@@ -26,6 +26,7 @@ class ExecNode {
   std::string ToString(const std::string& prefix = "");
   virtual Status Accept(Visitor* visitor) = 0;
   virtual ExecNodeType GetExecNodeType() = 0;
+  virtual std::unique_ptr<ExecNode> Clone() = 0;
 
   [[nodiscard]] ValueType GetReturnType() const { return return_type_; }
   void SetReturnType(ValueType return_type) { return_type_ = return_type; }
@@ -40,6 +41,7 @@ class EntryArgumentNode : public ExecNode {
  public:
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
+  std::unique_ptr<ExecNode> Clone() override;
 
  private:
   std::string ToStringImpl(const std::string& prefix) override;
@@ -49,6 +51,7 @@ class ExecContextNode : public ExecNode {
  public:
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
+  std::unique_ptr<ExecNode> Clone() override;
 
  private:
   std::string ToStringImpl(const std::string& prefix) override;
@@ -60,6 +63,8 @@ class ConstantValueNode : public ExecNode {
   explicit ConstantValueNode(ConstantValueType val) : val_(std::move(val)) {}
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
+  std::unique_ptr<ExecNode> Clone() override;
+
   [[nodiscard]] const ConstantValueType& GetVal() const { return val_; }
 
  private:
@@ -78,6 +83,7 @@ class ConstantListValueNode : public ExecNode {
   }
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
+  std::unique_ptr<ExecNode> Clone() override;
 
   [[nodiscard]] const ConstantListValueType& GetValList() const { return val_list_; }
   [[nodiscard]] const ConstantListValueType& GetSortValList() const { return sort_val_list_; }
@@ -95,6 +101,7 @@ class UnaryOPNode : public ExecNode {
   UnaryOPNode(UnaryOPType op, std::unique_ptr<ExecNode> child) : op_(op), child_(std::move(child)) {}
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
+  std::unique_ptr<ExecNode> Clone() override;
 
   [[nodiscard]] ExecNode* GetChild() const { return child_.get(); }
   [[nodiscard]] UnaryOPType GetOp() const { return op_; }
@@ -113,6 +120,7 @@ class BinaryOPNode : public ExecNode {
       : op_(op), left_(std::move(left)), right_(std::move(right)) {}
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
+  std::unique_ptr<ExecNode> Clone() override;
 
   [[nodiscard]] ExecNode* GetLeft() const { return left_.get(); }
   [[nodiscard]] ExecNode* GetRight() const { return right_.get(); }
@@ -134,6 +142,7 @@ class FunctionNode : public ExecNode {
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
   void AppendArgs(std::unique_ptr<ExecNode>&& arg);
+  std::unique_ptr<ExecNode> Clone() override;
 
   [[nodiscard]] std::string GetFuncName() const { return func_name_; }
   [[nodiscard]] const std::vector<std::unique_ptr<ExecNode>>& GetArgs() const { return args_; }
@@ -152,6 +161,7 @@ class NoOPNode : public ExecNode {
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
   void AppendArgs(std::unique_ptr<ExecNode>&& arg);
+  std::unique_ptr<ExecNode> Clone() override;
 
   [[nodiscard]] const std::vector<std::unique_ptr<ExecNode>>& GetArgs() const { return args_; }
 
@@ -167,6 +177,8 @@ class IfNode : public ExecNode {
   explicit IfNode(std::vector<std::unique_ptr<ExecNode>> args) : args_(std::move(args)) {}
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
+  std::unique_ptr<ExecNode> Clone() override;
+
   void AppendArgs(std::unique_ptr<ExecNode>&& arg);
 
   [[nodiscard]] const std::vector<std::unique_ptr<ExecNode>>& GetArgs() const { return args_; }
@@ -182,6 +194,8 @@ class SwitchNode : public ExecNode {
   explicit SwitchNode(std::vector<std::unique_ptr<ExecNode>> args) : args_(std::move(args)) {}
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
+  std::unique_ptr<ExecNode> Clone() override;
+
   void AppendArgs(std::unique_ptr<ExecNode>&& arg);
 
   [[nodiscard]] const std::vector<std::unique_ptr<ExecNode>>& GetArgs() const { return args_; }
