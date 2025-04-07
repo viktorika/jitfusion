@@ -91,7 +91,7 @@ The EntryArgumentNode will consistently return a u64 value, which is the input p
 The intermediate processes can all be converted into corresponding op nodes, function nodes, condition nodes, etc. Additionally, there are usually multiple execution flows within a single task, and these flows may use the same variables. To achieve maximum optimization, you can have all the store nodes ultimately point to a NoOP node, allowing LLVM to perform the optimization for you.
 
 ## Attention
-If you need to allocate memory that you cannot manage yourself and require the execution engine to manage it for you, you need to use the ExecContextNode. The ExecContext structure corresponding to ExecContextNode contains an arena. By using it to allocate memory, the memory will be automatically released when the execution is complete.
+1.If you need to allocate memory that you cannot manage yourself and require the execution engine to manage it for you, you need to use the ExecContextNode. The ExecContext structure corresponding to ExecContextNode contains an arena. By using it to allocate memory, the memory will be automatically released when the execution is complete.
 
 You can refer to test/exec_context_node_test.cc for more details. for example:
 
@@ -127,6 +127,7 @@ int main() {
 }
 ```
 
+2.All StringStructs generated through custom functions must be C-style strings, meaning they must end with '\0'. Otherwise, using certain string functions like StringCmp may result in undefined behavior.
 
 
 
