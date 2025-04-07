@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "exec_engine.h"
+#include "function/function_init.h"
 #include "function_registry.h"
 #include "llvm/IR/Attributes.h"
 #include "llvm/IR/Type.h"
