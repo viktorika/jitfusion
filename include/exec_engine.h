@@ -29,6 +29,8 @@ class ExecEngine {
  public:
   explicit ExecEngine(ExecEngineOption option = {});
   ~ExecEngine();
+  ExecEngine(const ExecEngine&) = delete;
+  ExecEngine& operator=(const ExecEngine&) = delete;
 
   Status Compile(const std::unique_ptr<ExecNode>& exec_node, const std::unique_ptr<FunctionRegistry>& func_registry);
   Status Execute(void* entry_arguments, RetType* result);
