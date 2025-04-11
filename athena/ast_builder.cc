@@ -27,7 +27,6 @@ Status ProgramAstBuilder::BuildProgram(const std::string& code, std::unique_ptr<
   }
   *result = std::move(statements_.back().expression);
   return Status::OK();
-  return Status::OK();
 }
 
 std::unique_ptr<ExecNode> ProgramAstBuilder::MakeRefNode(const std::string& var_name) {
