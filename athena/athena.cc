@@ -5,7 +5,6 @@
  * @Last Modified time: 2025-04-10 15:02:48
  */
 #include "athena.h"
-#include <string_view>
 #include "ast_builder.h"
 #include "exec_engine.h"
 #include "function_registry.h"
