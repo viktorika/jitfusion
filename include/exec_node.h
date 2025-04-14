@@ -76,23 +76,17 @@ class ConstantValueNode : public ExecNode {
 class ConstantListValueNode : public ExecNode {
  public:
   ConstantListValueNode() = delete;
-  explicit ConstantListValueNode(ConstantListValueType val_list) {
-    sort_val_list_ = val_list;
-    std::visit([](auto& v_list) { std::sort(v_list.begin(), v_list.end()); }, sort_val_list_);
-    val_list_ = std::move(val_list);
-  }
+  explicit ConstantListValueNode(ConstantListValueType val_list) : val_list_(std::move(val_list)) {}
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
   std::unique_ptr<ExecNode> Clone() override;
 
   [[nodiscard]] const ConstantListValueType& GetValList() const { return val_list_; }
-  [[nodiscard]] const ConstantListValueType& GetSortValList() const { return sort_val_list_; }
 
  private:
   std::string ToStringImpl(const std::string& prefix) override;
 
   ConstantListValueType val_list_;
-  ConstantListValueType sort_val_list_;
 };
 
 class UnaryOPNode : public ExecNode {
