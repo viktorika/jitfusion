@@ -197,8 +197,12 @@ Status Validator::Visit(IfNode& if_node) {
 }
 
 Status Validator::Visit(SwitchNode& switch_node) {
+  auto size = switch_node.GetArgs().size();
+  if (0U == (size & 1)) {
+    return Status::ParseError("Switch node must has odd number of arguments");
+  }
   std::vector<ValueType> arg_types;
-  arg_types.reserve(switch_node.GetArgs().size());
+  arg_types.reserve(size);
   for (const auto& arg : switch_node.GetArgs()) {
     JF_RETURN_NOT_OK(arg->Accept(this));
     arg_types.emplace_back(arg->GetReturnType());
@@ -206,15 +210,14 @@ Status Validator::Visit(SwitchNode& switch_node) {
 
   ValueType basic_type = ValueType::kUnknown;
   ValueType list_type = ValueType::kUnknown;
-  for (size_t i = 0; i < switch_node.GetArgs().size(); i++) {
-    if (i + 1 != switch_node.GetArgs().size() && i % 2 == 0 &&
-        !TypeHelper::IsNumericType(switch_node.GetArgs()[i]->GetReturnType())) {
+  for (size_t i = 0; i < size; i++) {
+    if (i + 1 != size && i % 2 == 0 && !TypeHelper::IsNumericType(switch_node.GetArgs()[i]->GetReturnType())) {
       // TODO(victorika): maybe condition can support complex struct
       return Status::ParseError(
           "Unspported type: ", TypeHelper::TypeToString(switch_node.GetArgs()[i]->GetReturnType()),
           " in switch condition");
     }
-    if (i % 2 != 0 || i + 1 == switch_node.GetArgs().size()) {
+    if (i % 2 != 0 || i + 1 == size) {
       if (TypeHelper::IsNumericType(switch_node.GetArgs()[i]->GetReturnType())) {
         basic_type = TypeHelper::GetPromotedType(basic_type, switch_node.GetArgs()[i]->GetReturnType());
       } else {
