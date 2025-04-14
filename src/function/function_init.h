@@ -12,8 +12,11 @@ namespace jitfusion {
 Status InitMathInternalFunc(FunctionRegistry *reg);
 Status InitStringInternalFunc(FunctionRegistry *reg);
 Status InitListInternalFunc(FunctionRegistry *reg);
-Status InitMemoryInternalFunc(FunctionRegistry *reg);
 
-llvm::Value *CallAllocFunc(IRCodeGenContext &ctx, llvm::Value *size);
+inline void ReadOnlyFunctionAttributeSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/,
+                                            llvm::Function *f) {
+  f->addFnAttr(llvm::Attribute::ReadOnly);
+  f->addFnAttr(llvm::Attribute::NoUnwind);
+}
 
 }  // namespace jitfusion

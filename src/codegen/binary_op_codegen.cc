@@ -14,13 +14,34 @@ namespace jitfusion {
 namespace {
 Status ListOrStringConcat(BinaryOPNode &binary_node, ValueType type, llvm::Value *lhs, llvm::Value *rhs,
                           IRCodeGenContext &ctx_, llvm::Value **ret_value) {
-  FunctionSignature sign{type == ValueType::kString ? "StringConcat" : "ListConcat",
-                         {binary_node.GetLeft()->GetReturnType(), binary_node.GetRight()->GetReturnType()},
-                         ValueType::kUnknown};
+  FunctionSignature sign{
+      type == ValueType::kString ? "StringConcat" : "ListConcat",
+      {binary_node.GetLeft()->GetReturnType(), binary_node.GetRight()->GetReturnType(), ValueType::kPtr},
+      ValueType::kUnknown};
 
   FunctionStructure func_struct;
   JF_RETURN_NOT_OK(ctx_.function_registry->GetFuncBySign(sign, &func_struct));
-  *ret_value = func_struct.codegen_func(sign, {lhs->getType(), rhs->getType()}, {lhs, rhs}, ctx_);
+  llvm::Type *llvm_ret_type;
+  JF_RETURN_NOT_OK(CodeGen::ValueTypeToLLVMType(ctx_, sign.GetRetType(), &llvm_ret_type));
+  llvm::FunctionType *func_type = llvm::FunctionType::get(llvm_ret_type,
+                                                          {
+                                                              lhs->getType(),
+                                                              rhs->getType(),
+                                                              llvm::Type::getVoidTy(ctx_.context)->getPointerTo(),
+                                                          },
+                                                          false);
+  llvm::FunctionCallee add_func_callee;
+  add_func_callee = ctx_.module.getOrInsertFunction(sign.ToString(), func_type);
+
+  std::string error_info;
+  llvm::raw_string_ostream error_stream(error_info);
+  if (llvm::verifyFunction(llvm::cast<llvm::Function>(*add_func_callee.getCallee()), &error_stream)) {
+    llvm::cast<llvm::Function>(*add_func_callee.getCallee()).print(error_stream);
+    error_stream.flush();
+    return Status::RuntimeError("verify function failed in binary_op_codegen in add_func_callee: " + error_info);
+  }
+
+  *ret_value = ctx_.builder.CreateCall(add_func_callee, {lhs, rhs, ctx_.entry_function->getArg(1)}, "calltmp");
   return Status::OK();
 }
 
