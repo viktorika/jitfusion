@@ -130,7 +130,6 @@ Status FunctionRegistry::Init() {
   JF_RETURN_NOT_OK(InitMathInternalFunc(this));
   JF_RETURN_NOT_OK(InitStringInternalFunc(this));
   JF_RETURN_NOT_OK(InitListInternalFunc(this));
-  JF_RETURN_NOT_OK(InitMemoryInternalFunc(this));
   return Status::OK();
 }
 
