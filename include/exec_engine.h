@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-15 10:48:46
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-24 11:00:05
+ * @Last Modified time: 2025-04-16 11:32:08
  */
 #pragma once
 
@@ -33,7 +33,11 @@ class ExecEngine {
   ExecEngine& operator=(const ExecEngine&) = delete;
 
   Status Compile(const std::unique_ptr<ExecNode>& exec_node, const std::unique_ptr<FunctionRegistry>& func_registry);
+  // Applicable to scenarios with similar expressions, a result is returned through the root node.
   Status Execute(void* entry_arguments, RetType* result);
+  // Applicable to more complex scenarios, users need to use an output node and a custom store function to write data,
+  // and it will not return data from the root node. and root node must be the no_op_node.
+  Status Execute(void* entry_arguments, void* result);
 
  private:
   Arena const_value_arena_;
