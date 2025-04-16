@@ -20,6 +20,7 @@ class CodeGen : public Visitor {
 
   Status Visit(EntryArgumentNode &entry_argument_node) override;
   Status Visit(ExecContextNode &exec_context_node) override;
+  Status Visit(OutputNode &output_node) override;
   Status Visit(ConstantValueNode &const_node) override;
   Status Visit(ConstantListValueNode &const_list_node) override;
   Status Visit(UnaryOPNode &unary_op_node) override;
