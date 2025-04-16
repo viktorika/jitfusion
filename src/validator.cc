@@ -5,6 +5,7 @@
  * @Last Modified time: 2025-01-30 22:22:27
  */
 #include "validator.h"
+#include <exec_node.h>
 #include "status.h"
 #include "type.h"
 
@@ -19,6 +20,11 @@ Status Validator::Visit(EntryArgumentNode& entry_argument_node) {
 
 Status Validator::Visit(ExecContextNode& exec_context_node) {
   exec_context_node.SetReturnType(ValueType::kPtr);
+  return Status::OK();
+}
+
+Status Validator::Visit(OutputNode& output_node) {
+  output_node.SetReturnType(ValueType::kPtr);
   return Status::OK();
 }
 
