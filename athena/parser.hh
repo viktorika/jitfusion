@@ -589,19 +589,20 @@ namespace athena {
     TOK_SEMI = 34,                 // ";"
     TOK_ENTRY_ARG = 35,            // "entry_arg"
     TOK_EXEC_CTX = 36,             // "exec_ctx"
-    TOK_IDENTIFIER = 37,           // "identifier"
-    TOK_I8 = 38,                   // "int8"
-    TOK_I16 = 39,                  // "int16"
-    TOK_I32 = 40,                  // "int32"
-    TOK_I64 = 41,                  // "int64"
-    TOK_U8 = 42,                   // "uint8"
-    TOK_U16 = 43,                  // "uint16"
-    TOK_U32 = 44,                  // "uint32"
-    TOK_U64 = 45,                  // "uint64"
-    TOK_F32 = 46,                  // "float"
-    TOK_F64 = 47,                  // "double"
-    TOK_STRING = 48,               // "string"
-    TOK_NEG = 49                   // NEG
+    TOK_OUTPUT = 37,               // "output"
+    TOK_IDENTIFIER = 38,           // "identifier"
+    TOK_I8 = 39,                   // "int8"
+    TOK_I16 = 40,                  // "int16"
+    TOK_I32 = 41,                  // "int32"
+    TOK_I64 = 42,                  // "int64"
+    TOK_U8 = 43,                   // "uint8"
+    TOK_U16 = 44,                  // "uint16"
+    TOK_U32 = 45,                  // "uint32"
+    TOK_U64 = 46,                  // "uint64"
+    TOK_F32 = 47,                  // "float"
+    TOK_F64 = 48,                  // "double"
+    TOK_STRING = 49,               // "string"
+    TOK_NEG = 50                   // NEG
       };
       /// Backward compatibility alias (Bison 3.6).
       typedef token_kind_type yytokentype;
@@ -618,7 +619,7 @@ namespace athena {
     {
       enum symbol_kind_type
       {
-        YYNTOKENS = 50, ///< Number of tokens.
+        YYNTOKENS = 51, ///< Number of tokens.
         S_YYEMPTY = -2,
         S_YYEOF = 0,                             // "end of file"
         S_YYerror = 1,                           // error
@@ -657,43 +658,44 @@ namespace athena {
         S_SEMI = 34,                             // ";"
         S_ENTRY_ARG = 35,                        // "entry_arg"
         S_EXEC_CTX = 36,                         // "exec_ctx"
-        S_IDENTIFIER = 37,                       // "identifier"
-        S_I8 = 38,                               // "int8"
-        S_I16 = 39,                              // "int16"
-        S_I32 = 40,                              // "int32"
-        S_I64 = 41,                              // "int64"
-        S_U8 = 42,                               // "uint8"
-        S_U16 = 43,                              // "uint16"
-        S_U32 = 44,                              // "uint32"
-        S_U64 = 45,                              // "uint64"
-        S_F32 = 46,                              // "float"
-        S_F64 = 47,                              // "double"
-        S_STRING = 48,                           // "string"
-        S_NEG = 49,                              // NEG
-        S_YYACCEPT = 50,                         // $accept
-        S_program = 51,                          // program
-        S_statement = 52,                        // statement
-        S_expr = 53,                             // expr
-        S_term = 54,                             // term
-        S_literal = 55,                          // literal
-        S_list = 56,                             // list
-        S_i8_list = 57,                          // i8_list
-        S_i16_list = 58,                         // i16_list
-        S_i32_list = 59,                         // i32_list
-        S_i64_list = 60,                         // i64_list
-        S_u8_list = 61,                          // u8_list
-        S_u16_list = 62,                         // u16_list
-        S_u32_list = 63,                         // u32_list
-        S_u64_list = 64,                         // u64_list
-        S_f32_list = 65,                         // f32_list
-        S_f64_list = 66,                         // f64_list
-        S_string_list = 67,                      // string_list
-        S_function = 68,                         // function
-        S_infix_function = 69,                   // infix_function
-        S_named_function = 70,                   // named_function
-        S_args = 71,                             // args
-        S_arg = 72,                              // arg
-        S_boolean = 73                           // boolean
+        S_OUTPUT = 37,                           // "output"
+        S_IDENTIFIER = 38,                       // "identifier"
+        S_I8 = 39,                               // "int8"
+        S_I16 = 40,                              // "int16"
+        S_I32 = 41,                              // "int32"
+        S_I64 = 42,                              // "int64"
+        S_U8 = 43,                               // "uint8"
+        S_U16 = 44,                              // "uint16"
+        S_U32 = 45,                              // "uint32"
+        S_U64 = 46,                              // "uint64"
+        S_F32 = 47,                              // "float"
+        S_F64 = 48,                              // "double"
+        S_STRING = 49,                           // "string"
+        S_NEG = 50,                              // NEG
+        S_YYACCEPT = 51,                         // $accept
+        S_program = 52,                          // program
+        S_statement = 53,                        // statement
+        S_expr = 54,                             // expr
+        S_term = 55,                             // term
+        S_literal = 56,                          // literal
+        S_list = 57,                             // list
+        S_i8_list = 58,                          // i8_list
+        S_i16_list = 59,                         // i16_list
+        S_i32_list = 60,                         // i32_list
+        S_i64_list = 61,                         // i64_list
+        S_u8_list = 62,                          // u8_list
+        S_u16_list = 63,                         // u16_list
+        S_u32_list = 64,                         // u32_list
+        S_u64_list = 65,                         // u64_list
+        S_f32_list = 66,                         // f32_list
+        S_f64_list = 67,                         // f64_list
+        S_string_list = 68,                      // string_list
+        S_function = 69,                         // function
+        S_infix_function = 70,                   // infix_function
+        S_named_function = 71,                   // named_function
+        S_args = 72,                             // args
+        S_arg = 73,                              // arg
+        S_boolean = 74                           // boolean
       };
     };
 
@@ -1725,7 +1727,7 @@ switch (yykind)
       {
 #if !defined _MSC_VER || defined __clang__
         YY_ASSERT (tok == token::TOK_YYEOF
-                   || (token::TOK_YYerror <= tok && tok <= token::TOK_EXEC_CTX)
+                   || (token::TOK_YYerror <= tok && tok <= token::TOK_OUTPUT)
                    || tok == token::TOK_NEG);
 #endif
       }
@@ -2468,6 +2470,21 @@ switch (yykind)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
+      make_OUTPUT (location_type l)
+      {
+        return symbol_type (token::TOK_OUTPUT, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_OUTPUT (const location_type& l)
+      {
+        return symbol_type (token::TOK_OUTPUT, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
       make_IDENTIFIER (std::string v, location_type l)
       {
         return symbol_type (token::TOK_IDENTIFIER, std::move (v), std::move (l));
@@ -2743,7 +2760,7 @@ switch (yykind)
     static const signed char yydefact_[];
 
     // YYPGOTO[NTERM-NUM].
-    static const signed char yypgoto_[];
+    static const short yypgoto_[];
 
     // YYDEFGOTO[NTERM-NUM].
     static const signed char yydefgoto_[];
@@ -3004,7 +3021,7 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 306,     ///< Last index in yytable_.
+      yylast_ = 307,     ///< Last index in yytable_.
       yynnts_ = 24,  ///< Number of nonterminal symbols.
       yyfinal_ = 5 ///< Termination state number.
     };
@@ -3373,7 +3390,7 @@ switch (yykind)
 
 #line 10 "parser.yy"
 } // athena
-#line 3377 "parser.hh"
+#line 3394 "parser.hh"
 
 
 // "%code provides" blocks.
@@ -3384,7 +3401,7 @@ switch (yykind)
 // ... and declare it for the parser's sake.
 YY_DECL;
 
-#line 3388 "parser.hh"
+#line 3405 "parser.hh"
 
 
 #endif // !YY_YY_PARSER_HH_INCLUDED

@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-04-09 15:44:37
  * @Last Modified by: victorika
- * @Last Modified time: 2025-04-10 15:13:53
+ * @Last Modified time: 2025-04-16 16:25:25
  */
 #pragma once
 
@@ -22,27 +22,20 @@ using jitfusion::Status;
 struct Statement {
   Statement() = default;
   Statement(std::string vname, std::unique_ptr<jitfusion::ExecNode> exp)
-      : var_name(std::move(vname)), expression(std::move(exp)) {}
+      : var_name(std::move(vname)), expression(std::move(exp)), has_dependency(false) {}
   ~Statement() = default;
-  Statement(Statement&& s) noexcept {
-    var_name = std::move(s.var_name);
-    expression = std::move(s.expression);
-  }
-  Statement& operator=(Statement&& other) noexcept {
-    if (this != &other) {
-      var_name = std::move(other.var_name);
-      expression = std::move(other.expression);
-    }
-    return *this;
-  }
+  Statement(Statement&& s) = default;
+  Statement& operator=(Statement&& other) = default;
 
   std::string var_name;
   std::unique_ptr<jitfusion::ExecNode> expression;
+  bool has_dependency;
 };
 
 class ProgramAstBuilder {
  public:
   Status BuildProgram(const std::string& code, std::unique_ptr<ExecNode>* result);
+  Status BuildProgram(const std::vector<std::string>& codes, std::unique_ptr<ExecNode>* result);
 
   std::unique_ptr<ExecNode> MakeRefNode(const std::string& var_name);
   void AddStatement(Statement statement);

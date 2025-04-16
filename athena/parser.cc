@@ -1102,7 +1102,7 @@ namespace athena {
           switch (yyn)
             {
   case 2: // program: statement
-#line 150 "parser.yy"
+#line 151 "parser.yy"
             { 
     builder.AddStatement(std::move(yystack_[0].value.as < Statement > ()));
     yylhs.value.as < void* > () = nullptr;
@@ -1111,7 +1111,7 @@ namespace athena {
     break;
 
   case 3: // program: program statement
-#line 154 "parser.yy"
+#line 155 "parser.yy"
                     {
   builder.AddStatement(std::move(yystack_[0].value.as < Statement > ()));
   yylhs.value.as < void* > () = nullptr;
@@ -1120,572 +1120,578 @@ namespace athena {
     break;
 
   case 4: // statement: "identifier" "=" expr ";"
-#line 159 "parser.yy"
+#line 160 "parser.yy"
                                    { yylhs.value.as < Statement > () = Statement(std::move(yystack_[3].value.as < std::string > ()), std::move(yystack_[1].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1126 "parser.cc"
     break;
 
   case 5: // expr: term
-#line 161 "parser.yy"
+#line 162 "parser.yy"
            { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ());}
 #line 1132 "parser.cc"
     break;
 
   case 6: // term: literal
-#line 165 "parser.yy"
+#line 166 "parser.yy"
           { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
 #line 1138 "parser.cc"
     break;
 
   case 7: // term: function
-#line 166 "parser.yy"
+#line 167 "parser.yy"
            { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
 #line 1144 "parser.cc"
     break;
 
   case 8: // term: boolean
-#line 167 "parser.yy"
+#line 168 "parser.yy"
           { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
 #line 1150 "parser.cc"
     break;
 
   case 9: // term: "(" term ")"
-#line 168 "parser.yy"
+#line 169 "parser.yy"
                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[1].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
 #line 1156 "parser.cc"
     break;
 
   case 10: // term: "identifier"
-#line 169 "parser.yy"
+#line 170 "parser.yy"
              { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = builder.MakeRefNode(std::move(yystack_[0].value.as < std::string > ())); }
 #line 1162 "parser.cc"
     break;
 
   case 11: // term: "entry_arg"
-#line 170 "parser.yy"
+#line 171 "parser.yy"
             { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::unique_ptr<jitfusion::ExecNode>(new jitfusion::EntryArgumentNode); }
 #line 1168 "parser.cc"
     break;
 
   case 12: // term: "exec_ctx"
-#line 171 "parser.yy"
+#line 172 "parser.yy"
            { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::unique_ptr<jitfusion::ExecNode>(new jitfusion::ExecContextNode); }
 #line 1174 "parser.cc"
     break;
 
-  case 13: // literal: "int8"
-#line 175 "parser.yy"
-     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < int8_t > ()); }
+  case 13: // term: "output"
+#line 173 "parser.yy"
+         { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::unique_ptr<jitfusion::ExecNode>(new jitfusion::OutputNode); }
 #line 1180 "parser.cc"
     break;
 
-  case 14: // literal: "int16"
-#line 176 "parser.yy"
-      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < int16_t > ()); }
+  case 14: // literal: "int8"
+#line 177 "parser.yy"
+     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < int8_t > ()); }
 #line 1186 "parser.cc"
     break;
 
-  case 15: // literal: "int32"
-#line 177 "parser.yy"
-      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < int32_t > ()); }
+  case 15: // literal: "int16"
+#line 178 "parser.yy"
+      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < int16_t > ()); }
 #line 1192 "parser.cc"
     break;
 
-  case 16: // literal: "int64"
-#line 178 "parser.yy"
-      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < int64_t > ()); }
+  case 16: // literal: "int32"
+#line 179 "parser.yy"
+      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < int32_t > ()); }
 #line 1198 "parser.cc"
     break;
 
-  case 17: // literal: "uint8"
-#line 179 "parser.yy"
-     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < uint8_t > ()); }
+  case 17: // literal: "int64"
+#line 180 "parser.yy"
+      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < int64_t > ()); }
 #line 1204 "parser.cc"
     break;
 
-  case 18: // literal: "uint16"
-#line 180 "parser.yy"
-      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < uint16_t > ()); }
+  case 18: // literal: "uint8"
+#line 181 "parser.yy"
+     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < uint8_t > ()); }
 #line 1210 "parser.cc"
     break;
 
-  case 19: // literal: "uint32"
-#line 181 "parser.yy"
-      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < uint32_t > ()); }
+  case 19: // literal: "uint16"
+#line 182 "parser.yy"
+      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < uint16_t > ()); }
 #line 1216 "parser.cc"
     break;
 
-  case 20: // literal: "uint64"
-#line 182 "parser.yy"
-      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < uint64_t > ()); }
+  case 20: // literal: "uint32"
+#line 183 "parser.yy"
+      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < uint32_t > ()); }
 #line 1222 "parser.cc"
     break;
 
-  case 21: // literal: "float"
-#line 183 "parser.yy"
-      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < float > ()); }
+  case 21: // literal: "uint64"
+#line 184 "parser.yy"
+      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < uint64_t > ()); }
 #line 1228 "parser.cc"
     break;
 
-  case 22: // literal: "double"
-#line 184 "parser.yy"
-      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < double > ()); }
+  case 22: // literal: "float"
+#line 185 "parser.yy"
+      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < float > ()); }
 #line 1234 "parser.cc"
     break;
 
-  case 23: // literal: "string"
-#line 185 "parser.yy"
-         { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < std::string > ()); }
+  case 23: // literal: "double"
+#line 186 "parser.yy"
+      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < double > ()); }
 #line 1240 "parser.cc"
     break;
 
-  case 24: // literal: list
-#line 186 "parser.yy"
-       { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
+  case 24: // literal: "string"
+#line 187 "parser.yy"
+         { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < std::string > ()); }
 #line 1246 "parser.cc"
     break;
 
-  case 25: // literal: "true"
-#line 187 "parser.yy"
-         { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(uint8_t(1)); }
+  case 25: // literal: list
+#line 188 "parser.yy"
+       { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
 #line 1252 "parser.cc"
     break;
 
-  case 26: // literal: "false"
-#line 188 "parser.yy"
-          { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(uint8_t(0)); }
+  case 26: // literal: "true"
+#line 189 "parser.yy"
+         { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(uint8_t(1)); }
 #line 1258 "parser.cc"
     break;
 
-  case 27: // list: "[" i8_list "]"
-#line 192 "parser.yy"
-                  { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<int8_t> > ()); }
+  case 27: // literal: "false"
+#line 190 "parser.yy"
+          { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(uint8_t(0)); }
 #line 1264 "parser.cc"
     break;
 
-  case 28: // list: "[" i16_list "]"
-#line 193 "parser.yy"
-                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<int16_t> > ()); }
+  case 28: // list: "[" i8_list "]"
+#line 194 "parser.yy"
+                  { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<int8_t> > ()); }
 #line 1270 "parser.cc"
     break;
 
-  case 29: // list: "[" i32_list "]"
-#line 194 "parser.yy"
-                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<int32_t> > ()); }
+  case 29: // list: "[" i16_list "]"
+#line 195 "parser.yy"
+                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<int16_t> > ()); }
 #line 1276 "parser.cc"
     break;
 
-  case 30: // list: "[" i64_list "]"
-#line 195 "parser.yy"
-                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<int64_t> > ()); }
+  case 30: // list: "[" i32_list "]"
+#line 196 "parser.yy"
+                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<int32_t> > ()); }
 #line 1282 "parser.cc"
     break;
 
-  case 31: // list: "[" u8_list "]"
-#line 196 "parser.yy"
-                  { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<uint8_t> > ()); }
+  case 31: // list: "[" i64_list "]"
+#line 197 "parser.yy"
+                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<int64_t> > ()); }
 #line 1288 "parser.cc"
     break;
 
-  case 32: // list: "[" u16_list "]"
-#line 197 "parser.yy"
-                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<uint16_t> > ()); }
+  case 32: // list: "[" u8_list "]"
+#line 198 "parser.yy"
+                  { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<uint8_t> > ()); }
 #line 1294 "parser.cc"
     break;
 
-  case 33: // list: "[" u32_list "]"
-#line 198 "parser.yy"
-                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<uint32_t> > ()); }
+  case 33: // list: "[" u16_list "]"
+#line 199 "parser.yy"
+                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<uint16_t> > ()); }
 #line 1300 "parser.cc"
     break;
 
-  case 34: // list: "[" u64_list "]"
-#line 199 "parser.yy"
-                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<uint64_t> > ()); }
+  case 34: // list: "[" u32_list "]"
+#line 200 "parser.yy"
+                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<uint32_t> > ()); }
 #line 1306 "parser.cc"
     break;
 
-  case 35: // list: "[" f32_list "]"
-#line 200 "parser.yy"
-                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<float> > ()); }
+  case 35: // list: "[" u64_list "]"
+#line 201 "parser.yy"
+                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<uint64_t> > ()); }
 #line 1312 "parser.cc"
     break;
 
-  case 36: // list: "[" f64_list "]"
-#line 201 "parser.yy"
-                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<double> > ()); }
+  case 36: // list: "[" f32_list "]"
+#line 202 "parser.yy"
+                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<float> > ()); }
 #line 1318 "parser.cc"
     break;
 
-  case 37: // list: "[" string_list "]"
-#line 202 "parser.yy"
-                      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<std::string> > ()); }
+  case 37: // list: "[" f64_list "]"
+#line 203 "parser.yy"
+                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<double> > ()); }
 #line 1324 "parser.cc"
     break;
 
-  case 38: // i8_list: "int8"
-#line 206 "parser.yy"
-     { yylhs.value.as < std::vector<int8_t> > () = std::vector<int8_t>{yystack_[0].value.as < int8_t > ()}; }
+  case 38: // list: "[" string_list "]"
+#line 204 "parser.yy"
+                      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<std::string> > ()); }
 #line 1330 "parser.cc"
     break;
 
-  case 39: // i8_list: i8_list "," "int8"
-#line 207 "parser.yy"
+  case 39: // i8_list: "int8"
+#line 208 "parser.yy"
+     { yylhs.value.as < std::vector<int8_t> > () = std::vector<int8_t>{yystack_[0].value.as < int8_t > ()}; }
+#line 1336 "parser.cc"
+    break;
+
+  case 40: // i8_list: i8_list "," "int8"
+#line 209 "parser.yy"
                  {
   yystack_[2].value.as < std::vector<int8_t> > ().emplace_back(std::move(yystack_[0].value.as < int8_t > ()));
   yylhs.value.as < std::vector<int8_t> > () = std::move(yystack_[2].value.as < std::vector<int8_t> > ());
 }
-#line 1339 "parser.cc"
-    break;
-
-  case 40: // i16_list: "int16"
-#line 214 "parser.yy"
-      { yylhs.value.as < std::vector<int16_t> > () = std::vector<int16_t>{yystack_[0].value.as < int16_t > ()}; }
 #line 1345 "parser.cc"
     break;
 
-  case 41: // i16_list: i16_list "," "int16"
-#line 215 "parser.yy"
+  case 41: // i16_list: "int16"
+#line 216 "parser.yy"
+      { yylhs.value.as < std::vector<int16_t> > () = std::vector<int16_t>{yystack_[0].value.as < int16_t > ()}; }
+#line 1351 "parser.cc"
+    break;
+
+  case 42: // i16_list: i16_list "," "int16"
+#line 217 "parser.yy"
                    {
   yystack_[2].value.as < std::vector<int16_t> > ().emplace_back(std::move(yystack_[0].value.as < int16_t > ()));
   yylhs.value.as < std::vector<int16_t> > () = std::move(yystack_[2].value.as < std::vector<int16_t> > ());
 }
-#line 1354 "parser.cc"
-    break;
-
-  case 42: // i32_list: "int32"
-#line 222 "parser.yy"
-      { yylhs.value.as < std::vector<int32_t> > () = std::vector<int32_t>{yystack_[0].value.as < int32_t > ()}; }
 #line 1360 "parser.cc"
     break;
 
-  case 43: // i32_list: i32_list "," "int32"
-#line 223 "parser.yy"
+  case 43: // i32_list: "int32"
+#line 224 "parser.yy"
+      { yylhs.value.as < std::vector<int32_t> > () = std::vector<int32_t>{yystack_[0].value.as < int32_t > ()}; }
+#line 1366 "parser.cc"
+    break;
+
+  case 44: // i32_list: i32_list "," "int32"
+#line 225 "parser.yy"
                    {
   yystack_[2].value.as < std::vector<int32_t> > ().emplace_back(std::move(yystack_[0].value.as < int32_t > ()));
   yylhs.value.as < std::vector<int32_t> > () = std::move(yystack_[2].value.as < std::vector<int32_t> > ());
 }
-#line 1369 "parser.cc"
-    break;
-
-  case 44: // i64_list: "int64"
-#line 230 "parser.yy"
-      { yylhs.value.as < std::vector<int64_t> > () = std::vector<int64_t>{yystack_[0].value.as < int64_t > ()}; }
 #line 1375 "parser.cc"
     break;
 
-  case 45: // i64_list: i64_list "," "int64"
-#line 231 "parser.yy"
+  case 45: // i64_list: "int64"
+#line 232 "parser.yy"
+      { yylhs.value.as < std::vector<int64_t> > () = std::vector<int64_t>{yystack_[0].value.as < int64_t > ()}; }
+#line 1381 "parser.cc"
+    break;
+
+  case 46: // i64_list: i64_list "," "int64"
+#line 233 "parser.yy"
                    {
   yystack_[2].value.as < std::vector<int64_t> > ().emplace_back(std::move(yystack_[0].value.as < int64_t > ()));
   yylhs.value.as < std::vector<int64_t> > () = std::move(yystack_[2].value.as < std::vector<int64_t> > ());
 }
-#line 1384 "parser.cc"
-    break;
-
-  case 46: // u8_list: "uint8"
-#line 238 "parser.yy"
-     { yylhs.value.as < std::vector<uint8_t> > () = std::vector<uint8_t>{yystack_[0].value.as < uint8_t > ()}; }
 #line 1390 "parser.cc"
     break;
 
-  case 47: // u8_list: u8_list "," "uint8"
-#line 239 "parser.yy"
+  case 47: // u8_list: "uint8"
+#line 240 "parser.yy"
+     { yylhs.value.as < std::vector<uint8_t> > () = std::vector<uint8_t>{yystack_[0].value.as < uint8_t > ()}; }
+#line 1396 "parser.cc"
+    break;
+
+  case 48: // u8_list: u8_list "," "uint8"
+#line 241 "parser.yy"
                  {
   yystack_[2].value.as < std::vector<uint8_t> > ().emplace_back(std::move(yystack_[0].value.as < uint8_t > ()));
   yylhs.value.as < std::vector<uint8_t> > () = std::move(yystack_[2].value.as < std::vector<uint8_t> > ());
 }
-#line 1399 "parser.cc"
-    break;
-
-  case 48: // u16_list: "uint16"
-#line 246 "parser.yy"
-      { yylhs.value.as < std::vector<uint16_t> > () = std::vector<uint16_t>{yystack_[0].value.as < uint16_t > ()}; }
 #line 1405 "parser.cc"
     break;
 
-  case 49: // u16_list: u16_list "," "uint16"
-#line 247 "parser.yy"
+  case 49: // u16_list: "uint16"
+#line 248 "parser.yy"
+      { yylhs.value.as < std::vector<uint16_t> > () = std::vector<uint16_t>{yystack_[0].value.as < uint16_t > ()}; }
+#line 1411 "parser.cc"
+    break;
+
+  case 50: // u16_list: u16_list "," "uint16"
+#line 249 "parser.yy"
                    {
   yystack_[2].value.as < std::vector<uint16_t> > ().emplace_back(std::move(yystack_[0].value.as < uint16_t > ()));
   yylhs.value.as < std::vector<uint16_t> > () = std::move(yystack_[2].value.as < std::vector<uint16_t> > ());
 }
-#line 1414 "parser.cc"
-    break;
-
-  case 50: // u32_list: "uint32"
-#line 254 "parser.yy"
-      { yylhs.value.as < std::vector<uint32_t> > () = std::vector<uint32_t>{yystack_[0].value.as < uint32_t > ()}; }
 #line 1420 "parser.cc"
     break;
 
-  case 51: // u32_list: u32_list "," "uint32"
-#line 255 "parser.yy"
+  case 51: // u32_list: "uint32"
+#line 256 "parser.yy"
+      { yylhs.value.as < std::vector<uint32_t> > () = std::vector<uint32_t>{yystack_[0].value.as < uint32_t > ()}; }
+#line 1426 "parser.cc"
+    break;
+
+  case 52: // u32_list: u32_list "," "uint32"
+#line 257 "parser.yy"
                    {
   yystack_[2].value.as < std::vector<uint32_t> > ().emplace_back(std::move(yystack_[0].value.as < uint32_t > ()));
   yylhs.value.as < std::vector<uint32_t> > () = std::move(yystack_[2].value.as < std::vector<uint32_t> > ());
 }
-#line 1429 "parser.cc"
-    break;
-
-  case 52: // u64_list: "uint64"
-#line 262 "parser.yy"
-      { yylhs.value.as < std::vector<uint64_t> > () = std::vector<uint64_t>{yystack_[0].value.as < uint64_t > ()}; }
 #line 1435 "parser.cc"
     break;
 
-  case 53: // u64_list: u64_list "," "uint64"
-#line 263 "parser.yy"
+  case 53: // u64_list: "uint64"
+#line 264 "parser.yy"
+      { yylhs.value.as < std::vector<uint64_t> > () = std::vector<uint64_t>{yystack_[0].value.as < uint64_t > ()}; }
+#line 1441 "parser.cc"
+    break;
+
+  case 54: // u64_list: u64_list "," "uint64"
+#line 265 "parser.yy"
                    {
   yystack_[2].value.as < std::vector<uint64_t> > ().emplace_back(std::move(yystack_[0].value.as < uint64_t > ()));
   yylhs.value.as < std::vector<uint64_t> > () = std::move(yystack_[2].value.as < std::vector<uint64_t> > ());
 }
-#line 1444 "parser.cc"
-    break;
-
-  case 54: // f32_list: "float"
-#line 270 "parser.yy"
-      { yylhs.value.as < std::vector<float> > () = std::vector<float>{yystack_[0].value.as < float > ()}; }
 #line 1450 "parser.cc"
     break;
 
-  case 55: // f32_list: f32_list "," "float"
-#line 271 "parser.yy"
+  case 55: // f32_list: "float"
+#line 272 "parser.yy"
+      { yylhs.value.as < std::vector<float> > () = std::vector<float>{yystack_[0].value.as < float > ()}; }
+#line 1456 "parser.cc"
+    break;
+
+  case 56: // f32_list: f32_list "," "float"
+#line 273 "parser.yy"
                    {
   yystack_[2].value.as < std::vector<float> > ().emplace_back(std::move(yystack_[0].value.as < float > ()));
   yylhs.value.as < std::vector<float> > () = std::move(yystack_[2].value.as < std::vector<float> > ());
 }
-#line 1459 "parser.cc"
-    break;
-
-  case 56: // f64_list: "double"
-#line 278 "parser.yy"
-      { yylhs.value.as < std::vector<double> > () = std::vector<double>{yystack_[0].value.as < double > ()}; }
 #line 1465 "parser.cc"
     break;
 
-  case 57: // f64_list: f64_list "," "double"
-#line 279 "parser.yy"
+  case 57: // f64_list: "double"
+#line 280 "parser.yy"
+      { yylhs.value.as < std::vector<double> > () = std::vector<double>{yystack_[0].value.as < double > ()}; }
+#line 1471 "parser.cc"
+    break;
+
+  case 58: // f64_list: f64_list "," "double"
+#line 281 "parser.yy"
                    {
   yystack_[2].value.as < std::vector<double> > ().emplace_back(std::move(yystack_[0].value.as < double > ()));
   yylhs.value.as < std::vector<double> > () = std::move(yystack_[2].value.as < std::vector<double> > ());
 }
-#line 1474 "parser.cc"
-    break;
-
-  case 58: // string_list: "string"
-#line 286 "parser.yy"
-         { yylhs.value.as < std::vector<std::string> > () = std::vector<std::string>{yystack_[0].value.as < std::string > ()}; }
 #line 1480 "parser.cc"
     break;
 
-  case 59: // string_list: string_list "," "string"
-#line 287 "parser.yy"
+  case 59: // string_list: "string"
+#line 288 "parser.yy"
+         { yylhs.value.as < std::vector<std::string> > () = std::vector<std::string>{yystack_[0].value.as < std::string > ()}; }
+#line 1486 "parser.cc"
+    break;
+
+  case 60: // string_list: string_list "," "string"
+#line 289 "parser.yy"
                          {
   yystack_[2].value.as < std::vector<std::string> > ().emplace_back(std::move(yystack_[0].value.as < std::string > ()));
   yylhs.value.as < std::vector<std::string> > () = std::move(yystack_[2].value.as < std::vector<std::string> > ());
 }
-#line 1489 "parser.cc"
-    break;
-
-  case 60: // function: infix_function
-#line 294 "parser.yy"
-                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
 #line 1495 "parser.cc"
     break;
 
-  case 61: // function: named_function
-#line 295 "parser.yy"
+  case 61: // function: infix_function
+#line 296 "parser.yy"
                  { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
 #line 1501 "parser.cc"
     break;
 
-  case 62: // infix_function: "-" term
-#line 300 "parser.yy"
-                     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kMinus, std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 62: // function: named_function
+#line 297 "parser.yy"
+                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
 #line 1507 "parser.cc"
     break;
 
-  case 63: // infix_function: "not" term
-#line 301 "parser.yy"
-                       { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kNot, std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 63: // infix_function: "-" term
+#line 302 "parser.yy"
+                     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kMinus, std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1513 "parser.cc"
     break;
 
-  case 64: // infix_function: "+" term
-#line 302 "parser.yy"
-                     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kPlus, std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 64: // infix_function: "not" term
+#line 303 "parser.yy"
+                       { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kNot, std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1519 "parser.cc"
     break;
 
-  case 65: // infix_function: "~" term
-#line 303 "parser.yy"
-                     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kBitwiseNot, std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 65: // infix_function: "+" term
+#line 304 "parser.yy"
+                     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kPlus, std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1525 "parser.cc"
     break;
 
-  case 66: // infix_function: term "+" term
-#line 304 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kAdd, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 66: // infix_function: "~" term
+#line 305 "parser.yy"
+                     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kBitwiseNot, std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1531 "parser.cc"
     break;
 
-  case 67: // infix_function: term "-" term
-#line 305 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kSub, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 67: // infix_function: term "+" term
+#line 306 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kAdd, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1537 "parser.cc"
     break;
 
-  case 68: // infix_function: term "*" term
-#line 306 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kMul, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 68: // infix_function: term "-" term
+#line 307 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kSub, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1543 "parser.cc"
     break;
 
-  case 69: // infix_function: term "/" term
-#line 307 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kDiv, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 69: // infix_function: term "*" term
+#line 308 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kMul, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1549 "parser.cc"
     break;
 
-  case 70: // infix_function: term "%" term
-#line 308 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kMod, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 70: // infix_function: term "/" term
+#line 309 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kDiv, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1555 "parser.cc"
     break;
 
-  case 71: // infix_function: term "&" term
-#line 309 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseAnd, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 71: // infix_function: term "%" term
+#line 310 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kMod, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1561 "parser.cc"
     break;
 
-  case 72: // infix_function: term "|" term
-#line 310 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseOr, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 72: // infix_function: term "&" term
+#line 311 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseAnd, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1567 "parser.cc"
     break;
 
-  case 73: // infix_function: term "^" term
-#line 311 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseXor, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 73: // infix_function: term "|" term
+#line 312 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseOr, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1573 "parser.cc"
     break;
 
-  case 74: // infix_function: term "==" term
-#line 312 "parser.yy"
-                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kEqual, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 74: // infix_function: term "^" term
+#line 313 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseXor, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1579 "parser.cc"
     break;
 
-  case 75: // infix_function: term "!=" term
-#line 313 "parser.yy"
-                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kNotEqual, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 75: // infix_function: term "==" term
+#line 314 "parser.yy"
+                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kEqual, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1585 "parser.cc"
     break;
 
-  case 76: // infix_function: term ">" term
-#line 314 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLarge, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 76: // infix_function: term "!=" term
+#line 315 "parser.yy"
+                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kNotEqual, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1591 "parser.cc"
     break;
 
-  case 77: // infix_function: term ">=" term
-#line 315 "parser.yy"
-                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLargeEqual, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 77: // infix_function: term ">" term
+#line 316 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLarge, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1597 "parser.cc"
     break;
 
-  case 78: // infix_function: term "<" term
-#line 316 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLess, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 78: // infix_function: term ">=" term
+#line 317 "parser.yy"
+                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLargeEqual, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1603 "parser.cc"
     break;
 
-  case 79: // infix_function: term "<=" term
-#line 317 "parser.yy"
-                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLessEqual, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 79: // infix_function: term "<" term
+#line 318 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLess, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1609 "parser.cc"
     break;
 
-  case 80: // infix_function: term "<<" term
-#line 318 "parser.yy"
-                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseShiftLeft, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 80: // infix_function: term "<=" term
+#line 319 "parser.yy"
+                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLessEqual, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1615 "parser.cc"
     break;
 
-  case 81: // infix_function: term ">>" term
-#line 319 "parser.yy"
-                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseShiftRight, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 81: // infix_function: term "<<" term
+#line 320 "parser.yy"
+                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseShiftLeft, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1621 "parser.cc"
     break;
 
-  case 82: // named_function: "if" "(" args ")"
-#line 323 "parser.yy"
-                    { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::IfNode>(std::move(yystack_[1].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ())); }
+  case 82: // infix_function: term ">>" term
+#line 321 "parser.yy"
+                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseShiftRight, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1627 "parser.cc"
     break;
 
-  case 83: // named_function: "identifier" "(" args ")"
-#line 324 "parser.yy"
-                           { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::FunctionNode>(std::move(yystack_[3].value.as < std::string > ()), std::move(yystack_[1].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ())); }
+  case 83: // named_function: "if" "(" args ")"
+#line 325 "parser.yy"
+                    { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::IfNode>(std::move(yystack_[1].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ())); }
 #line 1633 "parser.cc"
     break;
 
-  case 84: // named_function: term "in" term
-#line 325 "parser.yy"
+  case 84: // named_function: "identifier" "(" args ")"
+#line 326 "parser.yy"
+                           { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::FunctionNode>(std::move(yystack_[3].value.as < std::string > ()), std::move(yystack_[1].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ())); }
+#line 1639 "parser.cc"
+    break;
+
+  case 85: // named_function: term "in" term
+#line 327 "parser.yy"
                  {
     yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::FunctionNode>("in", std::vector<std::unique_ptr<jitfusion::ExecNode>>());
     static_cast<jitfusion::FunctionNode *>(yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > ().get())->AppendArgs(std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
     static_cast<jitfusion::FunctionNode *>(yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > ().get())->AppendArgs(std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
 }
-#line 1643 "parser.cc"
-    break;
-
-  case 85: // named_function: "switch" "(" args ")"
-#line 330 "parser.yy"
-                        { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::SwitchNode>(std::move(yystack_[1].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ())); }
 #line 1649 "parser.cc"
     break;
 
-  case 86: // args: arg
-#line 334 "parser.yy"
+  case 86: // named_function: "switch" "(" args ")"
+#line 332 "parser.yy"
+                        { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::SwitchNode>(std::move(yystack_[1].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ())); }
+#line 1655 "parser.cc"
+    break;
+
+  case 87: // args: arg
+#line 336 "parser.yy"
       {
     yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > () = std::vector<std::unique_ptr<jitfusion::ExecNode>>{};
     yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ().emplace_back(std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
   }
-#line 1658 "parser.cc"
+#line 1664 "parser.cc"
     break;
 
-  case 87: // args: args "," arg
-#line 338 "parser.yy"
+  case 88: // args: args "," arg
+#line 340 "parser.yy"
                {
     yystack_[2].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ().emplace_back(std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
     yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > () = std::move(yystack_[2].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ());
   }
-#line 1667 "parser.cc"
-    break;
-
-  case 88: // arg: term
-#line 345 "parser.yy"
-       { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
 #line 1673 "parser.cc"
     break;
 
-  case 89: // boolean: term "and" term
-#line 349 "parser.yy"
-                  { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kAnd, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 89: // arg: term
+#line 347 "parser.yy"
+       { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
 #line 1679 "parser.cc"
     break;
 
-  case 90: // boolean: term "or" term
-#line 350 "parser.yy"
-                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kOr, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+  case 90: // boolean: term "and" term
+#line 351 "parser.yy"
+                  { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kAnd, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1685 "parser.cc"
     break;
 
+  case 91: // boolean: term "or" term
+#line 352 "parser.yy"
+                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kOr, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
+#line 1691 "parser.cc"
+    break;
 
-#line 1689 "parser.cc"
+
+#line 1695 "parser.cc"
 
             default:
               break;
@@ -1872,13 +1878,13 @@ namespace athena {
     "end of file", "error", "invalid token", "if", "switch", "in", "not",
   "and", "or", "true", "false", "-", "+", "*", "/", "(", ")", "%", "|",
   "^", "&", "~", "<<", ">>", "==", "=", "!=", "<", "<=", ">", ">=", ",",
-  "[", "]", ";", "entry_arg", "exec_ctx", "identifier", "int8", "int16",
-  "int32", "int64", "uint8", "uint16", "uint32", "uint64", "float",
-  "double", "string", "NEG", "$accept", "program", "statement", "expr",
-  "term", "literal", "list", "i8_list", "i16_list", "i32_list", "i64_list",
-  "u8_list", "u16_list", "u32_list", "u64_list", "f32_list", "f64_list",
-  "string_list", "function", "infix_function", "named_function", "args",
-  "arg", "boolean", YY_NULLPTR
+  "[", "]", ";", "entry_arg", "exec_ctx", "output", "identifier", "int8",
+  "int16", "int32", "int64", "uint8", "uint16", "uint32", "uint64",
+  "float", "double", "string", "NEG", "$accept", "program", "statement",
+  "expr", "term", "literal", "list", "i8_list", "i16_list", "i32_list",
+  "i64_list", "u8_list", "u16_list", "u32_list", "u64_list", "f32_list",
+  "f64_list", "string_list", "function", "infix_function",
+  "named_function", "args", "arg", "boolean", YY_NULLPTR
     };
     return yy_sname[yysymbol];
   }
@@ -2147,174 +2153,174 @@ namespace athena {
   }
 
 
-  const signed char Parser::yypact_ninf_ = -38;
+  const signed char Parser::yypact_ninf_ = -39;
 
   const signed char Parser::yytable_ninf_ = -1;
 
   const short
   Parser::yypact_[] =
   {
-     -21,     2,     1,   -38,     9,   -38,   -38,    17,    25,     9,
-     -38,   -38,     9,     9,     9,     9,   258,   -38,   -38,    27,
-     -38,   -38,   -38,   -38,   -38,   -38,   -38,   -38,   -38,   -38,
-     -38,     3,   106,   -38,   -38,   -38,   -38,   -38,   -38,     9,
-       9,   -38,   -38,   -38,    80,   -38,   -38,   -38,   -38,   -38,
-     -38,   -38,   -38,   -38,   -38,   -38,   -38,   -27,    -8,    -5,
-      30,   107,   177,   197,   200,   217,   220,   237,     9,   -38,
+     -22,     2,     1,   -39,     9,   -39,   -39,    27,    72,     9,
+     -39,   -39,     9,     9,     9,     9,   258,   -39,   -39,   -39,
+      75,   -39,   -39,   -39,   -39,   -39,   -39,   -39,   -39,   -39,
+     -39,   -39,    57,   107,   -39,   -39,   -39,   -39,   -39,   -39,
+       9,     9,   -39,   -39,   -39,    81,   -39,   -39,   -39,   -39,
+     -39,   -39,   -39,   -39,   -39,   -39,   -39,   -39,   -27,    -8,
+      -5,    28,    29,    32,    33,   108,   178,   198,   201,     9,
+     -39,     9,     9,     9,     9,     9,     9,     9,     9,     9,
        9,     9,     9,     9,     9,     9,     9,     9,     9,     9,
-       9,     9,     9,     9,     9,     9,     9,     9,     9,   106,
-     -14,   -38,    -9,   -38,     5,   -38,    21,   -38,    24,   -38,
-      48,   -38,    23,   -38,    43,   -38,    46,   -38,    50,   -38,
-      55,   -38,    58,   -38,    64,   -38,    -2,   172,   152,   132,
-      45,    45,   -38,   -38,   -38,   192,   212,   232,    22,    22,
-     252,   252,   272,   272,   272,   272,   -38,     9,   -38,   -38,
-     -38,   -38,   -38,   -38,   -38,   -38,   -38,   -38,   -38,   -38,
-     -38,   -38
+     107,   -14,   -39,    -9,   -39,     4,   -39,    56,   -39,    61,
+     -39,    64,   -39,    70,   -39,    73,   -39,    71,   -39,    76,
+     -39,    85,   -39,    80,   -39,    74,   -39,    -2,   173,   153,
+     133,    23,    23,   -39,   -39,   -39,   193,   213,   233,    21,
+      21,   253,   253,   273,   273,   273,   273,   -39,     9,   -39,
+     -39,   -39,   -39,   -39,   -39,   -39,   -39,   -39,   -39,   -39,
+     -39,   -39,   -39
   };
 
   const signed char
   Parser::yydefact_[] =
   {
        0,     0,     0,     2,     0,     1,     3,     0,     0,     0,
-      25,    26,     0,     0,     0,     0,     0,    11,    12,    10,
-      13,    14,    15,    16,    17,    18,    19,    20,    21,    22,
-      23,     0,     5,     6,    24,     7,    60,    61,     8,     0,
-       0,    63,    62,    64,     0,    65,    38,    40,    42,    44,
-      46,    48,    50,    52,    54,    56,    58,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     4,
+      26,    27,     0,     0,     0,     0,     0,    11,    12,    13,
+      10,    14,    15,    16,    17,    18,    19,    20,    21,    22,
+      23,    24,     0,     5,     6,    25,     7,    61,    62,     8,
+       0,     0,    64,    63,    65,     0,    66,    39,    41,    43,
+      45,    47,    49,    51,    53,    55,    57,    59,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,    88,
-       0,    86,     0,     9,     0,    27,     0,    28,     0,    29,
-       0,    30,     0,    31,     0,    32,     0,    33,     0,    34,
-       0,    35,     0,    36,     0,    37,     0,    84,    89,    90,
-      67,    66,    68,    69,    70,    72,    73,    71,    80,    81,
-      74,    75,    78,    79,    76,    77,    82,     0,    85,    39,
-      41,    43,    45,    47,    49,    51,    53,    55,    57,    59,
-      83,    87
+       4,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+      89,     0,    87,     0,     9,     0,    28,     0,    29,     0,
+      30,     0,    31,     0,    32,     0,    33,     0,    34,     0,
+      35,     0,    36,     0,    37,     0,    38,     0,    85,    90,
+      91,    68,    67,    69,    70,    71,    73,    74,    72,    81,
+      82,    75,    76,    79,    80,    77,    78,    83,     0,    86,
+      40,    42,    44,    46,    48,    50,    52,    54,    56,    58,
+      60,    84,    88
   };
 
-  const signed char
+  const short
   Parser::yypgoto_[] =
   {
-     -38,   -38,   113,   -38,    -4,   -38,   -38,   -38,   -38,   -38,
-     -38,   -38,   -38,   -38,   -38,   -38,   -38,   -38,   -38,   -38,
-     -38,   -37,   -16,   -38
+     -39,   -39,   140,   -39,    -4,   -39,   -39,   -39,   -39,   -39,
+     -39,   -39,   -39,   -39,   -39,   -39,   -39,   -39,   -39,   -39,
+     -39,   -38,     5,   -39
   };
 
   const signed char
   Parser::yydefgoto_[] =
   {
-       0,     2,     3,    31,    89,    33,    34,    57,    58,    59,
-      60,    61,    62,    63,    64,    65,    66,    67,    35,    36,
-      37,    90,    91,    38
+       0,     2,     3,    32,    90,    34,    35,    58,    59,    60,
+      61,    62,    63,    64,    65,    66,    67,    68,    36,    37,
+      38,    91,    92,    39
   };
 
   const unsigned char
   Parser::yytable_[] =
   {
-      32,     5,   136,    92,    94,    41,    95,   138,    42,    43,
-      44,    45,     7,     8,   150,     9,     1,   137,    10,    11,
-      12,    13,   137,    96,    14,    97,    98,     4,    99,   137,
-      15,   116,    39,    73,    74,    75,    76,    69,     1,    77,
-      40,    16,    68,   139,    17,    18,    19,    20,    21,    22,
-      23,    24,    25,    26,    27,    28,    29,    30,    75,    76,
-     140,   100,    77,   101,   141,   143,   117,   118,   119,   120,
+      33,     5,   137,    93,    95,    42,    96,   139,    43,    44,
+      45,    46,     7,     8,   151,     9,     1,   138,    10,    11,
+      12,    13,   138,    97,    14,    98,    99,     4,   100,   138,
+      15,   117,    74,    75,    76,    77,    76,    77,    78,     1,
+      78,    16,    40,   140,    17,    18,    19,    20,    21,    22,
+      23,    24,    25,    26,    27,    28,    29,    30,    31,   101,
+     103,   102,   104,   105,   107,   106,   108,   118,   119,   120,
      121,   122,   123,   124,   125,   126,   127,   128,   129,   130,
-     131,   132,   133,   134,   135,    70,   144,    71,    72,   142,
-     145,    73,    74,    75,    76,   146,    93,    77,    78,    79,
-      80,   147,    81,    82,    83,   148,    84,    85,    86,    87,
-      88,    70,   149,    71,    72,     6,     0,    73,    74,    75,
-      76,   151,     0,    77,    78,    79,    80,     0,    81,    82,
-      83,     0,    84,    85,    86,    87,    88,    70,   102,    71,
-     103,     0,     0,    73,    74,    75,    76,     0,     0,    77,
-      78,    79,    80,     0,    81,    82,    83,    70,    84,    85,
-      86,    87,    88,    73,    74,    75,    76,     0,     0,    77,
-      78,    79,    80,     0,    81,    82,    83,     0,    84,    85,
-      86,    87,    88,    73,    74,    75,    76,     0,     0,    77,
-      78,    79,    80,     0,    81,    82,    83,     0,    84,    85,
-      86,    87,    88,    73,    74,    75,    76,     0,   104,    77,
-     105,    79,    80,     0,    81,    82,    83,     0,    84,    85,
-      86,    87,    88,    73,    74,    75,    76,     0,   106,    77,
-     107,   108,    80,   109,    81,    82,    83,     0,    84,    85,
-      86,    87,    88,    73,    74,    75,    76,     0,   110,    77,
-     111,   112,     0,   113,    81,    82,    83,     0,    84,    85,
-      86,    87,    88,    73,    74,    75,    76,     0,   114,    77,
-     115,     0,     0,     0,    81,    82,     0,     0,     0,    85,
-      86,    87,    88,    73,    74,    75,    76,     0,     0,    77,
-       0,     0,     0,     0,    81,    82,    46,    47,    48,    49,
-      50,    51,    52,    53,    54,    55,    56
+     131,   132,   133,   134,   135,   136,    71,    41,    72,    73,
+      69,    70,    74,    75,    76,    77,   141,    94,    78,    79,
+      80,    81,   142,    82,    83,    84,   143,    85,    86,    87,
+      88,    89,    71,   144,    72,    73,   146,   145,    74,    75,
+      76,    77,   147,   150,    78,    79,    80,    81,   149,    82,
+      83,    84,   148,    85,    86,    87,    88,    89,    71,   109,
+      72,   110,     6,   152,    74,    75,    76,    77,     0,     0,
+      78,    79,    80,    81,     0,    82,    83,    84,    71,    85,
+      86,    87,    88,    89,    74,    75,    76,    77,     0,     0,
+      78,    79,    80,    81,     0,    82,    83,    84,     0,    85,
+      86,    87,    88,    89,    74,    75,    76,    77,     0,     0,
+      78,    79,    80,    81,     0,    82,    83,    84,     0,    85,
+      86,    87,    88,    89,    74,    75,    76,    77,     0,   111,
+      78,   112,    80,    81,     0,    82,    83,    84,     0,    85,
+      86,    87,    88,    89,    74,    75,    76,    77,     0,   113,
+      78,   114,   115,    81,   116,    82,    83,    84,     0,    85,
+      86,    87,    88,    89,    74,    75,    76,    77,     0,     0,
+      78,     0,     0,     0,     0,    82,    83,    84,     0,    85,
+      86,    87,    88,    89,    74,    75,    76,    77,     0,     0,
+      78,     0,     0,     0,     0,    82,    83,     0,     0,     0,
+      86,    87,    88,    89,    74,    75,    76,    77,     0,     0,
+      78,     0,     0,     0,     0,    82,    83,    47,    48,    49,
+      50,    51,    52,    53,    54,    55,    56,    57
   };
 
   const short
   Parser::yycheck_[] =
   {
-       4,     0,    16,    40,    31,     9,    33,    16,    12,    13,
-      14,    15,     3,     4,    16,     6,    37,    31,     9,    10,
+       4,     0,    16,    41,    31,     9,    33,    16,    12,    13,
+      14,    15,     3,     4,    16,     6,    38,    31,     9,    10,
       11,    12,    31,    31,    15,    33,    31,    25,    33,    31,
-      21,    68,    15,    11,    12,    13,    14,    34,    37,    17,
-      15,    32,    15,    38,    35,    36,    37,    38,    39,    40,
-      41,    42,    43,    44,    45,    46,    47,    48,    13,    14,
-      39,    31,    17,    33,    40,    42,    70,    71,    72,    73,
+      21,    69,    11,    12,    13,    14,    13,    14,    17,    38,
+      17,    32,    15,    39,    35,    36,    37,    38,    39,    40,
+      41,    42,    43,    44,    45,    46,    47,    48,    49,    31,
+      31,    33,    33,    31,    31,    33,    33,    71,    72,    73,
       74,    75,    76,    77,    78,    79,    80,    81,    82,    83,
-      84,    85,    86,    87,    88,     5,    43,     7,     8,    41,
-      44,    11,    12,    13,    14,    45,    16,    17,    18,    19,
-      20,    46,    22,    23,    24,    47,    26,    27,    28,    29,
-      30,     5,    48,     7,     8,     2,    -1,    11,    12,    13,
-      14,   137,    -1,    17,    18,    19,    20,    -1,    22,    23,
-      24,    -1,    26,    27,    28,    29,    30,     5,    31,     7,
-      33,    -1,    -1,    11,    12,    13,    14,    -1,    -1,    17,
-      18,    19,    20,    -1,    22,    23,    24,     5,    26,    27,
-      28,    29,    30,    11,    12,    13,    14,    -1,    -1,    17,
-      18,    19,    20,    -1,    22,    23,    24,    -1,    26,    27,
-      28,    29,    30,    11,    12,    13,    14,    -1,    -1,    17,
-      18,    19,    20,    -1,    22,    23,    24,    -1,    26,    27,
-      28,    29,    30,    11,    12,    13,    14,    -1,    31,    17,
-      33,    19,    20,    -1,    22,    23,    24,    -1,    26,    27,
-      28,    29,    30,    11,    12,    13,    14,    -1,    31,    17,
-      33,    31,    20,    33,    22,    23,    24,    -1,    26,    27,
-      28,    29,    30,    11,    12,    13,    14,    -1,    31,    17,
-      33,    31,    -1,    33,    22,    23,    24,    -1,    26,    27,
-      28,    29,    30,    11,    12,    13,    14,    -1,    31,    17,
-      33,    -1,    -1,    -1,    22,    23,    -1,    -1,    -1,    27,
-      28,    29,    30,    11,    12,    13,    14,    -1,    -1,    17,
-      -1,    -1,    -1,    -1,    22,    23,    38,    39,    40,    41,
-      42,    43,    44,    45,    46,    47,    48
+      84,    85,    86,    87,    88,    89,     5,    15,     7,     8,
+      15,    34,    11,    12,    13,    14,    40,    16,    17,    18,
+      19,    20,    41,    22,    23,    24,    42,    26,    27,    28,
+      29,    30,     5,    43,     7,     8,    45,    44,    11,    12,
+      13,    14,    46,    49,    17,    18,    19,    20,    48,    22,
+      23,    24,    47,    26,    27,    28,    29,    30,     5,    31,
+       7,    33,     2,   138,    11,    12,    13,    14,    -1,    -1,
+      17,    18,    19,    20,    -1,    22,    23,    24,     5,    26,
+      27,    28,    29,    30,    11,    12,    13,    14,    -1,    -1,
+      17,    18,    19,    20,    -1,    22,    23,    24,    -1,    26,
+      27,    28,    29,    30,    11,    12,    13,    14,    -1,    -1,
+      17,    18,    19,    20,    -1,    22,    23,    24,    -1,    26,
+      27,    28,    29,    30,    11,    12,    13,    14,    -1,    31,
+      17,    33,    19,    20,    -1,    22,    23,    24,    -1,    26,
+      27,    28,    29,    30,    11,    12,    13,    14,    -1,    31,
+      17,    33,    31,    20,    33,    22,    23,    24,    -1,    26,
+      27,    28,    29,    30,    11,    12,    13,    14,    -1,    -1,
+      17,    -1,    -1,    -1,    -1,    22,    23,    24,    -1,    26,
+      27,    28,    29,    30,    11,    12,    13,    14,    -1,    -1,
+      17,    -1,    -1,    -1,    -1,    22,    23,    -1,    -1,    -1,
+      27,    28,    29,    30,    11,    12,    13,    14,    -1,    -1,
+      17,    -1,    -1,    -1,    -1,    22,    23,    39,    40,    41,
+      42,    43,    44,    45,    46,    47,    48,    49
   };
 
   const signed char
   Parser::yystos_[] =
   {
-       0,    37,    51,    52,    25,     0,    52,     3,     4,     6,
+       0,    38,    52,    53,    25,     0,    53,     3,     4,     6,
        9,    10,    11,    12,    15,    21,    32,    35,    36,    37,
       38,    39,    40,    41,    42,    43,    44,    45,    46,    47,
-      48,    53,    54,    55,    56,    68,    69,    70,    73,    15,
-      15,    54,    54,    54,    54,    54,    38,    39,    40,    41,
-      42,    43,    44,    45,    46,    47,    48,    57,    58,    59,
-      60,    61,    62,    63,    64,    65,    66,    67,    15,    34,
-       5,     7,     8,    11,    12,    13,    14,    17,    18,    19,
-      20,    22,    23,    24,    26,    27,    28,    29,    30,    54,
-      71,    72,    71,    16,    31,    33,    31,    33,    31,    33,
-      31,    33,    31,    33,    31,    33,    31,    33,    31,    33,
-      31,    33,    31,    33,    31,    33,    71,    54,    54,    54,
-      54,    54,    54,    54,    54,    54,    54,    54,    54,    54,
-      54,    54,    54,    54,    54,    54,    16,    31,    16,    38,
+      48,    49,    54,    55,    56,    57,    69,    70,    71,    74,
+      15,    15,    55,    55,    55,    55,    55,    39,    40,    41,
+      42,    43,    44,    45,    46,    47,    48,    49,    58,    59,
+      60,    61,    62,    63,    64,    65,    66,    67,    68,    15,
+      34,     5,     7,     8,    11,    12,    13,    14,    17,    18,
+      19,    20,    22,    23,    24,    26,    27,    28,    29,    30,
+      55,    72,    73,    72,    16,    31,    33,    31,    33,    31,
+      33,    31,    33,    31,    33,    31,    33,    31,    33,    31,
+      33,    31,    33,    31,    33,    31,    33,    72,    55,    55,
+      55,    55,    55,    55,    55,    55,    55,    55,    55,    55,
+      55,    55,    55,    55,    55,    55,    55,    16,    31,    16,
       39,    40,    41,    42,    43,    44,    45,    46,    47,    48,
-      16,    72
+      49,    16,    73
   };
 
   const signed char
   Parser::yyr1_[] =
   {
-       0,    50,    51,    51,    52,    53,    54,    54,    54,    54,
-      54,    54,    54,    55,    55,    55,    55,    55,    55,    55,
-      55,    55,    55,    55,    55,    55,    55,    56,    56,    56,
+       0,    51,    52,    52,    53,    54,    55,    55,    55,    55,
+      55,    55,    55,    55,    56,    56,    56,    56,    56,    56,
       56,    56,    56,    56,    56,    56,    56,    56,    57,    57,
-      58,    58,    59,    59,    60,    60,    61,    61,    62,    62,
-      63,    63,    64,    64,    65,    65,    66,    66,    67,    67,
-      68,    68,    69,    69,    69,    69,    69,    69,    69,    69,
-      69,    69,    69,    69,    69,    69,    69,    69,    69,    69,
-      69,    69,    70,    70,    70,    70,    71,    71,    72,    73,
-      73
+      57,    57,    57,    57,    57,    57,    57,    57,    57,    58,
+      58,    59,    59,    60,    60,    61,    61,    62,    62,    63,
+      63,    64,    64,    65,    65,    66,    66,    67,    67,    68,
+      68,    69,    69,    70,    70,    70,    70,    70,    70,    70,
+      70,    70,    70,    70,    70,    70,    70,    70,    70,    70,
+      70,    70,    70,    71,    71,    71,    71,    72,    72,    73,
+      74,    74
   };
 
   const signed char
@@ -2322,14 +2328,14 @@ namespace athena {
   {
        0,     2,     1,     2,     4,     1,     1,     1,     1,     3,
        1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     1,     1,     3,     3,     3,
-       3,     3,     3,     3,     3,     3,     3,     3,     1,     3,
-       1,     3,     1,     3,     1,     3,     1,     3,     1,     3,
-       1,     3,     1,     3,     1,     3,     1,     3,     1,     3,
-       1,     1,     2,     2,     2,     2,     3,     3,     3,     3,
+       1,     1,     1,     1,     1,     1,     1,     1,     3,     3,
+       3,     3,     3,     3,     3,     3,     3,     3,     3,     1,
+       3,     1,     3,     1,     3,     1,     3,     1,     3,     1,
+       3,     1,     3,     1,     3,     1,     3,     1,     3,     1,
+       3,     1,     1,     2,     2,     2,     2,     3,     3,     3,
        3,     3,     3,     3,     3,     3,     3,     3,     3,     3,
-       3,     3,     4,     4,     3,     4,     1,     3,     1,     3,
-       3
+       3,     3,     3,     4,     4,     3,     4,     1,     3,     1,
+       3,     3
   };
 
 
@@ -2339,16 +2345,16 @@ namespace athena {
   const short
   Parser::yyrline_[] =
   {
-       0,   150,   150,   154,   159,   161,   165,   166,   167,   168,
-     169,   170,   171,   175,   176,   177,   178,   179,   180,   181,
-     182,   183,   184,   185,   186,   187,   188,   192,   193,   194,
-     195,   196,   197,   198,   199,   200,   201,   202,   206,   207,
-     214,   215,   222,   223,   230,   231,   238,   239,   246,   247,
-     254,   255,   262,   263,   270,   271,   278,   279,   286,   287,
-     294,   295,   300,   301,   302,   303,   304,   305,   306,   307,
-     308,   309,   310,   311,   312,   313,   314,   315,   316,   317,
-     318,   319,   323,   324,   325,   330,   334,   338,   345,   349,
-     350
+       0,   151,   151,   155,   160,   162,   166,   167,   168,   169,
+     170,   171,   172,   173,   177,   178,   179,   180,   181,   182,
+     183,   184,   185,   186,   187,   188,   189,   190,   194,   195,
+     196,   197,   198,   199,   200,   201,   202,   203,   204,   208,
+     209,   216,   217,   224,   225,   232,   233,   240,   241,   248,
+     249,   256,   257,   264,   265,   272,   273,   280,   281,   288,
+     289,   296,   297,   302,   303,   304,   305,   306,   307,   308,
+     309,   310,   311,   312,   313,   314,   315,   316,   317,   318,
+     319,   320,   321,   325,   326,   327,   332,   336,   340,   347,
+     351,   352
   };
 
   void
@@ -2381,9 +2387,9 @@ namespace athena {
 
 #line 10 "parser.yy"
 } // athena
-#line 2385 "parser.cc"
+#line 2391 "parser.cc"
 
-#line 352 "parser.yy"
+#line 354 "parser.yy"
 
 
 void athena::Parser::error(const location_type &l, const std::string &m) {

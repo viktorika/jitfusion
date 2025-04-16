@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-04-09 15:45:31
  * @Last Modified by: victorika
- * @Last Modified time: 2025-04-10 15:39:29
+ * @Last Modified time: 2025-04-16 16:52:47
  */
 #include "athena.h"
 #include <array>
@@ -75,9 +75,21 @@ StringListStruct LoadStringList(void* entry_arguments, int32_t index) {
   return result;
 }
 
+int32_t StoreF32(void* output, int32_t index, float value) {
+  reinterpret_cast<float*>(output)[index] = value;
+  return 0;
+}
+
 void ReadOnlyFunctionSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) {
   f->setDoesNotThrow();
   f->setMemoryEffects(llvm::MemoryEffects::readOnly());
+}
+
+void StoreFunctionSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) {
+  f->setDoesNotThrow();
+  f->addAttributeAtIndex(1, llvm::Attribute::get(f->getContext(), llvm::Attribute::NoAlias));
+  f->addAttributeAtIndex(1, llvm::Attribute::get(f->getContext(), llvm::Attribute::NoCapture));
+  f->setOnlyAccessesArgMemory();
 }
 
 }  // namespace
@@ -1239,16 +1251,54 @@ TEST(SwitchTest, Test4) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
-  s = load(entry_arg, 0);
-  s9 = load(entry_arg, 1);
-  s21 = load(entry_arg, 2);
-  s22 = load(entry_arg, 3);
   r = switch(0,'a',1, 'b','c');
   )";
   ASSERT_TRUE(athena.Compile(code, func_registry).ok());
   RetType ret;
   ASSERT_TRUE(athena.Execute(nullptr, &ret).ok());
   EXPECT_EQ(std::get<std::string>(ret), "b");
+}
+
+TEST(ComplexTest, Test1) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadF32), nullptr,
+                                     ReadOnlyFunctionSetter};
+    EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  }
+  {
+    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kI32);
+    FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(StoreF32), nullptr,
+                                     StoreFunctionSetter};
+    EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  }
+
+  std::string code1 = R"(
+  s = load(entry_arg, 0);
+  s9 = load(entry_arg, 1);
+  s21 = load(entry_arg, 2);
+  s22 = load(entry_arg, 3);
+  r = switch(s21==10 and (s22==1004070 or s22==1003073) and s9==2, s*1.8, s21==10 and (s22==1004070 or s22==1003073) and s9==1,
+            s*1.4, (s21==10 and s22==1004116 and s9==1), s*1.5, (s21 != 10 and s9==3), s*1.8, s);
+  s_ret = store(output, 0, CastF32(r));
+  )";
+  std::string code2 = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  r = a - b;
+  s_ret = store(output, 1, r);
+  )";
+  std::vector<std::string> codes = {code1, code2};
+  ASSERT_TRUE(athena.Compile(codes, func_registry).ok());
+  RetType ret;
+  std::vector<float> value = {12, 321, 31, 0.9};
+  std::vector<float> output = {0, 0, 0, 0};
+  ASSERT_TRUE(athena.Execute(value.data(), output.data()).ok());
+  EXPECT_EQ(output[0], 12);
+  EXPECT_EQ(output[1], -309);
 }
 
 GTEST_API_ int main(int argc, char** argv) {
