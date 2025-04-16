@@ -115,7 +115,7 @@ FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(L
 EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
 ```
 
-When store functions, it is recommended to set the OutputNode as a corresponding attribute, similar to the code below.
+When use store functions, it is recommended to set the OutputNode as a corresponding attribute, similar to the code below.
 
 ```c++
 
