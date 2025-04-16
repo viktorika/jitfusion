@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-23 15:09:09
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-23 16:02:02
+ * @Last Modified time: 2025-04-16 16:51:08
  */
 #include "codegen.h"
 #include "type.h"
@@ -19,6 +19,7 @@ Status CodeGen::Visit(IfNode &if_node) {
   llvm::FunctionType *func_type =
       llvm::FunctionType::get(ret_type_llvm,
                               llvm::ArrayRef<llvm::Type *>({llvm::Type::getVoidTy(ctx_.context)->getPointerTo(),
+                                                            llvm::Type::getVoidTy(ctx_.context)->getPointerTo(),
                                                             llvm::Type::getVoidTy(ctx_.context)->getPointerTo()}),
                               false);
 
@@ -78,7 +79,9 @@ Status CodeGen::Visit(IfNode &if_node) {
     return Status::RuntimeError("verify function failed in function_codegen in if_func: " + error_info);
   }
 
-  value_ = ctx_.builder.CreateCall(if_func, {ctx_.entry_function->getArg(0), ctx_.entry_function->getArg(1)}, "if(i1)");
+  value_ = ctx_.builder.CreateCall(
+      if_func, {ctx_.entry_function->getArg(0), ctx_.entry_function->getArg(1), ctx_.entry_function->getArg(2)},
+      "if(i1)");
 
   return Status::OK();
 }
