@@ -140,6 +140,7 @@ blank [ \t\r]
 
 "entry_arg"   return  athena::Parser::make_ENTRY_ARG   (loc);
 "exec_ctx"    return  athena::Parser::make_EXEC_CTX    (loc);
+"output"      return  athena::Parser::make_OUTPUT        (loc);
 
 {id}       return  athena::Parser::make_IDENTIFIER (std::string(yytext), loc);
 

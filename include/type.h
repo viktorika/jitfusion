@@ -16,14 +16,15 @@ namespace jitfusion {
 enum class ExecNodeType : uint8_t {
   kEntryArgumentNode = 1,
   kExecContextNode = 2,
-  kConstValueNode = 3,
-  kConstListValueNode = 4,
-  kUnaryOPNode = 5,
-  kBinaryOPNode = 6,
-  kFunctionNode = 7,
-  kNoOPNode = 8,
-  kIfNode = 9,
-  kSwitchNode = 10,
+  kOutputNode = 3,
+  kConstValueNode = 4,
+  kConstListValueNode = 5,
+  kUnaryOPNode = 6,
+  kBinaryOPNode = 7,
+  kFunctionNode = 8,
+  kNoOPNode = 9,
+  kIfNode = 10,
+  kSwitchNode = 11,
 };
 
 enum class BinaryOPType : uint8_t {

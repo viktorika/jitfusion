@@ -57,6 +57,16 @@ class ExecContextNode : public ExecNode {
   std::string ToStringImpl(const std::string& prefix) override;
 };
 
+class OutputNode : public ExecNode {
+ public:
+  Status Accept(Visitor* visitor) override;
+  ExecNodeType GetExecNodeType() override;
+  std::unique_ptr<ExecNode> Clone() override;
+
+ private:
+  std::string ToStringImpl(const std::string& prefix) override;
+};
+
 class ConstantValueNode : public ExecNode {
  public:
   ConstantValueNode() = delete;
@@ -205,6 +215,7 @@ class Visitor {
 
   virtual Status Visit(EntryArgumentNode& entry_argument_node) = 0;
   virtual Status Visit(ExecContextNode& exec_context_node) = 0;
+  virtual Status Visit(OutputNode& output_node) = 0;
   virtual Status Visit(ConstantValueNode& const_node) = 0;
   virtual Status Visit(ConstantListValueNode& const_list_node) = 0;
   virtual Status Visit(UnaryOPNode& unary_op_node) = 0;

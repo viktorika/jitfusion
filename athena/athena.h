@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-04-09 15:43:45
  * @Last Modified by: victorika
- * @Last Modified time: 2025-04-10 15:02:42
+ * @Last Modified time: 2025-04-16 17:04:47
  */
 #pragma once
 
@@ -28,8 +28,15 @@ class Athena {
   Athena(const Athena&) = delete;
   Athena& operator=(const Athena&) = delete;
 
+  // Applicable to simple scenarios, the program will not actually use a custom store function to write data. Instead,
+  // the result will be returned, similar to expression scenarios.
   Status Compile(const std::string& code, const std::unique_ptr<FunctionRegistry>& func_registry);
   Status Execute(void* entry_arguments, RetType* result);
+
+  // Applicable to complex scenarios where multiple pipelines are computed simultaneously. Each pipeline writes data
+  // using a custom function, and results are not returned. This is similar to feature processing scenarios.
+  Status Compile(const std::vector<std::string>& code, const std::unique_ptr<FunctionRegistry>& func_registry);
+  Status Execute(void* entry_arguments, void* result);
 
  private:
   ExecEngine exec_engine_;

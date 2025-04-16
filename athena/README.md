@@ -29,8 +29,53 @@ When using it, you need to <span style="color:red">#include "athena.h"</span> an
 
 * 4.The ID of each statement must be unique to prevent errors.
 
-* 5.You can obtain the input parameter pointer through the entry_arg name and access the ExecContext via exec_ctx.
+* 5.You can obtain the input parameter pointer through the entry_arg name, access the ExecContext via exec_ctx and obtain the output parameter pointer through the output name.
 
-* 6.The last statement will be returned, and any statements not depended upon by the last statement will not be executed. For example, if you have two statements: a = store(1); b = store(2), but neither a nor b is used by the root node or nodes dependent on the root node, then these statements will not be executed. (This is a temporary design and is expected to be modified in the future. There is already a direction for adjustment, but it will take time.)
+## Execute Funtion
+```c++
+  // Applicable to simple scenarios, the program will not actually use a custom store function to write data. Instead,
+  // the result will be returned, similar to expression scenarios.
+  Status Compile(const std::string& code, const std::unique_ptr<FunctionRegistry>& func_registry);
+  Status Execute(void* entry_arguments, RetType* result);
+
+  // Applicable to complex scenarios where multiple pipelines are computed simultaneously. Each pipeline writes data
+  // using a custom function, and results are not returned. This is similar to feature processing scenarios.
+  Status Compile(const std::vector<std::string>& code, const std::unique_ptr<FunctionRegistry>& func_registry);
+  Status Execute(void* entry_arguments, void* result);
+```
+
+The first set of functions returns a value through the last statement and requires that no write operations occur during the process; otherwise, it results in undefined behavior. The second set of functions can accept multiple sets of code, where the statement requires the user to define a custom store function to write data. The function will perform merge and optimization processing on all the code.
+
+It is recommended to divide custom functions into two categories: read-only functions and store functions. Read-only functions can either be data loading functions or computation functions that generate an intermediate variable. It is not recommended for computation functions to directly modify parameter variables; instead, they should return the computation result by generating a new variable. In this case, you can set a read-only attribute for your function, as shown in the code below.
+
+```c++
+void ReadOnlyFunctionSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) {
+  f->setDoesNotThrow();
+  f->setMemoryEffects(llvm::MemoryEffects::readOnly());
+}
+
+FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
+FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadU32), nullptr,
+                                   ReadOnlyFunctionSetter};
+EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+```
+
+When store functions, it is recommended to set the OutputNode as a corresponding attribute, similar to the code below.
+
+```c++
+
+int32_t StoreF32(void* output, int32_t index, float value) {
+  reinterpret_cast<float*>(output)[index] = value;
+  return 0;
+}
+
+void StoreFunctionSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) {
+  f->setDoesNotThrow();
+  f->addAttributeAtIndex(1, llvm::Attribute::get(f->getContext(), llvm::Attribute::NoAlias));
+  f->addAttributeAtIndex(1, llvm::Attribute::get(f->getContext(), llvm::Attribute::NoCapture));
+  f->setOnlyAccessesArgMemory();
+}
+```
+
 
 For more details, please refer to the athena_test.cc file.

@@ -77,6 +77,7 @@ YY_DECL;
   SEMI                        ";"
   ENTRY_ARG                   "entry_arg"
   EXEC_CTX                    "exec_ctx"
+  OUTPUT                      "output"
 ;
 
 %token <std::string> IDENTIFIER "identifier";
@@ -169,6 +170,7 @@ term:
 | IDENTIFIER { $$ = builder.MakeRefNode(std::move($1)); }
 | ENTRY_ARG { $$ = std::unique_ptr<jitfusion::ExecNode>(new jitfusion::EntryArgumentNode); }
 | EXEC_CTX { $$ = std::unique_ptr<jitfusion::ExecNode>(new jitfusion::ExecContextNode); }
+| OUTPUT { $$ = std::unique_ptr<jitfusion::ExecNode>(new jitfusion::OutputNode); }
 ;
 
 literal:

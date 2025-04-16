@@ -45,6 +45,8 @@ I considered how many types of nodes are needed to represent a function in the e
 
     NoOPNode: No operation node.
 
+    OutputNode： Used for optimizing complex scenarios. Data is not returned via a return value but is instead written using a custom store function.
+
 
 
 In jitfusion, there are the following data types: u8, u16, u32, u64, i8, i16, i32, i64, float, double, string, u8list, u16list, u32list, u64list, i8list, i16list, i32list, i64list, floatlist, doublelist, stringlist. The type u8 corresponds to uint8_t in C, and so on. The C structures corresponding to all types can be found in the include/type.h file.
@@ -89,6 +91,47 @@ int main() {
 The EntryArgumentNode will consistently return a u64 value, which is the input parameter for the execution engine's Execute function. By passing this value to a custom function, you can perform operations on this parameter.If you want to achieve maximum performance, you can implement the codegen function. You can refer to the implementations in the src/function directory for guidance.
 
 The intermediate processes can all be converted into corresponding op nodes, function nodes, condition nodes, etc. Additionally, there are usually multiple execution flows within a single task, and these flows may use the same variables. To achieve maximum optimization, you can have all the store nodes ultimately point to a NoOP node, allowing LLVM to perform the optimization for you.
+
+# Optimize
+It is more recommended to use this interface.
+```c++
+  // Applicable to more complex scenarios, users need to use an output node and a custom store function to write data,
+  // and it will not return data from the root node. and root node must be the NoOpNode.
+  Status Execute(void* entry_arguments, void* result);
+```
+This function does not return data through the root node; instead, the user provides a pointer for writing, which can be obtained through the OutputNode.This function require that the root node must be the NoOpNode.
+
+It is recommended to divide custom functions into two categories: read-only functions and store functions. Read-only functions can either be data loading functions or computation functions that generate an intermediate variable. It is not recommended for computation functions to directly modify parameter variables; instead, they should return the computation result by generating a new variable. In this case, you can set a read-only attribute for your function, as shown in the code below.
+
+```c++
+void ReadOnlyFunctionSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) {
+  f->setDoesNotThrow();
+  f->setMemoryEffects(llvm::MemoryEffects::readOnly());
+}
+
+FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
+FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadU32), nullptr,
+                                   ReadOnlyFunctionSetter};
+EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+```
+
+When store functions, it is recommended to set the OutputNode as a corresponding attribute, similar to the code below.
+
+```c++
+
+int32_t StoreF32(void* output, int32_t index, float value) {
+  reinterpret_cast<float*>(output)[index] = value;
+  return 0;
+}
+
+void StoreFunctionSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) {
+  f->setDoesNotThrow();
+  f->addAttributeAtIndex(1, llvm::Attribute::get(f->getContext(), llvm::Attribute::NoAlias));
+  f->addAttributeAtIndex(1, llvm::Attribute::get(f->getContext(), llvm::Attribute::NoCapture));
+  f->setOnlyAccessesArgMemory();
+}
+```
+
 
 # Attention
 1.If you need to allocate memory that you cannot manage yourself and require the execution engine to manage it for you, you need to use the ExecContextNode. The ExecContext structure corresponding to ExecContextNode contains an arena. By using it to allocate memory, the memory will be automatically released when the execution is complete.

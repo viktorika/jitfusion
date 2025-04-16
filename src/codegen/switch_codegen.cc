@@ -1,8 +1,8 @@
 /*
  * @Author: victorika
  * @Date: 2025-01-23 16:00:20
- * @Last Modified by: viktorika
- * @Last Modified time: 2025-01-30 22:36:45
+ * @Last Modified by: victorika
+ * @Last Modified time: 2025-04-16 16:51:08
  */
 #include "codegen.h"
 #include "type.h"
@@ -19,12 +19,12 @@ Status CodeGen::Visit(SwitchNode &switch_node) {
   llvm::FunctionType *func_type =
       llvm::FunctionType::get(ret_type_llvm,
                               llvm::ArrayRef<llvm::Type *>({llvm::Type::getVoidTy(ctx_.context)->getPointerTo(),
+                                                            llvm::Type::getVoidTy(ctx_.context)->getPointerTo(),
                                                             llvm::Type::getVoidTy(ctx_.context)->getPointerTo()}),
                               false);
 
   llvm::Function *switch_func =
       llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, "switch", ctx_.module);
-
   llvm::BasicBlock *switch_entry_block = llvm::BasicBlock::Create(ctx_.context, "switch", switch_func);
   llvm::BasicBlock *prev_block = nullptr;
   for (int i = switch_node.GetArgs().size() - 1; i >= 0; i -= 2) {
@@ -73,8 +73,9 @@ Status CodeGen::Visit(SwitchNode &switch_node) {
     return Status::RuntimeError("verify function failed in function_codegen in switch_func: " + error_info);
   }
 
-  value_ =
-      ctx_.builder.CreateCall(switch_func, {ctx_.entry_function->getArg(0), ctx_.entry_function->getArg(1)}, "switch");
+  value_ = ctx_.builder.CreateCall(
+      switch_func, {ctx_.entry_function->getArg(0), ctx_.entry_function->getArg(1), ctx_.entry_function->getArg(2)},
+      "switch");
   return Status::OK();
 }
 
