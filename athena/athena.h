@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-04-09 15:43:45
  * @Last Modified by: victorika
- * @Last Modified time: 2025-04-16 14:27:21
+ * @Last Modified time: 2025-04-16 17:04:47
  */
 #pragma once
 
@@ -28,7 +28,7 @@ class Athena {
   Athena(const Athena&) = delete;
   Athena& operator=(const Athena&) = delete;
 
-  // Applicable to simple scenarios, the program will not actually use a custom write function to write data. Instead,
+  // Applicable to simple scenarios, the program will not actually use a custom store function to write data. Instead,
   // the result will be returned, similar to expression scenarios.
   Status Compile(const std::string& code, const std::unique_ptr<FunctionRegistry>& func_registry);
   Status Execute(void* entry_arguments, RetType* result);
