@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-15 10:59:27
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-23 15:47:55
+ * @Last Modified time: 2025-04-16 16:11:21
  */
 #include "exec_node.h"
 #include "type.h"
@@ -20,6 +20,11 @@ std::string ExecContextNode::ToStringImpl(const std::string& prefix) { return pr
 Status ExecContextNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType ExecContextNode::GetExecNodeType() { return ExecNodeType::kExecContextNode; }
 std::unique_ptr<ExecNode> ExecContextNode::Clone() { return std::make_unique<ExecContextNode>(); }
+
+std::string OutputNode::ToStringImpl(const std::string& prefix) { return prefix + "|--output\n"; }
+Status OutputNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
+ExecNodeType OutputNode::GetExecNodeType() { return ExecNodeType::kOutputNode; }
+std::unique_ptr<ExecNode> OutputNode::Clone() { return std::make_unique<OutputNode>(); }
 
 struct ValueToString {
   template <typename T>
@@ -111,7 +116,13 @@ std::unique_ptr<ExecNode> FunctionNode::Clone() {
   return std::make_unique<FunctionNode>(func_name_, std::move(args));
 }
 
-std::string NoOPNode::ToStringImpl(const std::string& prefix) { return prefix + "|--no_op\n"; }
+std::string NoOPNode::ToStringImpl(const std::string& prefix) {
+  std::string result = prefix + "|--no_op\n";
+  for (const auto& child : args_) {
+    result += child->ToString(prefix + "|   ");
+  }
+  return result;
+}
 
 Status NoOPNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType NoOPNode::GetExecNodeType() { return ExecNodeType::kNoOPNode; }
