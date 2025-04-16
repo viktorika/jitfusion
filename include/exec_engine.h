@@ -36,7 +36,7 @@ class ExecEngine {
   // Applicable to scenarios with similar expressions, a result is returned through the root node.
   Status Execute(void* entry_arguments, RetType* result);
   // Applicable to more complex scenarios, users need to use an output node and a custom store function to write data,
-  // and it will not return data from the root node. and root node must be the no_op_node.
+  // and it will not return data from the root node. and root node must be the NoOpNode.
   Status Execute(void* entry_arguments, void* result);
 
  private:
