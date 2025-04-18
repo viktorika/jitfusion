@@ -1154,7 +1154,7 @@ TEST(FunctionTest, ListMaxTest3) {
   EXPECT_EQ(std::get<std::vector<float>>(result), expect);
 }
 
-TEST(FunctionTest, GenLargeFilterIndexesTest1) {
+TEST(FunctionTest, GenLargeFilterBitmapTest1) {
   std::vector<uint16_t> data = {1, 2, 3, 4, 5, 6, 7};
   uint16_t value = 3;
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1166,7 +1166,7 @@ TEST(FunctionTest, GenLargeFilterIndexesTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeFilterIndexes", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeFilterBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1176,7 +1176,7 @@ TEST(FunctionTest, GenLargeFilterIndexesTest1) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenLargeFilterIndexesTest2) {
+TEST(FunctionTest, GenLargeFilterBitmapTest2) {
   std::vector<int64_t> data = {-1, 2, 3, -4, 5, -6, 7, -8, -9, 10};
   int64_t value = 0;
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1188,7 +1188,7 @@ TEST(FunctionTest, GenLargeFilterIndexesTest2) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeFilterIndexes", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeFilterBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1198,7 +1198,7 @@ TEST(FunctionTest, GenLargeFilterIndexesTest2) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenLargeFilterIndexesTest3) {
+TEST(FunctionTest, GenLargeFilterBitmapTest3) {
   std::vector<double> data = {-1, 2, 3, -4, 5, -6, 7, 8};
   double value = 0;
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1210,7 +1210,7 @@ TEST(FunctionTest, GenLargeFilterIndexesTest3) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeFilterIndexes", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeFilterBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1220,7 +1220,7 @@ TEST(FunctionTest, GenLargeFilterIndexesTest3) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenLargeEqualFilterIndexesTest1) {
+TEST(FunctionTest, GenLargeEqualFilterBitmapTest1) {
   std::vector<uint16_t> data = {1, 2, 3, 4, 5, 6, 7};
   uint16_t value = 3;
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1232,7 +1232,7 @@ TEST(FunctionTest, GenLargeEqualFilterIndexesTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeEqualFilterIndexes", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeEqualFilterBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1242,7 +1242,7 @@ TEST(FunctionTest, GenLargeEqualFilterIndexesTest1) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenEqualFilterIndexesTest1) {
+TEST(FunctionTest, GenEqualFilterBitmapTest1) {
   std::vector<int64_t> data = {-1, 2, 3, -4, 5, -6, 7, -8, -9, 10};
   int64_t value = 5;
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1254,7 +1254,7 @@ TEST(FunctionTest, GenEqualFilterIndexesTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenEqualFilterIndexes", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenEqualFilterBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1264,7 +1264,7 @@ TEST(FunctionTest, GenEqualFilterIndexesTest1) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenLessFilterIndexesTest1) {
+TEST(FunctionTest, GenLessFilterBitmapTest1) {
   std::vector<double> data = {-1, 2, 3, -4, 5, -6, 7, 8};
   double value = 0;
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1276,7 +1276,7 @@ TEST(FunctionTest, GenLessFilterIndexesTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLessFilterIndexes", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLessFilterBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1286,7 +1286,7 @@ TEST(FunctionTest, GenLessFilterIndexesTest1) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenLessEqualFilterIndexesTest1) {
+TEST(FunctionTest, GenLessEqualFilterBitmapTest1) {
   std::vector<uint8_t> data = {1, 2, 3, 4, 5, 6, 7, 8};
   uint8_t value = 1;
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1298,7 +1298,7 @@ TEST(FunctionTest, GenLessEqualFilterIndexesTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLessEqualFilterIndexes", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLessEqualFilterBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1308,7 +1308,7 @@ TEST(FunctionTest, GenLessEqualFilterIndexesTest1) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenNotEqualFilterIndexesTest1) {
+TEST(FunctionTest, GenNotEqualFilterBitmapTest1) {
   std::vector<uint32_t> data = {1, 2, 3, 4, 5, 6, 7, 8};
   uint32_t value = 10;
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1320,7 +1320,7 @@ TEST(FunctionTest, GenNotEqualFilterIndexesTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenNotEqualFilterIndexes", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenNotEqualFilterBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1344,4 +1344,54 @@ TEST(FunctionTest, CountBitsTest1) {
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<uint32_t>(result), 12U);
+}
+
+TEST(FunctionTest, FilterByBitmapTest1) {
+  std::vector<int32_t> data = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16,
+                               17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
+  std::vector<uint8_t> bitmap = {0xFF, 0x1, 0x2, 0x5};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto bitmap_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(bitmap));
+  auto bits_cnt_node = std::unique_ptr<ExecNode>(new ConstantValueNode(12U));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(bitmap_node));
+  args_list.emplace_back(std::move(bits_cnt_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("FilterByBitmap", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<int32_t> expect = {1, 2, 3, 4, 5, 6, 7, 8, 9, 18, 25, 27};
+  EXPECT_EQ(std::get<std::vector<int32_t>>(result), expect);
+}
+
+TEST(FunctionTest, FilterByBitmapTest2) {
+  std::vector<double> data = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16,
+                              17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
+  std::vector<uint8_t> bitmap = {0xFF, 0x1, 0x2, 0x5};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto bitmap_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(bitmap));
+  auto bits_cnt_node = std::unique_ptr<ExecNode>(new ConstantValueNode(12U));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(bitmap_node));
+  args_list.emplace_back(std::move(bits_cnt_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("FilterByBitmap", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<double> expect = {1, 2, 3, 4, 5, 6, 7, 8, 9, 18, 25, 27};
+  EXPECT_EQ(std::get<std::vector<double>>(result), expect);
 }
