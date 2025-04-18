@@ -1172,8 +1172,7 @@ TEST(FunctionTest, GenLargeFilterIndexesTest1) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<uint8_t> expect = {0, 0, 0, 0, 120};
-  reinterpret_cast<uint32_t*>(expect.data())[0] = 4;
+  std::vector<uint8_t> expect = {120};
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
@@ -1195,8 +1194,7 @@ TEST(FunctionTest, GenLargeFilterIndexesTest2) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<uint8_t> expect = {0, 0, 0, 0, 86, 2};
-  reinterpret_cast<uint32_t*>(expect.data())[0] = 5;
+  std::vector<uint8_t> expect = {86, 2};
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
@@ -1218,8 +1216,7 @@ TEST(FunctionTest, GenLargeFilterIndexesTest3) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<uint8_t> expect = {0, 0, 0, 0, 214};
-  reinterpret_cast<uint32_t*>(expect.data())[0] = 5;
+  std::vector<uint8_t> expect = {214};
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
@@ -1241,8 +1238,7 @@ TEST(FunctionTest, GenLargeEqualFilterIndexesTest1) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<uint8_t> expect = {0, 0, 0, 0, 124};
-  reinterpret_cast<uint32_t*>(expect.data())[0] = 5;
+  std::vector<uint8_t> expect = {124};
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
@@ -1264,8 +1260,7 @@ TEST(FunctionTest, GenEqualFilterIndexesTest1) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<uint8_t> expect = {0, 0, 0, 0, 16, 0};
-  reinterpret_cast<uint32_t*>(expect.data())[0] = 1;
+  std::vector<uint8_t> expect = {16, 0};
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
@@ -1287,8 +1282,7 @@ TEST(FunctionTest, GenLessFilterIndexesTest1) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<uint8_t> expect = {0, 0, 0, 0, 41};
-  reinterpret_cast<uint32_t*>(expect.data())[0] = 3;
+  std::vector<uint8_t> expect = {41};
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
@@ -1310,8 +1304,7 @@ TEST(FunctionTest, GenLessEqualFilterIndexesTest1) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<uint8_t> expect = {0, 0, 0, 0, 1};
-  reinterpret_cast<uint32_t*>(expect.data())[0] = 1;
+  std::vector<uint8_t> expect = {1};
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
@@ -1333,7 +1326,6 @@ TEST(FunctionTest, GenNotEqualFilterIndexesTest1) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<uint8_t> expect = {0, 0, 0, 0, 255};
-  reinterpret_cast<uint32_t*>(expect.data())[0] = 8;
+  std::vector<uint8_t> expect = {255};
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
