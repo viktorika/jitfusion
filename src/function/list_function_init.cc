@@ -321,6 +321,61 @@ ListType ListMax(ListType a, typename ListType::CElementType b, void *exec_conte
   return result;
 }
 
+template <typename ListType, BinaryOPType OpType>
+U8ListStruct GenFilterIndexes(ListType a, typename ListType::CElementType b, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  U8ListStruct result;
+  result.len = 4 + (a.len + 7) / 8;
+  result.data = reinterpret_cast<U8ListStruct::CElementType *>(
+      exec_ctx->arena.Allocate(result.len * sizeof(U8ListStruct::CElementType)));
+  uint32_t cnt = 0;
+  uint32_t vec_loop_len = a.len & (~7U);
+  uint32_t i = 0;
+  for (i = 0; i < vec_loop_len; i += 8) {
+    uint8_t mask_bit = 0;
+    for (int j = 0; j < 8; ++j) {
+      uint32_t is_true;
+      if constexpr (BinaryOPType::kLarge == OpType) {
+        is_true = (a.data[i + j] > b ? 1U : 0U);
+      } else if constexpr (BinaryOPType::kLargeEqual == OpType) {
+        is_true = (a.data[i + j] >= b ? 1U : 0U);
+      } else if constexpr (BinaryOPType::kEqual == OpType) {
+        is_true = (a.data[i + j] == b ? 1U : 0U);
+      } else if constexpr (BinaryOPType::kLess == OpType) {
+        is_true = (a.data[i + j] < b ? 1U : 0U);
+      } else if constexpr (BinaryOPType::kLessEqual == OpType) {
+        is_true = (a.data[i + j] <= b ? 1U : 0U);
+      } else if constexpr (BinaryOPType::kNotEqual == OpType) {
+        is_true = (a.data[i + j] != b ? 1U : 0U);
+      }
+      mask_bit |= (is_true << j);
+      cnt += is_true;
+    }
+    result.data[4 + (i / 8)] = mask_bit;
+  }
+  auto last_index = 4 + (vec_loop_len / 8);
+  for (int j = 0; i + j < a.len; j++) {
+    uint32_t is_true;
+    if constexpr (BinaryOPType::kLarge == OpType) {
+      is_true = (a.data[i + j] > b ? 1U : 0U);
+    } else if constexpr (BinaryOPType::kLargeEqual == OpType) {
+      is_true = (a.data[i + j] >= b ? 1U : 0U);
+    } else if constexpr (BinaryOPType::kEqual == OpType) {
+      is_true = (a.data[i + j] == b ? 1U : 0U);
+    } else if constexpr (BinaryOPType::kLess == OpType) {
+      is_true = (a.data[i + j] < b ? 1U : 0U);
+    } else if constexpr (BinaryOPType::kLessEqual == OpType) {
+      is_true = (a.data[i + j] <= b ? 1U : 0U);
+    } else if constexpr (BinaryOPType::kNotEqual == OpType) {
+      is_true = (a.data[i + j] != b ? 1U : 0U);
+    }
+    result.data[last_index] |= (is_true << j);
+    cnt += is_true;
+  }
+  reinterpret_cast<uint32_t *>(result.data)[0] = cnt;
+  return result;
+}
+
 Status InitListConcatFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(
       FunctionSignature("ListConcat", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
@@ -1204,6 +1259,340 @@ Status InitListMaxFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+Status InitGenLargeFilterIndexesFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeFilterIndexes", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U8ListStruct, BinaryOPType::kLarge>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeFilterIndexes", {ValueType::kU16List, ValueType::kU16, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U16ListStruct, BinaryOPType::kLarge>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeFilterIndexes", {ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U32ListStruct, BinaryOPType::kLarge>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeFilterIndexes", {ValueType::kU64List, ValueType::kU64, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U64ListStruct, BinaryOPType::kLarge>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeFilterIndexes", {ValueType::kI8List, ValueType::kI8, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I8ListStruct, BinaryOPType::kLarge>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeFilterIndexes", {ValueType::kI16List, ValueType::kI16, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I16ListStruct, BinaryOPType::kLarge>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeFilterIndexes", {ValueType::kI32List, ValueType::kI32, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I32ListStruct, BinaryOPType::kLarge>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeFilterIndexes", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I64ListStruct, BinaryOPType::kLarge>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeFilterIndexes", {ValueType::kF32List, ValueType::kF32, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<F32ListStruct, BinaryOPType::kLarge>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeFilterIndexes", {ValueType::kF64List, ValueType::kF64, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<F64ListStruct, BinaryOPType::kLarge>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  return Status::OK();
+}
+
+Status InitGenLargeEqualFilterIndexesFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterIndexes", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U8ListStruct, BinaryOPType::kLargeEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterIndexes", {ValueType::kU16List, ValueType::kU16, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U16ListStruct, BinaryOPType::kLargeEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterIndexes", {ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U32ListStruct, BinaryOPType::kLargeEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterIndexes", {ValueType::kU64List, ValueType::kU64, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U64ListStruct, BinaryOPType::kLargeEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterIndexes", {ValueType::kI8List, ValueType::kI8, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I8ListStruct, BinaryOPType::kLargeEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterIndexes", {ValueType::kI16List, ValueType::kI16, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I16ListStruct, BinaryOPType::kLargeEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterIndexes", {ValueType::kI32List, ValueType::kI32, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I32ListStruct, BinaryOPType::kLargeEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterIndexes", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I64ListStruct, BinaryOPType::kLargeEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterIndexes", {ValueType::kF32List, ValueType::kF32, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<F32ListStruct, BinaryOPType::kLargeEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterIndexes", {ValueType::kF64List, ValueType::kF64, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<F64ListStruct, BinaryOPType::kLargeEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  return Status::OK();
+}
+
+Status InitGenEqualFilterIndexesFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenEqualFilterIndexes", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U8ListStruct, BinaryOPType::kEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenEqualFilterIndexes", {ValueType::kU16List, ValueType::kU16, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U16ListStruct, BinaryOPType::kEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenEqualFilterIndexes", {ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U32ListStruct, BinaryOPType::kEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenEqualFilterIndexes", {ValueType::kU64List, ValueType::kU64, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U64ListStruct, BinaryOPType::kEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenEqualFilterIndexes", {ValueType::kI8List, ValueType::kI8, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I8ListStruct, BinaryOPType::kEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenEqualFilterIndexes", {ValueType::kI16List, ValueType::kI16, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I16ListStruct, BinaryOPType::kEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenEqualFilterIndexes", {ValueType::kI32List, ValueType::kI32, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I32ListStruct, BinaryOPType::kEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenEqualFilterIndexes", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I64ListStruct, BinaryOPType::kEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenEqualFilterIndexes", {ValueType::kF32List, ValueType::kF32, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<F32ListStruct, BinaryOPType::kEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenEqualFilterIndexes", {ValueType::kF64List, ValueType::kF64, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<F64ListStruct, BinaryOPType::kEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  return Status::OK();
+}
+
+Status InitGenLessFilterIndexesFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessFilterIndexes", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U8ListStruct, BinaryOPType::kLess>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessFilterIndexes", {ValueType::kU16List, ValueType::kU16, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U16ListStruct, BinaryOPType::kLess>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessFilterIndexes", {ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U32ListStruct, BinaryOPType::kLess>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessFilterIndexes", {ValueType::kU64List, ValueType::kU64, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U64ListStruct, BinaryOPType::kLess>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessFilterIndexes", {ValueType::kI8List, ValueType::kI8, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I8ListStruct, BinaryOPType::kLess>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessFilterIndexes", {ValueType::kI16List, ValueType::kI16, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I16ListStruct, BinaryOPType::kLess>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessFilterIndexes", {ValueType::kI32List, ValueType::kI32, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I32ListStruct, BinaryOPType::kLess>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessFilterIndexes", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I64ListStruct, BinaryOPType::kLess>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessFilterIndexes", {ValueType::kF32List, ValueType::kF32, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<F32ListStruct, BinaryOPType::kLess>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessFilterIndexes", {ValueType::kF64List, ValueType::kF64, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<F64ListStruct, BinaryOPType::kLess>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  return Status::OK();
+}
+
+Status InitGenLessEqualFilterIndexesFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessEqualFilterIndexes", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U8ListStruct, BinaryOPType::kLessEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessEqualFilterIndexes", {ValueType::kU16List, ValueType::kU16, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U16ListStruct, BinaryOPType::kLessEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessEqualFilterIndexes", {ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U32ListStruct, BinaryOPType::kLessEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessEqualFilterIndexes", {ValueType::kU64List, ValueType::kU64, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U64ListStruct, BinaryOPType::kLessEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessEqualFilterIndexes", {ValueType::kI8List, ValueType::kI8, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I8ListStruct, BinaryOPType::kLessEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessEqualFilterIndexes", {ValueType::kI16List, ValueType::kI16, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I16ListStruct, BinaryOPType::kLessEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessEqualFilterIndexes", {ValueType::kI32List, ValueType::kI32, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I32ListStruct, BinaryOPType::kLessEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessEqualFilterIndexes", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I64ListStruct, BinaryOPType::kLessEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessEqualFilterIndexes", {ValueType::kF32List, ValueType::kF32, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<F32ListStruct, BinaryOPType::kLessEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLessEqualFilterIndexes", {ValueType::kF64List, ValueType::kF64, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<F64ListStruct, BinaryOPType::kLessEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  return Status::OK();
+}
+
+Status InitGenNotEqualFilterIndexesFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenNotEqualFilterIndexes", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U8ListStruct, BinaryOPType::kNotEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenNotEqualFilterIndexes", {ValueType::kU16List, ValueType::kU16, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U16ListStruct, BinaryOPType::kNotEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenNotEqualFilterIndexes", {ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U32ListStruct, BinaryOPType::kNotEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenNotEqualFilterIndexes", {ValueType::kU64List, ValueType::kU64, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<U64ListStruct, BinaryOPType::kNotEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenNotEqualFilterIndexes", {ValueType::kI8List, ValueType::kI8, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I8ListStruct, BinaryOPType::kNotEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenNotEqualFilterIndexes", {ValueType::kI16List, ValueType::kI16, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I16ListStruct, BinaryOPType::kNotEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenNotEqualFilterIndexes", {ValueType::kI32List, ValueType::kI32, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I32ListStruct, BinaryOPType::kNotEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenNotEqualFilterIndexes", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<I64ListStruct, BinaryOPType::kNotEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenNotEqualFilterIndexes", {ValueType::kF32List, ValueType::kF32, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<F32ListStruct, BinaryOPType::kNotEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenNotEqualFilterIndexes", {ValueType::kF64List, ValueType::kF64, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(GenFilterIndexes<F64ListStruct, BinaryOPType::kNotEqual>),
+       nullptr, ReadOnlyFunctionAttributeSetter}));
+  return Status::OK();
+}
+
+Status InitFilterFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(InitGenLargeFilterIndexesFunc(reg));
+  JF_RETURN_NOT_OK(InitGenLargeEqualFilterIndexesFunc(reg));
+  JF_RETURN_NOT_OK(InitGenEqualFilterIndexesFunc(reg));
+  JF_RETURN_NOT_OK(InitGenLessFilterIndexesFunc(reg));
+  JF_RETURN_NOT_OK(InitGenLessEqualFilterIndexesFunc(reg));
+  JF_RETURN_NOT_OK(InitGenNotEqualFilterIndexesFunc(reg));
+  return Status::OK();
+}
+
 Status InitOperationFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitListAddFunc(reg));
   JF_RETURN_NOT_OK(InitListSubFunc(reg));
@@ -1235,6 +1624,7 @@ Status InitListInternalFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitSortFunc(reg));
   JF_RETURN_NOT_OK(InitTruncateFunc(reg));
   JF_RETURN_NOT_OK(InitOperationFunc(reg));
+  JF_RETURN_NOT_OK(InitFilterFunc(reg));
   return Status::OK();
 }
 
