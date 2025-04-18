@@ -325,10 +325,9 @@ template <typename ListType, BinaryOPType OpType>
 U8ListStruct GenFilterIndexes(ListType a, typename ListType::CElementType b, void *exec_context) {
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
   U8ListStruct result;
-  result.len = 4 + (a.len + 7) / 8;
+  result.len = (a.len + 7) / 8;
   result.data = reinterpret_cast<U8ListStruct::CElementType *>(
       exec_ctx->arena.Allocate(result.len * sizeof(U8ListStruct::CElementType)));
-  uint32_t cnt = 0;
   uint32_t vec_loop_len = a.len & (~7U);
   uint32_t i = 0;
   for (i = 0; i < vec_loop_len; i += 8) {
@@ -349,11 +348,10 @@ U8ListStruct GenFilterIndexes(ListType a, typename ListType::CElementType b, voi
         is_true = (a.data[i + j] != b ? 1U : 0U);
       }
       mask_bit |= (is_true << j);
-      cnt += is_true;
     }
-    result.data[4 + (i / 8)] = mask_bit;
+    result.data[(i / 8)] = mask_bit;
   }
-  auto last_index = 4 + (vec_loop_len / 8);
+  auto last_index = (vec_loop_len / 8);
   for (int j = 0; i + j < a.len; j++) {
     uint32_t is_true;
     if constexpr (BinaryOPType::kLarge == OpType) {
@@ -370,9 +368,7 @@ U8ListStruct GenFilterIndexes(ListType a, typename ListType::CElementType b, voi
       is_true = (a.data[i + j] != b ? 1U : 0U);
     }
     result.data[last_index] |= (is_true << j);
-    cnt += is_true;
   }
-  reinterpret_cast<uint32_t *>(result.data)[0] = cnt;
   return result;
 }
 
