@@ -1329,3 +1329,19 @@ TEST(FunctionTest, GenNotEqualFilterIndexesTest1) {
   std::vector<uint8_t> expect = {255};
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
+
+TEST(FunctionTest, CountBitsTest1) {
+  std::vector<uint8_t> data = {0xFF, 0x1, 0x2, 0x5};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("CountBits", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<uint32_t>(result), 12U);
+}

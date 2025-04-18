@@ -372,6 +372,22 @@ U8ListStruct GenFilterIndexes(ListType a, typename ListType::CElementType b, voi
   return result;
 }
 
+uint32_t CountBits(U8ListStruct a) {
+  static std::array<uint8_t, 256> poptable = {
+      0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 1, 2, 2, 3, 2,
+      3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3,
+      3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5,
+      6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4,
+      3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4,
+      5, 5, 6, 5, 6, 6, 7, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6,
+      6, 7, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8};
+  uint32_t cnt = 0;
+  for (uint32_t i = 0; i < a.len; i++) {
+    cnt += poptable[a.data[i]];
+  }
+  return cnt;
+}
+
 Status InitListConcatFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(
       FunctionSignature("ListConcat", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
@@ -1579,6 +1595,13 @@ Status InitGenNotEqualFilterIndexesFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+Status InitFilterByIndexesFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("CountBits", {ValueType::kU8List}, ValueType::kU32),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(CountBits), nullptr, ReadOnlyFunctionAttributeSetter}));
+  return Status::OK();
+}
+
 Status InitFilterFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitGenLargeFilterIndexesFunc(reg));
   JF_RETURN_NOT_OK(InitGenLargeEqualFilterIndexesFunc(reg));
@@ -1586,6 +1609,7 @@ Status InitFilterFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitGenLessFilterIndexesFunc(reg));
   JF_RETURN_NOT_OK(InitGenLessEqualFilterIndexesFunc(reg));
   JF_RETURN_NOT_OK(InitGenNotEqualFilterIndexesFunc(reg));
+  JF_RETURN_NOT_OK(InitFilterByIndexesFunc(reg));
   return Status::OK();
 }
 
