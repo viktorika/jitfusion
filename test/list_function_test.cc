@@ -1395,3 +1395,47 @@ TEST(FunctionTest, FilterByBitmapTest2) {
   std::vector<double> expect = {1, 2, 3, 4, 5, 6, 7, 8, 9, 18, 25, 27};
   EXPECT_EQ(std::get<std::vector<double>>(result), expect);
 }
+
+TEST(FunctionTest, ListBitwiseAndTest1) {
+  std::vector<uint32_t> data = {1000, 2000, 3000, 4000};
+  uint32_t div = 10;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto div_node = std::unique_ptr<ExecNode>(new ConstantValueNode(div));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(div_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseAnd", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<uint32_t> expect = {1000 & 10, 2000 & 10, 3000 & 10, 4000 & 10};
+  EXPECT_EQ(std::get<std::vector<uint32_t>>(result), expect);
+}
+
+TEST(FunctionTest, ListBitwiseAndTest2) {
+  std::vector<int64_t> data = {1000, 2000, 3000, 4000};
+  int64_t div = 10;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto div_node = std::unique_ptr<ExecNode>(new ConstantValueNode(div));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(div_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseAnd", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<int64_t> expect = {1000 & 10, 2000 & 10, 3000 & 10, 4000 & 10};
+  EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
+}

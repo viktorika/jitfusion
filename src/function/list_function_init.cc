@@ -204,6 +204,19 @@ ListType ListMod(ListType a, typename ListType::CElementType b, void *exec_conte
   return result;
 }
 
+template <typename ListType>
+ListType ListBitwiseAnd(ListType a, typename ListType::CElementType b, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  ListType result;
+  result.data = reinterpret_cast<typename ListType::CElementType *>(
+      exec_ctx->arena.Allocate((a.len) * sizeof(typename ListType::CElementType)));
+  result.len = a.len;
+  for (uint32_t i = 0; i < a.len; i++) {
+    result.data[i] = a.data[i] & b;
+  }
+  return result;
+}
+
 template <typename ListType, typename ResultType>
 ResultType ListExp(ListType a, void *exec_context) {
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
@@ -1010,6 +1023,42 @@ Status InitListModFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+Status InitListBitwiseAndFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr}, ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListBitwiseAnd<U8ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kU16List, ValueType::kU16, ValueType::kPtr}, ValueType::kU16List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListBitwiseAnd<U16ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kU32List, ValueType::kU32, ValueType::kPtr}, ValueType::kU32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListBitwiseAnd<U32ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kU64List, ValueType::kU64, ValueType::kPtr}, ValueType::kU64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListBitwiseAnd<U64ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kI8List, ValueType::kI8, ValueType::kPtr}, ValueType::kI8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListBitwiseAnd<I8ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kI16List, ValueType::kI16, ValueType::kPtr}, ValueType::kI16List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListBitwiseAnd<I16ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kI32List, ValueType::kI32, ValueType::kPtr}, ValueType::kI32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListBitwiseAnd<I32ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr}, ValueType::kI64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListBitwiseAnd<I64ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  return Status::OK();
+}
+
 Status InitListExpFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(
       reg->RegisterFunc(FunctionSignature("ListExp", {ValueType::kU8List, ValueType::kPtr}, ValueType::kF64List),
@@ -1712,6 +1761,7 @@ Status InitOperationFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitListMulFunc(reg));
   JF_RETURN_NOT_OK(InitListDivFunc(reg));
   JF_RETURN_NOT_OK(InitListModFunc(reg));
+  JF_RETURN_NOT_OK(InitListBitwiseAndFunc(reg));
   JF_RETURN_NOT_OK(InitListExpFunc(reg));
   JF_RETURN_NOT_OK(InitListLogFunc(reg));
   JF_RETURN_NOT_OK(InitListLog2Func(reg));
