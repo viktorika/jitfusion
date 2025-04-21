@@ -1301,6 +1301,27 @@ TEST(ComplexTest, Test1) {
   EXPECT_EQ(output[1], -309);
 }
 
+TEST(FilterTest, Test1) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32List);
+  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadI32List), nullptr,
+                                   ReadOnlyFunctionSetter};
+  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  std::string code = R"(
+  a = load(entry_arg, 0);
+  b = GenLargeFilterBitmap(a, 3, exec_ctx);
+  r = FilterByBitmap(a, b, CountBits(b), exec_ctx);
+  )";
+  ASSERT_TRUE(athena.Compile(code, func_registry).ok());
+  RetType ret;
+  std::array<std::vector<int32_t>, 2> value = {std::vector<int32_t>{0, 1, 2, 3, 4, 0, 1, 4, 9, 16}};
+  ASSERT_TRUE(athena.Execute(value.data(), &ret).ok());
+  std::vector<int32_t> expect{4, 4, 9, 16};
+  EXPECT_EQ(std::get<std::vector<std::int32_t>>(ret), expect);
+}
+
 GTEST_API_ int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
