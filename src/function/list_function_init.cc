@@ -231,6 +231,19 @@ ListType ListDiv(ListType a, typename ListType::CElementType b, void *exec_conte
 }
 
 template <typename ListType>
+ListType ListDivWithMinSize(ListType a, ListType b, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  ListType result;
+  result.len = std::min(a.len, b.len);
+  result.data = reinterpret_cast<typename ListType::CElementType *>(
+      exec_ctx->arena.Allocate((result.len) * sizeof(typename ListType::CElementType)));
+  for (uint32_t i = 0; i < result.len; i++) {
+    result.data[i] = a.data[i] / b.data[i];
+  }
+  return result;
+}
+
+template <typename ListType>
 ListType ListMod(ListType a, typename ListType::CElementType b, void *exec_context) {
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
   ListType result;
@@ -1201,6 +1214,57 @@ Status InitListDivFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(
       FunctionSignature("ListDiv", {ValueType::kF64List, ValueType::kF64, ValueType::kPtr}, ValueType::kF64List),
       {FunctionType::kCFunc, reinterpret_cast<void *>(ListDiv<F64ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListDivWithMinSize", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListDivWithMinSize<U8ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListDivWithMinSize", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr},
+                        ValueType::kU16List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListDivWithMinSize<U16ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListDivWithMinSize", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr},
+                        ValueType::kU32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListDivWithMinSize<U32ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListDivWithMinSize", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr},
+                        ValueType::kU64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListDivWithMinSize<U64ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListDivWithMinSize", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr},
+                        ValueType::kI8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListDivWithMinSize<I8ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListDivWithMinSize", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr},
+                        ValueType::kI16List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListDivWithMinSize<I16ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListDivWithMinSize", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr},
+                        ValueType::kI32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListDivWithMinSize<I32ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListDivWithMinSize", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr},
+                        ValueType::kI64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListDivWithMinSize<I64ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListDivWithMinSize", {ValueType::kF32List, ValueType::kF32List, ValueType::kPtr},
+                        ValueType::kF32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListDivWithMinSize<F32ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListDivWithMinSize", {ValueType::kF64List, ValueType::kF64List, ValueType::kPtr},
+                        ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListDivWithMinSize<F64ListStruct>), nullptr,
        ReadOnlyFunctionAttributeSetter}));
   return Status::OK();
 }
