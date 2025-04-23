@@ -1794,15 +1794,15 @@ TEST(FunctionTest, ListBitwiseAndWithMinSizeTest2) {
 
 TEST(FunctionTest, ListBitwiseOrTest1) {
   std::vector<uint32_t> data = {1000, 2000, 3000, 4000};
-  uint32_t div = 10;
+  uint32_t or_data = 10;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
-  auto div_node = std::unique_ptr<ExecNode>(new ConstantValueNode(div));
+  auto or_data_node = std::unique_ptr<ExecNode>(new ConstantValueNode(or_data));
   auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
-  args_list.emplace_back(std::move(div_node));
+  args_list.emplace_back(std::move(or_data_node));
   args_list.emplace_back(std::move(exec_node));
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseOr", std::move(args_list)));
   ExecEngine exec_engine;
@@ -1816,15 +1816,15 @@ TEST(FunctionTest, ListBitwiseOrTest1) {
 
 TEST(FunctionTest, ListBitwiseOrTest2) {
   std::vector<int64_t> data = {1000, 2000, 3000, 4000};
-  int64_t div = 10;
+  int64_t or_data = 10;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
-  auto div_node = std::unique_ptr<ExecNode>(new ConstantValueNode(div));
+  auto or_data_node = std::unique_ptr<ExecNode>(new ConstantValueNode(or_data));
   auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
-  args_list.emplace_back(std::move(div_node));
+  args_list.emplace_back(std::move(or_data_node));
   args_list.emplace_back(std::move(exec_node));
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseOr", std::move(args_list)));
   ExecEngine exec_engine;
@@ -1836,17 +1836,61 @@ TEST(FunctionTest, ListBitwiseOrTest2) {
   EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
 }
 
-TEST(FunctionTest, ListBitwiseXorTest1) {
+TEST(FunctionTest, ListBitwiseOrWithMinSizeTest1) {
   std::vector<uint32_t> data = {1000, 2000, 3000, 4000};
-  uint32_t div = 10;
+  std::vector<uint32_t> or_data = {10, 10, 10, 10};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
-  auto div_node = std::unique_ptr<ExecNode>(new ConstantValueNode(div));
+  auto or_data_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(or_data));
   auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
-  args_list.emplace_back(std::move(div_node));
+  args_list.emplace_back(std::move(or_data_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseOrWithMinSize", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<uint32_t> expect = {1000 | 10, 2000 | 10, 3000 | 10, 4000 | 10};
+  EXPECT_EQ(std::get<std::vector<uint32_t>>(result), expect);
+}
+
+TEST(FunctionTest, ListBitwiseOrWithMinSizeTest2) {
+  std::vector<int64_t> data = {1000, 2000, 3000, 4000};
+  std::vector<int64_t> or_data = {10, 10, 10, 10};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto or_data_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(or_data));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(or_data_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseOrWithMinSize", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<int64_t> expect = {1000 | 10, 2000 | 10, 3000 | 10, 4000 | 10};
+  EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
+}
+
+TEST(FunctionTest, ListBitwiseXorTest1) {
+  std::vector<uint32_t> data = {1000, 2000, 3000, 4000};
+  uint32_t xor_data = 10;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto xor_data_node = std::unique_ptr<ExecNode>(new ConstantValueNode(xor_data));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(xor_data_node));
   args_list.emplace_back(std::move(exec_node));
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseXor", std::move(args_list)));
   ExecEngine exec_engine;
@@ -1860,17 +1904,61 @@ TEST(FunctionTest, ListBitwiseXorTest1) {
 
 TEST(FunctionTest, ListBitwiseXorTest2) {
   std::vector<int64_t> data = {1000, 2000, 3000, 4000};
-  int64_t div = 10;
+  int64_t xor_data = 10;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
-  auto div_node = std::unique_ptr<ExecNode>(new ConstantValueNode(div));
+  auto xor_data_node = std::unique_ptr<ExecNode>(new ConstantValueNode(xor_data));
   auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
-  args_list.emplace_back(std::move(div_node));
+  args_list.emplace_back(std::move(xor_data_node));
   args_list.emplace_back(std::move(exec_node));
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseXor", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<int64_t> expect = {1000 ^ 10, 2000 ^ 10, 3000 ^ 10, 4000 ^ 10};
+  EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
+}
+
+TEST(FunctionTest, ListBitwiseXorWithMinSizeTest1) {
+  std::vector<uint32_t> data = {1000, 2000, 3000, 4000};
+  std::vector<uint32_t> xor_data = {10, 10, 10, 10};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto xor_data_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(xor_data));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(xor_data_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseXorWithMinSize", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<uint32_t> expect = {1000 ^ 10, 2000 ^ 10, 3000 ^ 10, 4000 ^ 10};
+  EXPECT_EQ(std::get<std::vector<uint32_t>>(result), expect);
+}
+
+TEST(FunctionTest, ListBitwiseXorWithMinSizeTest2) {
+  std::vector<int64_t> data = {1000, 2000, 3000, 4000};
+  std::vector<int64_t> xor_data = {10, 10, 10, 10};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto xor_data_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(xor_data));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(xor_data_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseXorWithMinSize", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
