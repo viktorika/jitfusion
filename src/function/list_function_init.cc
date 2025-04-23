@@ -153,6 +153,19 @@ ListType ListAdd(ListType a, typename ListType::CElementType b, void *exec_conte
 }
 
 template <typename ListType>
+ListType ListAddWithMinSize(ListType a, ListType b, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  ListType result;
+  result.len = std::min(a.len, b.len);
+  result.data = reinterpret_cast<typename ListType::CElementType *>(
+      exec_ctx->arena.Allocate((result.len) * sizeof(typename ListType::CElementType)));
+  for (uint32_t i = 0; i < result.len; i++) {
+    result.data[i] = a.data[i] + b.data[i];
+  }
+  return result;
+}
+
+template <typename ListType>
 ListType ListSub(ListType a, typename ListType::CElementType b, void *exec_context) {
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
   ListType result;
@@ -877,6 +890,57 @@ Status InitListAddFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(
       FunctionSignature("ListAdd", {ValueType::kF64List, ValueType::kF64, ValueType::kPtr}, ValueType::kF64List),
       {FunctionType::kCFunc, reinterpret_cast<void *>(ListAdd<F64ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListAddWithMinSize", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListAddWithMinSize<U8ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListAddWithMinSize", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr},
+                        ValueType::kU16List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListAddWithMinSize<U16ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListAddWithMinSize", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr},
+                        ValueType::kU32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListAddWithMinSize<U32ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListAddWithMinSize", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr},
+                        ValueType::kU64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListAddWithMinSize<U64ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListAddWithMinSize", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr},
+                        ValueType::kI8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListAddWithMinSize<I8ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListAddWithMinSize", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr},
+                        ValueType::kI16List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListAddWithMinSize<I16ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListAddWithMinSize", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr},
+                        ValueType::kI32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListAddWithMinSize<I32ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListAddWithMinSize", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr},
+                        ValueType::kI64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListAddWithMinSize<I64ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListAddWithMinSize", {ValueType::kF32List, ValueType::kF32List, ValueType::kPtr},
+                        ValueType::kF32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListAddWithMinSize<F32ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListAddWithMinSize", {ValueType::kF64List, ValueType::kF64List, ValueType::kPtr},
+                        ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListAddWithMinSize<F64ListStruct>), nullptr,
        ReadOnlyFunctionAttributeSetter}));
   return Status::OK();
 }
@@ -1871,7 +1935,6 @@ Status InitOperationFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitListRoundFunc(reg));
   JF_RETURN_NOT_OK(InitListMinFunc(reg));
   JF_RETURN_NOT_OK(InitListMaxFunc(reg));
-  JF_RETURN_NOT_OK(InitCountBitsFunc(reg));
   return Status::OK();
 };
 
@@ -1889,6 +1952,7 @@ Status InitListInternalFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitTruncateFunc(reg));
   JF_RETURN_NOT_OK(InitOperationFunc(reg));
   JF_RETURN_NOT_OK(InitFilterFunc(reg));
+  JF_RETURN_NOT_OK(InitCountBitsFunc(reg));
   return Status::OK();
 }
 

@@ -438,6 +438,72 @@ TEST(FunctionTest, ListAddTest3) {
   EXPECT_EQ(std::get<std::vector<float>>(result), expect);
 }
 
+TEST(FunctionTest, ListAddWithMinSizeTest1) {
+  std::vector<uint8_t> data1 = {1, 2, 3, 4};
+  std::vector<uint8_t> data2 = {5, 6, 7, 8};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto data1_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
+  auto data2_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(data1_node));
+  args_list.emplace_back(std::move(data2_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListAddWithMinSize", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<uint8_t> expect = {6, 8, 10, 12};
+  EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
+}
+
+TEST(FunctionTest, ListAddWithMinSizeTest2) {
+  std::vector<int64_t> data1 = {1, 2, 3, 4};
+  std::vector<int64_t> data2 = {5, 6, 7};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto data1_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
+  auto data2_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(data1_node));
+  args_list.emplace_back(std::move(data2_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListAddWithMinSize", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<int64_t> expect = {6, 8, 10};
+  EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
+}
+
+TEST(FunctionTest, ListAddWithMinSizeTest3) {
+  std::vector<float> data1 = {1, 2, 3, 4};
+  std::vector<float> data2 = {-5, -6, -7, -8, -9};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto data1_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
+  auto data2_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(data1_node));
+  args_list.emplace_back(std::move(data2_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListAddWithMinSize", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<float> expect = {-4, -4, -4, -4};
+  EXPECT_EQ(std::get<std::vector<float>>(result), expect);
+}
+
 TEST(FunctionTest, ListSubTest1) {
   std::vector<int8_t> data = {1, 2, 3, 4};
   int8_t sub = -100;
