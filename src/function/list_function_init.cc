@@ -283,6 +283,19 @@ ListType ListBitwiseAnd(ListType a, typename ListType::CElementType b, void *exe
 }
 
 template <typename ListType>
+ListType ListBitwiseAndWithMinSize(ListType a, ListType b, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  ListType result;
+  result.len = std::min(a.len, b.len);
+  result.data = reinterpret_cast<typename ListType::CElementType *>(
+      exec_ctx->arena.Allocate((result.len) * sizeof(typename ListType::CElementType)));
+  for (uint32_t i = 0; i < result.len; i++) {
+    result.data[i] = a.data[i] & b.data[i];
+  }
+  return result;
+}
+
+template <typename ListType>
 ListType ListBitwiseOr(ListType a, typename ListType::CElementType b, void *exec_context) {
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
   ListType result;
@@ -1391,6 +1404,47 @@ Status InitListBitwiseAndFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(
       FunctionSignature("ListBitwiseAnd", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr}, ValueType::kI64List),
       {FunctionType::kCFunc, reinterpret_cast<void *>(ListBitwiseAnd<I64ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListBitwiseAndWithMinSize", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListBitwiseAndWithMinSize<U8ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListBitwiseAndWithMinSize", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr},
+                        ValueType::kU16List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListBitwiseAndWithMinSize<U16ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListBitwiseAndWithMinSize", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr},
+                        ValueType::kU32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListBitwiseAndWithMinSize<U32ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListBitwiseAndWithMinSize", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr},
+                        ValueType::kU64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListBitwiseAndWithMinSize<U64ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListBitwiseAndWithMinSize", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr},
+                        ValueType::kI8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListBitwiseAndWithMinSize<I8ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListBitwiseAndWithMinSize", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr},
+                        ValueType::kI16List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListBitwiseAndWithMinSize<I16ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListBitwiseAndWithMinSize", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr},
+                        ValueType::kI32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListBitwiseAndWithMinSize<I32ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListBitwiseAndWithMinSize", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr},
+                        ValueType::kI64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListBitwiseAndWithMinSize<I64ListStruct>), nullptr,
        ReadOnlyFunctionAttributeSetter}));
   return Status::OK();
 }
