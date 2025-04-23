@@ -702,6 +702,72 @@ TEST(FunctionTest, ListMulTest3) {
   EXPECT_EQ(std::get<std::vector<float>>(result), expect);
 }
 
+TEST(FunctionTest, ListMulWithMinSizeTest1) {
+  std::vector<uint16_t> data1 = {1, 2, 3, 4};
+  std::vector<uint16_t> data2 = {10, 20, 30, 40};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
+  auto mul_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(mul_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMulWithMinSize", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<uint16_t> expect = {10, 40, 90, 160};
+  EXPECT_EQ(std::get<std::vector<uint16_t>>(result), expect);
+}
+
+TEST(FunctionTest, ListMulWithMinSizeTest2) {
+  std::vector<int32_t> data1 = {1, 2, 3, 4};
+  std::vector<int32_t> data2 = {10, 20, 30, 40};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
+  auto mul_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(mul_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMulWithMinSize", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<int32_t> expect = {10, 40, 90, 160};
+  EXPECT_EQ(std::get<std::vector<int32_t>>(result), expect);
+}
+
+TEST(FunctionTest, ListMulWithMinSizeTest3) {
+  std::vector<float> data1 = {1, 2, 3, 4};
+  std::vector<float> data2 = {10, 20, 30};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
+  auto mul_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(mul_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMulWithMinSize", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<float> expect = {10, 40, 90};
+  EXPECT_EQ(std::get<std::vector<float>>(result), expect);
+}
+
 TEST(FunctionTest, ListDivTest1) {
   std::vector<uint32_t> data = {1000, 2000, 3000, 4000};
   uint32_t div = 10;
