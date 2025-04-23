@@ -205,6 +205,19 @@ ListType ListMul(ListType a, typename ListType::CElementType b, void *exec_conte
 }
 
 template <typename ListType>
+ListType ListMulWithMinSize(ListType a, ListType b, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  ListType result;
+  result.len = std::min(a.len, b.len);
+  result.data = reinterpret_cast<typename ListType::CElementType *>(
+      exec_ctx->arena.Allocate((result.len) * sizeof(typename ListType::CElementType)));
+  for (uint32_t i = 0; i < result.len; i++) {
+    result.data[i] = a.data[i] * b.data[i];
+  }
+  return result;
+}
+
+template <typename ListType>
 ListType ListDiv(ListType a, typename ListType::CElementType b, void *exec_context) {
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
   ListType result;
@@ -1093,6 +1106,57 @@ Status InitListMulFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(
       FunctionSignature("ListMul", {ValueType::kF64List, ValueType::kF64, ValueType::kPtr}, ValueType::kF64List),
       {FunctionType::kCFunc, reinterpret_cast<void *>(ListMul<F64ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMulWithMinSize", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr},
+                        ValueType::kU8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMulWithMinSize<U8ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMulWithMinSize", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr},
+                        ValueType::kU16List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMulWithMinSize<U16ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMulWithMinSize", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr},
+                        ValueType::kU32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMulWithMinSize<U32ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMulWithMinSize", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr},
+                        ValueType::kU64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMulWithMinSize<U64ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMulWithMinSize", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr},
+                        ValueType::kI8List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMulWithMinSize<I8ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMulWithMinSize", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr},
+                        ValueType::kI16List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMulWithMinSize<I16ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMulWithMinSize", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr},
+                        ValueType::kI32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMulWithMinSize<I32ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMulWithMinSize", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr},
+                        ValueType::kI64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMulWithMinSize<I64ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMulWithMinSize", {ValueType::kF32List, ValueType::kF32List, ValueType::kPtr},
+                        ValueType::kF32List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMulWithMinSize<F32ListStruct>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("ListMulWithMinSize", {ValueType::kF64List, ValueType::kF64List, ValueType::kPtr},
+                        ValueType::kF64List),
+      {FunctionType::kCFunc, reinterpret_cast<void *>(ListMulWithMinSize<F64ListStruct>), nullptr,
        ReadOnlyFunctionAttributeSetter}));
   return Status::OK();
 }
