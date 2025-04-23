@@ -944,6 +944,50 @@ TEST(FunctionTest, ListModTest2) {
   EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
 }
 
+TEST(FunctionTest, ListModWithMinSizeTest1) {
+  std::vector<uint32_t> data1 = {1000, 2000, 3000, 4000};
+  std::vector<uint32_t> data2 = {7, 8, 9, 10};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
+  auto mod_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(mod_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListModWithMinSize", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<uint32_t> expect = {1000 % 7, 2000 % 8, 3000 % 9, 4000 % 10};
+  EXPECT_EQ(std::get<std::vector<uint32_t>>(result), expect);
+}
+
+TEST(FunctionTest, ListModWithMinSizeTest2) {
+  std::vector<int64_t> data1 = {1000, 2000, 3000, 4000};
+  std::vector<int64_t> data2 = {7, 8, 9, 10};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
+  auto mod_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(mod_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListModWithMinSize", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<int64_t> expect = {1000 % 7, 2000 % 8, 3000 % 9, 4000 % 10};
+  EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
+}
+
 TEST(FunctionTest, ListExpTest1) {
   std::vector<int8_t> data = {1, 2, 3, 4};
   std::unique_ptr<FunctionRegistry> func_registry;
