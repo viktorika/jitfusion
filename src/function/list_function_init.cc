@@ -13,6 +13,7 @@
 #include "function_init.h"
 #include "function_registry.h"
 #include "llvm/IR/Value.h"
+#include "murmurhash3.h"
 #include "status.h"
 #include "type.h"
 
@@ -567,6 +568,13 @@ ListType FilterByBitmap(ListType a, U8ListStruct bitmap, uint32_t bits_cnt, void
       result.data[cur++] = (a.data[(i * 8) + idx]);
     }
   }
+  return result;
+}
+
+template <typename ListType>
+uint32_t MurmurHash3X8632(ListType a) {
+  uint32_t result;
+  MurmurHash3_x86_32(a.data, a.len * sizeof(typename ListType::CElementType), 0x9747b28c, &result);
   return result;
 }
 
@@ -2314,6 +2322,40 @@ Status InitCountBitsFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+Status InitHashFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("MurmurHash3X8632", {ValueType::kU8List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(MurmurHash3X8632<U8ListStruct>),
+                                      nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("MurmurHash3X8632", {ValueType::kU16List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(MurmurHash3X8632<U16ListStruct>),
+                                      nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("MurmurHash3X8632", {ValueType::kU32List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(MurmurHash3X8632<U32ListStruct>),
+                                      nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("MurmurHash3X8632", {ValueType::kU64List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(MurmurHash3X8632<U64ListStruct>),
+                                      nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("MurmurHash3X8632", {ValueType::kI8List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(MurmurHash3X8632<I8ListStruct>),
+                                      nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("MurmurHash3X8632", {ValueType::kI16List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(MurmurHash3X8632<I16ListStruct>),
+                                      nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("MurmurHash3X8632", {ValueType::kI32List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(MurmurHash3X8632<I32ListStruct>),
+                                      nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("MurmurHash3X8632", {ValueType::kI64List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(MurmurHash3X8632<I64ListStruct>),
+                                      nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("MurmurHash3X8632", {ValueType::kF32List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(MurmurHash3X8632<F32ListStruct>),
+                                      nullptr, ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("MurmurHash3X8632", {ValueType::kF64List}, ValueType::kU32),
+                                     {FunctionType::kCFunc, reinterpret_cast<void *>(MurmurHash3X8632<F64ListStruct>),
+                                      nullptr, ReadOnlyFunctionAttributeSetter}));
+  return Status::OK();
+}
+
 Status InitFilterFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitGenLargeFilterBitmapFunc(reg));
   JF_RETURN_NOT_OK(InitGenLargeEqualFilterBitmapFunc(reg));
@@ -2361,6 +2403,7 @@ Status InitListInternalFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitOperationFunc(reg));
   JF_RETURN_NOT_OK(InitFilterFunc(reg));
   JF_RETURN_NOT_OK(InitCountBitsFunc(reg));
+  JF_RETURN_NOT_OK(InitHashFunc(reg));
   return Status::OK();
 }
 

@@ -1967,3 +1967,19 @@ TEST(FunctionTest, ListBitwiseXorWithMinSizeTest2) {
   std::vector<int64_t> expect = {1000 ^ 10, 2000 ^ 10, 3000 ^ 10, 4000 ^ 10};
   EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
 }
+
+TEST(FunctionTest, MurmurHash3X8632Test1) {
+  std::vector<int64_t> data = {1000, 2000, 3000, 4000};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("MurmurHash3X8632", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<uint32_t>(result), 1952695723U);
+}
