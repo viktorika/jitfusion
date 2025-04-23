@@ -834,6 +834,72 @@ TEST(FunctionTest, ListDivTest3) {
   EXPECT_EQ(std::get<std::vector<double>>(result), expect);
 }
 
+TEST(FunctionTest, ListDivWithMinSizeTest1) {
+  std::vector<uint32_t> data1 = {1000, 2000, 3000, 4000};
+  std::vector<uint32_t> data2 = {10, 20, 30, 40};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
+  auto div_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(div_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListDivWithMinSize", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<uint32_t> expect = {100, 100, 100, 100};
+  EXPECT_EQ(std::get<std::vector<uint32_t>>(result), expect);
+}
+
+TEST(FunctionTest, ListDivWithMinSizeTest2) {
+  std::vector<int64_t> data1 = {1000, 2000, 3000, 4000};
+  std::vector<int64_t> data2 = {10, 20, 30, 40};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
+  auto div_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(div_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListDivWithMinSize", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<int64_t> expect = {100, 100, 100, 100};
+  EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
+}
+
+TEST(FunctionTest, ListDivWithMinSizeTest3) {
+  std::vector<double> data1 = {1000, 2000, 3000, 4000};
+  std::vector<double> data2 = {10, 20, 30, 40};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
+  auto div_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(div_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListDivWithMinSize", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<double> expect = {100, 100, 100, 100};
+  EXPECT_EQ(std::get<std::vector<double>>(result), expect);
+}
+
 TEST(FunctionTest, ListModTest1) {
   std::vector<uint32_t> data = {1000, 2000, 3000, 4000};
   uint32_t mod = 7;
