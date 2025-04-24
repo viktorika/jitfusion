@@ -1,23 +1,9 @@
 # athena
 
-An execution engine utilizing DSL in combination with JITFusion.
-
-# Build
-Environment
-
-  * jitfution
-  * bazel 7.4.1
-
-```bash
-bazel build :athena
-```
-You can get the unit test binary use the following command.
-```bash
-bazel build :athena_test
-```
+An execution engine utilizing DSL in combination with jitfusion.
 
 # How to use
-When using it, you need to <span style="color:red">#include "athena.h"</span> and depend on the <span style="color:red">Athena target</span>.
+When using it, you need to <span style="color:red">#include "athena.h"</span> and depend on the <span style="color:red">athena target</span>.
 
 ## DSL Rule
 
