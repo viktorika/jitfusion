@@ -17,8 +17,8 @@ llvm-config --version
 
 ## CMake Build
 ```bash
-mkdir CmakeBuild
-cd CmakeBuild
+mkdir CMakeBuild
+cd CMakeBuild
 cmake .. && make
 ```
 
