@@ -6,14 +6,24 @@ A execution engine completely based on llvm jit.
 Environment
 
   * llvm 19.1.7
-  * bazel 7.4.1
+  * googletest
 
-First, you need to have <span style="color:red">LLVM 19.1.7</span>; other versions will not work. However, if you can only use other versions, you can modify the exec_engine.cc file to adapt it, and it shouldn't require too many changes. Additionally, currently, only Bazel is supported for compilation.If you are using version <span style="color:red">Bazel 8</span> or above, you will need to use the --enable_workspace=true option.
+First, you need to have <span style="color:red">LLVM 19.1.7</span>; other versions will not work. However, if you can only use other versions, you can modify the exec_engine.cc file to adapt it, and it shouldn't require too many changes. Additionally,
 
 You can use the following command to check your version.
 ```bash
 llvm-config --version
 ```
+
+## CMake Build
+```bash
+mkdir CmakeBuild
+cd CmakeBuild
+cmake .. && make
+```
+
+## Bazel Build
+If you are using version <span style="color:red">Bazel 8</span> or above, you will need to use the --enable_workspace=true option.
 
 You can get the library use the following command.
 ```bash
@@ -22,6 +32,16 @@ bazel build //:jitfusion
 You can get the unit test binary use the following command.
 ```bash
 bazel build //:jitfusion_test
+```
+
+You can get the athena use the following command.
+```bash
+bazel build //:athena
+```
+
+You can get the athena unit test binary use the following command.
+```bash
+bazel build //:athena_test
 ```
 
 # How to use
