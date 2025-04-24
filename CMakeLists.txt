@@ -24,7 +24,6 @@ execute_process(
 include_directories(${LLVM_PREFIX}/include)
 link_directories(${LLVM_PREFIX}/lib)
 
-# 添加编译选项
 add_compile_options(
     -Wall
     -Wextra
@@ -42,10 +41,8 @@ add_library(jitfusion ${JITFUSION_SRC} ${JITFUSION_HDRS})
 target_include_directories(jitfusion PUBLIC include PRIVATE src)
 target_link_libraries(jitfusion ${LLVM_LIBS})
 
-# 添加可执行文件
 file(GLOB_RECURSE JITFUSION_TEST_SRC "test/*.cc")
 
-# 查找 GTest 包
 find_package(GTest REQUIRED)
 
 add_executable(jitfusion_test ${JITFUSION_TEST_SRC})
