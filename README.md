@@ -194,5 +194,5 @@ int main() {
 
 # Tools
 
-* athena：An execution engine utilizing DSL in combination with JITFusion. You can find more details in the athena directory.
+* athena：An execution engine utilizing DSL in combination with jitfusion. You can find more details in the athena directory.
 https://github.com/viktorika/jitfusion/tree/main/athena
