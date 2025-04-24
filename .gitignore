@@ -4,4 +4,4 @@
 .DS_Store
 compile_commands.json
 MODULE.bazel.lock
-/CmakeBuild
+/CMakeBuild
