@@ -25,9 +25,9 @@ template <typename ListType>
 ListType ListConcat(ListType a, ListType b, void *exec_context) {
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
   ListType result;
-  result.data = reinterpret_cast<typename ListType::CElementType *>(
-      exec_ctx->arena.Allocate((a.len + b.len) * sizeof(typename ListType::CElementType)));
   result.len = a.len + b.len;
+  result.data = reinterpret_cast<typename ListType::CElementType *>(
+      exec_ctx->arena.Allocate(result.len * sizeof(typename ListType::CElementType)));
   memcpy(result.data, a.data, a.len * sizeof(typename ListType::CElementType));
   memcpy(result.data + a.len, b.data, b.len * sizeof(typename ListType::CElementType));
   return result;
