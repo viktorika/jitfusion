@@ -192,6 +192,10 @@ int main() {
 
 2.All StringStructs generated through custom functions must be C-style strings, meaning they must end with '\0'. Otherwise, using certain string functions like StringCmp may result in undefined behavior.
 
+# Supported functions
+
+Currently supported function documentation：https://github.com/viktorika/jitfusion/blob/main/doc/function.md
+
 # Tools
 
 * athena：An execution engine utilizing DSL in combination with jitfusion. You can find more details in the athena directory.
