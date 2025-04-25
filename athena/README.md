@@ -65,3 +65,7 @@ void StoreFunctionSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/,
 
 
 For more details, please refer to the athena_test.cc file.
+
+# Supported functions
+
+Currently supported function documentation：https://github.com/viktorika/jitfusion/blob/main/doc/function.md
