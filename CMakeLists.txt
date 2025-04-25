@@ -48,7 +48,14 @@ find_package(GTest REQUIRED)
 add_executable(jitfusion_test ${JITFUSION_TEST_SRC})
 target_link_libraries(jitfusion_test jitfusion GTest::GTest)
 
-file(GLOB_RECURSE ATHENA_SRC "athena/*.cc" "athena/*.h")
+file(GLOB_RECURSE ATHENA_SRC 
+    "athena/athena.cc"
+    "athena/ast_builder.cc"
+    "athena/ast_builder.h"
+    "athena/location.hh"
+    "athena/parser.cc"
+    "athena/parser.hh"
+    "athena/token.cc")
 
 add_library(athena ${ATHENA_SRC})
 target_include_directories(jitfusion PUBLIC athena)
