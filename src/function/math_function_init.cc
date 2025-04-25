@@ -329,11 +329,6 @@ Status InitSqrtFunc(FunctionRegistry *reg) {
 }
 
 Status InitAbsFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("abs", {ValueType::kF32}, ValueType::kF32),
-                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinAbsFunction}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("abs", {ValueType::kF64}, ValueType::kF64),
-                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinAbsFunction}));
-
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("abs", {ValueType::kI8}, ValueType::kI32),
                                      {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinAbsFunction}));
   JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("abs", {ValueType::kI16}, ValueType::kI32),
