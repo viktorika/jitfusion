@@ -152,6 +152,14 @@ void StoreFunctionSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/,
 }
 ```
 
+If you find that you have significant overhead in memory allocation, you can perform pooling operations on ExecContext and pass it in using the function below during execution. This way, you can avoid repeatedly allocating memory.
+
+```c++
+  Status Execute(ExecContext& exec_ctx, void* entry_arguments, RetType* result);
+
+  Status Execute(ExecContext& exec_ctx, void* entry_arguments, void* result);
+```
+
 
 # Attention
 1.If you need to allocate memory that you cannot manage yourself and require the execution engine to manage it for you, you need to use the ExecContextNode. The ExecContext structure corresponding to ExecContextNode contains an arena. By using it to allocate memory, the memory will be automatically released when the execution is complete.
