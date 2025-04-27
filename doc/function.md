@@ -863,6 +863,20 @@ Traverse the list to find all values that meet the condition of being greater th
     f32list IfLarge(f32list src, f32 cmp_value, f32 target_value, ptr exec_ctx)
     f64list IfLarge(f64list src, f64 cmp_value, f64 target_value, ptr exec_ctx)
 
+## IfLargeEqual
+Traverse the list to find all values that meet the condition of being greater than or equal to the specified value, modify them to the target value, and return a new list.
+
+    u8list  IfLargeEqual(u8list src, u8 cmp_value, u8 target_value, ptr exec_ctx)
+    u16list IfLargeEqual(u16list src, u16 cmp_value, u16 target_value, ptr exec_ctx)
+    u32list IfLargeEqual(u32list src, u32 cmp_value, u32 target_value, ptr exec_ctx)
+    u64list IfLargeEqual(u64list src, u64 cmp_value, u64 target_value, ptr exec_ctx)
+    i8list  IfLargeEqual(i8list src, i8 cmp_value, i8 target_value, ptr exec_ctx)
+    i16list IfLargeEqual(i16list src, i16 cmp_value, i16 target_value, ptr exec_ctx)
+    i32list IfLargeEqual(i32list src, i32 cmp_value, i32 target_value, ptr exec_ctx)
+    i64list IfLargeEqual(i64list src, i64 cmp_value, i64 target_value, ptr exec_ctx)
+    f32list IfLargeEqual(f32list src, f32 cmp_value, f32 target_value, ptr exec_ctx)
+    f64list IfLargeEqual(f64list src, f64 cmp_value, f64 target_value, ptr exec_ctx)
+
 ## MurmurHash3X8632
 MurmurHash3_x86_32 algorithm
 
