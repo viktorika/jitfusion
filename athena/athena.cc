@@ -21,6 +21,10 @@ Status Athena::Compile(const std::string& code, const std::unique_ptr<FunctionRe
 
 Status Athena::Execute(void* entry_arguments, RetType* result) { return exec_engine_.Execute(entry_arguments, result); }
 
+Status Athena::Execute(ExecContext& exec_ctx, void* entry_arguments, RetType* result) {
+  return exec_engine_.Execute(exec_ctx, entry_arguments, result);
+}
+
 Status Athena::Compile(const std::vector<std::string>& code, const std::unique_ptr<FunctionRegistry>& func_registry) {
   ProgramAstBuilder ast_builder;
   std::unique_ptr<ExecNode> program_ast;
@@ -29,5 +33,9 @@ Status Athena::Compile(const std::vector<std::string>& code, const std::unique_p
 }
 
 Status Athena::Execute(void* entry_arguments, void* result) { return exec_engine_.Execute(entry_arguments, result); }
+
+Status Athena::Execute(ExecContext& exec_ctx, void* entry_arguments, void* result) {
+  return exec_engine_.Execute(exec_ctx, entry_arguments, result);
+}
 
 }  // namespace athena

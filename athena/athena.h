@@ -14,6 +14,7 @@
 
 namespace athena {
 
+using jitfusion::ExecContext;
 using jitfusion::ExecEngine;
 using jitfusion::ExecEngineOption;
 using jitfusion::FunctionRegistry;
@@ -30,13 +31,17 @@ class Athena {
 
   // Applicable to simple scenarios, the program will not actually use a custom store function to write data. Instead,
   // the result will be returned, similar to expression scenarios.
+  // If you need to optimize the memory allocation issue of ExecContext, you can use the function passed to ExecContext.
   Status Compile(const std::string& code, const std::unique_ptr<FunctionRegistry>& func_registry);
   Status Execute(void* entry_arguments, RetType* result);
+  Status Execute(ExecContext& exec_ctx, void* entry_arguments, RetType* result);
 
   // Applicable to complex scenarios where multiple pipelines are computed simultaneously. Each pipeline writes data
   // using a custom function, and results are not returned. This is similar to feature processing scenarios.
+  // If you need to optimize the memory allocation issue of ExecContext, you can use the function passed to ExecContext.
   Status Compile(const std::vector<std::string>& code, const std::unique_ptr<FunctionRegistry>& func_registry);
   Status Execute(void* entry_arguments, void* result);
+  Status Execute(ExecContext& exec_ctx, void* entry_arguments, void* result);
 
  private:
   ExecEngine exec_engine_;
