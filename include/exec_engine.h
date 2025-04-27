@@ -18,11 +18,16 @@ namespace jitfusion {
 struct ExecContext {
   explicit ExecContext(int64_t alloc_min_chunk_size) : arena(alloc_min_chunk_size) {}
   Arena arena;
+
+  void Clear() {
+    arena.Reset();
+  }
 };
 
 struct ExecEngineOption {
   int64_t const_value_arena_alloc_min_chunk_size{4096};
   int64_t exec_ctx_arena_alloc_min_chunk_size{4096};
+  bool use_pool_{false};
 };
 
 class ExecEngine {
@@ -34,10 +39,15 @@ class ExecEngine {
 
   Status Compile(const std::unique_ptr<ExecNode>& exec_node, const std::unique_ptr<FunctionRegistry>& func_registry);
   // Applicable to scenarios with similar expressions, a result is returned through the root node.
+  // If you need to optimize the memory allocation issue of ExecContext, you can use the function passed to ExecContext.
   Status Execute(void* entry_arguments, RetType* result);
+  Status Execute(ExecContext& exec_ctx, void* entry_arguments, RetType* result);
+
   // Applicable to more complex scenarios, users need to use an output node and a custom store function to write data,
   // and it will not return data from the root node. and root node must be the NoOpNode.
+  // If you need to optimize the memory allocation issue of ExecContext, you can use the function passed to ExecContext.
   Status Execute(void* entry_arguments, void* result);
+  Status Execute(ExecContext& exec_ctx, void* entry_arguments, void* result);
 
  private:
   Arena const_value_arena_;
