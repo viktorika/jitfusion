@@ -877,6 +877,62 @@ Traverse the list to find all values that meet the condition of being greater th
     f32list IfLargeEqual(f32list src, f32 cmp_value, f32 target_value, ptr exec_ctx)
     f64list IfLargeEqual(f64list src, f64 cmp_value, f64 target_value, ptr exec_ctx)
 
+## IfEqual
+Traverse the list to find all values that meet the condition of being greater than or equal to the specified value, modify them to the target value, and return a new list.
+
+    u8list  IfEqual(u8list src, u8 cmp_value, u8 target_value, ptr exec_ctx)
+    u16list IfEqual(u16list src, u16 cmp_value, u16 target_value, ptr exec_ctx)
+    u32list IfEqual(u32list src, u32 cmp_value, u32 target_value, ptr exec_ctx)
+    u64list IfEqual(u64list src, u64 cmp_value, u64 target_value, ptr exec_ctx)
+    i8list  IfEqual(i8list src, i8 cmp_value, i8 target_value, ptr exec_ctx)
+    i16list IfEqual(i16list src, i16 cmp_value, i16 target_value, ptr exec_ctx)
+    i32list IfEqual(i32list src, i32 cmp_value, i32 target_value, ptr exec_ctx)
+    i64list IfEqual(i64list src, i64 cmp_value, i64 target_value, ptr exec_ctx)
+    f32list IfEqual(f32list src, f32 cmp_value, f32 target_value, ptr exec_ctx)
+    f64list IfEqual(f64list src, f64 cmp_value, f64 target_value, ptr exec_ctx)
+
+## IfLess
+Traverse the list to find all values that meet the condition of being greater than or equal to the specified value, modify them to the target value, and return a new list.
+
+    u8list  IfLess(u8list src, u8 cmp_value, u8 target_value, ptr exec_ctx)
+    u16list IfLess(u16list src, u16 cmp_value, u16 target_value, ptr exec_ctx)
+    u32list IfLess(u32list src, u32 cmp_value, u32 target_value, ptr exec_ctx)
+    u64list IfLess(u64list src, u64 cmp_value, u64 target_value, ptr exec_ctx)
+    i8list  IfLess(i8list src, i8 cmp_value, i8 target_value, ptr exec_ctx)
+    i16list IfLess(i16list src, i16 cmp_value, i16 target_value, ptr exec_ctx)
+    i32list IfLess(i32list src, i32 cmp_value, i32 target_value, ptr exec_ctx)
+    i64list IfLess(i64list src, i64 cmp_value, i64 target_value, ptr exec_ctx)
+    f32list IfLess(f32list src, f32 cmp_value, f32 target_value, ptr exec_ctx)
+    f64list IfLess(f64list src, f64 cmp_value, f64 target_value, ptr exec_ctx)
+
+## IfLessEqual
+Traverse the list to find all values that meet the condition of being greater than or equal to the specified value, modify them to the target value, and return a new list.
+
+    u8list  IfLessEqual(u8list src, u8 cmp_value, u8 target_value, ptr exec_ctx)
+    u16list IfLessEqual(u16list src, u16 cmp_value, u16 target_value, ptr exec_ctx)
+    u32list IfLessEqual(u32list src, u32 cmp_value, u32 target_value, ptr exec_ctx)
+    u64list IfLessEqual(u64list src, u64 cmp_value, u64 target_value, ptr exec_ctx)
+    i8list  IfLessEqual(i8list src, i8 cmp_value, i8 target_value, ptr exec_ctx)
+    i16list IfLessEqual(i16list src, i16 cmp_value, i16 target_value, ptr exec_ctx)
+    i32list IfLessEqual(i32list src, i32 cmp_value, i32 target_value, ptr exec_ctx)
+    i64list IfLessEqual(i64list src, i64 cmp_value, i64 target_value, ptr exec_ctx)
+    f32list IfLessEqual(f32list src, f32 cmp_value, f32 target_value, ptr exec_ctx)
+    f64list IfLessEqual(f64list src, f64 cmp_value, f64 target_value, ptr exec_ctx)
+
+## IfNotEqual
+Traverse the list to find all values that meet the condition of being greater than or equal to the specified value, modify them to the target value, and return a new list.
+
+    u8list  IfNotEqual(u8list src, u8 cmp_value, u8 target_value, ptr exec_ctx)
+    u16list IfNotEqual(u16list src, u16 cmp_value, u16 target_value, ptr exec_ctx)
+    u32list IfNotEqual(u32list src, u32 cmp_value, u32 target_value, ptr exec_ctx)
+    u64list IfNotEqual(u64list src, u64 cmp_value, u64 target_value, ptr exec_ctx)
+    i8list  IfNotEqual(i8list src, i8 cmp_value, i8 target_value, ptr exec_ctx)
+    i16list IfNotEqual(i16list src, i16 cmp_value, i16 target_value, ptr exec_ctx)
+    i32list IfNotEqual(i32list src, i32 cmp_value, i32 target_value, ptr exec_ctx)
+    i64list IfNotEqual(i64list src, i64 cmp_value, i64 target_value, ptr exec_ctx)
+    f32list IfNotEqual(f32list src, f32 cmp_value, f32 target_value, ptr exec_ctx)
+    f64list IfNotEqual(f64list src, f64 cmp_value, f64 target_value, ptr exec_ctx)
+
 ## MurmurHash3X8632
 MurmurHash3_x86_32 algorithm
 
