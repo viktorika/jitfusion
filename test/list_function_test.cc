@@ -1983,3 +1983,78 @@ TEST(FunctionTest, MurmurHash3X8632Test1) {
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<uint32_t>(result), 1952695723U);
 }
+
+TEST(FunctionTest, IfLargeTest1) {
+  std::vector<int8_t> data = {1, 2, 3, 4, 5};
+  int8_t cmp_value = 3;
+  int8_t fill_value = 100;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto cmp_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(cmp_value));
+  auto fill_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(fill_value));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(cmp_value_node));
+  args_list.emplace_back(std::move(fill_value_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("IfLarge", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<int8_t> expect = {1, 2, 3, 100, 100};
+  EXPECT_EQ(std::get<std::vector<int8_t>>(result), expect);
+}
+
+TEST(FunctionTest, IfLargeTest2) {
+  std::vector<uint32_t> data = {1, 2, 3, 4, 5};
+  uint32_t cmp_value = 3;
+  uint32_t fill_value = 100;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto cmp_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(cmp_value));
+  auto fill_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(fill_value));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(cmp_value_node));
+  args_list.emplace_back(std::move(fill_value_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("IfLarge", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<uint32_t> expect = {1, 2, 3, 100, 100};
+  EXPECT_EQ(std::get<std::vector<uint32_t>>(result), expect);
+}
+
+TEST(FunctionTest, IfLargeTest3) {
+  std::vector<float> data = {1, 2, 3, 4, 5};
+  float cmp_value = 3;
+  float fill_value = 100;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto cmp_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(cmp_value));
+  auto fill_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(fill_value));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(cmp_value_node));
+  args_list.emplace_back(std::move(fill_value_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("IfLarge", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<float> expect = {1, 2, 3, 100, 100};
+  EXPECT_EQ(std::get<std::vector<float>>(result), expect);
+}
