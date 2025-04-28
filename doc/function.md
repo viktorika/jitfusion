@@ -962,7 +962,7 @@ Traverse the list to find all values that meet the condition of being greater th
     f64list IfLargeEqual(f64list src, f64 cmp_value, f64 target_value, ptr exec_ctx)
 
 ## IfEqual
-Traverse the list to find all values that meet the condition of being greater than or equal to the specified value, modify them to the target value, and return a new list.
+Traverse the list to find all values that meet the condition of being equal to the specified value, modify them to the target value, and return a new list.
 
     u8list  IfEqual(u8list src, u8 cmp_value, u8 target_value, ptr exec_ctx)
     u16list IfEqual(u16list src, u16 cmp_value, u16 target_value, ptr exec_ctx)
@@ -976,7 +976,7 @@ Traverse the list to find all values that meet the condition of being greater th
     f64list IfEqual(f64list src, f64 cmp_value, f64 target_value, ptr exec_ctx)
 
 ## IfLess
-Traverse the list to find all values that meet the condition of being greater than or equal to the specified value, modify them to the target value, and return a new list.
+Traverse the list to find all values that meet the condition of being less than the specified value, modify them to the target value, and return a new list.
 
     u8list  IfLess(u8list src, u8 cmp_value, u8 target_value, ptr exec_ctx)
     u16list IfLess(u16list src, u16 cmp_value, u16 target_value, ptr exec_ctx)
@@ -990,7 +990,7 @@ Traverse the list to find all values that meet the condition of being greater th
     f64list IfLess(f64list src, f64 cmp_value, f64 target_value, ptr exec_ctx)
 
 ## IfLessEqual
-Traverse the list to find all values that meet the condition of being greater than or equal to the specified value, modify them to the target value, and return a new list.
+Traverse the list to find all values that meet the condition of being less than or equal to the specified value, modify them to the target value, and return a new list.
 
     u8list  IfLessEqual(u8list src, u8 cmp_value, u8 target_value, ptr exec_ctx)
     u16list IfLessEqual(u16list src, u16 cmp_value, u16 target_value, ptr exec_ctx)
@@ -1004,7 +1004,7 @@ Traverse the list to find all values that meet the condition of being greater th
     f64list IfLessEqual(f64list src, f64 cmp_value, f64 target_value, ptr exec_ctx)
 
 ## IfNotEqual
-Traverse the list to find all values that meet the condition of being greater than or equal to the specified value, modify them to the target value, and return a new list.
+Traverse the list to find all values that meet the condition of being not equal to the specified value, modify them to the target value, and return a new list.
 
     u8list  IfNotEqual(u8list src, u8 cmp_value, u8 target_value, ptr exec_ctx)
     u16list IfNotEqual(u16list src, u16 cmp_value, u16 target_value, ptr exec_ctx)
