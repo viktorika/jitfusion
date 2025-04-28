@@ -66,10 +66,6 @@ std::unique_ptr<ExecNode> ProgramAstBuilder::MakeRefNode(const std::string& var_
 }
 
 void ProgramAstBuilder::AddStatement(Statement statement) {
-  if (auto it = var2index_.find(statement.var_name); it != var2index_.end()) {
-    custom_error_message_ = "Duplicate variable name: " + statement.var_name;
-    return;
-  }
   statements_.emplace_back(std::move(statement));
   var2index_[statements_.back().var_name] = statements_.size() - 1;
 }
