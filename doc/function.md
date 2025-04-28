@@ -900,6 +900,20 @@ Return a bitmap representation after performing a not equal comparison on all el
     u8list GenNotEqualFilterBitmap(f32list, f32, ptr exec_ctx)
     u8list GenNotEqualFilterBitmap(f64list, f64, ptr exec_ctx)
 
+## GenNotEqualFilterBitmapWithMinSize
+Return a bitmap representing the results of not equal comparisons for each element in the two lists, with the length being the minimum of the two lists.
+
+    u8list GenNotEqualFilterBitmapWithMinSize(u8list, u8list, ptr exec_ctx)
+    u8list GenNotEqualFilterBitmapWithMinSize(u16list, u16list, ptr exec_ctx)
+    u8list GenNotEqualFilterBitmapWithMinSize(u32list, u32list, ptr exec_ctx)
+    u8list GenNotEqualFilterBitmapWithMinSize(u64list, u64list, ptr exec_ctx)
+    u8list GenNotEqualFilterBitmapWithMinSize(i8list, i8list, ptr exec_ctx)
+    u8list GenNotEqualFilterBitmapWithMinSize(i16list, i16list, ptr exec_ctx)
+    u8list GenNotEqualFilterBitmapWithMinSize(i32list, i32list, ptr exec_ctx)
+    u8list GenNotEqualFilterBitmapWithMinSize(i64list, i64list, ptr exec_ctx)
+    u8list GenNotEqualFilterBitmapWithMinSize(f32list, f32list, ptr exec_ctx)
+    u8list GenNotEqualFilterBitmapWithMinSize(f64list, f64list, ptr exec_ctx)
+
 ## FilterByBitmap
 Return a new list by filtering out the corresponding elements based on the bitmap.
 
