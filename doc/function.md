@@ -760,6 +760,20 @@ Return a bitmap representation after performing a greater-than comparison on all
     u8list GenLargeFilterBitmap(f32list, f32, ptr exec_ctx)
     u8list GenLargeFilterBitmap(f64list, f64, ptr exec_ctx)
 
+## GenLargeFilterBitmapWithMinSize
+Return a bitmap representing the results of greater-than comparisons for each element in the two lists, with the length being the minimum of the two lists.
+
+    u8list GenLargeFilterBitmapWithMinSize(u8list, u8list, ptr exec_ctx)
+    u8list GenLargeFilterBitmapWithMinSize(u16list, u16list, ptr exec_ctx)
+    u8list GenLargeFilterBitmapWithMinSize(u32list, u32list, ptr exec_ctx)
+    u8list GenLargeFilterBitmapWithMinSize(u64list, u64list, ptr exec_ctx)
+    u8list GenLargeFilterBitmapWithMinSize(i8list, i8list, ptr exec_ctx)
+    u8list GenLargeFilterBitmapWithMinSize(i16list, i16list, ptr exec_ctx)
+    u8list GenLargeFilterBitmapWithMinSize(i32list, i32list, ptr exec_ctx)
+    u8list GenLargeFilterBitmapWithMinSize(i64list, i64list, ptr exec_ctx)
+    u8list GenLargeFilterBitmapWithMinSize(f32list, f32list, ptr exec_ctx)
+    u8list GenLargeFilterBitmapWithMinSize(f64list, f64list, ptr exec_ctx)
+
 ## GenLargeEqualFilterBitmap
 Return a bitmap representation after performing a greater-than or equal comparison on all elements in the list.
 
