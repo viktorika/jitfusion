@@ -2235,6 +2235,70 @@ Status InitGenLargeEqualFilterBitmapFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+Status InitGenLargeEqualFilterBitmapWithMinSizeFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterBitmapWithMinSize",
+                        {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
+      {FunctionType::kCFunc,
+       reinterpret_cast<void *>(GenFilterBitmapWithMinSize<U8ListStruct, BinaryOPType::kLargeEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterBitmapWithMinSize",
+                        {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr}, ValueType::kU8List),
+      {FunctionType::kCFunc,
+       reinterpret_cast<void *>(GenFilterBitmapWithMinSize<U16ListStruct, BinaryOPType::kLargeEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterBitmapWithMinSize",
+                        {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU8List),
+      {FunctionType::kCFunc,
+       reinterpret_cast<void *>(GenFilterBitmapWithMinSize<U32ListStruct, BinaryOPType::kLargeEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterBitmapWithMinSize",
+                        {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr}, ValueType::kU8List),
+      {FunctionType::kCFunc,
+       reinterpret_cast<void *>(GenFilterBitmapWithMinSize<U64ListStruct, BinaryOPType::kLargeEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterBitmapWithMinSize",
+                        {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr}, ValueType::kU8List),
+      {FunctionType::kCFunc,
+       reinterpret_cast<void *>(GenFilterBitmapWithMinSize<I8ListStruct, BinaryOPType::kLargeEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterBitmapWithMinSize",
+                        {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr}, ValueType::kU8List),
+      {FunctionType::kCFunc,
+       reinterpret_cast<void *>(GenFilterBitmapWithMinSize<I16ListStruct, BinaryOPType::kLargeEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterBitmapWithMinSize",
+                        {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr}, ValueType::kU8List),
+      {FunctionType::kCFunc,
+       reinterpret_cast<void *>(GenFilterBitmapWithMinSize<I32ListStruct, BinaryOPType::kLargeEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterBitmapWithMinSize",
+                        {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr}, ValueType::kU8List),
+      {FunctionType::kCFunc,
+       reinterpret_cast<void *>(GenFilterBitmapWithMinSize<I64ListStruct, BinaryOPType::kLargeEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterBitmapWithMinSize",
+                        {ValueType::kF32List, ValueType::kF32List, ValueType::kPtr}, ValueType::kU8List),
+      {FunctionType::kCFunc,
+       reinterpret_cast<void *>(GenFilterBitmapWithMinSize<F32ListStruct, BinaryOPType::kLargeEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      FunctionSignature("GenLargeEqualFilterBitmapWithMinSize",
+                        {ValueType::kF64List, ValueType::kF64List, ValueType::kPtr}, ValueType::kU8List),
+      {FunctionType::kCFunc,
+       reinterpret_cast<void *>(GenFilterBitmapWithMinSize<F64ListStruct, BinaryOPType::kLargeEqual>), nullptr,
+       ReadOnlyFunctionAttributeSetter}));
+  return Status::OK();
+}
+
 Status InitGenEqualFilterBitmapFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterFunc(
       FunctionSignature("GenEqualFilterBitmap", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr},
@@ -2550,6 +2614,7 @@ Status InitFilterFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitGenLargeFilterBitmapFunc(reg));
   JF_RETURN_NOT_OK(InitGenLargeFilterBitmapWithMinSizeFunc(reg));
   JF_RETURN_NOT_OK(InitGenLargeEqualFilterBitmapFunc(reg));
+  JF_RETURN_NOT_OK(InitGenLargeEqualFilterBitmapWithMinSizeFunc(reg));
   JF_RETURN_NOT_OK(InitGenEqualFilterBitmapFunc(reg));
   JF_RETURN_NOT_OK(InitGenLessFilterBitmapFunc(reg));
   JF_RETURN_NOT_OK(InitGenLessEqualFilterBitmapFunc(reg));
