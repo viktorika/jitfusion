@@ -872,6 +872,20 @@ Return a bitmap representation after performing a less-than or equal comparison 
     u8list GenLessEqualFilterBitmap(f32list, f32, ptr exec_ctx)
     u8list GenLessEqualFilterBitmap(f64list, f64, ptr exec_ctx)
 
+## GenLessEqualFilterBitmapWithMinSize
+Return a bitmap representing the results of less-than or equal comparisons for each element in the two lists, with the length being the minimum of the two lists.
+
+    u8list GenLessEqualFilterBitmapWithMinSize(u8list, u8list, ptr exec_ctx)
+    u8list GenLessEqualFilterBitmapWithMinSize(u16list, u16list, ptr exec_ctx)
+    u8list GenLessEqualFilterBitmapWithMinSize(u32list, u32list, ptr exec_ctx)
+    u8list GenLessEqualFilterBitmapWithMinSize(u64list, u64list, ptr exec_ctx)
+    u8list GenLessEqualFilterBitmapWithMinSize(i8list, i8list, ptr exec_ctx)
+    u8list GenLessEqualFilterBitmapWithMinSize(i16list, i16list, ptr exec_ctx)
+    u8list GenLessEqualFilterBitmapWithMinSize(i32list, i32list, ptr exec_ctx)
+    u8list GenLessEqualFilterBitmapWithMinSize(i64list, i64list, ptr exec_ctx)
+    u8list GenLessEqualFilterBitmapWithMinSize(f32list, f32list, ptr exec_ctx)
+    u8list GenLessEqualFilterBitmapWithMinSize(f64list, f64list, ptr exec_ctx)
+
 ## GenNotEqualFilterBitmap
 Return a bitmap representation after performing a not equal comparison on all elements in the list.
 
