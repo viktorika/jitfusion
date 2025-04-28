@@ -1749,6 +1749,29 @@ TEST(FunctionTest, GenLessEqualFilterBitmapTest1) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
+TEST(FunctionTest, GenLessEqualFilterBitmapWithMinSizeTest1) {
+  std::vector<uint8_t> data = {1, 2, 3, 4, 5, 6, 7, 8};
+  std::vector<uint8_t> value = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto value_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(value));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(value_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node =
+      std::unique_ptr<ExecNode>(new FunctionNode("GenLessEqualFilterBitmapWithMinSize", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<uint8_t> expect = {1};
+  EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
+}
+
 TEST(FunctionTest, GenNotEqualFilterBitmapTest1) {
   std::vector<uint32_t> data = {1, 2, 3, 4, 5, 6, 7, 8};
   uint32_t value = 10;
