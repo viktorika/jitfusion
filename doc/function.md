@@ -844,6 +844,20 @@ Return a bitmap representation after performing a less-than comparison on all el
     u8list GenLessFilterBitmap(f32list, f32, ptr exec_ctx)
     u8list GenLessFilterBitmap(f64list, f64, ptr exec_ctx)
 
+## GenLessFilterBitmapWithMinSize
+Return a bitmap representing the results of less-than comparisons for each element in the two lists, with the length being the minimum of the two lists.
+
+    u8list GenLessFilterBitmapWithMinSize(u8list, u8list, ptr exec_ctx)
+    u8list GenLessFilterBitmapWithMinSize(u16list, u16list, ptr exec_ctx)
+    u8list GenLessFilterBitmapWithMinSize(u32list, u32list, ptr exec_ctx)
+    u8list GenLessFilterBitmapWithMinSize(u64list, u64list, ptr exec_ctx)
+    u8list GenLessFilterBitmapWithMinSize(i8list, i8list, ptr exec_ctx)
+    u8list GenLessFilterBitmapWithMinSize(i16list, i16list, ptr exec_ctx)
+    u8list GenLessFilterBitmapWithMinSize(i32list, i32list, ptr exec_ctx)
+    u8list GenLessFilterBitmapWithMinSize(i64list, i64list, ptr exec_ctx)
+    u8list GenLessFilterBitmapWithMinSize(f32list, f32list, ptr exec_ctx)
+    u8list GenLessFilterBitmapWithMinSize(f64list, f64list, ptr exec_ctx)
+
 ## GenLessEqualFilterBitmap
 Return a bitmap representation after performing a less-than or equal comparison on all elements in the list.
 
