@@ -496,6 +496,7 @@ U8ListStruct GenFilterBitmap(ListType a, typename ListType::CElementType b, void
     result.data[(i / 8)] = mask_bit;
   }
   auto last_index = (vec_loop_len / 8);
+  result.data[last_index] = 0;
   for (int j = 0; i + j < a.len; j++) {
     uint32_t is_true;
     if constexpr (BinaryOPType::kLarge == OpType) {
