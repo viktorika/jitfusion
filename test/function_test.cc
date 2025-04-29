@@ -115,7 +115,7 @@ TEST(FunctionTest, TruncTest) {
 }
 
 TEST(FunctionTest, PowTest) {
-  int32_t arg = 3432432;
+  int32_t arg = 400;
   int32_t x = 3;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
