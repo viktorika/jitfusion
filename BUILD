@@ -17,7 +17,6 @@ cc_library(
         "-O2",
         "-DNDEBUG",
         "-ftree-vectorize",
-        "-DLLVM_ENABLE_ABI_BREAKING_CHECKS=0",
     ],
 )
 
