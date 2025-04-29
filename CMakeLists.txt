@@ -31,7 +31,6 @@ add_compile_options(
     -O2
     -DNDEBUG
     -ftree-vectorize
-    -DLLVM_ENABLE_ABI_BREAKING_CHECKS=0
 )
 
 file(GLOB_RECURSE JITFUSION_SRC "src/*.cc" "src/*.h")
