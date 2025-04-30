@@ -34,8 +34,8 @@ It is recommended to divide custom functions into two categories: read-only func
 
 ```c++
 void ReadOnlyFunctionSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) {
-  f->setDoesNotThrow();
-  f->setMemoryEffects(llvm::MemoryEffects::readOnly());
+  f->addFnAttr(llvm::Attribute::ReadOnly);
+  f->addFnAttr(llvm::Attribute::NoUnwind);
 }
 
 FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
