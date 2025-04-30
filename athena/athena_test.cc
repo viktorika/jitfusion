@@ -82,8 +82,8 @@ int32_t StoreF32(void* output, int32_t index, float value) {
 }
 
 void ReadOnlyFunctionSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) {
-  f->setDoesNotThrow();
-  f->setMemoryEffects(llvm::MemoryEffects::readOnly());
+  f->addFnAttr(llvm::Attribute::ReadOnly);
+  f->addFnAttr(llvm::Attribute::NoUnwind);
 }
 
 void StoreFunctionSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) {
