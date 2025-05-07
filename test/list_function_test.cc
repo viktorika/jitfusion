@@ -1462,7 +1462,7 @@ TEST(FunctionTest, ListMaxTest3) {
   EXPECT_EQ(std::get<std::vector<float>>(result), expect);
 }
 
-TEST(FunctionTest, GenLargeFilterBitmapTest1) {
+TEST(FunctionTest, GenLargeBitmapTest1) {
   std::vector<uint16_t> data = {1, 2, 3, 4, 5, 6, 7};
   uint16_t value = 3;
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1474,7 +1474,7 @@ TEST(FunctionTest, GenLargeFilterBitmapTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeFilterBitmap", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1484,7 +1484,7 @@ TEST(FunctionTest, GenLargeFilterBitmapTest1) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenLargeFilterBitmapTest2) {
+TEST(FunctionTest, GenLargeBitmapTest2) {
   std::vector<int64_t> data = {-1, 2, 3, -4, 5, -6, 7, -8, -9, 10};
   int64_t value = 0;
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1496,7 +1496,7 @@ TEST(FunctionTest, GenLargeFilterBitmapTest2) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeFilterBitmap", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1506,7 +1506,7 @@ TEST(FunctionTest, GenLargeFilterBitmapTest2) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenLargeFilterBitmapTest3) {
+TEST(FunctionTest, GenLargeBitmapTest3) {
   std::vector<double> data = {-1, 2, 3, -4, 5, -6, 7, 8};
   double value = 0;
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1518,7 +1518,7 @@ TEST(FunctionTest, GenLargeFilterBitmapTest3) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeFilterBitmap", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1528,7 +1528,7 @@ TEST(FunctionTest, GenLargeFilterBitmapTest3) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenLargeFilterBitmapWithMinSizeTest1) {
+TEST(FunctionTest, GenLargeBitmapWithMinSizeTest1) {
   std::vector<uint16_t> data = {1, 2, 3, 4, 5, 6, 7};
   std::vector<uint16_t> value = {1, 5, 2, 7};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1540,7 +1540,7 @@ TEST(FunctionTest, GenLargeFilterBitmapWithMinSizeTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeFilterBitmapWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeBitmapWithMinSize", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1550,7 +1550,7 @@ TEST(FunctionTest, GenLargeFilterBitmapWithMinSizeTest1) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenLargeFilterBitmapWithMinSizeTest2) {
+TEST(FunctionTest, GenLargeBitmapWithMinSizeTest2) {
   std::vector<int64_t> data = {-1, 2, 3, -4, 5, -6, 7, -8, -9, 10};
   std::vector<int64_t> value = {-1, -2, -3, -4, -5, -6, -7, -8, -9, -10};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1562,7 +1562,7 @@ TEST(FunctionTest, GenLargeFilterBitmapWithMinSizeTest2) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeFilterBitmapWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeBitmapWithMinSize", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1572,7 +1572,7 @@ TEST(FunctionTest, GenLargeFilterBitmapWithMinSizeTest2) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenLargeFilterBitmapWithMinSizeTest3) {
+TEST(FunctionTest, GenLargeBitmapWithMinSizeTest3) {
   std::vector<double> data = {-1, 2, 3, -4, 5, -6, 7, 8};
   std::vector<double> value = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1584,7 +1584,7 @@ TEST(FunctionTest, GenLargeFilterBitmapWithMinSizeTest3) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeFilterBitmapWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeBitmapWithMinSize", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1594,7 +1594,7 @@ TEST(FunctionTest, GenLargeFilterBitmapWithMinSizeTest3) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenLargeEqualFilterBitmapTest1) {
+TEST(FunctionTest, GenLargeEqualBitmapTest1) {
   std::vector<uint16_t> data = {1, 2, 3, 4, 5, 6, 7};
   uint16_t value = 3;
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1606,7 +1606,7 @@ TEST(FunctionTest, GenLargeEqualFilterBitmapTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeEqualFilterBitmap", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeEqualBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1616,7 +1616,7 @@ TEST(FunctionTest, GenLargeEqualFilterBitmapTest1) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenLargeEqualFilterBitmapWithMinSizeTest1) {
+TEST(FunctionTest, GenLargeEqualBitmapWithMinSizeTest1) {
   std::vector<uint16_t> data = {1, 2, 3, 4, 5, 6, 7};
   std::vector<uint16_t> value = {2, 1, 4, 3, 5, 5, 5};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1629,7 +1629,7 @@ TEST(FunctionTest, GenLargeEqualFilterBitmapWithMinSizeTest1) {
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
   auto op_node =
-      std::unique_ptr<ExecNode>(new FunctionNode("GenLargeEqualFilterBitmapWithMinSize", std::move(args_list)));
+      std::unique_ptr<ExecNode>(new FunctionNode("GenLargeEqualBitmapWithMinSize", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1639,7 +1639,7 @@ TEST(FunctionTest, GenLargeEqualFilterBitmapWithMinSizeTest1) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenEqualFilterBitmapTest1) {
+TEST(FunctionTest, GenEqualBitmapTest1) {
   std::vector<int64_t> data = {-1, 2, 3, -4, 5, -6, 7, -8, -9, 10};
   int64_t value = 5;
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1651,7 +1651,7 @@ TEST(FunctionTest, GenEqualFilterBitmapTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenEqualFilterBitmap", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenEqualBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1661,7 +1661,7 @@ TEST(FunctionTest, GenEqualFilterBitmapTest1) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenEqualFilterBitmapWithMinSizeTest1) {
+TEST(FunctionTest, GenEqualBitmapWithMinSizeTest1) {
   std::vector<int64_t> data = {-1, 2, 3, -4, 5, -6, 7, -8, -9, 10};
   std::vector<int64_t> value = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1673,7 +1673,7 @@ TEST(FunctionTest, GenEqualFilterBitmapWithMinSizeTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenEqualFilterBitmapWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenEqualBitmapWithMinSize", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1683,7 +1683,7 @@ TEST(FunctionTest, GenEqualFilterBitmapWithMinSizeTest1) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenLessFilterBitmapTest1) {
+TEST(FunctionTest, GenLessBitmapTest1) {
   std::vector<double> data = {-1, 2, 3, -4, 5, -6, 7, 8};
   double value = 0;
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1695,7 +1695,7 @@ TEST(FunctionTest, GenLessFilterBitmapTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLessFilterBitmap", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLessBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1705,7 +1705,7 @@ TEST(FunctionTest, GenLessFilterBitmapTest1) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenLessFilterBitmapWithMinSizeTest1) {
+TEST(FunctionTest, GenLessBitmapWithMinSizeTest1) {
   std::vector<double> data = {-1, 2, 3, -4, 5, -6, 7, 8};
   std::vector<double> value = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1717,7 +1717,7 @@ TEST(FunctionTest, GenLessFilterBitmapWithMinSizeTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLessFilterBitmapWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLessBitmapWithMinSize", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1727,7 +1727,7 @@ TEST(FunctionTest, GenLessFilterBitmapWithMinSizeTest1) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenLessEqualFilterBitmapTest1) {
+TEST(FunctionTest, GenLessEqualBitmapTest1) {
   std::vector<uint8_t> data = {1, 2, 3, 4, 5, 6, 7, 8};
   uint8_t value = 1;
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1739,7 +1739,7 @@ TEST(FunctionTest, GenLessEqualFilterBitmapTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLessEqualFilterBitmap", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLessEqualBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1749,7 +1749,7 @@ TEST(FunctionTest, GenLessEqualFilterBitmapTest1) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenLessEqualFilterBitmapWithMinSizeTest1) {
+TEST(FunctionTest, GenLessEqualBitmapWithMinSizeTest1) {
   std::vector<uint8_t> data = {1, 2, 3, 4, 5, 6, 7, 8};
   std::vector<uint8_t> value = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1762,7 +1762,7 @@ TEST(FunctionTest, GenLessEqualFilterBitmapWithMinSizeTest1) {
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
   auto op_node =
-      std::unique_ptr<ExecNode>(new FunctionNode("GenLessEqualFilterBitmapWithMinSize", std::move(args_list)));
+      std::unique_ptr<ExecNode>(new FunctionNode("GenLessEqualBitmapWithMinSize", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1772,7 +1772,7 @@ TEST(FunctionTest, GenLessEqualFilterBitmapWithMinSizeTest1) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenNotEqualFilterBitmapTest1) {
+TEST(FunctionTest, GenNotEqualBitmapTest1) {
   std::vector<uint32_t> data = {1, 2, 3, 4, 5, 6, 7, 8};
   uint32_t value = 10;
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1784,7 +1784,7 @@ TEST(FunctionTest, GenNotEqualFilterBitmapTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenNotEqualFilterBitmap", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GenNotEqualBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1794,7 +1794,7 @@ TEST(FunctionTest, GenNotEqualFilterBitmapTest1) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, GenNotEqualFilterBitmapWithMinSizeTest1) {
+TEST(FunctionTest, GenNotEqualBitmapWithMinSizeTest1) {
   std::vector<uint32_t> data = {1, 2, 3, 4, 5, 6, 7, 8};
   std::vector<uint32_t> value = {10, 10, 10, 10, 10, 10, 10, 10, 10};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1807,7 +1807,7 @@ TEST(FunctionTest, GenNotEqualFilterBitmapWithMinSizeTest1) {
   args_list.emplace_back(std::move(value_node));
   args_list.emplace_back(std::move(exec_node));
   auto op_node =
-      std::unique_ptr<ExecNode>(new FunctionNode("GenNotEqualFilterBitmapWithMinSize", std::move(args_list)));
+      std::unique_ptr<ExecNode>(new FunctionNode("GenNotEqualBitmapWithMinSize", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());

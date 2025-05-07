@@ -1312,7 +1312,7 @@ TEST(FilterTest, Test1) {
   EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
-  b = GenLargeFilterBitmap(a, 3, exec_ctx);
+  b = GenLargeBitmap(a, 3, exec_ctx);
   r = FilterByBitmap(a, b, CountBits(b), exec_ctx);
   )";
   ASSERT_TRUE(athena.Compile(code, func_registry).ok());
