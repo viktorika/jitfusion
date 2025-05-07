@@ -1017,6 +1017,42 @@ Traverse the list to find all values that meet the condition of being not equal 
     f32list IfNotEqual(f32list src, f32 cmp_value, f32 target_value, ptr exec_ctx)
     f64list IfNotEqual(f64list src, f64 cmp_value, f64 target_value, ptr exec_ctx)
 
+## IfByBitmap
+Return a new list based on the values from the bitmap.
+
+    u8list  IfByBitmap(u8list bitmap, u8list lhs, u8 rhs, ptr exec_ctx)
+    u16list IfByBitmap(u8list bitmap, u16list lhs, u16 rhs, ptr exec_ctx)
+    u32list IfByBitmap(u8list bitmap, u32list lhs, u32 rhs, ptr exec_ctx)
+    u64list IfByBitmap(u8list bitmap, u64list lhs, u64 rhs, ptr exec_ctx)
+    i8list  IfByBitmap(u8list bitmap, i8list lhs, i8 rhs, ptr exec_ctx)
+    i16list IfByBitmap(u8list bitmap, i16list lhs, i16 rhs, ptr exec_ctx)
+    i32list IfByBitmap(u8list bitmap, i32list lhs, i32 rhs, ptr exec_ctx)
+    i64list IfByBitmap(u8list bitmap, i64list lhs, i64 rhs, ptr exec_ctx)
+    f32list IfByBitmap(u8list bitmap, f32list lhs, f32 rhs, ptr exec_ctx)
+    f64list IfByBitmap(u8list bitmap, f64list lhs, f64 rhs, ptr exec_ctx)
+
+    u8list  IfByBitmap(u8list bitmap, u8 lhs, u8list rhs, ptr exec_ctx)
+    u16list IfByBitmap(u8list bitmap, u16 lhs, u16list rhs, ptr exec_ctx)
+    u32list IfByBitmap(u8list bitmap, u32 lhs, u32list rhs, ptr exec_ctx)
+    u64list IfByBitmap(u8list bitmap, u64 lhs, u64list rhs, ptr exec_ctx)
+    i8list  IfByBitmap(u8list bitmap, i8 lhs, i8list rhs, ptr exec_ctx)
+    i16list IfByBitmap(u8list bitmap, i16 lhs, i16list rhs, ptr exec_ctx)
+    i32list IfByBitmap(u8list bitmap, i32 lhs, i32list rhs, ptr exec_ctx)
+    i64list IfByBitmap(u8list bitmap, i64 lhs, i64list rhs, ptr exec_ctx)
+    f32list IfByBitmap(u8list bitmap, f32 lhs, f32list rhs, ptr exec_ctx)
+    f64list IfByBitmap(u8list bitmap, f64 lhs, f64list rhs, ptr exec_ctx)
+
+    u8list  IfByBitmap(u8list bitmap, u8list lhs, u8list rhs, ptr exec_ctx)
+    u16list IfByBitmap(u8list bitmap, u16list lhs, u16list rhs, ptr exec_ctx)
+    u32list IfByBitmap(u8list bitmap, u32list lhs, u32list rhs, ptr exec_ctx)
+    u64list IfByBitmap(u8list bitmap, u64list lhs, u64list rhs, ptr exec_ctx)
+    i8list  IfByBitmap(u8list bitmap, i8list lhs, i8list rhs, ptr exec_ctx)
+    i16list IfByBitmap(u8list bitmap, i16list lhs, i16list rhs, ptr exec_ctx)
+    i32list IfByBitmap(u8list bitmap, i32list lhs, i32list rhs, ptr exec_ctx)
+    i64list IfByBitmap(u8list bitmap, i64list lhs, i64list rhs, ptr exec_ctx)
+    f32list IfByBitmap(u8list bitmap, f32list lhs, f32list rhs, ptr exec_ctx)
+    f64list IfByBitmap(u8list bitmap, f64list lhs, f64list rhs, ptr exec_ctx)
+
 ## MurmurHash3X8632
 MurmurHash3_x86_32 algorithm
 
