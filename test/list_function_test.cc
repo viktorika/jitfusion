@@ -2335,7 +2335,7 @@ TEST(FunctionTest, IfELessEqualTest) {
   EXPECT_EQ(std::get<std::vector<double>>(result), expect);
 }
 
-TEST(FunctionTest, IfENotEqualTest) {
+TEST(FunctionTest, IfNotEqualTest) {
   std::vector<double> data = {1, 2, 3, 4, 5};
   double cmp_value = 3;
   double fill_value = 100;
