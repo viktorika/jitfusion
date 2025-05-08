@@ -736,7 +736,8 @@ ListType IfByBitmapLLRB(U8ListStruct bitmap, ListType lhs, typename ListType::CE
     result.data[i + j] = (bitmap.data[last_index] >> j) & 1;
   }
   for (uint32_t j = 0; j < result.len; j++) {
-    result.data[j] = result.data[j] > 0 ? lhs.data[j] : rhs;
+    typename ListType::CElementType mask = (result.data[j] > 0); 
+    result.data[j] = lhs.data[j] * mask + rhs * (1 - mask);
   }
   return result;
 }
@@ -761,7 +762,8 @@ ListType IfByBitmapLBRL(U8ListStruct bitmap, typename ListType::CElementType lhs
     result.data[i + j] = (bitmap.data[last_index] >> j) & 1;
   }
   for (uint32_t j = 0; j < result.len; j++) {
-    result.data[j] = result.data[j] > 0 ? lhs : rhs.data[j];
+    typename ListType::CElementType mask = (result.data[j] > 0); 
+    result.data[j] = lhs * mask + rhs.data[j] * (1 - mask);
   }
   return result;
 }
@@ -786,7 +788,8 @@ ListType IfByBitmapLLRL(U8ListStruct bitmap, ListType lhs, ListType rhs, void *e
     result.data[i + j] = (bitmap.data[last_index] >> j) & 1;
   }
   for (uint32_t j = 0; j < result.len; j++) {
-    result.data[j] = result.data[j] > 0 ? lhs.data[j] : rhs.data[j];
+    typename ListType::CElementType mask = (result.data[j] > 0); 
+    result.data[j] = lhs.data[j] * mask + rhs.data[j] * (1 - mask);
   }
   return result;
 }
