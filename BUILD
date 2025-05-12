@@ -17,6 +17,9 @@ cc_library(
         "-O2",
         "-DNDEBUG",
         "-ftree-vectorize",
+        #"-g",
+        #"-Rpass=loop-vectorize",
+        "-DHAS_XSIMD",
     ],
 )
 
@@ -72,6 +75,7 @@ cc_library(
         #"-mavx2",
         "-O2",
         "-ftree-vectorize",
+        #"-g",
     ],
 )
 

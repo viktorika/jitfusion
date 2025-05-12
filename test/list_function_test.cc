@@ -1160,7 +1160,7 @@ TEST(FunctionTest, ListLog2Test3) {
 }
 
 TEST(FunctionTest, ListLog10Test1) {
-  std::vector<int16_t> data = {100, 200, 300, 400};
+  std::vector<int16_t> data = {100, 200, 300, 400, 500, 600, 700, 800, 900};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
@@ -1174,7 +1174,8 @@ TEST(FunctionTest, ListLog10Test1) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<double> expect = {std::log10(100), std::log10(200), std::log10(300), std::log10(400)};
+  std::vector<double> expect = {std::log10(100), std::log10(200), std::log10(300), std::log10(400), std::log10(500),
+                                std::log10(600), std::log10(700), std::log10(800), std::log10(900)};
   EXPECT_EQ(std::get<std::vector<double>>(result), expect);
 }
 
