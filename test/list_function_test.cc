@@ -1307,7 +1307,7 @@ TEST(FunctionTest, ListFloorTest2) {
 }
 
 TEST(FunctionTest, ListRoundTest1) {
-  std::vector<float> data = {100.5F, 200.5F, 300.5F, 400.5F};
+  std::vector<float> data = {100.5F, 200.5F, 300.5F, 400.5F, 500.5F, 600.5F, 700.5F, 800.5F, 900.5F};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
@@ -1321,7 +1321,9 @@ TEST(FunctionTest, ListRoundTest1) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<float> expect = {std::round(100.5F), std::round(200.5F), std::round(300.5F), std::round(400.5F)};
+  std::vector<float> expect = {std::round(100.5F), std::round(200.5F), std::round(300.5F),
+                               std::round(400.5F), std::round(500.5F), std::round(600.5F),
+                               std::round(700.5F), std::round(800.5F), std::round(900.5F)};
   EXPECT_EQ(std::get<std::vector<float>>(result), expect);
 }
 
