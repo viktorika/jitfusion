@@ -1046,7 +1046,7 @@ TEST(FunctionTest, ListExpTest3) {
 }
 
 TEST(FunctionTest, ListLogTest1) {
-  std::vector<int16_t> data = {100, 200, 300, 400};
+  std::vector<int16_t> data = {100, 200, 300, 400, 500, 600, 700, 800, 900};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
@@ -1060,7 +1060,8 @@ TEST(FunctionTest, ListLogTest1) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<double> expect = {std::log(100), std::log(200), std::log(300), std::log(400)};
+  std::vector<double> expect = {std::log(100), std::log(200), std::log(300), std::log(400), std::log(500),
+                                std::log(600), std::log(700), std::log(800), std::log(900)};
   EXPECT_EQ(std::get<std::vector<double>>(result), expect);
 }
 
@@ -1103,7 +1104,7 @@ TEST(FunctionTest, ListLogTest3) {
 }
 
 TEST(FunctionTest, ListLog2Test1) {
-  std::vector<int16_t> data = {100, 200, 300, 400};
+  std::vector<int16_t> data = {100, 200, 300, 400, 500, 600, 700, 800, 900};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
@@ -1117,7 +1118,8 @@ TEST(FunctionTest, ListLog2Test1) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<double> expect = {std::log2(100), std::log2(200), std::log2(300), std::log2(400)};
+  std::vector<double> expect = {std::log2(100), std::log2(200), std::log2(300), std::log2(400), std::log2(500),
+                                std::log2(600), std::log2(700), std::log2(800), std::log2(900)};
   EXPECT_EQ(std::get<std::vector<double>>(result), expect);
 }
 
