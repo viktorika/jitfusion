@@ -23,7 +23,7 @@ cd CMakeBuild
 cmake .. && make
 ```
 
-If you don't need xsimd, you can add -DHAS_XSIMD=OFF.
+If you don't need xsimd, you can use -DHAS_XSIMD=OFF.
 
 ## Bazel Build
 If you are using version <span style="color:red">Bazel 8</span> or above, you will need to use the --enable_workspace=true option.
