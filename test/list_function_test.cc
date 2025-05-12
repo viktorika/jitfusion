@@ -615,8 +615,8 @@ TEST(FunctionTest, ListSubWithMinSizeTest2) {
 }
 
 TEST(FunctionTest, ListSubWithMinSizeTest3) {
-  std::vector<double> data1 = {100, 200, 300, 400};
-  std::vector<double> data2 = {10, 11, 12};
+  std::vector<double> data1 = {100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100};
+  std::vector<double> data2 = {10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto data1_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
@@ -632,7 +632,7 @@ TEST(FunctionTest, ListSubWithMinSizeTest3) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<double> expect = {90, 189, 288};
+  std::vector<double> expect = {90, 189, 288, 387, 486, 585, 684, 783, 882, 981, 1080};
   EXPECT_EQ(std::get<std::vector<double>>(result), expect);
 }
 
