@@ -747,8 +747,8 @@ TEST(FunctionTest, ListMulWithMinSizeTest2) {
 }
 
 TEST(FunctionTest, ListMulWithMinSizeTest3) {
-  std::vector<float> data1 = {1, 2, 3, 4};
-  std::vector<float> data2 = {10, 20, 30};
+  std::vector<float> data1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+  std::vector<float> data2 = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
@@ -764,7 +764,7 @@ TEST(FunctionTest, ListMulWithMinSizeTest3) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<float> expect = {10, 40, 90};
+  std::vector<float> expect = {10, 40, 90, 160, 250, 360, 490, 640, 810, 1000, 1210};
   EXPECT_EQ(std::get<std::vector<float>>(result), expect);
 }
 
@@ -879,8 +879,8 @@ TEST(FunctionTest, ListDivWithMinSizeTest2) {
 }
 
 TEST(FunctionTest, ListDivWithMinSizeTest3) {
-  std::vector<double> data1 = {1000, 2000, 3000, 4000};
-  std::vector<double> data2 = {10, 20, 30, 40};
+  std::vector<double> data1 = {1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000};
+  std::vector<double> data2 = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
@@ -896,7 +896,7 @@ TEST(FunctionTest, ListDivWithMinSizeTest3) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<double> expect = {100, 100, 100, 100};
+  std::vector<double> expect = {100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100};
   EXPECT_EQ(std::get<std::vector<double>>(result), expect);
 }
 
