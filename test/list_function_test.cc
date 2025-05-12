@@ -967,8 +967,8 @@ TEST(FunctionTest, ListModWithMinSizeTest1) {
 }
 
 TEST(FunctionTest, ListModWithMinSizeTest2) {
-  std::vector<int64_t> data1 = {1000, 2000, 3000, 4000};
-  std::vector<int64_t> data2 = {7, 8, 9, 10};
+  std::vector<int64_t> data1 = {1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000};
+  std::vector<int64_t> data2 = {7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
@@ -984,7 +984,8 @@ TEST(FunctionTest, ListModWithMinSizeTest2) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<int64_t> expect = {1000 % 7, 2000 % 8, 3000 % 9, 4000 % 10};
+  std::vector<int64_t> expect = {1000 % 7,  2000 % 8,  3000 % 9,  4000 % 10,  5000 % 11, 6000 % 12,
+                                 7000 % 13, 8000 % 14, 9000 % 15, 10000 % 16, 11000 % 17};
   EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
 }
 

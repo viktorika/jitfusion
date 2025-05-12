@@ -329,9 +329,24 @@ ListType ListModWithMinSize(ListType a, ListType b, void *exec_context) {
   result.len = std::min(a.len, b.len);
   result.data = reinterpret_cast<typename ListType::CElementType *>(
       exec_ctx->arena.Allocate((result.len) * sizeof(typename ListType::CElementType)));
+#ifdef HAS_XSIMD
+  using batch_type = xs::batch<typename ListType::CElementType, xs::default_arch>;
+  constexpr std::size_t batch_size = batch_type::size;
+  auto vec_size = result.len - (result.len % batch_size);
+  for (std::size_t i = 0; i < vec_size; i += batch_size) {
+    auto a_vec = batch_type::load_unaligned(a.data + i);
+    auto b_vec = batch_type::load_unaligned(b.data + i);
+    auto add_vec = a_vec % b_vec;
+    add_vec.store_unaligned(result.data + i);
+  }
+  for (std::size_t i = vec_size; i < result.len; ++i) {
+    result.data[i] = a.data[i] % b.data[i];
+  }
+#else
   for (uint32_t i = 0; i < result.len; i++) {
     result.data[i] = a.data[i] % b.data[i];
   }
+#endif
   return result;
 }
 
