@@ -1392,7 +1392,7 @@ TEST(FunctionTest, ListMinTest2) {
 }
 
 TEST(FunctionTest, ListMinTest3) {
-  std::vector<float> data = {1, 2, 3, 4};
+  std::vector<float> data = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
   float value = 2;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
@@ -1409,7 +1409,7 @@ TEST(FunctionTest, ListMinTest3) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<float> expect = {1, 2, 2, 2};
+  std::vector<float> expect = {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
   EXPECT_EQ(std::get<std::vector<float>>(result), expect);
 }
 
@@ -1458,7 +1458,7 @@ TEST(FunctionTest, ListMaxTest2) {
 }
 
 TEST(FunctionTest, ListMaxTest3) {
-  std::vector<float> data = {1, 2, 3, 4};
+  std::vector<float> data = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
   float value = 2;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
@@ -1475,7 +1475,7 @@ TEST(FunctionTest, ListMaxTest3) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<float> expect = {2, 2, 3, 4};
+  std::vector<float> expect = {2, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
   EXPECT_EQ(std::get<std::vector<float>>(result), expect);
 }
 
