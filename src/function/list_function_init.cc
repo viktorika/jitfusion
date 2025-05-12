@@ -17,6 +17,11 @@
 #include "status.h"
 #include "type.h"
 
+#ifdef HAS_XSIMD
+#  include <xsimd/xsimd.hpp>
+namespace xs = xsimd;
+#endif
+
 namespace jitfusion {
 
 namespace {
@@ -394,9 +399,23 @@ ResultType ListLog10(ListType a, void *exec_context) {
   result.data = reinterpret_cast<typename ResultType::CElementType *>(
       exec_ctx->arena.Allocate((a.len) * sizeof(typename ResultType::CElementType)));
   result.len = a.len;
+#ifdef HAS_XSIMD
+  using batch_type = xs::batch<typename ResultType::CElementType, xs::default_arch>;
+  constexpr std::size_t batch_size = batch_type::size;
+  auto vec_size = a.len - (a.len % batch_size);
+  for (std::size_t i = 0; i < vec_size; i += batch_size) {
+    auto a_vec = batch_type::load_unaligned(a.data + i);
+    auto log_vec = xs::log10(a_vec);
+    log_vec.store_unaligned(result.data + i);
+  }
+  for (std::size_t i = vec_size; i < a.len; ++i) {
+    result.data[i] = std::log10(a.data[i]);
+  }
+#else
   for (uint32_t i = 0; i < a.len; i++) {
     result.data[i] = std::log10(a.data[i]);
   }
+#endif
   return result;
 }
 
@@ -736,7 +755,7 @@ ListType IfByBitmapLLRB(U8ListStruct bitmap, ListType lhs, typename ListType::CE
     result.data[i + j] = (bitmap.data[last_index] >> j) & 1;
   }
   for (uint32_t j = 0; j < result.len; j++) {
-    typename ListType::CElementType mask = (result.data[j] > 0); 
+    typename ListType::CElementType mask = (result.data[j] > 0);
     result.data[j] = lhs.data[j] * mask + rhs * (1 - mask);
   }
   return result;
@@ -762,7 +781,7 @@ ListType IfByBitmapLBRL(U8ListStruct bitmap, typename ListType::CElementType lhs
     result.data[i + j] = (bitmap.data[last_index] >> j) & 1;
   }
   for (uint32_t j = 0; j < result.len; j++) {
-    typename ListType::CElementType mask = (result.data[j] > 0); 
+    typename ListType::CElementType mask = (result.data[j] > 0);
     result.data[j] = lhs * mask + rhs.data[j] * (1 - mask);
   }
   return result;
@@ -788,7 +807,7 @@ ListType IfByBitmapLLRL(U8ListStruct bitmap, ListType lhs, ListType rhs, void *e
     result.data[i + j] = (bitmap.data[last_index] >> j) & 1;
   }
   for (uint32_t j = 0; j < result.len; j++) {
-    typename ListType::CElementType mask = (result.data[j] > 0); 
+    typename ListType::CElementType mask = (result.data[j] > 0);
     result.data[j] = lhs.data[j] * mask + rhs.data[j] * (1 - mask);
   }
   return result;

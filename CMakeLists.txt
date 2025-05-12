@@ -33,6 +33,16 @@ add_compile_options(
     -ftree-vectorize
 )
 
+if(NOT DEFINED HAS_XSIMD)
+    message(STATUS "default set HAS_XSIMD to ON")
+    set(HAS_XSIMD ON)
+endif()
+
+if(DEFINED HAS_XSIMD)
+    message(STATUS "compile with xsimd")
+    add_compile_definitions(HAS_XSIMD)
+endif()
+
 file(GLOB_RECURSE JITFUSION_SRC "src/*.cc" "src/*.h")
 file(GLOB JITFUSION_HDRS "include/*.h")
 

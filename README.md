@@ -7,6 +7,7 @@ Environment
 
   * llvm 19.1.7
   * googletest
+  * xsimd-13.2.0 (option)
 
 First, you need to have <span style="color:red">LLVM 19.1.7</span>; other versions will not work. However, if you can only use other versions, you can modify the exec_engine.cc file to adapt it, and it shouldn't require too many changes.
 
@@ -21,6 +22,8 @@ mkdir CMakeBuild
 cd CMakeBuild
 cmake .. && make
 ```
+
+If you don't need xsimd, you can add -DHAS_XSIMD=OFF.
 
 ## Bazel Build
 If you are using version <span style="color:red">Bazel 8</span> or above, you will need to use the --enable_workspace=true option.
