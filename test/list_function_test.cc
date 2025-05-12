@@ -989,7 +989,7 @@ TEST(FunctionTest, ListModWithMinSizeTest2) {
 }
 
 TEST(FunctionTest, ListExpTest1) {
-  std::vector<int8_t> data = {1, 2, 3, 4};
+  std::vector<int8_t> data = {1, 2, 3, 4, 5, 6, 7, 8, 9};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
@@ -1003,8 +1003,12 @@ TEST(FunctionTest, ListExpTest1) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<double> expect = {std::exp(1), std::exp(2), std::exp(3), std::exp(4)};
-  EXPECT_EQ(std::get<std::vector<double>>(result), expect);
+  std::vector<double> expect = {std::exp(1), std::exp(2), std::exp(3), std::exp(4), std::exp(5),
+                                std::exp(6), std::exp(7), std::exp(8), std::exp(9)};
+  auto rs = std::get<std::vector<double>>(result);
+  for (size_t i = 0; i < rs.size(); i++) {
+    EXPECT_DOUBLE_EQ(rs[i], expect[i]);
+  }
 }
 
 TEST(FunctionTest, ListExpTest2) {
@@ -1023,7 +1027,10 @@ TEST(FunctionTest, ListExpTest2) {
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   std::vector<double> expect = {std::exp(10), std::exp(20), std::exp(30), std::exp(40)};
-  EXPECT_EQ(std::get<std::vector<double>>(result), expect);
+  auto rs = std::get<std::vector<double>>(result);
+  for (size_t i = 0; i < rs.size(); i++) {
+    EXPECT_DOUBLE_EQ(rs[i], expect[i]);
+  }
 }
 
 TEST(FunctionTest, ListExpTest3) {
