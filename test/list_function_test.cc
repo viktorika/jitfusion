@@ -1227,7 +1227,7 @@ TEST(FunctionTest, ListLog10Test3) {
 }
 
 TEST(FunctionTest, ListCeilTest1) {
-  std::vector<float> data = {100.5F, 200.5F, 300.5F, 400.5F};
+  std::vector<float> data = {100.5F, 200.5F, 300.5F, 400.5F, 500.5F, 600.5F, 700.5F, 800.5F, 900.5F};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
@@ -1241,7 +1241,9 @@ TEST(FunctionTest, ListCeilTest1) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<float> expect = {std::ceil(100.5F), std::ceil(200.5F), std::ceil(300.5F), std::ceil(400.5F)};
+  std::vector<float> expect = {std::ceil(100.5F), std::ceil(200.5F), std::ceil(300.5F),
+                               std::ceil(400.5F), std::ceil(500.5F), std::ceil(600.5F),
+                               std::ceil(700.5F), std::ceil(800.5F), std::ceil(900.5F)};
   EXPECT_EQ(std::get<std::vector<float>>(result), expect);
 }
 
@@ -1265,7 +1267,7 @@ TEST(FunctionTest, ListCeilTest2) {
 }
 
 TEST(FunctionTest, ListFloorTest1) {
-  std::vector<float> data = {100.5F, 200.5F, 300.5F, 400.5F};
+  std::vector<float> data = {100.5F, 200.5F, 300.5F, 400.5F, 500.5F, 600.5F, 700.5F, 800.5F, 900.5F};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
@@ -1279,7 +1281,9 @@ TEST(FunctionTest, ListFloorTest1) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<float> expect = {std::floor(100.5F), std::floor(200.5F), std::floor(300.5F), std::floor(400.5F)};
+  std::vector<float> expect = {std::floor(100.5F), std::floor(200.5F), std::floor(300.5F),
+                               std::floor(400.5F), std::floor(500.5F), std::floor(600.5F),
+                               std::floor(700.5F), std::floor(800.5F), std::floor(900.5F)};
   EXPECT_EQ(std::get<std::vector<float>>(result), expect);
 }
 
