@@ -483,8 +483,8 @@ TEST(FunctionTest, ListAddWithMinSizeTest2) {
 }
 
 TEST(FunctionTest, ListAddWithMinSizeTest3) {
-  std::vector<float> data1 = {1, 2, 3, 4};
-  std::vector<float> data2 = {-5, -6, -7, -8, -9};
+  std::vector<float> data1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  std::vector<float> data2 = {-5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto data1_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
@@ -500,7 +500,7 @@ TEST(FunctionTest, ListAddWithMinSizeTest3) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<float> expect = {-4, -4, -4, -4};
+  std::vector<float> expect = {-4, -4, -4, -4, -4, -4, -4, -4, -4, -4};
   EXPECT_EQ(std::get<std::vector<float>>(result), expect);
 }
 
