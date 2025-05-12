@@ -1964,8 +1964,8 @@ TEST(FunctionTest, ListBitwiseAndWithMinSizeTest1) {
 }
 
 TEST(FunctionTest, ListBitwiseAndWithMinSizeTest2) {
-  std::vector<int64_t> data1 = {1000, 2000, 3000, 4000};
-  std::vector<int64_t> data2 = {10, 20, 30, 40};
+  std::vector<int64_t> data1 = {1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000};
+  std::vector<int64_t> data2 = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto data1_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
@@ -1981,7 +1981,8 @@ TEST(FunctionTest, ListBitwiseAndWithMinSizeTest2) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<int64_t> expect = {1000 & 10, 2000 & 20, 3000 & 30, 4000 & 40};
+  std::vector<int64_t> expect = {1000 & 10, 2000 & 20, 3000 & 30, 4000 & 40,   5000 & 50,  6000 & 60,
+                                 7000 & 70, 8000 & 80, 9000 & 90, 10000 & 100, 11000 & 110};
   EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
 }
 
@@ -2052,8 +2053,8 @@ TEST(FunctionTest, ListBitwiseOrWithMinSizeTest1) {
 }
 
 TEST(FunctionTest, ListBitwiseOrWithMinSizeTest2) {
-  std::vector<int64_t> data = {1000, 2000, 3000, 4000};
-  std::vector<int64_t> or_data = {10, 10, 10, 10};
+  std::vector<int64_t> data = {1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000};
+  std::vector<int64_t> or_data = {10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
@@ -2069,7 +2070,8 @@ TEST(FunctionTest, ListBitwiseOrWithMinSizeTest2) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<int64_t> expect = {1000 | 10, 2000 | 10, 3000 | 10, 4000 | 10};
+  std::vector<int64_t> expect = {1000 | 10, 2000 | 10, 3000 | 10, 4000 | 10,  5000 | 10, 6000 | 10,
+                                 7000 | 10, 8000 | 10, 9000 | 10, 10000 | 10, 11000 | 10};
   EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
 }
 
@@ -2140,8 +2142,8 @@ TEST(FunctionTest, ListBitwiseXorWithMinSizeTest1) {
 }
 
 TEST(FunctionTest, ListBitwiseXorWithMinSizeTest2) {
-  std::vector<int64_t> data = {1000, 2000, 3000, 4000};
-  std::vector<int64_t> xor_data = {10, 10, 10, 10};
+  std::vector<int64_t> data = {1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000};
+  std::vector<int64_t> xor_data = {10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
@@ -2157,7 +2159,8 @@ TEST(FunctionTest, ListBitwiseXorWithMinSizeTest2) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<int64_t> expect = {1000 ^ 10, 2000 ^ 10, 3000 ^ 10, 4000 ^ 10};
+  std::vector<int64_t> expect = {1000 ^ 10, 2000 ^ 10, 3000 ^ 10, 4000 ^ 10,  5000 ^ 10, 6000 ^ 10,
+                                 7000 ^ 10, 8000 ^ 10, 9000 ^ 10, 10000 ^ 10, 11000 ^ 10};
   EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
 }
 
