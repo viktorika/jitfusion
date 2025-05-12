@@ -7,7 +7,7 @@ Environment
 
   * llvm 19.1.7
   * googletest
-  * xsimd-13.2.0 (option)
+  * xsimd-13.2.0 (optional)
 
 First, you need to have <span style="color:red">LLVM 19.1.7</span>; other versions will not work. However, if you can only use other versions, you can modify the exec_engine.cc file to adapt it, and it shouldn't require too many changes.
 
