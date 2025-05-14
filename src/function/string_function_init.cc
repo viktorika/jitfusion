@@ -40,14 +40,14 @@ llvm::Value *CallBuiltinStringLenFunction(const FunctionSignature & /*sign*/,
 }  // namespace
 
 Status InitStringInternalFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
       FunctionSignature("StringConcat", {ValueType::kString, ValueType::kString, ValueType::kPtr}, ValueType::kString),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(StringConcat), nullptr, ReadOnlyFunctionAttributeSetter}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(
+      reinterpret_cast<void *>(StringConcat)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
       FunctionSignature("StringCmp", {ValueType::kString, ValueType::kString}, ValueType::kI32),
-      {FunctionType::kCFunc, reinterpret_cast<void *>(StringCmp), nullptr, ReadOnlyFunctionAttributeSetter}));
-  JF_RETURN_NOT_OK(reg->RegisterFunc(FunctionSignature("StringLen", {ValueType::kString}, ValueType::kU32),
-                                     {FunctionType::kLLVMIntrinicFunc, nullptr, CallBuiltinStringLenFunction}));
+      reinterpret_cast<void *>(StringCmp)));
+  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(FunctionSignature("StringLen", {ValueType::kString}, ValueType::kU32),
+                                                 CallBuiltinStringLenFunction));
   return Status::OK();
 }
 

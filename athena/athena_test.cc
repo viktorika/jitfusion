@@ -81,18 +81,6 @@ int32_t StoreF32(void* output, int32_t index, float value) {
   return 0;
 }
 
-void ReadOnlyFunctionSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) {
-  f->setOnlyReadsMemory();
-  f->setDoesNotThrow();
-}
-
-void StoreFunctionSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) {
-  f->setDoesNotThrow();
-  f->addAttributeAtIndex(1, llvm::Attribute::get(f->getContext(), llvm::Attribute::NoAlias));
-  f->addAttributeAtIndex(1, llvm::Attribute::get(f->getContext(), llvm::Attribute::NoCapture));
-  f->setOnlyAccessesArgMemory();
-}
-
 }  // namespace
 
 TEST(ConstValueTest, Test1) {
@@ -218,9 +206,7 @@ TEST(BinaryOperatorTest, Test3) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadU32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadU32)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -238,9 +224,7 @@ TEST(BinaryOperatorTest, Test4) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadF32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -258,9 +242,7 @@ TEST(BinaryOperatorTest, Test5) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadF32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -278,9 +260,7 @@ TEST(BinaryOperatorTest, Test6) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadF32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -298,9 +278,7 @@ TEST(BinaryOperatorTest, Test7) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadU32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadU32)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -318,9 +296,7 @@ TEST(BinaryOperatorTest, Test8) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadU32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadU32)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -338,9 +314,7 @@ TEST(BinaryOperatorTest, Test9) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadU32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadU32)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -358,9 +332,7 @@ TEST(BinaryOperatorTest, Test10) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadU32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadU32)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -639,9 +611,7 @@ TEST(FunctionTest, Test13) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadU32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadU32)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -672,9 +642,7 @@ TEST(FunctionTest, Test15) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadU32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadU32)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -692,9 +660,7 @@ TEST(FunctionTest, Test16) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadU32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadU32)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -725,9 +691,7 @@ TEST(FunctionTest, Test18) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadF32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   r = frac(a);
@@ -744,9 +708,7 @@ TEST(FunctionTest, Test19) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadF32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   r = frac(a) + trunc(a);
@@ -763,9 +725,7 @@ TEST(FunctionTest, Test20) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadF32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -796,9 +756,7 @@ TEST(FunctionTest, Test22) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadF32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -816,9 +774,7 @@ TEST(FunctionTest, Test23) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadI32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadI32)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -849,9 +805,7 @@ TEST(FunctionTest, Test25) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadF32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -869,9 +823,7 @@ TEST(FunctionTest, Test26) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadF32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -889,9 +841,7 @@ TEST(StringFunctionTest, Test1) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kString);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadStr), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadStr)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   r = a + "wwwwwwwwwwwwwww";
@@ -908,9 +858,7 @@ TEST(StringFunctionTest, Test2) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kString);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadStr), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadStr)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   r = (StringLen(a + "www") + 101);
@@ -927,9 +875,7 @@ TEST(StringFunctionTest, Test3) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kString);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadStr), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadStr)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -947,9 +893,7 @@ TEST(StringFunctionTest, Test4) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kString);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadStr), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadStr)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -967,9 +911,7 @@ TEST(StringFunctionTest, Test5) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kString);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadStr), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadStr)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -987,9 +929,7 @@ TEST(StringFunctionTest, Test6) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kString);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadStr), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadStr)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   r = (a + a + a + a);
@@ -1006,9 +946,7 @@ TEST(ListFunctionTest, Test1) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32List);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadI32List), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadI32List)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -1027,9 +965,7 @@ TEST(ListFunctionTest, Test2) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32List);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadI32List), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadI32List)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -1048,9 +984,7 @@ TEST(ListFunctionTest, Test3) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32List);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadI32List), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadI32List)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -1069,9 +1003,7 @@ TEST(ListFunctionTest, Test4) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32List);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadI32List), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadI32List)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -1089,9 +1021,7 @@ TEST(ListFunctionTest, Test5) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kStringList);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadStringList), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadStringList)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -1110,9 +1040,7 @@ TEST(ListFunctionTest, Test6) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kStringList);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadStringList), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadStringList)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -1130,9 +1058,7 @@ TEST(ListFunctionTest, Test7) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF64List);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadF64List), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF64List)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -1150,9 +1076,7 @@ TEST(ListFunctionTest, Test8) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF64List);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadF64List), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF64List)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
@@ -1170,9 +1094,7 @@ TEST(MixTest, Test1) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadF32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
   std::string code = R"(
   v1 = load(entry_arg, 0);
   r = if(ceil(v1/0.05) > 12, 12, ceil(v1/0.05));
@@ -1189,9 +1111,7 @@ TEST(SwitchTest, Test1) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadF32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
   std::string code = R"(
   v1 = load(entry_arg, 0);
   v2 = load(entry_arg, 1);
@@ -1209,9 +1129,7 @@ TEST(SwitchTest, Test2) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadF32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
   std::string code = R"(
   s = load(entry_arg, 0);
   r = switch ((1<=CastI32(floor(s/100))%100 and CastI32(floor(s/100)%100)<=10), 1, 
@@ -1229,9 +1147,7 @@ TEST(SwitchTest, Test3) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadF32), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
   std::string code = R"(
   s = load(entry_arg, 0);
   s9 = load(entry_arg, 1);
@@ -1266,15 +1182,11 @@ TEST(ComplexTest, Test1) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
     FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
-    FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadF32), nullptr,
-                                     ReadOnlyFunctionSetter};
-    EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(LoadF32), 1).ok());
   }
   {
     FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kI32);
-    FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(StoreF32), nullptr,
-                                     StoreFunctionSetter};
-    EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
   }
 
   std::string code1 = R"(
@@ -1307,9 +1219,7 @@ TEST(FilterTest, Test1) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32List);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadI32List), nullptr,
-                                   ReadOnlyFunctionSetter};
-  EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadI32List)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
   b = GenLargeBitmap(a, 3, exec_ctx);
