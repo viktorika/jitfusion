@@ -17,7 +17,7 @@ Status InitListInternalFunc(FunctionRegistry *reg);
 inline void ReadOnlyFunctionAttributeSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/,
                                             llvm::Function *f) {
   f->setOnlyReadsMemory();
-  f->addFnAttr(llvm::Attribute::NoUnwind);
+  f->setDoesNotThrow();
 }
 
 }  // namespace jitfusion
