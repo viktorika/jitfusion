@@ -86,14 +86,14 @@ Typically, the initial node is a data loading node. After a series of operations
 The data reading and writing nodes can both be implemented using EntryArgumentNode and FunctionNode. You can refer to test/entry_argument_node_test.cc for more details. for example:
 
 ```c++
+using namespace jitfusion;
 int32_t LoadValue(void* data, uint32_t i) { return reinterpret_cast<int32_t*>(data)[i]; }
 
 int main() {
   std::unique_ptr<FunctionRegistry> func_registry;
   FunctionRegistryFactory::CreateFunctionRegistry(&func_registry);
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadValue), nullptr};
-  func_registry->RegisterFunc(sign, func_struct);
+  func_registry->RegisterReadOnlyCFunc(sign,  reinterpret_cast<void*>(LoadValue));
 
   auto args_node = std::unique_ptr<ExecNode>(new EntryArgumentNode);
   auto index_node = std::unique_ptr<ExecNode>(new ConstantValueNode(1));
@@ -127,18 +127,17 @@ This function does not return data through the root node; instead, the user prov
 It is recommended to divide custom functions into two categories: read-only functions and store functions. Read-only functions can either be data loading functions or computation functions that generate an intermediate variable. It is not recommended for computation functions to directly modify parameter variables; instead, they should return the computation result by generating a new variable. In this case, you can set a read-only attribute for your function, as shown in the code below.
 
 ```c++
-void ReadOnlyFunctionSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) {
-  f->setOnlyReadsMemory();
-  f->setDoesNotThrow();
+uint32_t LoadU32(void* entry_arguments, int32_t index) {
+  auto* args = reinterpret_cast<uint32_t*>(entry_arguments);
+  return args[index];
 }
 
 FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
-FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadU32), nullptr,
-                                   ReadOnlyFunctionSetter};
-EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadU32)).ok());
 ```
 
 When use store functions, it is recommended to set the OutputNode as a corresponding attribute, similar to the code below.
+The third parameter of RegisterStoreCFunc is used to tell jitfusion which argument is the OutputNode.
 
 ```c++
 
@@ -147,12 +146,8 @@ int32_t StoreF32(void* output, int32_t index, float value) {
   return 0;
 }
 
-void StoreFunctionSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) {
-  f->setDoesNotThrow();
-  f->addAttributeAtIndex(1, llvm::Attribute::get(f->getContext(), llvm::Attribute::NoAlias));
-  f->addAttributeAtIndex(1, llvm::Attribute::get(f->getContext(), llvm::Attribute::NoCapture));
-  f->setOnlyAccessesArgMemory();
-}
+FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kI32);
+EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
 ```
 
 If you find that you have significant overhead in memory allocation, you can perform pooling operations on ExecContext and pass it in using the function below during execution. This way, you can avoid repeatedly allocating memory.
@@ -170,6 +165,7 @@ If you find that you have significant overhead in memory allocation, you can per
 You can refer to test/exec_context_node_test.cc for more details. for example:
 
 ```c++
+using namespace jitfusion;
 U32ListStruct CreateU32List(void* ctx) {
   auto* exec_ctx = reinterpret_cast<ExecContext*>(ctx);
   U32ListStruct u32_list;
@@ -186,8 +182,7 @@ int main() {
   std::unique_ptr<FunctionRegistry> func_registry;
   FunctionRegistryFactory::CreateFunctionRegistry(&func_registry);
   FunctionSignature sign("create_u32_list", {ValueType::kPtr}, ValueType::kU32List);
-  FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(CreateU32List), nullptr};
-  func_registry->RegisterFunc(sign, func_struct);
+  func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(CreateU32List));
 
   auto args_node = std::unique_ptr<ExecNode>(new ExecContextNode);
   std::vector<std::unique_ptr<ExecNode>> create_func_args;

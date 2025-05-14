@@ -38,6 +38,22 @@ inline void hash_combine(std::size_t& seed, T const& v) {
   std::hash<T> hasher;
   return hash_combine_impl(seed, hasher(v));
 }
+
+inline void ReadOnlyFunctionAttributeSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) {
+  f->setOnlyReadsMemory();
+  f->setDoesNotThrow();
+}
+
+struct StoreFunctionSetter {
+  uint32_t index;
+  void operator()(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) const {
+    f->setDoesNotThrow();
+    f->addAttributeAtIndex(index, llvm::Attribute::get(f->getContext(), llvm::Attribute::NoAlias));
+    f->addAttributeAtIndex(index, llvm::Attribute::get(f->getContext(), llvm::Attribute::NoCapture));
+    f->setOnlyAccessesArgMemory();
+  }
+};
+
 }  // namespace
 
 bool FunctionSignature::operator==(const FunctionSignature& other) const {
@@ -84,6 +100,45 @@ Status FunctionRegistry::RegisterFunc(const FunctionSignature& func_sign, Functi
   if (FunctionType::kCFunc == func_struct.func_type && nullptr == func_struct.c_func_ptr) {
     return Status::InvalidArgument("c function must supply the c function address");
   }
+  name2funclist_[func_sign.GetName()].emplace_back(func_sign, func_struct);
+  signature2funcstruct_[func_sign] = func_struct;
+  return Status::OK();
+}
+
+Status FunctionRegistry::RegisterLLVMIntrinicFunc(const FunctionSignature& func_sign, CodeGenFunc codegen_func) {
+  if (nullptr == codegen_func) {
+    return Status::InvalidArgument("codegen function is nullptr");
+  }
+  FunctionStructure func_struct;
+  func_struct.func_type = FunctionType::kLLVMIntrinicFunc;
+  func_struct.codegen_func = std::move(codegen_func);
+  name2funclist_[func_sign.GetName()].emplace_back(func_sign, func_struct);
+  signature2funcstruct_[func_sign] = func_struct;
+  return Status::OK();
+}
+
+Status FunctionRegistry::RegisterReadOnlyCFunc(const FunctionSignature& func_sign, void* c_func_ptr) {
+  if (nullptr == c_func_ptr) {
+    return Status::InvalidArgument("c_func_ptr is nullptr");
+  }
+  FunctionStructure func_struct;
+  func_struct.func_type = FunctionType::kCFunc;
+  func_struct.c_func_ptr = c_func_ptr;
+  func_struct.func_attr_setter = ReadOnlyFunctionAttributeSetter;
+  name2funclist_[func_sign.GetName()].emplace_back(func_sign, func_struct);
+  signature2funcstruct_[func_sign] = func_struct;
+  return Status::OK();
+}
+
+Status FunctionRegistry::RegisterStoreCFunc(const FunctionSignature& func_sign, void* c_func_ptr,
+                                            uint32_t store_args_index) {
+  if (nullptr == c_func_ptr) {
+    return Status::InvalidArgument("c_func_ptr is nullptr");
+  }
+  FunctionStructure func_struct;
+  func_struct.func_type = FunctionType::kCFunc;
+  func_struct.c_func_ptr = c_func_ptr;
+  func_struct.func_attr_setter = StoreFunctionSetter{store_args_index};
   name2funclist_[func_sign.GetName()].emplace_back(func_sign, func_struct);
   signature2funcstruct_[func_sign] = func_struct;
   return Status::OK();

@@ -5,7 +5,6 @@
  * @Last Modified time: 2025-01-23 14:42:12
  */
 #include "function_registry.h"
-#include "llvm/IR/Attributes.h"
 #include "status.h"
 
 namespace jitfusion {
@@ -13,11 +12,5 @@ namespace jitfusion {
 Status InitMathInternalFunc(FunctionRegistry *reg);
 Status InitStringInternalFunc(FunctionRegistry *reg);
 Status InitListInternalFunc(FunctionRegistry *reg);
-
-inline void ReadOnlyFunctionAttributeSetter(llvm::ExecutionEngine * /*engine*/, llvm::Module * /*m*/,
-                                            llvm::Function *f) {
-  f->setOnlyReadsMemory();
-  f->setDoesNotThrow();
-}
 
 }  // namespace jitfusion

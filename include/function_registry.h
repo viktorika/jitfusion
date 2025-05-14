@@ -74,12 +74,13 @@ struct IRCodeGenContext {
   Arena &const_value_arena;
 };
 
+using CodeGenFunc = std::function<llvm::Value *(const FunctionSignature &, const std::vector<llvm::Type *> &,
+                                                const std::vector<llvm::Value *> &, IRCodeGenContext &)>;
+
 struct FunctionStructure {
   FunctionType func_type;
   void *c_func_ptr;
-  std::function<llvm::Value *(const FunctionSignature &, const std::vector<llvm::Type *> &,
-                              const std::vector<llvm::Value *> &, IRCodeGenContext &)>
-      codegen_func;
+  CodeGenFunc codegen_func;
   std::function<void(llvm::ExecutionEngine *, llvm::Module *, llvm::Function *)> func_attr_setter{nullptr};
 };
 
@@ -111,7 +112,19 @@ class FunctionSignature {
 
 class FunctionRegistry {
  public:
+  // Register function to registry
   Status RegisterFunc(const FunctionSignature &func_sign, FunctionStructure func_struct);
+
+  // Register LLVMIntrinicFunc
+  Status RegisterLLVMIntrinicFunc(const FunctionSignature &func_sign, CodeGenFunc codegen_func);
+
+  // Register ReadOnlyCFunc
+  Status RegisterReadOnlyCFunc(const FunctionSignature &func_sign, void *c_func_ptr);
+  
+  // Register StoreCFunc
+  // store_args_index is the index of the args in the function signature that is OuputNode
+  Status RegisterStoreCFunc(const FunctionSignature &func_sign, void *c_func_ptr, uint32_t store_args_index);
+
   Status GetFuncBySign(FunctionSignature &func_sign, FunctionStructure *func_struct) const;
   Status MappingToLLVM(llvm::ExecutionEngine *engine, llvm::Module *m);
 
