@@ -34,7 +34,7 @@ It is recommended to divide custom functions into two categories: read-only func
 
 ```c++
 void ReadOnlyFunctionSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) {
-  f->addFnAttr(llvm::Attribute::ReadOnly);
+  f->setOnlyReadsMemory();
   f->addFnAttr(llvm::Attribute::NoUnwind);
 }
 

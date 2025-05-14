@@ -316,8 +316,9 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
   auto mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
   mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::CallSiteSplittingPass()));
   mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::SLPVectorizerPass()));
-  mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::VerifierPass()));
+
   mpm.run(*m, mam);
+  engine_->setVerifyModules(true);
   engine_->finalizeObject();
 
   // m->print(llvm::errs(), nullptr);
