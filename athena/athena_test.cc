@@ -1182,7 +1182,7 @@ TEST(ComplexTest, Test1) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
     FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
-    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(LoadF32), 1).ok());
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
   }
   {
     FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kI32);

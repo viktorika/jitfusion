@@ -33,15 +33,13 @@ The first set of functions returns a value through the last statement and requir
 It is recommended to divide custom functions into two categories: read-only functions and store functions. Read-only functions can either be data loading functions or computation functions that generate an intermediate variable. It is not recommended for computation functions to directly modify parameter variables; instead, they should return the computation result by generating a new variable. In this case, you can set a read-only attribute for your function, as shown in the code below.
 
 ```c++
-void ReadOnlyFunctionSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) {
-  f->setOnlyReadsMemory();
-  f->setDoesNotThrow();
+uint32_t LoadU32(void* entry_arguments, int32_t index) {
+  auto* args = reinterpret_cast<uint32_t*>(entry_arguments);
+  return args[index];
 }
 
 FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
-FunctionStructure func_struct = {FunctionType::kCFunc, reinterpret_cast<void*>(LoadU32), nullptr,
-                                   ReadOnlyFunctionSetter};
-EXPECT_TRUE(func_registry->RegisterFunc(sign, func_struct).ok());
+EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadU32)).ok());
 ```
 
 When store functions, it is recommended to set the OutputNode as a corresponding attribute, similar to the code below.
@@ -53,12 +51,8 @@ int32_t StoreF32(void* output, int32_t index, float value) {
   return 0;
 }
 
-void StoreFunctionSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) {
-  f->setDoesNotThrow();
-  f->addAttributeAtIndex(1, llvm::Attribute::get(f->getContext(), llvm::Attribute::NoAlias));
-  f->addAttributeAtIndex(1, llvm::Attribute::get(f->getContext(), llvm::Attribute::NoCapture));
-  f->setOnlyAccessesArgMemory();
-}
+FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kI32);
+EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
 ```
 
 

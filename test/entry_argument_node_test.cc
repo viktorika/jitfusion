@@ -51,8 +51,7 @@ TEST(EntryArgsTest, LoadDataTest) {
     std::unique_ptr<FunctionRegistry> func_registry;
     EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
     FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, type_list[i]);
-    FunctionStructure func_struct = {FunctionType::kCFunc, func_list[i], nullptr};
-    func_registry->RegisterFunc(sign, func_struct);
+    func_registry->RegisterReadOnlyCFunc(sign, func_list[i]);
 
     auto args_node = std::unique_ptr<ExecNode>(new EntryArgumentNode);
     auto index_node = std::unique_ptr<ExecNode>(new ConstantValueNode(1));
