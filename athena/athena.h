@@ -7,6 +7,7 @@
 #pragma once
 
 #include <memory>
+#include "arena.h"
 #include "exec_engine.h"
 #include "function_registry.h"
 #include "status.h"
@@ -14,13 +15,39 @@
 
 namespace athena {
 
+using jitfusion::Arena;
+using jitfusion::BinaryOPType;
+using jitfusion::CodeGenFunc;
+using jitfusion::ConstantListValueType;
+using jitfusion::ConstantValueType;
 using jitfusion::ExecContext;
 using jitfusion::ExecEngine;
 using jitfusion::ExecEngineOption;
+using jitfusion::ExecNodeType;
+using jitfusion::F32ListStruct;
+using jitfusion::F64ListStruct;
 using jitfusion::FunctionRegistry;
+using jitfusion::FunctionRegistryFactory;
 using jitfusion::FunctionSignature;
+using jitfusion::FunctionStructure;
+using jitfusion::FunctionType;
+using jitfusion::I16ListStruct;
+using jitfusion::I32ListStruct;
+using jitfusion::I64ListStruct;
+using jitfusion::I8ListStruct;
+using jitfusion::IRCodeGenContext;
+using jitfusion::LLVMStructType;
 using jitfusion::RetType;
 using jitfusion::Status;
+using jitfusion::StringListStruct;
+using jitfusion::StringStruct;
+using jitfusion::TypeHelper;
+using jitfusion::U16ListStruct;
+using jitfusion::U32ListStruct;
+using jitfusion::U64ListStruct;
+using jitfusion::U8ListStruct;
+using jitfusion::UnaryOPType;
+using jitfusion::ValueType;
 
 class Athena {
  public:
