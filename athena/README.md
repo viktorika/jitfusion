@@ -11,7 +11,7 @@ When using it, you need to <span style="color:red">#include "athena.h"</span> an
 
 * 2.The format of a statement must be constructed as follows: {ID} = {Expression}, where ID is understood as a variable name and Expression is an expression.
 
-* 3.In addition to supporting various operations, expressions also support several types of special syntax. Function syntax: {Function_name}({arg1}, {arg2}, ...). It also supports switch statements and if statements. Following the principle of simplicity, the syntax for switch and if statements is similar to function syntax: if({condition}, {true_expression}, {false_expression}), switch({case1}, {value1}, {case2}, {value2}..., {default_value}).
+* 3.In addition to supporting various operations, expressions also support several types of special syntax. Function syntax: {function_name}({arg1}, {arg2}, ...). It also supports switch statements and if statements. Following the principle of simplicity, the syntax for switch and if statements is similar to function syntax: if({condition}, {true_expression}, {false_expression}), switch({case1}, {value1}, {case2}, {value2}..., {default_value}).
 
 * 4.You can obtain the input parameter pointer through the entry_arg name, access the ExecContext via exec_ctx and obtain the output parameter pointer through the output name.
 
