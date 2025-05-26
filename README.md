@@ -1,6 +1,5 @@
 # jitfusion
-A execution engine completely based on llvm jit.
-
+A high-performance execution engine based on LLVM JIT.
 
 # Build
 Environment
