@@ -239,44 +239,44 @@ using return_stringlist_function_type = StringListStruct (*)(void*, void*, void*
 }  // namespace
 
 ExecEngine::ExecEngine(ExecEngineOption option)
-    : const_value_arena_(option.const_value_arena_alloc_min_chunk_size), option_(option) {}
-ExecEngine::~ExecEngine() { delete engine_; }
+    : const_value_arena_(option.const_value_arena_alloc_min_chunk_size), jit_(nullptr), option_(option) {}
 
 Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
                            const std::unique_ptr<FunctionRegistry>& func_registry) {
-  delete engine_;
-  engine_ = nullptr;
   // validator
   Validator validator(func_registry);
   JF_RETURN_NOT_OK(validator.Validate(exec_node.get()));
   ret_type_ = exec_node->GetReturnType();
 
   // codegen
-  std::unique_ptr<llvm::Module> owner = std::make_unique<llvm::Module>("module", llvm_context_);
+  std::unique_ptr<llvm::LLVMContext> llvm_context = std::make_unique<llvm::LLVMContext>();
+  std::unique_ptr<llvm::Module> owner = std::make_unique<llvm::Module>("module", *llvm_context);
   llvm::Module* m = owner.get();
 
-  LLVMStructType llvm_struct_type = CreateLLVMStructType(llvm_context_);
+  LLVMStructType llvm_struct_type = CreateLLVMStructType(*llvm_context);
 
   llvm::FunctionCallee entry_func_callee;
-  JF_RETURN_NOT_OK(GetEntryFunctionCallee(llvm_context_, owner, llvm_struct_type, ret_type_, &entry_func_callee));
+  JF_RETURN_NOT_OK(GetEntryFunctionCallee(*llvm_context, owner, llvm_struct_type, ret_type_, &entry_func_callee));
   if (auto* entry_function = llvm::dyn_cast<llvm::Function>(entry_func_callee.getCallee())) {
-    entry_function->addAttributeAtIndex(1, llvm::Attribute::get(llvm_context_, llvm::Attribute::NoAlias));
-    entry_function->addAttributeAtIndex(1, llvm::Attribute::get(llvm_context_, llvm::Attribute::ReadOnly));
-    entry_function->addAttributeAtIndex(2, llvm::Attribute::get(llvm_context_, llvm::Attribute::NoAlias));
-    entry_function->addAttributeAtIndex(3, llvm::Attribute::get(llvm_context_, llvm::Attribute::NoAlias));
+    entry_function->addAttributeAtIndex(1, llvm::Attribute::get(*llvm_context, llvm::Attribute::NoAlias));
+    entry_function->addAttributeAtIndex(1, llvm::Attribute::get(*llvm_context, llvm::Attribute::ReadOnly));
+    entry_function->addAttributeAtIndex(2, llvm::Attribute::get(*llvm_context, llvm::Attribute::NoAlias));
+    entry_function->addAttributeAtIndex(3, llvm::Attribute::get(*llvm_context, llvm::Attribute::NoAlias));
   }
 
   auto* entry_function = llvm::cast<llvm::Function>(entry_func_callee.getCallee());
-  llvm::BasicBlock* entry_bb = llvm::BasicBlock::Create(llvm_context_, "entryBB", entry_function);
+  llvm::BasicBlock* entry_bb = llvm::BasicBlock::Create(*llvm_context, "entryBB", entry_function);
   llvm::IRBuilder<> builder(entry_bb);
   std::unique_ptr<IRCodeGenContext> codegen_ctx = std::make_unique<IRCodeGenContext>(
-      llvm_context_, *m, builder, entry_bb, entry_function, llvm_struct_type, func_registry, const_value_arena_);
+      *llvm_context, *m, builder, entry_bb, entry_function, llvm_struct_type, func_registry, const_value_arena_);
 
   CodeGen codegen(*codegen_ctx);
 
   llvm::Value* ret_value;
   JF_RETURN_NOT_OK(codegen.GetValue(exec_node.get(), &ret_value));
   builder.CreateRet(ret_value);
+
+  func_registry->SetCFuncAttr(m);
 
   // verify
   std::string error_info;
@@ -306,26 +306,28 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
 
   pb.crossRegisterProxies(lam, fam, cgam, mam, &mfm);
 
-  // Now we create the JIT.
-  engine_ = llvm::EngineBuilder(std::move(owner)).setEngineKind(llvm::EngineKind::JIT).create();
-  func_registry->MappingToLLVM(engine_, m);
-
-  // debug
-  // m->print(llvm::errs(), nullptr);
-
+  // Create the optimization pipeline.
   auto mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
   mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::CallSiteSplittingPass()));
   mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::SLPVectorizerPass()));
 
   mpm.run(*m, mam);
-  engine_->setVerifyModules(true);
-  engine_->finalizeObject();
 
-  // m->print(llvm::errs(), nullptr);
+  jit_ = llvm::orc::LLJITBuilder().create();
+  if (!jit_) {
+    return Status::RuntimeError("Failed to create LLJIT: ", llvm::toString(jit_.takeError()));
+  }
+  if (auto err = jit_->get()->addIRModule(llvm::orc::ThreadSafeModule(std::move(owner), std::move(llvm_context)))) {
+    return Status::RuntimeError("Failed to add module to JIT: ", llvm::toString(std::move(err)));
+  }
+  func_registry->MappingToJIT(jit_->get());
 
-  uintptr_t entry_func_offset = engine_->getFunctionAddress("entry");
+  // debug
+  m->print(llvm::errs(), nullptr);
+
+  auto entry_func_offset = jit_->get()->lookup("entry");
   entry_func_ptr_ = nullptr;
-  entry_func_ptr_ += entry_func_offset;
+  entry_func_ptr_ += entry_func_offset->getValue();
   return Status::OK();
 }
 

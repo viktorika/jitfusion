@@ -7,6 +7,7 @@
 #include "function_registry.h"
 #include <type_traits>
 #include "function/function_init.h"
+#include "llvm/ExecutionEngine/JITSymbol.h"
 #include "status.h"
 #include "type.h"
 
@@ -39,14 +40,14 @@ inline void hash_combine(std::size_t& seed, T const& v) {
   return hash_combine_impl(seed, hasher(v));
 }
 
-inline void ReadOnlyFunctionAttributeSetter(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) {
+inline void ReadOnlyFunctionAttributeSetter(llvm::Module* /*m*/, llvm::Function* f) {
   f->setOnlyReadsMemory();
   f->setDoesNotThrow();
 }
 
 struct StoreFunctionSetter {
   uint32_t index;
-  void operator()(llvm::ExecutionEngine* /*engine*/, llvm::Module* /*m*/, llvm::Function* f) const {
+  void operator()(llvm::Module* /*m*/, llvm::Function* f) const {
     f->setDoesNotThrow();
     f->addAttributeAtIndex(index, llvm::Attribute::get(f->getContext(), llvm::Attribute::NoAlias));
     f->addAttributeAtIndex(index, llvm::Attribute::get(f->getContext(), llvm::Attribute::NoCapture));
@@ -159,10 +160,7 @@ Status FunctionRegistry::GetFuncBySign(FunctionSignature& func_sign, FunctionStr
   return Status::RuntimeError("function ", func_sign.ToString(), " not found");
 }
 
-Status FunctionRegistry::MappingToLLVM(llvm::ExecutionEngine* engine, llvm::Module* m) {
-  if (engine == nullptr) {
-    return Status::RuntimeError("engine pointer is nullptr");
-  }
+Status FunctionRegistry::SetCFuncAttr(llvm::Module* m) {
   for (const auto& [sign, fc] : signature2funcstruct_) {
     if (FunctionType::kLLVMIntrinicFunc == fc.func_type) {
       continue;
@@ -172,11 +170,25 @@ Status FunctionRegistry::MappingToLLVM(llvm::ExecutionEngine* engine, llvm::Modu
       continue;
     }
     if (fc.func_attr_setter) {
-      fc.func_attr_setter(engine, m, func);
+      fc.func_attr_setter(m, func);
     }
-    engine->addGlobalMapping(func, fc.c_func_ptr);
-    // I don't know why I cant use sign string to add globalmapping
-    // engine->addGlobalMapping(sign.ToString(), reinterpret_cast<uint64_t>(fc.c_func_ptr));
+  }
+  return Status::OK();
+}
+
+Status FunctionRegistry::MappingToJIT(llvm::orc::LLJIT* jit) {
+  auto symbols = llvm::orc::SymbolMap();
+  llvm::orc::MangleAndInterner mangle(jit->getExecutionSession(), jit->getDataLayout());
+  auto& mainjd = jit->getMainJITDylib();
+  for (const auto& [sign, fc] : signature2funcstruct_) {
+    if (FunctionType::kLLVMIntrinicFunc == fc.func_type) {
+      continue;
+    }
+    auto function_a_address = llvm::orc::ExecutorAddr::fromPtr(fc.c_func_ptr);
+    symbols.try_emplace(mangle(sign.ToString()), function_a_address, llvm::JITSymbolFlags::Exported);
+  }
+  if (auto err = mainjd.define(absoluteSymbols(symbols))) {
+    return Status::RuntimeError("Failed to define symbol in JIT: ", llvm::toString(std::move(err)));
   }
   return Status::OK();
 }

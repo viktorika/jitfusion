@@ -11,8 +11,7 @@
 #include <utility>
 #include <vector>
 #include "arena.h"
-#include "llvm/ExecutionEngine/ExecutionEngine.h"
-#include "llvm/ExecutionEngine/MCJIT.h"
+#include "llvm/ExecutionEngine/Orc/LLJIT.h"
 #include "llvm/IR/Attributes.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/DerivedTypes.h"
@@ -81,7 +80,7 @@ struct FunctionStructure {
   FunctionType func_type;
   void *c_func_ptr;
   CodeGenFunc codegen_func;
-  std::function<void(llvm::ExecutionEngine *, llvm::Module *, llvm::Function *)> func_attr_setter{nullptr};
+  std::function<void(llvm::Module *, llvm::Function *)> func_attr_setter{nullptr};
 };
 
 class FunctionSignature {
@@ -120,13 +119,15 @@ class FunctionRegistry {
 
   // Register ReadOnlyCFunc
   Status RegisterReadOnlyCFunc(const FunctionSignature &func_sign, void *c_func_ptr);
-  
+
   // Register StoreCFunc
   // store_args_index is the index of the args in the function signature that is OuputNode
   Status RegisterStoreCFunc(const FunctionSignature &func_sign, void *c_func_ptr, uint32_t store_args_index);
 
   Status GetFuncBySign(FunctionSignature &func_sign, FunctionStructure *func_struct) const;
-  Status MappingToLLVM(llvm::ExecutionEngine *engine, llvm::Module *m);
+
+  Status SetCFuncAttr(llvm::Module *m);
+  Status MappingToJIT(llvm::orc::LLJIT *jit);
 
  private:
   FunctionRegistry() = default;
@@ -137,6 +138,7 @@ class FunctionRegistry {
   struct KeyEquals {
     bool operator()(const FunctionSignature &s1, const FunctionSignature &s2) const { return s1 == s2; }
   };
+
   std::unordered_map<std::string, std::vector<std::tuple<FunctionSignature, FunctionStructure>>> name2funclist_;
   std::unordered_map<const FunctionSignature, FunctionStructure, KeyHash, KeyEquals> signature2funcstruct_;
 
