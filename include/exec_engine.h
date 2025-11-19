@@ -10,6 +10,7 @@
 #include "arena.h"
 #include "exec_node.h"
 #include "function_registry.h"
+#include "llvm/ExecutionEngine/Orc/LLJIT.h"
 #include "status.h"
 #include "type.h"
 
@@ -19,9 +20,7 @@ struct ExecContext {
   explicit ExecContext(int64_t alloc_min_chunk_size) : arena(alloc_min_chunk_size) {}
   Arena arena;
 
-  void Clear() {
-    arena.Reset();
-  }
+  void Clear() { arena.Reset(); }
 };
 
 struct ExecEngineOption {
@@ -32,7 +31,7 @@ struct ExecEngineOption {
 class ExecEngine {
  public:
   explicit ExecEngine(ExecEngineOption option = {});
-  ~ExecEngine();
+  ~ExecEngine() = default;
   ExecEngine(const ExecEngine&) = delete;
   ExecEngine& operator=(const ExecEngine&) = delete;
 
@@ -50,8 +49,7 @@ class ExecEngine {
 
  private:
   Arena const_value_arena_;
-  llvm::LLVMContext llvm_context_;
-  llvm::ExecutionEngine* engine_{nullptr};
+  llvm::Expected<std::unique_ptr<llvm::orc::LLJIT>> jit_;
   char* entry_func_ptr_;
   ValueType ret_type_;
   ExecEngineOption option_;
