@@ -70,6 +70,8 @@ class Athena {
   Status Execute(void* entry_arguments, void* result);
   Status Execute(ExecContext& exec_ctx, void* entry_arguments, void* result);
 
+  [[nodiscard]] std::string_view GetIRCode() const { return exec_engine_.GetIRCode(); }
+
  private:
   ExecEngine exec_engine_;
 };
