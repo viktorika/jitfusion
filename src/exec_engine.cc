@@ -275,6 +275,8 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
              .setCompileFunctionCreator([&](llvm::orc::JITTargetMachineBuilder jtmb)
                                             -> llvm::Expected<std::unique_ptr<llvm::orc::IRCompileLayer::IRCompiler>> {
                jtmb.setCodeGenOptLevel(llvm::CodeGenOptLevel::Aggressive);
+               jtmb.getOptions().AllowFPOpFusion = llvm::FPOpFusion::Fast;
+               jtmb.getOptions().UnsafeFPMath = true;
                return std::make_unique<llvm::orc::ConcurrentIRCompiler>(std::move(jtmb));
              })
              .create();
