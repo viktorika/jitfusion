@@ -53,31 +53,14 @@ namespace jitfusion {
 
 namespace {
 
-llvm::TargetMachine* GetTargetMachine() {
-  llvm::InitializeNativeTarget();
-  llvm::InitializeNativeTargetAsmPrinter();
-  llvm::InitializeNativeTargetAsmParser();
-  llvm::InitializeNativeTargetDisassembler();
-  llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
-
-  llvm::StringRef cpu = llvm::sys::getHostCPUName();
-
-  llvm::SubtargetFeatures features;
-  auto host_features = llvm::sys::getHostCPUFeatures();
-  for (auto& f : host_features) {
-    features.AddFeature(f.first(), f.second);
+struct LLVMInit {
+  LLVMInit() {
+    llvm::InitializeNativeTarget();
+    llvm::InitializeNativeTargetAsmPrinter();
+    llvm::InitializeNativeTargetAsmParser();
+    llvm::InitializeNativeTargetDisassembler();
+    llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
   }
-
-  std::string error;
-  auto triple = llvm::sys::getDefaultTargetTriple();
-  const auto* target = llvm::TargetRegistry::lookupTarget(triple, error);
-
-  llvm::TargetOptions options;
-  options.AllowFPOpFusion = llvm::FPOpFusion::Fast;
-  options.UnsafeFPMath = true;
-  auto* target_machine = target->createTargetMachine(triple, cpu, features.getString(), options, std::nullopt,
-                                                     std::nullopt, llvm::CodeGenOptLevel::Aggressive, true);
-  return target_machine;
 };
 
 LLVMStructType CreateLLVMStructType(llvm::LLVMContext& context) {
@@ -286,32 +269,7 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
     return Status::RuntimeError("Module verification failed: ", error_info);
   }
   // optimize
-  static auto* machine = GetTargetMachine();
-  // llvm::PassBuilder pb(machine);
-
-  // llvm::LoopAnalysisManager lam;
-  // llvm::FunctionAnalysisManager fam;
-  // llvm::CGSCCAnalysisManager cgam;
-  // llvm::ModuleAnalysisManager mam;
-  // llvm::MachineFunctionAnalysisManager mfm;
-
-  // fam.registerPass([] { return machine->getTargetIRAnalysis(); });
-
-  // // Register all the basic analyses with the managers.
-  // pb.registerModuleAnalyses(mam);
-  // pb.registerCGSCCAnalyses(cgam);
-  // pb.registerFunctionAnalyses(fam);
-  // pb.registerLoopAnalyses(lam);
-  // pb.registerMachineFunctionAnalyses(mfm);
-
-  // pb.crossRegisterProxies(lam, fam, cgam, mam, &mfm);
-
-  // // Create the optimization pipeline.
-  // auto mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
-  // mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::CallSiteSplittingPass()));
-  // mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::SLPVectorizerPass()));
-
-  // mpm.run(*m, mam);
+  static auto machine = LLVMInit();
 
   jit_ = llvm::orc::LLJITBuilder()
              .setCompileFunctionCreator([&](llvm::orc::JITTargetMachineBuilder jtmb)
@@ -328,8 +286,8 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
   }
   func_registry->MappingToJIT(jit_->get());
   jit_->get()->getIRTransformLayer().setTransform(
-      [&](llvm::orc::ThreadSafeModule tsm, const llvm::orc::MaterializationResponsibility& r) {
-        tsm.withModuleDo([](llvm::Module& module) {
+      [&, this](llvm::orc::ThreadSafeModule tsm, const llvm::orc::MaterializationResponsibility& /*r*/) {
+        tsm.withModuleDo([this](llvm::Module& module) {
           llvm::PassBuilder pb;
 
           llvm::LoopAnalysisManager lam;
@@ -337,8 +295,6 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
           llvm::CGSCCAnalysisManager cgam;
           llvm::ModuleAnalysisManager mam;
           llvm::MachineFunctionAnalysisManager mfm;
-
-          fam.registerPass([] { return machine->getTargetIRAnalysis(); });
 
           // Register all the basic analyses with the managers.
           pb.registerModuleAnalyses(mam);
@@ -355,16 +311,16 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
           mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::SLPVectorizerPass()));
 
           mpm.run(module, mam);
+          llvm::raw_string_ostream string_os(ir_code_);
+          module.print(string_os, nullptr);
         });
         return tsm;
       });
 
-  llvm::raw_string_ostream string_os(ir_code_);
-  m->print(string_os, nullptr);
-
   auto entry_func_offset = jit_->get()->lookup("entry");
   entry_func_ptr_ = nullptr;
   entry_func_ptr_ += entry_func_offset->getValue();
+
   return Status::OK();
 }
 
