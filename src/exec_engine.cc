@@ -322,8 +322,8 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
   }
   func_registry->MappingToJIT(jit_->get());
 
-  // debug
-  m->print(llvm::errs(), nullptr);
+  llvm::raw_string_ostream string_os(ir_code_);
+  m->print(string_os, nullptr);
 
   auto entry_func_offset = jit_->get()->lookup("entry");
   entry_func_ptr_ = nullptr;

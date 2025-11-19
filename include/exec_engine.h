@@ -47,12 +47,15 @@ class ExecEngine {
   Status Execute(void* entry_arguments, void* result);
   Status Execute(ExecContext& exec_ctx, void* entry_arguments, void* result);
 
+  [[nodiscard]] std::string_view GetIRCode() const { return ir_code_; }
+
  private:
   Arena const_value_arena_;
   llvm::Expected<std::unique_ptr<llvm::orc::LLJIT>> jit_;
   char* entry_func_ptr_;
   ValueType ret_type_;
   ExecEngineOption option_;
+  std::string ir_code_;
 };
 
 }  // namespace jitfusion
