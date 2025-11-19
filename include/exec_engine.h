@@ -27,7 +27,6 @@ struct ExecContext {
 struct ExecEngineOption {
   int64_t const_value_arena_alloc_min_chunk_size{4096};
   int64_t exec_ctx_arena_alloc_min_chunk_size{4096};
-  bool use_pool_{false};
 };
 
 class ExecEngine {
