@@ -287,33 +287,39 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
   }
   // optimize
   static auto* machine = GetTargetMachine();
-  llvm::PassBuilder pb(machine);
+  // llvm::PassBuilder pb(machine);
 
-  llvm::LoopAnalysisManager lam;
-  llvm::FunctionAnalysisManager fam;
-  llvm::CGSCCAnalysisManager cgam;
-  llvm::ModuleAnalysisManager mam;
-  llvm::MachineFunctionAnalysisManager mfm;
+  // llvm::LoopAnalysisManager lam;
+  // llvm::FunctionAnalysisManager fam;
+  // llvm::CGSCCAnalysisManager cgam;
+  // llvm::ModuleAnalysisManager mam;
+  // llvm::MachineFunctionAnalysisManager mfm;
 
-  fam.registerPass([] { return machine->getTargetIRAnalysis(); });
+  // fam.registerPass([] { return machine->getTargetIRAnalysis(); });
 
-  // Register all the basic analyses with the managers.
-  pb.registerModuleAnalyses(mam);
-  pb.registerCGSCCAnalyses(cgam);
-  pb.registerFunctionAnalyses(fam);
-  pb.registerLoopAnalyses(lam);
-  pb.registerMachineFunctionAnalyses(mfm);
+  // // Register all the basic analyses with the managers.
+  // pb.registerModuleAnalyses(mam);
+  // pb.registerCGSCCAnalyses(cgam);
+  // pb.registerFunctionAnalyses(fam);
+  // pb.registerLoopAnalyses(lam);
+  // pb.registerMachineFunctionAnalyses(mfm);
 
-  pb.crossRegisterProxies(lam, fam, cgam, mam, &mfm);
+  // pb.crossRegisterProxies(lam, fam, cgam, mam, &mfm);
 
-  // Create the optimization pipeline.
-  auto mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
-  mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::CallSiteSplittingPass()));
-  mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::SLPVectorizerPass()));
+  // // Create the optimization pipeline.
+  // auto mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
+  // mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::CallSiteSplittingPass()));
+  // mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::SLPVectorizerPass()));
 
-  mpm.run(*m, mam);
+  // mpm.run(*m, mam);
 
-  jit_ = llvm::orc::LLJITBuilder().create();
+  jit_ = llvm::orc::LLJITBuilder()
+             .setCompileFunctionCreator([&](llvm::orc::JITTargetMachineBuilder jtmb)
+                                            -> llvm::Expected<std::unique_ptr<llvm::orc::IRCompileLayer::IRCompiler>> {
+               jtmb.setCodeGenOptLevel(llvm::CodeGenOptLevel::Aggressive);
+               return std::make_unique<llvm::orc::ConcurrentIRCompiler>(std::move(jtmb));
+             })
+             .create();
   if (!jit_) {
     return Status::RuntimeError("Failed to create LLJIT: ", llvm::toString(jit_.takeError()));
   }
@@ -321,6 +327,37 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
     return Status::RuntimeError("Failed to add module to JIT: ", llvm::toString(std::move(err)));
   }
   func_registry->MappingToJIT(jit_->get());
+  jit_->get()->getIRTransformLayer().setTransform(
+      [&](llvm::orc::ThreadSafeModule tsm, const llvm::orc::MaterializationResponsibility& r) {
+        tsm.withModuleDo([](llvm::Module& module) {
+          llvm::PassBuilder pb;
+
+          llvm::LoopAnalysisManager lam;
+          llvm::FunctionAnalysisManager fam;
+          llvm::CGSCCAnalysisManager cgam;
+          llvm::ModuleAnalysisManager mam;
+          llvm::MachineFunctionAnalysisManager mfm;
+
+          fam.registerPass([] { return machine->getTargetIRAnalysis(); });
+
+          // Register all the basic analyses with the managers.
+          pb.registerModuleAnalyses(mam);
+          pb.registerCGSCCAnalyses(cgam);
+          pb.registerFunctionAnalyses(fam);
+          pb.registerLoopAnalyses(lam);
+          pb.registerMachineFunctionAnalyses(mfm);
+
+          pb.crossRegisterProxies(lam, fam, cgam, mam, &mfm);
+
+          // Create the optimization pipeline.
+          auto mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
+          mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::CallSiteSplittingPass()));
+          mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::SLPVectorizerPass()));
+
+          mpm.run(module, mam);
+        });
+        return tsm;
+      });
 
   llvm::raw_string_ostream string_os(ir_code_);
   m->print(string_os, nullptr);
