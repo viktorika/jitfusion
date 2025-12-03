@@ -157,7 +157,9 @@ program:
   $$ = nullptr;
 }
 
-statement: IDENTIFIER "=" expr ";" { $$ = Statement(std::move($1), std::move($3)); }
+statement: 
+  IDENTIFIER "=" expr ";" { $$ = Statement(std::move($1), std::move($3)); }
+| expr ";" { $$ = Statement(std::move($1)); }
 
 expr: term { $$ = std::move($1);}
 ;

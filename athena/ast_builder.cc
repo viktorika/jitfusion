@@ -67,7 +67,11 @@ std::unique_ptr<ExecNode> ProgramAstBuilder::MakeRefNode(const std::string& var_
 
 void ProgramAstBuilder::AddStatement(Statement statement) {
   statements_.emplace_back(std::move(statement));
-  var2index_[statements_.back().var_name] = statements_.size() - 1;
+  const auto& var_name = statements_.back().var_name;
+  if (var_name.empty()) {
+    return;
+  }
+  var2index_[var_name] = statements_.size() - 1;
 }
 
 }  // namespace athena

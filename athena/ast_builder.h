@@ -23,6 +23,7 @@ struct Statement {
   Statement() = default;
   Statement(std::string vname, std::unique_ptr<jitfusion::ExecNode> exp)
       : var_name(std::move(vname)), expression(std::move(exp)), has_dependency(false) {}
+  explicit Statement(std::unique_ptr<jitfusion::ExecNode> exp) : expression(std::move(exp)), has_dependency(false) {}
   ~Statement() = default;
   Statement(Statement&& s) = default;
   Statement& operator=(Statement&& other) = default;

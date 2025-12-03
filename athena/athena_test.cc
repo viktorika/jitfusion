@@ -1196,13 +1196,13 @@ TEST(ComplexTest, Test1) {
   s22 = load(entry_arg, 3);
   r = switch(s21==10 and (s22==1004070 or s22==1003073) and s9==2, s*1.8, s21==10 and (s22==1004070 or s22==1003073) and s9==1,
             s*1.4, (s21==10 and s22==1004116 and s9==1), s*1.5, (s21 != 10 and s9==3), s*1.8, s);
-  s_ret = store(output, 0, CastF32(r));
+  store(output, 0, CastF32(r));
   )";
   std::string code2 = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
   r = a - b;
-  s_ret = store(output, 1, r);
+  store(output, 1, r);
   )";
   std::vector<std::string> codes = {code1, code2};
   ASSERT_TRUE(athena.Compile(codes, func_registry).ok());
@@ -1223,7 +1223,7 @@ TEST(FilterTest, Test1) {
   std::string code = R"(
   a = load(entry_arg, 0);
   b = GenLargeBitmap(a, 3, exec_ctx);
-  r = FilterByBitmap(a, b, CountBits(b), exec_ctx);
+  FilterByBitmap(a, b, CountBits(b), exec_ctx);
   )";
   ASSERT_TRUE(athena.Compile(code, func_registry).ok());
   RetType ret;
