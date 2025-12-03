@@ -9,7 +9,7 @@ When using it, you need to <span style="color:red">#include "athena.h"</span> an
 
 * 1.The execution process of the entire program is determined by each statement, with each statement ending with a semicolon ";".
 
-* 2.The format of a statement must be constructed as follows: {ID} = {Expression}, where ID is understood as a variable name and Expression is an expression.
+* 2.The format of a statement must be constructed as follows: {ID} = {Expression}, where ID is understood as a variable name and Expression is an expression. Of course, you can also use just an expression without an ID, and it is still valid.
 
 * 3.In addition to supporting various operations, expressions also support several types of special syntax. Function syntax: {function_name}({arg1}, {arg2}, ...). It also supports switch statements and if statements. Following the principle of simplicity, the syntax for switch and if statements is similar to function syntax: if({condition}, {true_expression}, {false_expression}), switch({case1}, {value1}, {case2}, {value2}..., {default_value}).
 
