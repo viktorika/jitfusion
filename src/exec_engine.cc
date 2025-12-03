@@ -268,9 +268,7 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
     // m->print(llvm::errs(), nullptr);
     return Status::RuntimeError("Module verification failed: ", error_info);
   }
-  // optimize
   static auto machine = LLVMInit();
-
   jit_ = llvm::orc::LLJITBuilder()
              .setCompileFunctionCreator([&](llvm::orc::JITTargetMachineBuilder jtmb)
                                             -> llvm::Expected<std::unique_ptr<llvm::orc::IRCompileLayer::IRCompiler>> {
@@ -287,6 +285,7 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
     return Status::RuntimeError("Failed to add module to JIT: ", llvm::toString(std::move(err)));
   }
   func_registry->MappingToJIT(jit_->get());
+  // optimize
   jit_->get()->getIRTransformLayer().setTransform(
       [&, this](llvm::orc::ThreadSafeModule tsm, const llvm::orc::MaterializationResponsibility& /*r*/) {
         tsm.withModuleDo([this](llvm::Module& module) {
