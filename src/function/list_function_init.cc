@@ -1387,43 +1387,43 @@ Status InitListAddFunc(FunctionRegistry *reg) {
       FunctionSignature("ListAdd", {ValueType::kF64List, ValueType::kF64, ValueType::kPtr}, ValueType::kF64List),
       reinterpret_cast<void *>(ListAdd<F64ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListAddWithMinSize", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(ListAddWithMinSize<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListAddWithMinSize", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr},
                         ValueType::kU16List),
       reinterpret_cast<void *>(ListAddWithMinSize<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListAddWithMinSize", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr},
                         ValueType::kU32List),
       reinterpret_cast<void *>(ListAddWithMinSize<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListAddWithMinSize", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr},
                         ValueType::kU64List),
       reinterpret_cast<void *>(ListAddWithMinSize<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListAddWithMinSize", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr},
                         ValueType::kI8List),
       reinterpret_cast<void *>(ListAddWithMinSize<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListAddWithMinSize", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr},
                         ValueType::kI16List),
       reinterpret_cast<void *>(ListAddWithMinSize<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListAddWithMinSize", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr},
                         ValueType::kI32List),
       reinterpret_cast<void *>(ListAddWithMinSize<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListAddWithMinSize", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr},
                         ValueType::kI64List),
       reinterpret_cast<void *>(ListAddWithMinSize<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListAddWithMinSize", {ValueType::kF32List, ValueType::kF32List, ValueType::kPtr},
                         ValueType::kF32List),
       reinterpret_cast<void *>(ListAddWithMinSize<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListAddWithMinSize", {ValueType::kF64List, ValueType::kF64List, ValueType::kPtr},
                         ValueType::kF64List),
       reinterpret_cast<void *>(ListAddWithMinSize<F64ListStruct>)));
@@ -1537,43 +1537,43 @@ Status InitListMulFunc(FunctionRegistry *reg) {
       FunctionSignature("ListMul", {ValueType::kF64List, ValueType::kF64, ValueType::kPtr}, ValueType::kF64List),
       reinterpret_cast<void *>(ListMul<F64ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListMulWithMinSize", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(ListMulWithMinSize<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListMulWithMinSize", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr},
                         ValueType::kU16List),
       reinterpret_cast<void *>(ListMulWithMinSize<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListMulWithMinSize", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr},
                         ValueType::kU32List),
       reinterpret_cast<void *>(ListMulWithMinSize<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListMulWithMinSize", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr},
                         ValueType::kU64List),
       reinterpret_cast<void *>(ListMulWithMinSize<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListMulWithMinSize", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr},
                         ValueType::kI8List),
       reinterpret_cast<void *>(ListMulWithMinSize<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListMulWithMinSize", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr},
                         ValueType::kI16List),
       reinterpret_cast<void *>(ListMulWithMinSize<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListMulWithMinSize", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr},
                         ValueType::kI32List),
       reinterpret_cast<void *>(ListMulWithMinSize<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListMulWithMinSize", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr},
                         ValueType::kI64List),
       reinterpret_cast<void *>(ListMulWithMinSize<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListMulWithMinSize", {ValueType::kF32List, ValueType::kF32List, ValueType::kPtr},
                         ValueType::kF32List),
       reinterpret_cast<void *>(ListMulWithMinSize<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListMulWithMinSize", {ValueType::kF64List, ValueType::kF64List, ValueType::kPtr},
                         ValueType::kF64List),
       reinterpret_cast<void *>(ListMulWithMinSize<F64ListStruct>)));
