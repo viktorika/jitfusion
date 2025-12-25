@@ -50,6 +50,8 @@ struct LLVMStructType {
   llvm::StructType *stringlist_type;
 };
 
+constexpr const char *kCommutative = "commutative";
+
 struct IRCodeGenContext {
   IRCodeGenContext(llvm::LLVMContext &context, llvm::Module &module, llvm::IRBuilder<> &builder,
                    llvm::BasicBlock *entry_bb, llvm::Function *entry_function, LLVMStructType complex_type,
@@ -123,6 +125,9 @@ class FunctionRegistry {
   // Register StoreCFunc
   // store_args_index is the index of the args in the function signature that is OuputNode
   Status RegisterStoreCFunc(const FunctionSignature &func_sign, void *c_func_ptr, uint32_t store_args_index);
+
+  // Register a function that satisfies the commutative property.
+  Status RegisterCommutativeCFunc(const FunctionSignature &func_sign, void *c_func_ptr);
 
   Status GetFuncBySign(FunctionSignature &func_sign, FunctionStructure *func_struct) const;
 

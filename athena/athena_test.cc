@@ -1233,6 +1233,27 @@ TEST(FilterTest, Test1) {
   EXPECT_EQ(std::get<std::vector<std::int32_t>>(ret), expect);
 }
 
+TEST(CustomPassTest, CommutativeCallCanonicalizerPass) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32List);
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadI32List)).ok());
+  std::string code = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  c = ListAddWithMinSize(a, b, exec_ctx);
+  d = ListAddWithMinSize(b, a, exec_ctx);
+  e = ListAddWithMinSize(c, d, exec_ctx);
+  )";
+  ASSERT_TRUE(athena.Compile(code, func_registry).ok());
+  RetType ret;
+  std::array<std::vector<int32_t>, 2> value = {std::vector<int32_t>{1, 2, 3}, std::vector<int32_t>{4, 5, 6}};
+  ASSERT_TRUE(athena.Execute(value.data(), &ret).ok());
+  std::vector<int32_t> expect{10, 14, 18};
+  EXPECT_EQ(std::get<std::vector<std::int32_t>>(ret), expect);
+}
+
 GTEST_API_ int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

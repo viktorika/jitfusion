@@ -196,6 +196,49 @@ Status GetEntryFunctionCallee(llvm::LLVMContext& context, std::unique_ptr<llvm::
   return Status::OK();
 }
 
+// 定义你的自定义 Pass
+struct CommutativeCallCanonicalizerPass : public llvm::PassInfoMixin<CommutativeCallCanonicalizerPass> {
+  CommutativeCallCanonicalizerPass() = default;
+
+  llvm::PreservedAnalyses run(llvm::Function& f, llvm::FunctionAnalysisManager& /*AM*/) {
+    bool changed = false;
+    for (auto& bb : f) {
+      for (auto& i : bb) {
+        if (auto* ci = llvm::dyn_cast<llvm::CallInst>(&i)) {
+          llvm::Function* called_func = ci->getCalledFunction();
+          if (called_func == nullptr) {
+            continue;
+          }
+          if (!called_func->hasFnAttribute(kCommutative)) {
+            continue;
+          }
+          if (ci->arg_size() < 2) {
+            continue;
+          }
+          llvm::Value* arg0 = ci->getArgOperand(0);
+          llvm::Value* arg1 = ci->getArgOperand(1);
+          if (arg0->getType() != arg1->getType()) {
+            continue;
+          }
+          if (ShouldSwapArguments(arg0, arg1)) {
+            ci->setArgOperand(0, arg1);
+            ci->setArgOperand(1, arg0);
+            changed = true;
+          }
+        }
+      }
+    }
+    return changed ? llvm::PreservedAnalyses::none() : llvm::PreservedAnalyses::all();
+  }
+
+ private:
+  static bool ShouldSwapArguments(llvm::Value* arg0, llvm::Value* arg1) {
+    auto name0 = arg0->getName();
+    auto name1 = arg1->getName();
+    return name0 > name1;
+  }
+};
+
 using return_u8_function_type = uint8_t (*)(void*, void*, void*);
 using return_u16_function_type = uint16_t (*)(void*, void*, void*);
 using return_u32_function_type = uint32_t (*)(void*, void*, void*);
@@ -296,6 +339,10 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
           llvm::CGSCCAnalysisManager cgam;
           llvm::ModuleAnalysisManager mam;
           llvm::MachineFunctionAnalysisManager mfm;
+
+          pb.registerPeepholeEPCallback([&](llvm::FunctionPassManager& fpm, llvm::OptimizationLevel /*level*/) {
+            fpm.addPass(CommutativeCallCanonicalizerPass());
+          });
 
           // Register all the basic analyses with the managers.
           pb.registerModuleAnalyses(mam);

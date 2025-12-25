@@ -45,6 +45,11 @@ inline void ReadOnlyFunctionAttributeSetter(llvm::Module* /*m*/, llvm::Function*
   f->setDoesNotThrow();
 }
 
+inline void CommutantFunctionAttributeSetter(llvm::Module* m, llvm::Function* f) {
+  ReadOnlyFunctionAttributeSetter(m, f);
+  f->addFnAttr(kCommutative);
+}
+
 struct StoreFunctionSetter {
   uint32_t index;
   void operator()(llvm::Module* /*m*/, llvm::Function* f) const {
@@ -140,6 +145,19 @@ Status FunctionRegistry::RegisterStoreCFunc(const FunctionSignature& func_sign, 
   func_struct.func_type = FunctionType::kCFunc;
   func_struct.c_func_ptr = c_func_ptr;
   func_struct.func_attr_setter = StoreFunctionSetter{store_args_index};
+  name2funclist_[func_sign.GetName()].emplace_back(func_sign, func_struct);
+  signature2funcstruct_[func_sign] = func_struct;
+  return Status::OK();
+}
+
+Status FunctionRegistry::RegisterCommutativeCFunc(const FunctionSignature& func_sign, void* c_func_ptr) {
+  if (nullptr == c_func_ptr) {
+    return Status::InvalidArgument("c_func_ptr is nullptr");
+  }
+  FunctionStructure func_struct;
+  func_struct.func_type = FunctionType::kCFunc;
+  func_struct.c_func_ptr = c_func_ptr;
+  func_struct.func_attr_setter = CommutantFunctionAttributeSetter;
   name2funclist_[func_sign.GetName()].emplace_back(func_sign, func_struct);
   signature2funcstruct_[func_sign] = func_struct;
   return Status::OK();
