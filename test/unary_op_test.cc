@@ -72,6 +72,48 @@ TEST(UnaryOPTest, NotTest2) {
   EXPECT_EQ(std::get<uint8_t>(result), !value);
 }
 
+TEST(UnaryOPTest, NotTest3) {
+  uint16_t value = 256;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(value));
+  auto op_node = std::unique_ptr<ExecNode>(new UnaryOPNode(UnaryOPType::kNot, std::move(args_node)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<uint8_t>(result), !value);
+}
+
+TEST(UnaryOPTest, NotTest4) {
+  float value = 0;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(value));
+  auto op_node = std::unique_ptr<ExecNode>(new UnaryOPNode(UnaryOPType::kNot, std::move(args_node)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<uint8_t>(result), !value);
+}
+
+TEST(UnaryOPTest, NotTest5) {
+  float value = 3.14;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(value));
+  auto op_node = std::unique_ptr<ExecNode>(new UnaryOPNode(UnaryOPType::kNot, std::move(args_node)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<uint8_t>(result), !value);
+}
+
 TEST(UnaryOPTest, BitwiseNotTest) {
   int8_t value = 100;
   std::unique_ptr<FunctionRegistry> func_registry;
