@@ -76,3 +76,44 @@ TEST(SwitchTest, Test3) {
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<int32_t>(result), 500);
 }
+
+TEST(SwitchTest, Test4) {
+  std::vector<uint32_t> condition_list = {256, 256, 0, 0};
+  std::vector<int32_t> value_list = {100, 200, 300, 400};
+  std::vector<std::unique_ptr<ExecNode>> child;
+  for (size_t i = 0; i < condition_list.size(); i++) {
+    child.emplace_back(std::unique_ptr<ExecNode>(new ConstantValueNode(condition_list[i])));
+    child.emplace_back(std::unique_ptr<ExecNode>(new ConstantValueNode(value_list[i])));
+  }
+  child.emplace_back(std::unique_ptr<ExecNode>(new ConstantValueNode(500)));
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto node = std::unique_ptr<ExecNode>(new SwitchNode(std::move(child)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<int32_t>(result), 100);
+}
+
+
+TEST(SwitchTest, Test5) {
+  std::vector<float> condition_list = {0, 3.14, 0, 0};
+  std::vector<int32_t> value_list = {100, 200, 300, 400};
+  std::vector<std::unique_ptr<ExecNode>> child;
+  for (size_t i = 0; i < condition_list.size(); i++) {
+    child.emplace_back(std::unique_ptr<ExecNode>(new ConstantValueNode(condition_list[i])));
+    child.emplace_back(std::unique_ptr<ExecNode>(new ConstantValueNode(value_list[i])));
+  }
+  child.emplace_back(std::unique_ptr<ExecNode>(new ConstantValueNode(500)));
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto node = std::unique_ptr<ExecNode>(new SwitchNode(std::move(child)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<int32_t>(result), 200);
+}
