@@ -196,11 +196,10 @@ Status GetEntryFunctionCallee(llvm::LLVMContext& context, std::unique_ptr<llvm::
   return Status::OK();
 }
 
-// 定义你的自定义 Pass
 struct CommutativeCallCanonicalizerPass : public llvm::PassInfoMixin<CommutativeCallCanonicalizerPass> {
   CommutativeCallCanonicalizerPass() = default;
 
-  llvm::PreservedAnalyses run(llvm::Function& f, llvm::FunctionAnalysisManager& /*AM*/) {
+  static llvm::PreservedAnalyses run(llvm::Function& f, llvm::FunctionAnalysisManager& /*AM*/) {
     bool changed = false;
     for (auto& bb : f) {
       for (auto& i : bb) {

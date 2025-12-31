@@ -167,9 +167,9 @@ ListType ListAddWithMinSize(ListType a, ListType b, void *exec_context) {
       exec_ctx->arena.Allocate((result.len) * sizeof(typename ListType::CElementType)));
 #ifdef HAS_XSIMD
   using batch_type = xs::batch<typename ListType::CElementType, xs::default_arch>;
-  constexpr std::size_t batch_size = batch_type::size;
-  auto vec_size = result.len - (result.len % batch_size);
-  for (std::size_t i = 0; i < vec_size; i += batch_size) {
+  constexpr std::size_t kBatchSize = batch_type::size;
+  auto vec_size = result.len - (result.len % kBatchSize);
+  for (std::size_t i = 0; i < vec_size; i += kBatchSize) {
     auto a_vec = batch_type::load_unaligned(a.data + i);
     auto b_vec = batch_type::load_unaligned(b.data + i);
     auto add_vec = a_vec + b_vec;
@@ -208,9 +208,9 @@ ListType ListSubWithMinSize(ListType a, ListType b, void *exec_context) {
       exec_ctx->arena.Allocate((result.len) * sizeof(typename ListType::CElementType)));
 #ifdef HAS_XSIMD
   using batch_type = xs::batch<typename ListType::CElementType, xs::default_arch>;
-  constexpr std::size_t batch_size = batch_type::size;
-  auto vec_size = result.len - (result.len % batch_size);
-  for (std::size_t i = 0; i < vec_size; i += batch_size) {
+  constexpr std::size_t kBatchSize = batch_type::size;
+  auto vec_size = result.len - (result.len % kBatchSize);
+  for (std::size_t i = 0; i < vec_size; i += kBatchSize) {
     auto a_vec = batch_type::load_unaligned(a.data + i);
     auto b_vec = batch_type::load_unaligned(b.data + i);
     auto add_vec = a_vec - b_vec;
@@ -249,9 +249,9 @@ ListType ListMulWithMinSize(ListType a, ListType b, void *exec_context) {
       exec_ctx->arena.Allocate((result.len) * sizeof(typename ListType::CElementType)));
 #ifdef HAS_XSIMD
   using batch_type = xs::batch<typename ListType::CElementType, xs::default_arch>;
-  constexpr std::size_t batch_size = batch_type::size;
-  auto vec_size = result.len - (result.len % batch_size);
-  for (std::size_t i = 0; i < vec_size; i += batch_size) {
+  constexpr std::size_t kBatchSize = batch_type::size;
+  auto vec_size = result.len - (result.len % kBatchSize);
+  for (std::size_t i = 0; i < vec_size; i += kBatchSize) {
     auto a_vec = batch_type::load_unaligned(a.data + i);
     auto b_vec = batch_type::load_unaligned(b.data + i);
     auto add_vec = a_vec * b_vec;
@@ -290,9 +290,9 @@ ListType ListDivWithMinSize(ListType a, ListType b, void *exec_context) {
       exec_ctx->arena.Allocate((result.len) * sizeof(typename ListType::CElementType)));
 #ifdef HAS_XSIMD
   using batch_type = xs::batch<typename ListType::CElementType, xs::default_arch>;
-  constexpr std::size_t batch_size = batch_type::size;
-  auto vec_size = result.len - (result.len % batch_size);
-  for (std::size_t i = 0; i < vec_size; i += batch_size) {
+  constexpr std::size_t kBatchSize = batch_type::size;
+  auto vec_size = result.len - (result.len % kBatchSize);
+  for (std::size_t i = 0; i < vec_size; i += kBatchSize) {
     auto a_vec = batch_type::load_unaligned(a.data + i);
     auto b_vec = batch_type::load_unaligned(b.data + i);
     auto add_vec = a_vec / b_vec;
@@ -331,9 +331,9 @@ ListType ListModWithMinSize(ListType a, ListType b, void *exec_context) {
       exec_ctx->arena.Allocate((result.len) * sizeof(typename ListType::CElementType)));
 #ifdef HAS_XSIMD
   using batch_type = xs::batch<typename ListType::CElementType, xs::default_arch>;
-  constexpr std::size_t batch_size = batch_type::size;
-  auto vec_size = result.len - (result.len % batch_size);
-  for (std::size_t i = 0; i < vec_size; i += batch_size) {
+  constexpr std::size_t kBatchSize = batch_type::size;
+  auto vec_size = result.len - (result.len % kBatchSize);
+  for (std::size_t i = 0; i < vec_size; i += kBatchSize) {
     auto a_vec = batch_type::load_unaligned(a.data + i);
     auto b_vec = batch_type::load_unaligned(b.data + i);
     auto add_vec = a_vec % b_vec;
@@ -372,9 +372,9 @@ ListType ListBitwiseAndWithMinSize(ListType a, ListType b, void *exec_context) {
       exec_ctx->arena.Allocate((result.len) * sizeof(typename ListType::CElementType)));
 #ifdef HAS_XSIMD
   using batch_type = xs::batch<typename ListType::CElementType, xs::default_arch>;
-  constexpr std::size_t batch_size = batch_type::size;
-  auto vec_size = result.len - (result.len % batch_size);
-  for (std::size_t i = 0; i < vec_size; i += batch_size) {
+  constexpr std::size_t kBatchSize = batch_type::size;
+  auto vec_size = result.len - (result.len % kBatchSize);
+  for (std::size_t i = 0; i < vec_size; i += kBatchSize) {
     auto a_vec = batch_type::load_unaligned(a.data + i);
     auto b_vec = batch_type::load_unaligned(b.data + i);
     auto add_vec = a_vec & b_vec;
@@ -413,9 +413,9 @@ ListType ListBitwiseOrWithMinSize(ListType a, ListType b, void *exec_context) {
       exec_ctx->arena.Allocate((result.len) * sizeof(typename ListType::CElementType)));
 #ifdef HAS_XSIMD
   using batch_type = xs::batch<typename ListType::CElementType, xs::default_arch>;
-  constexpr std::size_t batch_size = batch_type::size;
-  auto vec_size = result.len - (result.len % batch_size);
-  for (std::size_t i = 0; i < vec_size; i += batch_size) {
+  constexpr std::size_t kBatchSize = batch_type::size;
+  auto vec_size = result.len - (result.len % kBatchSize);
+  for (std::size_t i = 0; i < vec_size; i += kBatchSize) {
     auto a_vec = batch_type::load_unaligned(a.data + i);
     auto b_vec = batch_type::load_unaligned(b.data + i);
     auto add_vec = a_vec | b_vec;
@@ -454,9 +454,9 @@ ListType ListBitwiseXorWithMinSize(ListType a, ListType b, void *exec_context) {
       exec_ctx->arena.Allocate((result.len) * sizeof(typename ListType::CElementType)));
 #ifdef HAS_XSIMD
   using batch_type = xs::batch<typename ListType::CElementType, xs::default_arch>;
-  constexpr std::size_t batch_size = batch_type::size;
-  auto vec_size = result.len - (result.len % batch_size);
-  for (std::size_t i = 0; i < vec_size; i += batch_size) {
+  constexpr std::size_t kBatchSize = batch_type::size;
+  auto vec_size = result.len - (result.len % kBatchSize);
+  for (std::size_t i = 0; i < vec_size; i += kBatchSize) {
     auto a_vec = batch_type::load_unaligned(a.data + i);
     auto b_vec = batch_type::load_unaligned(b.data + i);
     auto add_vec = a_vec ^ b_vec;
@@ -482,9 +482,9 @@ ResultType ListExp(ListType a, void *exec_context) {
   result.len = a.len;
 #ifdef HAS_XSIMD
   using batch_type = xs::batch<typename ResultType::CElementType, xs::default_arch>;
-  constexpr std::size_t batch_size = batch_type::size;
-  auto vec_size = a.len - (a.len % batch_size);
-  for (std::size_t i = 0; i < vec_size; i += batch_size) {
+  constexpr std::size_t kBatchSize = batch_type::size;
+  auto vec_size = a.len - (a.len % kBatchSize);
+  for (std::size_t i = 0; i < vec_size; i += kBatchSize) {
     auto a_vec = batch_type::load_unaligned(a.data + i);
     auto exp_vec = xs::exp(a_vec);
     exp_vec.store_unaligned(result.data + i);
@@ -509,9 +509,9 @@ ResultType ListLog(ListType a, void *exec_context) {
   result.len = a.len;
 #ifdef HAS_XSIMD
   using batch_type = xs::batch<typename ResultType::CElementType, xs::default_arch>;
-  constexpr std::size_t batch_size = batch_type::size;
-  auto vec_size = a.len - (a.len % batch_size);
-  for (std::size_t i = 0; i < vec_size; i += batch_size) {
+  constexpr std::size_t kBatchSize = batch_type::size;
+  auto vec_size = a.len - (a.len % kBatchSize);
+  for (std::size_t i = 0; i < vec_size; i += kBatchSize) {
     auto a_vec = batch_type::load_unaligned(a.data + i);
     auto log_vec = xs::log(a_vec);
     log_vec.store_unaligned(result.data + i);
@@ -536,9 +536,9 @@ ResultType ListLog2(ListType a, void *exec_context) {
   result.len = a.len;
 #ifdef HAS_XSIMD
   using batch_type = xs::batch<typename ResultType::CElementType, xs::default_arch>;
-  constexpr std::size_t batch_size = batch_type::size;
-  auto vec_size = a.len - (a.len % batch_size);
-  for (std::size_t i = 0; i < vec_size; i += batch_size) {
+  constexpr std::size_t kBatchSize = batch_type::size;
+  auto vec_size = a.len - (a.len % kBatchSize);
+  for (std::size_t i = 0; i < vec_size; i += kBatchSize) {
     auto a_vec = batch_type::load_unaligned(a.data + i);
     auto log_vec = xs::log2(a_vec);
     log_vec.store_unaligned(result.data + i);
@@ -563,9 +563,9 @@ ResultType ListLog10(ListType a, void *exec_context) {
   result.len = a.len;
 #ifdef HAS_XSIMD
   using batch_type = xs::batch<typename ResultType::CElementType, xs::default_arch>;
-  constexpr std::size_t batch_size = batch_type::size;
-  auto vec_size = a.len - (a.len % batch_size);
-  for (std::size_t i = 0; i < vec_size; i += batch_size) {
+  constexpr std::size_t kBatchSize = batch_type::size;
+  auto vec_size = a.len - (a.len % kBatchSize);
+  for (std::size_t i = 0; i < vec_size; i += kBatchSize) {
     auto a_vec = batch_type::load_unaligned(a.data + i);
     auto log_vec = xs::log10(a_vec);
     log_vec.store_unaligned(result.data + i);
@@ -590,9 +590,9 @@ ListType ListCeil(ListType a, void *exec_context) {
   result.len = a.len;
 #ifdef HAS_XSIMD
   using batch_type = xs::batch<typename ListType::CElementType, xs::default_arch>;
-  constexpr std::size_t batch_size = batch_type::size;
-  auto vec_size = a.len - (a.len % batch_size);
-  for (std::size_t i = 0; i < vec_size; i += batch_size) {
+  constexpr std::size_t kBatchSize = batch_type::size;
+  auto vec_size = a.len - (a.len % kBatchSize);
+  for (std::size_t i = 0; i < vec_size; i += kBatchSize) {
     auto a_vec = batch_type::load_unaligned(a.data + i);
     auto log_vec = xs::ceil(a_vec);
     log_vec.store_unaligned(result.data + i);
@@ -617,9 +617,9 @@ ListType ListFloor(ListType a, void *exec_context) {
   result.len = a.len;
 #ifdef HAS_XSIMD
   using batch_type = xs::batch<typename ListType::CElementType, xs::default_arch>;
-  constexpr std::size_t batch_size = batch_type::size;
-  auto vec_size = a.len - (a.len % batch_size);
-  for (std::size_t i = 0; i < vec_size; i += batch_size) {
+  constexpr std::size_t kBatchSize = batch_type::size;
+  auto vec_size = a.len - (a.len % kBatchSize);
+  for (std::size_t i = 0; i < vec_size; i += kBatchSize) {
     auto a_vec = batch_type::load_unaligned(a.data + i);
     auto log_vec = xs::floor(a_vec);
     log_vec.store_unaligned(result.data + i);
@@ -644,9 +644,9 @@ ListType ListRound(ListType a, void *exec_context) {
   result.len = a.len;
 #ifdef HAS_XSIMD
   using batch_type = xs::batch<typename ListType::CElementType, xs::default_arch>;
-  constexpr std::size_t batch_size = batch_type::size;
-  auto vec_size = a.len - (a.len % batch_size);
-  for (std::size_t i = 0; i < vec_size; i += batch_size) {
+  constexpr std::size_t kBatchSize = batch_type::size;
+  auto vec_size = a.len - (a.len % kBatchSize);
+  for (std::size_t i = 0; i < vec_size; i += kBatchSize) {
     auto a_vec = batch_type::load_unaligned(a.data + i);
     auto log_vec = xs::round(a_vec);
     log_vec.store_unaligned(result.data + i);
@@ -671,10 +671,10 @@ ListType ListMin(ListType a, typename ListType::CElementType b, void *exec_conte
   result.len = a.len;
 #ifdef HAS_XSIMD
   using batch_type = xs::batch<typename ListType::CElementType, xs::default_arch>;
-  constexpr std::size_t batch_size = batch_type::size;
-  auto vec_size = a.len - (a.len % batch_size);
+  constexpr std::size_t kBatchSize = batch_type::size;
+  auto vec_size = a.len - (a.len % kBatchSize);
   auto b_vec = batch_type(b);
-  for (std::size_t i = 0; i < vec_size; i += batch_size) {
+  for (std::size_t i = 0; i < vec_size; i += kBatchSize) {
     auto a_vec = batch_type::load_unaligned(a.data + i);
     auto log_vec = xs::min(a_vec, b_vec);
     log_vec.store_unaligned(result.data + i);
@@ -699,10 +699,10 @@ ListType ListMax(ListType a, typename ListType::CElementType b, void *exec_conte
   result.len = a.len;
 #ifdef HAS_XSIMD
   using batch_type = xs::batch<typename ListType::CElementType, xs::default_arch>;
-  constexpr std::size_t batch_size = batch_type::size;
-  auto vec_size = a.len - (a.len % batch_size);
+  constexpr std::size_t kBatchSize = batch_type::size;
+  auto vec_size = a.len - (a.len % kBatchSize);
   auto b_vec = batch_type(b);
-  for (std::size_t i = 0; i < vec_size; i += batch_size) {
+  for (std::size_t i = 0; i < vec_size; i += kBatchSize) {
     auto a_vec = batch_type::load_unaligned(a.data + i);
     auto log_vec = xs::max(a_vec, b_vec);
     log_vec.store_unaligned(result.data + i);
