@@ -216,7 +216,7 @@ Status Validator::Visit(SwitchNode& switch_node) {
 
   ValueType basic_type = ValueType::kUnknown;
   ValueType list_type = ValueType::kUnknown;
-  for (size_t i = 0; i < size; i++) {
+  for (std::size_t i = 0; i < size; i++) {
     if (i + 1 != size && i % 2 == 0 && !TypeHelper::IsNumericType(switch_node.GetArgs()[i]->GetReturnType())) {
       // TODO(victorika): maybe condition can support complex struct
       return Status::ParseError(

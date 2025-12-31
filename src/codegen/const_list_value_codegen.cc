@@ -18,7 +18,7 @@ struct MakeListVisitor {
     auto *data = reinterpret_cast<StringStruct *>(
         ctx_.const_value_arena.Allocate(static_cast<int>(list.size()) * sizeof(StringStruct)));
 
-    for (size_t idx = 0; idx < list.size(); ++idx) {
+    for (std::size_t idx = 0; idx < list.size(); ++idx) {
       data[idx].data =
           reinterpret_cast<char *>(ctx_.const_value_arena.Allocate(static_cast<int>(list[idx].size()) + 1));
       memcpy(data[idx].data, list[idx].data(), list[idx].size() * sizeof(char));
