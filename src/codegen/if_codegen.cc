@@ -31,8 +31,13 @@ Status CodeGen::Visit(IfNode &if_node) {
   ctx_.builder.SetInsertPoint(if_block);
   llvm::Value *cond_value{};
   JF_RETURN_NOT_OK(GetValue(if_node.GetArgs()[0].get(), &cond_value));
-  cond_value = ctx_.builder.CreateTruncOrBitCast(cond_value, llvm::Type::getInt1Ty(ctx_.context), "i1");
-
+  if (cond_value->getType()->isIntegerTy()) {
+    cond_value = ctx_.builder.CreateICmpNE(cond_value, llvm::ConstantInt::get(cond_value->getType(), 0), "to_bool");
+  } else if (cond_value->getType()->isFloatingPointTy()) {
+    cond_value = ctx_.builder.CreateFCmpONE(cond_value, llvm::ConstantFP::get(cond_value->getType(), 0.0), "to_bool");
+  } else {
+    return Status::RuntimeError("Unsupported type for if condition");
+  }
   // 创建 if-else 结构
   llvm::BasicBlock *then_block = llvm::BasicBlock::Create(ctx_.context, "then", if_func);
   llvm::BasicBlock *else_block = llvm::BasicBlock::Create(ctx_.context, "else", if_func);

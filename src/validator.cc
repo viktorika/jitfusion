@@ -187,9 +187,6 @@ Status Validator::Visit(IfNode& if_node) {
     JF_RETURN_NOT_OK(arg->Accept(this));
     arg_types.emplace_back(arg->GetReturnType());
   }
-  if (arg_types[0] != ValueType::kU8) {
-    return Status::ParseError("If node condition must be u8 type");
-  }
 
   if (TypeHelper::IsNumericType(arg_types[1]) && TypeHelper::IsNumericType(arg_types[2])) {
     if_node.SetReturnType(TypeHelper::GetPromotedType(arg_types[1], arg_types[2]));
