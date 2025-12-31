@@ -41,21 +41,21 @@ ListType ListConcat(ListType a, ListType b, void *exec_context) {
 template <typename ListType>
 uint8_t IsInList(typename ListType::CElementType a, ListType b) {
   if constexpr (std::is_same_v<float, typename ListType::CElementType>) {
-    for (size_t i = 0; i < b.len; ++i) {
+    for (std::size_t i = 0; i < b.len; ++i) {
       if (std::abs(a - b.data[i]) < std::numeric_limits<float>::epsilon()) {
         return 1;
       }
     }
     return 0;
   } else if constexpr (std::is_same_v<double, typename ListType::CElementType>) {
-    for (size_t i = 0; i < b.len; ++i) {
+    for (std::size_t i = 0; i < b.len; ++i) {
       if (std::abs(a - b.data[i]) < std::numeric_limits<double>::epsilon()) {
         return 1;
       }
     }
     return 0;
   } else {
-    for (size_t i = 0; i < b.len; ++i) {
+    for (std::size_t i = 0; i < b.len; ++i) {
       if (a == b.data[i]) {
         return 1;
       }
@@ -65,7 +65,7 @@ uint8_t IsInList(typename ListType::CElementType a, ListType b) {
 }
 
 inline uint8_t IsInStringList(StringStruct a, StringListStruct b) {
-  for (size_t i = 0; i < b.len; ++i) {
+  for (std::size_t i = 0; i < b.len; ++i) {
     if (a.len == b.data[i].len && strcmp(a.data, b.data[i].data) == 0) {
       return static_cast<uint8_t>(1);
     }
@@ -83,7 +83,7 @@ llvm::Value *CallBuiltinLenFunction(const FunctionSignature & /*sign*/,
 template <typename RetType, typename ListType>
 inline RetType Sum(ListType a) {
   RetType sum = 0;
-  for (size_t i = 0; i < a.len; ++i) {
+  for (std::size_t i = 0; i < a.len; ++i) {
     sum += a.data[i];
   }
   return sum;
@@ -865,7 +865,7 @@ ListType FilterByBitmap(ListType a, U8ListStruct bitmap, uint32_t bits_cnt, void
       exec_ctx->arena.Allocate(bits_cnt * sizeof(typename ListType::CElementType)));
   result.len = bits_cnt;
   uint32_t cur = 0;
-  for (size_t i = 0; i < bitmap.len; i++) {
+  for (std::size_t i = 0; i < bitmap.len; i++) {
     uint8_t mask = bitmap.data[i];
     const auto &indices = filter_index_table[mask];
     for (auto idx : indices) {
@@ -893,7 +893,7 @@ ListType IfLarge(ListType a, typename ListType::CElementType cmp_value, typename
   result.data = reinterpret_cast<typename ListType::CElementType *>(
       exec_ctx->arena.Allocate((a.len) * sizeof(typename ListType::CElementType)));
   result.len = a.len;
-  for (size_t i = 0; i < a.len; i++) {
+  for (std::size_t i = 0; i < a.len; i++) {
     result.data[i] = a.data[i] > cmp_value ? target_value : a.data[i];
   }
   return result;
@@ -907,7 +907,7 @@ ListType IfLargeEqual(ListType a, typename ListType::CElementType cmp_value,
   result.data = reinterpret_cast<typename ListType::CElementType *>(
       exec_ctx->arena.Allocate((a.len) * sizeof(typename ListType::CElementType)));
   result.len = a.len;
-  for (size_t i = 0; i < a.len; i++) {
+  for (std::size_t i = 0; i < a.len; i++) {
     result.data[i] = a.data[i] >= cmp_value ? target_value : a.data[i];
   }
   return result;
@@ -921,7 +921,7 @@ ListType IfEqual(ListType a, typename ListType::CElementType cmp_value, typename
   result.data = reinterpret_cast<typename ListType::CElementType *>(
       exec_ctx->arena.Allocate((a.len) * sizeof(typename ListType::CElementType)));
   result.len = a.len;
-  for (size_t i = 0; i < a.len; i++) {
+  for (std::size_t i = 0; i < a.len; i++) {
     result.data[i] = a.data[i] == cmp_value ? target_value : a.data[i];
   }
   return result;
@@ -935,7 +935,7 @@ ListType IfLess(ListType a, typename ListType::CElementType cmp_value, typename 
   result.data = reinterpret_cast<typename ListType::CElementType *>(
       exec_ctx->arena.Allocate((a.len) * sizeof(typename ListType::CElementType)));
   result.len = a.len;
-  for (size_t i = 0; i < a.len; i++) {
+  for (std::size_t i = 0; i < a.len; i++) {
     result.data[i] = a.data[i] < cmp_value ? target_value : a.data[i];
   }
   return result;
@@ -949,7 +949,7 @@ ListType IfLessEqual(ListType a, typename ListType::CElementType cmp_value,
   result.data = reinterpret_cast<typename ListType::CElementType *>(
       exec_ctx->arena.Allocate((a.len) * sizeof(typename ListType::CElementType)));
   result.len = a.len;
-  for (size_t i = 0; i < a.len; i++) {
+  for (std::size_t i = 0; i < a.len; i++) {
     result.data[i] = a.data[i] <= cmp_value ? target_value : a.data[i];
   }
   return result;
@@ -963,7 +963,7 @@ ListType IfNotEqual(ListType a, typename ListType::CElementType cmp_value, typen
   result.data = reinterpret_cast<typename ListType::CElementType *>(
       exec_ctx->arena.Allocate((a.len) * sizeof(typename ListType::CElementType)));
   result.len = a.len;
-  for (size_t i = 0; i < a.len; i++) {
+  for (std::size_t i = 0; i < a.len; i++) {
     result.data[i] = a.data[i] != cmp_value ? target_value : a.data[i];
   }
   return result;

@@ -66,7 +66,7 @@ bool FunctionSignature::operator==(const FunctionSignature& other) const {
   if (param_types_.size() != other.param_types_.size() || func_name_ != other.func_name_) {
     return false;
   }
-  for (size_t idx = 0; idx < param_types_.size(); idx++) {
+  for (std::size_t idx = 0; idx < param_types_.size(); idx++) {
     if (param_types_[idx] != other.param_types_[idx]) {
       return false;
     }
@@ -75,11 +75,11 @@ bool FunctionSignature::operator==(const FunctionSignature& other) const {
 }
 
 std::size_t FunctionSignature::Hash() const {
-  static const size_t kSeedValue = 17;
-  size_t result = kSeedValue;
+  constexpr std::size_t kSeedValue = 17;
+  std::size_t result = kSeedValue;
   hash_combine(result, func_name_);
   for (const auto& param_type : param_types_) {
-    hash_combine(result, static_cast<size_t>(param_type));
+    hash_combine(result, static_cast<std::size_t>(param_type));
   }
   return result;
 }
@@ -89,7 +89,7 @@ void FunctionSignature::SetRetType(ValueType ret_type) { ret_type_ = ret_type; }
 std::string FunctionSignature::ToString() const {
   std::stringstream s;
   s << func_name_ << "(";
-  for (size_t i = 0; i < param_types_.size(); i++) {
+  for (std::size_t i = 0; i < param_types_.size(); i++) {
     if (i > 0) {
       s << ", ";
     }
