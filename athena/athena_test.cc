@@ -46,6 +46,13 @@ StringStruct LoadStr(void* entry_arguments, int32_t index) {
   return result;
 }
 
+StringStruct LoadNullString(void* /*entry_arguments*/) {
+  StringStruct result;
+  result.data = nullptr;
+  result.len = 0;
+  return result;
+}
+
 I32ListStruct LoadI32List(void* entry_arguments, int32_t index) {
   auto* args = reinterpret_cast<std::vector<int32_t>*>(entry_arguments);
   I32ListStruct result;
@@ -943,17 +950,18 @@ TEST(StringFunctionTest, Test7) {
   Athena athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
-  FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kString);
-  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadStr)).ok());
+  FunctionSignature sign("load", {ValueType::kPtr}, ValueType::kString);
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadNullString)).ok());
   std::string code = R"(
-  a = load(entry_arg, 0);
-  r = (a + a + a + a);
+  a = load(entry_arg);
+  b = load(entry_arg);
+  a == b;
   )";
   ASSERT_TRUE(athena.Compile(code, func_registry).ok());
   RetType ret;
-  std::vector<std::string> value = {"abcde", "abcde"};
+  std::vector<std::string> value = {};
   ASSERT_TRUE(athena.Execute(value.data(), &ret).ok());
-  EXPECT_EQ(std::get<std::string>(ret), "abcdeabcdeabcdeabcde");
+  EXPECT_EQ(std::get<uint8_t>(ret), true);
 }
 
 TEST(ListFunctionTest, Test1) {
