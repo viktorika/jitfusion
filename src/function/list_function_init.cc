@@ -140,7 +140,10 @@ llvm::Value *CallBuiltinTruncateFunction(const FunctionSignature & /*sign*/,
                                                "load len_ptr");
 
   llvm::Value *new_len = arg_llvm_value_list[1];
-  ctx.builder.CreateStore(new_len, len_ptr);
+  llvm::Value *old_len = ctx.builder.CreateLoad(llvm::Type::getInt32Ty(ctx.context), len_ptr, "old_len");
+  llvm::Value *cmp = ctx.builder.CreateICmpULT(new_len, old_len, "cmp_len");
+  llvm::Value *final_len = ctx.builder.CreateSelect(cmp, new_len, old_len, "final_len");
+  ctx.builder.CreateStore(final_len, len_ptr);
   llvm::Value *result = ctx.builder.CreateLoad(arg_llvm_type_list[0], result_ptr, "result");
   return result;
 }
