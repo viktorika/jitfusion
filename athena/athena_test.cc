@@ -16,8 +16,6 @@ using jitfusion::F64ListStruct;
 using jitfusion::FunctionRegistry;
 using jitfusion::FunctionRegistryFactory;
 using jitfusion::FunctionSignature;
-using jitfusion::FunctionStructure;
-using jitfusion::FunctionType;
 using jitfusion::I32ListStruct;
 using jitfusion::RetType;
 using jitfusion::StringListStruct;
