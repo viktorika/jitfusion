@@ -5,6 +5,7 @@
  * @Last Modified time: 2025-01-29 22:44:52
  */
 #include <cstring>
+#include <string_view>
 #include "codegen/codegen.h"
 #include "exec_engine.h"
 #include "function_init.h"
@@ -27,7 +28,11 @@ inline StringStruct StringConcat(StringStruct a, StringStruct b, void *exec_cont
   return result;
 }
 
-inline int32_t StringCmp(StringStruct a, StringStruct b) { return strcmp(a.data, b.data); }
+inline int32_t StringCmp(StringStruct a, StringStruct b) {
+  std::string_view va(a.data, a.len);
+  std::string_view vb(b.data, b.len);
+  return va.compare(vb);
+}
 
 llvm::Value *CallBuiltinStringLenFunction(const FunctionSignature & /*sign*/,
                                           const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,

@@ -939,6 +939,23 @@ TEST(StringFunctionTest, Test6) {
   EXPECT_EQ(std::get<std::string>(ret), "abcdeabcdeabcdeabcde");
 }
 
+TEST(StringFunctionTest, Test7) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kString);
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadStr)).ok());
+  std::string code = R"(
+  a = load(entry_arg, 0);
+  r = (a + a + a + a);
+  )";
+  ASSERT_TRUE(athena.Compile(code, func_registry).ok());
+  RetType ret;
+  std::vector<std::string> value = {"abcde", "abcde"};
+  ASSERT_TRUE(athena.Execute(value.data(), &ret).ok());
+  EXPECT_EQ(std::get<std::string>(ret), "abcdeabcdeabcdeabcde");
+}
+
 TEST(ListFunctionTest, Test1) {
   Athena athena;
   std::unique_ptr<FunctionRegistry> func_registry;
