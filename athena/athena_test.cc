@@ -46,7 +46,7 @@ StringStruct LoadStr(void* entry_arguments, int32_t index) {
   return result;
 }
 
-StringStruct LoadNullString(void* /*entry_arguments*/) {
+StringStruct LoadNullString() {
   StringStruct result;
   result.data = nullptr;
   result.len = 0;
@@ -950,11 +950,11 @@ TEST(StringFunctionTest, Test7) {
   Athena athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
-  FunctionSignature sign("load", {ValueType::kPtr}, ValueType::kString);
+  FunctionSignature sign("load", {}, ValueType::kString);
   EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadNullString)).ok());
   std::string code = R"(
-  a = load(entry_arg);
-  b = load(entry_arg);
+  a = load();
+  b = load();
   a == b;
   )";
   ASSERT_TRUE(athena.Compile(code, func_registry).ok());
