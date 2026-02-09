@@ -85,8 +85,16 @@ struct MakeListVisitor {
 };
 
 Status CodeGen::Visit(ConstantListValueNode &list_node) {
+  const auto &val_list = list_node.GetValList();
+  auto it = ctx_.const_list_cache.find(val_list);
+  if (it != ctx_.const_list_cache.end()) {
+    value_ = it->second;
+    return Status::OK();
+  }
+
   MakeListVisitor visitor(ctx_);
-  value_ = std::visit(visitor, list_node.GetValList());
+  value_ = std::visit(visitor, val_list);
+  ctx_.const_list_cache[val_list] = value_;
   return Status::OK();
 }
 

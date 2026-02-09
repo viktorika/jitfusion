@@ -7,6 +7,7 @@
 #pragma once
 
 #include <functional>
+#include <map>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -71,6 +72,7 @@ struct IRCodeGenContext {
   llvm::BasicBlock *entry_bb;
   llvm::Function *entry_function;
   LLVMStructType complex_type;
+  std::map<ConstantListValueType, llvm::Value *> const_list_cache;
   const std::unique_ptr<FunctionRegistry> &function_registry;
   Arena &const_value_arena;
 };

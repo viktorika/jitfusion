@@ -130,6 +130,24 @@ TEST(ConstValueTest, Test4) {
   EXPECT_EQ(std::get<std::string>(ret), "abcde");
 }
 
+TEST(ConstValueTest, ListMergeOptimizeTest) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  std::string code = R"(
+  a = [1, 2, 3];
+  b = [1, 2, 3];
+  c = ListAddWithMinSize(a, b, exec_ctx);
+  d = ListAddWithMinSize(b, a, exec_ctx);
+  e = ListAddWithMinSize(c, d, exec_ctx);
+  )";
+  ASSERT_TRUE(athena.Compile(code, func_registry).ok());
+  RetType ret;
+  ASSERT_TRUE(athena.Execute(nullptr, &ret).ok());
+  std::vector<int32_t> expect{4, 8, 12};
+  EXPECT_EQ(std::get<std::vector<std::int32_t>>(ret), expect);
+}
+
 TEST(StringAddTest, Test1) {
   Athena athena;
   std::unique_ptr<FunctionRegistry> func_registry;
