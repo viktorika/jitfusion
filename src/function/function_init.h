@@ -2,19 +2,26 @@
  * @Author: victorika
  * @Date: 2025-01-23 10:37:20
  * @Last Modified by: victorika
- * @Last Modified time: 2026-02-09 15:01:32
+ * @Last Modified time: 2026-02-09 15:11:32
  */
 #include "function_registry.h"
 #include "status.h"
 
 namespace jitfusion {
 
-Status InitMathInternalFunc(FunctionRegistry *reg);
-Status InitStringInternalFunc(FunctionRegistry *reg);
-Status InitListInternalFunc(FunctionRegistry *reg);
-
 Status InitListArithmeticFunc(FunctionRegistry *reg);
 Status InitListComparisonFunc(FunctionRegistry *reg);
 Status InitListAggregationFunc(FunctionRegistry *reg);
+Status InitListBasicFunc(FunctionRegistry *reg);
+
+Status InitMathInternalFunc(FunctionRegistry *reg);
+Status InitStringInternalFunc(FunctionRegistry *reg);
+inline Status InitListInternalFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(InitListArithmeticFunc(reg));
+  JF_RETURN_NOT_OK(InitListComparisonFunc(reg));
+  JF_RETURN_NOT_OK(InitListAggregationFunc(reg));
+  JF_RETURN_NOT_OK(InitListBasicFunc(reg));
+  return Status::OK();
+}
 
 }  // namespace jitfusion
