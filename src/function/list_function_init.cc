@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <string_view>
 #include <unordered_set>
 #include "codegen/codegen.h"
 #include "exec_engine.h"
@@ -65,12 +66,14 @@ uint8_t IsInList(typename ListType::CElementType a, ListType b) {
 }
 
 inline uint8_t IsInStringList(StringStruct a, StringListStruct b) {
+  std::string_view a_view(a.data, a.len);
   for (std::size_t i = 0; i < b.len; ++i) {
-    if (a.len == b.data[i].len && strcmp(a.data, b.data[i].data) == 0) {
-      return static_cast<uint8_t>(1);
+    std::string_view b_view(b.data[i].data, b.data[i].len);
+    if (a_view == b_view) {
+      return 1;
     }
   }
-  return static_cast<uint8_t>(0);
+  return 0;
 }
 
 llvm::Value *CallBuiltinLenFunction(const FunctionSignature & /*sign*/,
