@@ -326,6 +326,7 @@ infix_function:
 named_function:
   "if" "(" args ")" { $$ = std::make_unique<jitfusion::IfNode>(std::move($3)); }
 |  IDENTIFIER "(" args ")" { $$ = std::make_unique<jitfusion::FunctionNode>(std::move($1), std::move($3)); }
+|  IDENTIFIER "(" ")" { $$ = std::make_unique<jitfusion::FunctionNode>(std::move($1), std::vector<std::unique_ptr<ExecNode>>{});}
 | term "in" term {
     $$ = std::make_unique<jitfusion::FunctionNode>("in", std::vector<std::unique_ptr<jitfusion::ExecNode>>());
     static_cast<jitfusion::FunctionNode *>($$.get())->AppendArgs(std::move($1));
