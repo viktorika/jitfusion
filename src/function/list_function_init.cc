@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <string_view>
 #include <unordered_set>
 #include "codegen/codegen.h"
 #include "exec_engine.h"
@@ -16,7 +17,6 @@
 #include "murmurhash3.h"
 #include "status.h"
 #include "type.h"
-#include <string_view>
 
 #ifdef HAS_XSIMD
 #  include <xsimd/xsimd.hpp>
