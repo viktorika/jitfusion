@@ -1,14 +1,13 @@
 /*
  * @Author: victorika
- * @Date: 2025-01-23 12:39:23
+ * @Date: 2026-02-09 15:09:08
  * @Last Modified by: victorika
- * @Last Modified time: 2026-02-09 15:04:26
+ * @Last Modified time: 2026-02-09 15:10:47
  */
 #include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <string_view>
-#include <unordered_set>
 #include "exec_engine.h"
 #include "function_init.h"
 #include "function_registry.h"
@@ -366,11 +365,7 @@ Status InitHashFunc(FunctionRegistry *reg) {
 
 }  // namespace
 
-Status InitListInternalFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(InitListArithmeticFunc(reg));
-  JF_RETURN_NOT_OK(InitListComparisonFunc(reg));
-  JF_RETURN_NOT_OK(InitListAggregationFunc(reg));
-
+Status InitListBasicFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitListConcatFunc(reg));
   JF_RETURN_NOT_OK(InitInFunc(reg));
   JF_RETURN_NOT_OK(InitLenFunc(reg));
