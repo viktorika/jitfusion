@@ -96,6 +96,11 @@ Status GetEntryFunctionCallee(llvm::LLVMContext& context, std::unique_ptr<llvm::
                               LLVMStructType llvm_struct_type, ValueType ret_type,
                               llvm::FunctionCallee* entry_func_callee) {
   switch (ret_type) {
+    case ValueType::kVoid: {
+      *entry_func_callee = m->getOrInsertFunction(
+          "entry", llvm::Type::getVoidTy(context), llvm::Type::getVoidTy(context)->getPointerTo(),
+          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+    } break;
     case ValueType::kU8:
     case ValueType::kI8: {
       *entry_func_callee = m->getOrInsertFunction(
@@ -238,6 +243,7 @@ struct CommutativeCallCanonicalizerPass : public llvm::PassInfoMixin<Commutative
   }
 };
 
+using return_void_function_type = void (*)(void*, void*, void*);
 using return_u8_function_type = uint8_t (*)(void*, void*, void*);
 using return_u16_function_type = uint16_t (*)(void*, void*, void*);
 using return_u32_function_type = uint32_t (*)(void*, void*, void*);
@@ -299,7 +305,11 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
 
   llvm::Value* ret_value;
   JF_RETURN_NOT_OK(codegen.GetValue(exec_node.get(), &ret_value));
-  builder.CreateRet(ret_value);
+  if (ValueType::kVoid == ret_type_) {
+    builder.CreateRetVoid();
+  } else {
+    builder.CreateRet(ret_value);
+  }
 
   func_registry->SetCFuncAttr(m);
 
@@ -373,6 +383,9 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
 
 #define EXPAND_SWITCH_TYPE                                                                                         \
   switch (ret_type_) {                                                                                             \
+    case ValueType::kVoid: {                                                                                       \
+      reinterpret_cast<return_void_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx, nullptr);           \
+    } break;                                                                                                       \
     case ValueType::kU8: {                                                                                         \
       *result = reinterpret_cast<return_u8_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx, nullptr);   \
     } break;                                                                                                       \

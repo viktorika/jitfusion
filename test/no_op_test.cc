@@ -27,5 +27,4 @@ TEST(NoOPTest, NoOPTest) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  EXPECT_EQ(std::get<int8_t>(result), 0);
 }

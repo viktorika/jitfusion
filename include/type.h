@@ -62,6 +62,7 @@ enum class UnaryOPType : uint8_t {
 
 enum class ValueType : uint8_t {
   kUnknown,
+  kVoid,
   kU8,
   kU16,
   kU32,

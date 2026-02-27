@@ -81,10 +81,7 @@ StringListStruct LoadStringList(void* entry_arguments, int32_t index) {
   return result;
 }
 
-int32_t StoreF32(void* output, int32_t index, float value) {
-  reinterpret_cast<float*>(output)[index] = value;
-  return 0;
-}
+void StoreF32(void* output, int32_t index, float value) { reinterpret_cast<float*>(output)[index] = value; }
 
 }  // namespace
 
@@ -1226,7 +1223,7 @@ TEST(ComplexTest, Test1) {
     EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
   }
   {
-    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kI32);
+    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kVoid);
     EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
   }
 
