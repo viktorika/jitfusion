@@ -102,6 +102,11 @@ ListType IfNotEqual(ListType a, typename ListType::CElementType cmp_value, typen
 template <typename ListType>
 ListType IfByBitmapLLRB(U8ListStruct bitmap, ListType lhs, typename ListType::CElementType rhs, void *exec_context) {
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  uint32_t required_bitmap_len = (lhs.len + 7) / 8;
+  if (bitmap.len < required_bitmap_len) {
+    return {nullptr, 0};
+  }
+
   ListType result;
   result.data = reinterpret_cast<typename ListType::CElementType *>(
       exec_ctx->arena.Allocate((lhs.len) * sizeof(typename ListType::CElementType)));
@@ -128,6 +133,10 @@ ListType IfByBitmapLLRB(U8ListStruct bitmap, ListType lhs, typename ListType::CE
 template <typename ListType>
 ListType IfByBitmapLBRL(U8ListStruct bitmap, typename ListType::CElementType lhs, ListType rhs, void *exec_context) {
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  uint32_t required_bitmap_len = (rhs.len + 7) / 8;
+  if (bitmap.len < required_bitmap_len) {
+    return {nullptr, 0};
+  }
   ListType result;
   result.data = reinterpret_cast<typename ListType::CElementType *>(
       exec_ctx->arena.Allocate((rhs.len) * sizeof(typename ListType::CElementType)));
@@ -154,6 +163,13 @@ ListType IfByBitmapLBRL(U8ListStruct bitmap, typename ListType::CElementType lhs
 template <typename ListType>
 ListType IfByBitmapLLRL(U8ListStruct bitmap, ListType lhs, ListType rhs, void *exec_context) {
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  if (lhs.len != rhs.len) {
+    return {nullptr, 0};
+  }
+  uint32_t required_bitmap_len = (lhs.len + 7) / 8;
+  if (bitmap.len < required_bitmap_len) {
+    return {nullptr, 0};
+  }
   ListType result;
   result.data = reinterpret_cast<typename ListType::CElementType *>(
       exec_ctx->arena.Allocate((lhs.len) * sizeof(typename ListType::CElementType)));
