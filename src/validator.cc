@@ -69,6 +69,9 @@ Status Validator::Visit(ConstantListValueNode& list_node) {
 Status Validator::Visit(UnaryOPNode& unary_op_node) {
   JF_RETURN_NOT_OK(unary_op_node.GetChild()->Accept(this));
   auto child_return_type = unary_op_node.GetChild()->GetReturnType();
+  if (ValueType::kVoid == child_return_type) {
+    return Status::ParseError("Unary OP not support void type");
+  }
   if (!TypeHelper::IsNumericType(child_return_type)) {
     return Status::ParseError("Unary OP only support numeric type");
   }
@@ -139,6 +142,10 @@ Status Validator::Visit(BinaryOPNode& binary_op_node) {
   JF_RETURN_NOT_OK(right->Accept(this));
   auto op = binary_op_node.GetOp();
 
+  if (ValueType::kVoid == left->GetReturnType() || ValueType::kVoid == right->GetReturnType()) {
+    return Status::ParseError("Binary OP not support void type");
+  }
+
   // extra check
   if ((BinaryOPType::kDiv == op || BinaryOPType::kMod == op) &&
       right->GetExecNodeType() == ExecNodeType::kConstValueNode &&
@@ -160,6 +167,9 @@ Status Validator::Visit(FunctionNode& function_node) {
   arg_types.reserve(function_node.GetArgs().size());
   for (const auto& arg : function_node.GetArgs()) {
     JF_RETURN_NOT_OK(arg->Accept(this));
+    if (ValueType::kVoid == arg->GetReturnType()) {
+      return Status::ParseError("Function ", function_node.GetFuncName(), " argument cant be void type");
+    }
     arg_types.emplace_back(arg->GetReturnType());
   }
   FunctionSignature sign(function_node.GetFuncName(), arg_types, ValueType::kUnknown);
@@ -173,7 +183,7 @@ Status Validator::Visit(NoOPNode& no_op_node) {
   for (const auto& arg : no_op_node.GetArgs()) {
     JF_RETURN_NOT_OK(arg->Accept(this));
   }
-  no_op_node.SetReturnType(ValueType::kI8);
+  no_op_node.SetReturnType(ValueType::kVoid);
   return Status::OK();
 }
 
@@ -185,6 +195,9 @@ Status Validator::Visit(IfNode& if_node) {
   arg_types.reserve(if_node.GetArgs().size());
   for (const auto& arg : if_node.GetArgs()) {
     JF_RETURN_NOT_OK(arg->Accept(this));
+    if (ValueType::kVoid == arg->GetReturnType()) {
+      return Status::ParseError("If node argument cant be void type");
+    }
     arg_types.emplace_back(arg->GetReturnType());
   }
 
@@ -208,6 +221,9 @@ Status Validator::Visit(SwitchNode& switch_node) {
   arg_types.reserve(size);
   for (const auto& arg : switch_node.GetArgs()) {
     JF_RETURN_NOT_OK(arg->Accept(this));
+    if (ValueType::kVoid == arg->GetReturnType()) {
+      return Status::ParseError("Switch node argument cant be void type");
+    }
     arg_types.emplace_back(arg->GetReturnType());
   }
 

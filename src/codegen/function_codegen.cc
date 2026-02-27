@@ -49,8 +49,12 @@ Status CodeGen::Visit(FunctionNode& function_node) {
       if (llvm::verifyFunction(llvm::cast<llvm::Function>(*call_func_callee.getCallee()), &error_stream)) {
         return Status::RuntimeError("Verify function failed in function_codegen in call_func_callee: " + error_info);
       }
-
-      value_ = ctx_.builder.CreateCall(call_func_callee, args_llvm_value_list, "call_" + function_node.GetFuncName());
+      if (function_node.GetReturnType() == ValueType::kVoid) {
+        ctx_.builder.CreateCall(call_func_callee, args_llvm_value_list);
+        value_ = nullptr;
+      } else {
+        value_ = ctx_.builder.CreateCall(call_func_callee, args_llvm_value_list, "call_" + function_node.GetFuncName());
+      }
     } break;
     default:
       return Status::NotImplemented("Unsupport func type to codegen");

@@ -14,7 +14,7 @@ Status CodeGen::Visit(NoOPNode& no_op_node) {
     llvm::Value* args_value;
     JF_RETURN_NOT_OK(GetValue(arg.get(), &args_value));
   }
-  value_ = llvm::ConstantInt::get(llvm::Type::getInt8Ty(ctx_.context), 0, true);
+  value_ = nullptr;
   return Status::OK();
 }
 

@@ -18,6 +18,9 @@ Status CodeGen::GetValue(ExecNode *node, llvm::Value **ret_value) {
 
 Status CodeGen::ValueTypeToLLVMType(IRCodeGenContext &ctx, ValueType value_type, llvm::Type **llvm_type) {
   switch (value_type) {
+    case ValueType::kVoid: {
+      *llvm_type = llvm::Type::getVoidTy(ctx.context);
+    } break;
     case ValueType::kU8:
     case ValueType::kI8: {
       *llvm_type = llvm::Type::getInt8Ty(ctx.context);
