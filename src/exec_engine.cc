@@ -530,12 +530,12 @@ Status ExecEngine::Execute(ExecContext& exec_ctx, void* entry_arguments, RetType
 
 Status ExecEngine::Execute(void* entry_arguments, void* result) {
   ExecContext exec_ctx(option_.exec_ctx_arena_alloc_min_chunk_size);
-  reinterpret_cast<return_i8_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx, result);
+  reinterpret_cast<return_void_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx, result);
   return Status::OK();
 }
 
 Status ExecEngine::Execute(ExecContext& exec_ctx, void* entry_arguments, void* result) {
-  reinterpret_cast<return_i8_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx, result);
+  reinterpret_cast<return_void_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx, result);
   exec_ctx.Clear();
   return Status::OK();
 }
