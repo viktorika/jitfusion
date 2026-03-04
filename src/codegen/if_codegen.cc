@@ -50,7 +50,8 @@ Status CodeGen::Visit(IfNode &if_node) {
   ctx_.builder.SetInsertPoint(then_block);
   llvm::Value *then_value{};
   JF_RETURN_NOT_OK(GetValue(if_node.GetArgs()[1].get(), &then_value));
-  NumericTypeConvert(ctx_, if_node.GetArgs()[1]->GetReturnType(), if_node.GetReturnType(), &then_value);
+  JF_RETURN_NOT_OK(
+      NumericTypeConvert(ctx_, if_node.GetArgs()[1]->GetReturnType(), if_node.GetReturnType(), &then_value));
   ctx_.builder.CreateBr(merge_block);
 
   // 创建 else 块
@@ -59,7 +60,8 @@ Status CodeGen::Visit(IfNode &if_node) {
   ctx_.builder.SetInsertPoint(else_block);
   llvm::Value *else_value{};
   JF_RETURN_NOT_OK(GetValue(if_node.GetArgs()[2].get(), &else_value));
-  NumericTypeConvert(ctx_, if_node.GetArgs()[2]->GetReturnType(), if_node.GetReturnType(), &else_value);
+  JF_RETURN_NOT_OK(
+      NumericTypeConvert(ctx_, if_node.GetArgs()[2]->GetReturnType(), if_node.GetReturnType(), &else_value));
   ctx_.builder.CreateBr(merge_block);
 
   // 创建 merge 块
