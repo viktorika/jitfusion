@@ -36,7 +36,8 @@ Status CodeGen::Visit(SwitchNode &switch_node) {
     llvm::Value *tmp_value;
     if (prev_block == nullptr) {
       JF_RETURN_NOT_OK(GetValue(switch_node.GetArgs()[i].get(), &tmp_value));
-      NumericTypeConvert(ctx_, switch_node.GetArgs()[i]->GetReturnType(), switch_node.GetReturnType(), &tmp_value);
+      JF_RETURN_NOT_OK(
+          NumericTypeConvert(ctx_, switch_node.GetArgs()[i]->GetReturnType(), switch_node.GetReturnType(), &tmp_value));
       ctx_.builder.CreateRet(tmp_value);
     } else {
       JF_RETURN_NOT_OK(GetValue(switch_node.GetArgs()[i].get(), &cond_value));
@@ -57,7 +58,8 @@ Status CodeGen::Visit(SwitchNode &switch_node) {
       ctx_.entry_function = switch_func;
       ctx_.builder.SetInsertPoint(then_block);
       JF_RETURN_NOT_OK(GetValue(switch_node.GetArgs()[i + 1].get(), &tmp_value));
-      NumericTypeConvert(ctx_, switch_node.GetArgs()[i + 1]->GetReturnType(), switch_node.GetReturnType(), &tmp_value);
+      JF_RETURN_NOT_OK(NumericTypeConvert(ctx_, switch_node.GetArgs()[i + 1]->GetReturnType(),
+                                          switch_node.GetReturnType(), &tmp_value));
       ctx_.builder.CreateRet(tmp_value);
     }
     prev_block = switch_block;
