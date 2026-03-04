@@ -74,7 +74,7 @@ void Arena::Reset() {
   avail_bytes_ = total_bytes_ = chunks_.at(0).size_;
 }
 
-void Arena::ReleaseChunks(bool retain_first = true) {
+void Arena::ReleaseChunks(bool retain_first) {
   for (auto& chunk : chunks_) {
     if (retain_first) {
       // skip freeing first chunk.
