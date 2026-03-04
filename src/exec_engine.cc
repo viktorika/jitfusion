@@ -237,9 +237,7 @@ struct CommutativeCallCanonicalizerPass : public llvm::PassInfoMixin<Commutative
 
  private:
   static bool ShouldSwapArguments(llvm::Value* arg0, llvm::Value* arg1) {
-    auto name0 = arg0->getName();
-    auto name1 = arg1->getName();
-    return name0 > name1;
+    return std::greater<llvm::Value*>()(arg0, arg1);
   }
 };
 
