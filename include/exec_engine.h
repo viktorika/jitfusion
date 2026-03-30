@@ -47,15 +47,35 @@ class ExecEngine {
   Status Execute(void* entry_arguments, void* result);
   Status Execute(ExecContext& exec_ctx, void* entry_arguments, void* result);
 
+  // Batch compile multiple ASTs into separate functions within a single module.
+  // Each ExecNode can have any return type. All functions share the same JIT and memory pages.
+  Status BatchCompile(const std::vector<std::unique_ptr<ExecNode>>& exec_nodes,
+                      const std::unique_ptr<FunctionRegistry>& func_registry);
+  // Execute a specific batch-compiled function by index.
+  // For void return type functions (NoOPNode root), use the void* result overload.
+  Status ExecuteAt(size_t index, void* entry_arguments, RetType* result);
+  Status ExecuteAt(size_t index, ExecContext& exec_ctx, void* entry_arguments, RetType* result);
+  // For void return type functions only.
+  Status ExecuteAt(size_t index, void* entry_arguments, void* result);
+  Status ExecuteAt(size_t index, ExecContext& exec_ctx, void* entry_arguments, void* result);
+
+  [[nodiscard]] size_t GetBatchFunctionCount() const { return batch_entry_func_ptrs_.size(); }
+  [[nodiscard]] ValueType GetBatchFunctionReturnType(size_t index) const { return batch_ret_types_[index]; }
+
   [[nodiscard]] std::string_view GetIRCode() const { return ir_code_; }
 
  private:
+  Status CreateJitAndOptimize(const std::unique_ptr<FunctionRegistry>& func_registry,
+                              std::unique_ptr<llvm::Module> owner, std::unique_ptr<llvm::LLVMContext> llvm_context);
+
   Arena const_value_arena_;
   llvm::Expected<std::unique_ptr<llvm::orc::LLJIT>> jit_;
   char* entry_func_ptr_;
   ValueType ret_type_;
   ExecEngineOption option_;
   std::string ir_code_;
+  std::vector<char*> batch_entry_func_ptrs_;
+  std::vector<ValueType> batch_ret_types_;
 };
 
 }  // namespace jitfusion
