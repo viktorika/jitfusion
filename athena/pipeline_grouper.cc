@@ -2,11 +2,13 @@
  * @Author: victorika
  * @Date: 2026-03-30 19:23:34
  * @Last Modified by: victorika
- * @Last Modified time: 2026-03-31 11:36:52
+ * @Last Modified time: 2026-03-31 15:14:46
  */
 #include "pipeline_grouper.h"
 #include <status.h>
 #include <memory>
+#include <unordered_map>
+#include <vector>
 #include "dsu.h"
 
 namespace athena {
