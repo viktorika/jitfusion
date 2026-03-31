@@ -55,6 +55,10 @@ cc_library(
         "athena/parser.cc",
         "athena/parser.hh",
         "athena/token.cc",
+        "athena/dsu.cc",
+        "athena/dsu.h",
+        "athena/pipeline_grouper.cc",
+        "athena/pipeline_grouper.h",
     ],
     hdrs = [
         "athena/athena.h",

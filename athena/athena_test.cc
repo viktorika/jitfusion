@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-04-09 15:45:31
  * @Last Modified by: victorika
- * @Last Modified time: 2025-04-16 16:52:47
+ * @Last Modified time: 2026-03-31 15:11:34
  */
 #include "athena.h"
 #include <array>
@@ -1312,6 +1312,73 @@ TEST(CustomPassTest, CommutativeCallCanonicalizerPass2) {
   ASSERT_TRUE(athena.Execute(value.data(), &ret).ok());
   std::vector<int32_t> expect{10, 14, 18};
   EXPECT_EQ(std::get<std::vector<std::int32_t>>(ret), expect);
+}
+
+TEST(PipelineGrouperTest, ThreeGroupTest) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  }
+  {
+    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kVoid);
+    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
+  }
+
+  std::string code1 = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  r = a + b;
+  store(output, 0, r);
+  )";
+  std::string code2 = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  r = a * b;
+  store(output, 1, r);
+  )";
+
+  std::string code3 = R"(
+  c = load(entry_arg, 2);
+  d = load(entry_arg, 3);
+  r = c - d;
+  store(output, 2, r);
+  )";
+  std::string code4 = R"(
+  c = load(entry_arg, 2);
+  d = load(entry_arg, 3);
+  r = c / d;
+  store(output, 3, r);
+  )";
+
+  std::string code5 = R"(
+  e = load(entry_arg, 4);
+  f = load(entry_arg, 5);
+  r = max(e, f);
+  store(output, 4, r);
+  )";
+  std::string code6 = R"(
+  e = load(entry_arg, 4);
+  f = load(entry_arg, 5);
+  r = min(e, f);
+  store(output, 5, r);
+  )";
+
+  std::vector<std::string> codes = {code1, code2, code3, code4, code5, code6};
+  ASSERT_TRUE(athena.Compile(codes, func_registry).ok());
+
+  std::vector<float> value = {10, 3, 20, 4, 50, 7};
+  std::vector<float> output = {0, 0, 0, 0, 0, 0};
+  ASSERT_TRUE(athena.Execute(value.data(), output.data()).ok());
+
+  EXPECT_EQ(output[0], 10 + 3);
+  EXPECT_EQ(output[1], 10 * 3);
+  EXPECT_EQ(output[2], 20 - 4);
+  EXPECT_EQ(output[3], 20.0F / 4);
+  EXPECT_EQ(output[4], 50);
+  EXPECT_EQ(output[5], 7);
 }
 
 GTEST_API_ int main(int argc, char** argv) {

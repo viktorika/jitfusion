@@ -2,12 +2,13 @@
  * @Author: victorika
  * @Date: 2025-04-09 15:44:26
  * @Last Modified by: victorika
- * @Last Modified time: 2025-04-16 14:54:56
+ * @Last Modified time: 2026-03-31 14:56:54
  */
 #include "athena.h"
 #include "ast_builder.h"
 #include "exec_engine.h"
 #include "function_registry.h"
+#include "pipeline_grouper.h"
 #include "status.h"
 
 namespace athena {
@@ -27,15 +28,21 @@ Status Athena::Execute(ExecContext& exec_ctx, void* entry_arguments, RetType* re
 
 Status Athena::Compile(const std::vector<std::string>& code, const std::unique_ptr<FunctionRegistry>& func_registry) {
   ProgramAstBuilder ast_builder;
-  std::unique_ptr<ExecNode> program_ast;
-  JF_RETURN_NOT_OK(ast_builder.BuildProgram(code, &program_ast));
-  return exec_engine_.Compile(program_ast, func_registry);
+  std::vector<std::unique_ptr<ExecNode>> program_asts;
+  for (const auto& code_str : code) {
+    std::unique_ptr<ExecNode> program_ast;
+    JF_RETURN_NOT_OK(ast_builder.BuildProgram(code_str, &program_ast));
+    program_asts.emplace_back(std::move(program_ast));
+  }
+  PipelineGrouper pipeline_grouper;
+  std::vector<std::unique_ptr<ExecNode>> grouped_program_asts = pipeline_grouper.Group(program_asts);
+  return exec_engine_.BatchCompile(grouped_program_asts, func_registry);
 }
 
-Status Athena::Execute(void* entry_arguments, void* result) { return exec_engine_.Execute(entry_arguments, result); }
+Status Athena::Execute(void* entry_arguments, void* result) { return exec_engine_.ExecuteAll(entry_arguments, result); }
 
 Status Athena::Execute(ExecContext& exec_ctx, void* entry_arguments, void* result) {
-  return exec_engine_.Execute(exec_ctx, entry_arguments, result);
+  return exec_engine_.ExecuteAll(exec_ctx, entry_arguments, result);
 }
 
 }  // namespace athena
