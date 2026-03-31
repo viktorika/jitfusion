@@ -64,7 +64,12 @@ file(GLOB_RECURSE ATHENA_SRC
     "athena/location.hh"
     "athena/parser.cc"
     "athena/parser.hh"
-    "athena/token.cc")
+    "athena/token.cc"
+    "athena/dsu.cc"
+    "athena/dsu.h"
+    "athena/pipeline_grouper.cc"
+    "athena/pipeline_grouper.h"
+)
 
 add_library(athena ${ATHENA_SRC})
 target_include_directories(jitfusion PUBLIC athena)
