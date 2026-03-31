@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-15 10:59:33
  * @Last Modified by: victorika
- * @Last Modified time: 2025-04-16 16:49:31
+ * @Last Modified time: 2026-03-31 14:51:40
  */
 #include "exec_engine.h"
 #include <memory>
@@ -586,6 +586,33 @@ Status ExecEngine::ExecuteAt(size_t index, ExecContext& exec_ctx, void* entry_ar
   }
   reinterpret_cast<return_void_function_type>(batch_entry_func_ptrs_[index])(entry_arguments, &exec_ctx, result);
   exec_ctx.Clear();
+  return Status::OK();
+}
+
+Status ExecEngine::ExecuteAll(void* entry_arguments, std::vector<RetType>* results) {
+  results->resize(batch_entry_func_ptrs_.size());
+  for (size_t i = 0; i < batch_entry_func_ptrs_.size(); ++i) {
+    JF_RETURN_NOT_OK(ExecuteAt(i, entry_arguments, &(*results)[i]));
+  }
+  return Status::OK();
+}
+Status ExecEngine::ExecuteAll(ExecContext& exec_ctx, void* entry_arguments, std::vector<RetType>* results) {
+  results->resize(batch_entry_func_ptrs_.size());
+  for (size_t i = 0; i < batch_entry_func_ptrs_.size(); ++i) {
+    JF_RETURN_NOT_OK(ExecuteAt(i, exec_ctx, entry_arguments, &(*results)[i]));
+  }
+  return Status::OK();
+}
+Status ExecEngine::ExecuteAll(void* entry_arguments, void* results) {
+  for (size_t i = 0; i < batch_entry_func_ptrs_.size(); ++i) {
+    JF_RETURN_NOT_OK(ExecuteAt(i, entry_arguments, results));
+  }
+  return Status::OK();
+}
+Status ExecEngine::ExecuteAll(ExecContext& exec_ctx, void* entry_arguments, void* results) {
+  for (size_t i = 0; i < batch_entry_func_ptrs_.size(); ++i) {
+    JF_RETURN_NOT_OK(ExecuteAt(i, exec_ctx, entry_arguments, results));
+  }
   return Status::OK();
 }
 

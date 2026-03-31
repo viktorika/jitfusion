@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-15 10:48:46
  * @Last Modified by: victorika
- * @Last Modified time: 2025-04-16 11:32:08
+ * @Last Modified time: 2026-03-31 14:45:31
  */
 #pragma once
 
@@ -58,6 +58,12 @@ class ExecEngine {
   // For void return type functions only.
   Status ExecuteAt(size_t index, void* entry_arguments, void* result);
   Status ExecuteAt(size_t index, ExecContext& exec_ctx, void* entry_arguments, void* result);
+  // Execute all batch-compiled functions.
+  Status ExecuteAll(void* entry_arguments, std::vector<RetType>* results);
+  Status ExecuteAll(ExecContext& exec_ctx, void* entry_arguments, std::vector<RetType>* results);
+  // For void return type functions only.
+  Status ExecuteAll(void* entry_arguments, void* results);
+  Status ExecuteAll(ExecContext& exec_ctx, void* entry_arguments, void* results);
 
   [[nodiscard]] size_t GetBatchFunctionCount() const { return batch_entry_func_ptrs_.size(); }
   [[nodiscard]] ValueType GetBatchFunctionReturnType(size_t index) const { return batch_ret_types_[index]; }
