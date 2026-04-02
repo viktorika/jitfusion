@@ -134,9 +134,9 @@ TEST(ConstValueTest, ListMergeOptimizeTest) {
   std::string code = R"(
   a = [1, 2, 3];
   b = [1, 2, 3];
-  c = ListAddWithMinSize(a, b, exec_ctx);
-  d = ListAddWithMinSize(b, a, exec_ctx);
-  e = ListAddWithMinSize(c, d, exec_ctx);
+  c = ListAdd(a, b, exec_ctx);
+  d = ListAdd(b, a, exec_ctx);
+  e = ListAdd(c, d, exec_ctx);
   )";
   ASSERT_TRUE(athena.Compile(code, func_registry).ok());
   RetType ret;
@@ -1301,9 +1301,9 @@ TEST(CustomPassTest, CommutativeCallCanonicalizerPass1) {
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
-  c = ListAddWithMinSize(a, b, exec_ctx);
-  d = ListAddWithMinSize(b, a, exec_ctx);
-  e = ListAddWithMinSize(c, d, exec_ctx);
+  c = ListAdd(a, b, exec_ctx);
+  d = ListAdd(b, a, exec_ctx);
+  e = ListAdd(c, d, exec_ctx);
   )";
   ASSERT_TRUE(athena.Compile(code, func_registry).ok());
   RetType ret;
@@ -1322,9 +1322,9 @@ TEST(CustomPassTest, CommutativeCallCanonicalizerPass2) {
   std::string code = R"(
   a = [1, 2, 3];
   b = [4, 5, 6];
-  c = ListAddWithMinSize(a, b, exec_ctx);
-  d = ListAddWithMinSize(b, a, exec_ctx);
-  e = ListAddWithMinSize(c, d, exec_ctx);
+  c = ListAdd(a, b, exec_ctx);
+  d = ListAdd(b, a, exec_ctx);
+  e = ListAdd(c, d, exec_ctx);
   )";
   ASSERT_TRUE(athena.Compile(code, func_registry).ok());
   RetType ret;

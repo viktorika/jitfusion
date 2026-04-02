@@ -434,19 +434,18 @@ Return a new list after adding a number to all elements in the list.
     f32list ListAdd(f32list src, f32 add, ptr exec_ctx)
     f64list ListAdd(f64list src, f64 add, ptr exec_ctx)
 
-## ListAddWithMinSize
-Add two lists and return a new list, taking the smaller length.
+Add two lists element-wise and return a new list. Both lists must have equal length.
 
-    u8list  ListAddWithMinSize(u8list lhs, u8list rhs, ptr exec_ctx)
-    u16list ListAddWithMinSize(u16list lhs, u16list rhs, ptr exec_ctx)
-    u32list ListAddWithMinSize(u32list lhs, u32list rhs, ptr exec_ctx)
-    u64list ListAddWithMinSize(u64list lhs, u64list rhs, ptr exec_ctx)
-    i8list  ListAddWithMinSize(i8list lhs, i8list rhs, ptr exec_ctx)
-    i16list ListAddWithMinSize(i16list lhs, i16list rhs, ptr exec_ctx)
-    i32list ListAddWithMinSize(i32list lhs, i32list rhs, ptr exec_ctx)
-    i64list ListAddWithMinSize(i64list lhs, i64list rhs, ptr exec_ctx)
-    f32list ListAddWithMinSize(f32list lhs, f32list rhs, ptr exec_ctx)
-    f64list ListAddWithMinSize(f64list lhs, f64list rhs, ptr exec_ctx)
+    u8list  ListAdd(u8list lhs, u8list rhs, ptr exec_ctx)
+    u16list ListAdd(u16list lhs, u16list rhs, ptr exec_ctx)
+    u32list ListAdd(u32list lhs, u32list rhs, ptr exec_ctx)
+    u64list ListAdd(u64list lhs, u64list rhs, ptr exec_ctx)
+    i8list  ListAdd(i8list lhs, i8list rhs, ptr exec_ctx)
+    i16list ListAdd(i16list lhs, i16list rhs, ptr exec_ctx)
+    i32list ListAdd(i32list lhs, i32list rhs, ptr exec_ctx)
+    i64list ListAdd(i64list lhs, i64list rhs, ptr exec_ctx)
+    f32list ListAdd(f32list lhs, f32list rhs, ptr exec_ctx)
+    f64list ListAdd(f64list lhs, f64list rhs, ptr exec_ctx)
 
 ## ListSub
 Return a new list after subtracting a number to all elements in the list.
@@ -462,19 +461,18 @@ Return a new list after subtracting a number to all elements in the list.
     f32list ListSub(f32list lhs, f32 rhs, ptr exec_ctx)
     f64list ListSub(f64list lhs, f64 rhs, ptr exec_ctx)
 
-## ListSubWithMinSize
-Subtract two lists and return a new list, taking the smaller length.
+Subtract two lists element-wise and return a new list. Both lists must have equal length.
 
-    u8list  ListSubWithMinSize(u8list lhs, u8list rhs, ptr exec_ctx)
-    u16list ListSubWithMinSize(u16list lhs, u16list rhs, ptr exec_ctx)
-    u32list ListSubWithMinSize(u32list lhs, u32list rhs, ptr exec_ctx)
-    u64list ListSubWithMinSize(u64list lhs, u64list rhs, ptr exec_ctx)
-    i8list  ListSubWithMinSize(i8list lhs, i8list rhs, ptr exec_ctx)
-    i16list ListSubWithMinSize(i16list lhs, i16list rhs, ptr exec_ctx)
-    i32list ListSubWithMinSize(i32list lhs, i32list rhs, ptr exec_ctx)
-    i64list ListSubWithMinSize(i64list lhs, i64list rhs, ptr exec_ctx)
-    f32list ListSubWithMinSize(f32list lhs, f32list rhs, ptr exec_ctx)
-    f64list ListSubWithMinSize(f64list lhs, f64list rhs, ptr exec_ctx)
+    u8list  ListSub(u8list lhs, u8list rhs, ptr exec_ctx)
+    u16list ListSub(u16list lhs, u16list rhs, ptr exec_ctx)
+    u32list ListSub(u32list lhs, u32list rhs, ptr exec_ctx)
+    u64list ListSub(u64list lhs, u64list rhs, ptr exec_ctx)
+    i8list  ListSub(i8list lhs, i8list rhs, ptr exec_ctx)
+    i16list ListSub(i16list lhs, i16list rhs, ptr exec_ctx)
+    i32list ListSub(i32list lhs, i32list rhs, ptr exec_ctx)
+    i64list ListSub(i64list lhs, i64list rhs, ptr exec_ctx)
+    f32list ListSub(f32list lhs, f32list rhs, ptr exec_ctx)
+    f64list ListSub(f64list lhs, f64list rhs, ptr exec_ctx)
 
 ## ListMul
 Return a new list after multiplying all elements in the list by a number.
@@ -490,19 +488,18 @@ Return a new list after multiplying all elements in the list by a number.
     f32list ListMul(f32list lhs, f32 rhs, ptr exec_ctx)
     f64list ListMul(f64list lhs, f64 rhs, ptr exec_ctx)
 
-## ListMulWithMinSize
-Multiply two lists and return a new list, taking the smaller length.
+Multiply two lists element-wise and return a new list. Both lists must have equal length.
 
-    u8list  ListMulWithMinSize(u8list lhs, u8list rhs, ptr exec_ctx)
-    u16list ListMulWithMinSize(u16list lhs, u16list rhs, ptr exec_ctx)
-    u32list ListMulWithMinSize(u32list lhs, u32list rhs, ptr exec_ctx)
-    u64list ListMulWithMinSize(u64list lhs, u64list rhs, ptr exec_ctx)
-    i8list  ListMulWithMinSize(i8list lhs, i8list rhs, ptr exec_ctx)
-    i16list ListMulWithMinSize(i16list lhs, i16list rhs, ptr exec_ctx)
-    i32list ListMulWithMinSize(i32list lhs, i32list rhs, ptr exec_ctx)
-    i64list ListMulWithMinSize(i64list lhs, i64list rhs, ptr exec_ctx)
-    f32list ListMulWithMinSize(f32list lhs, f32list rhs, ptr exec_ctx)
-    f64list ListMulWithMinSize(f64list lhs, f64list rhs, ptr exec_ctx)
+    u8list  ListMul(u8list lhs, u8list rhs, ptr exec_ctx)
+    u16list ListMul(u16list lhs, u16list rhs, ptr exec_ctx)
+    u32list ListMul(u32list lhs, u32list rhs, ptr exec_ctx)
+    u64list ListMul(u64list lhs, u64list rhs, ptr exec_ctx)
+    i8list  ListMul(i8list lhs, i8list rhs, ptr exec_ctx)
+    i16list ListMul(i16list lhs, i16list rhs, ptr exec_ctx)
+    i32list ListMul(i32list lhs, i32list rhs, ptr exec_ctx)
+    i64list ListMul(i64list lhs, i64list rhs, ptr exec_ctx)
+    f32list ListMul(f32list lhs, f32list rhs, ptr exec_ctx)
+    f64list ListMul(f64list lhs, f64list rhs, ptr exec_ctx)
 
 # ListDiv
 Return a new list after dividing all elements in the list by a number.
@@ -518,19 +515,18 @@ Return a new list after dividing all elements in the list by a number.
     f32list ListDiv(f32list lhs, f32 rhs, ptr exec_ctx)
     f64list ListDiv(f64list lhs, f64 rhs, ptr exec_ctx)
 
-## ListDivWithMinSize
-Divide two lists and return a new list, taking the smaller length.
+Divide two lists element-wise and return a new list. Both lists must have equal length.
 
-    u8list  ListDivWithMinSize(u8list lhs, u8list rhs, ptr exec_ctx)
-    u16list ListDivWithMinSize(u16list lhs, u16list rhs, ptr exec_ctx)
-    u32list ListDivWithMinSize(u32list lhs, u32list rhs, ptr exec_ctx)
-    u64list ListDivWithMinSize(u64list lhs, u64list rhs, ptr exec_ctx)
-    i8list  ListDivWithMinSize(i8list lhs, i8list rhs, ptr exec_ctx)
-    i16list ListDivWithMinSize(i16list lhs, i16list rhs, ptr exec_ctx)
-    i32list ListDivWithMinSize(i32list lhs, i32list rhs, ptr exec_ctx)
-    i64list ListDivWithMinSize(i64list lhs, i64list rhs, ptr exec_ctx)
-    f32list ListDivWithMinSize(f32list lhs, f32list rhs, ptr exec_ctx)
-    f64list ListDivWithMinSize(f64list lhs, f64list rhs, ptr exec_ctx)
+    u8list  ListDiv(u8list lhs, u8list rhs, ptr exec_ctx)
+    u16list ListDiv(u16list lhs, u16list rhs, ptr exec_ctx)
+    u32list ListDiv(u32list lhs, u32list rhs, ptr exec_ctx)
+    u64list ListDiv(u64list lhs, u64list rhs, ptr exec_ctx)
+    i8list  ListDiv(i8list lhs, i8list rhs, ptr exec_ctx)
+    i16list ListDiv(i16list lhs, i16list rhs, ptr exec_ctx)
+    i32list ListDiv(i32list lhs, i32list rhs, ptr exec_ctx)
+    i64list ListDiv(i64list lhs, i64list rhs, ptr exec_ctx)
+    f32list ListDiv(f32list lhs, f32list rhs, ptr exec_ctx)
+    f64list ListDiv(f64list lhs, f64list rhs, ptr exec_ctx)
 
 ## ListMod
 Return a new list after applying the modulus operation to all elements in the list with a given number.
@@ -546,19 +542,16 @@ Return a new list after applying the modulus operation to all elements in the li
     f32list ListMod(f32list lhs, f32 rhs, ptr exec_ctx)
     f64list ListMod(f64list lhs, f64 rhs, ptr exec_ctx)
 
-## ListModWithMinSize
-Applying the modulus operation of two lists and return a new list, using the smaller length.
+Apply the modulus operation element-wise on two lists and return a new list. Both lists must have equal length.
 
-    u8list  ListModWithMinSize(u8list lhs, u8 rhs, ptr exec_ctx)
-    u16list ListModWithMinSize(u16list lhs, u16 rhs, ptr exec_ctx)
-    u32list ListModWithMinSize(u32list lhs, u32 rhs, ptr exec_ctx)
-    u64list ListModWithMinSize(u64list lhs, u64 rhs, ptr exec_ctx)
-    i8list  ListModWithMinSize(i8list lhs, i8 rhs, ptr exec_ctx)
-    i16list ListModWithMinSize(i16list lhs, i16 rhs, ptr exec_ctx)
-    i32list ListModWithMinSize(i32list lhs, i32 rhs, ptr exec_ctx)
-    i64list ListModWithMinSize(i64list lhs, i64 rhs, ptr exec_ctx)
-    f32list ListModWithMinSize(f32list lhs, f32 rhs, ptr exec_ctx)
-    f64list ListModWithMinSize(f64list lhs, f64 rhs, ptr exec_ctx)
+    u8list  ListMod(u8list lhs, u8list rhs, ptr exec_ctx)
+    u16list ListMod(u16list lhs, u16list rhs, ptr exec_ctx)
+    u32list ListMod(u32list lhs, u32list rhs, ptr exec_ctx)
+    u64list ListMod(u64list lhs, u64list rhs, ptr exec_ctx)
+    i8list  ListMod(i8list lhs, i8list rhs, ptr exec_ctx)
+    i16list ListMod(i16list lhs, i16list rhs, ptr exec_ctx)
+    i32list ListMod(i32list lhs, i32list rhs, ptr exec_ctx)
+    i64list ListMod(i64list lhs, i64list rhs, ptr exec_ctx)
 
 ## ListBitwiseAnd
 Return a new list after performing a bitwise AND operation between all elements in the list and a given number.
@@ -574,19 +567,16 @@ Return a new list after performing a bitwise AND operation between all elements 
     f32list ListBitwiseAnd(f32list lhs, f32 rhs, ptr exec_ctx)
     f64list ListBitwiseAnd(f64list lhs, f64 rhs, ptr exec_ctx)
 
-## ListBitwiseAndWithMinSize
-Perform a bitwise AND operation between two lists and return a new list, using the smaller length.
+Perform a bitwise AND operation element-wise on two lists and return a new list. Both lists must have equal length.
 
-    u8list  ListBitwiseAndWithMinSize(u8list lhs, u8 rhs, ptr exec_ctx)
-    u16list ListBitwiseAndWithMinSize(u16list lhs, u16 rhs, ptr exec_ctx)
-    u32list ListBitwiseAndWithMinSize(u32list lhs, u32 rhs, ptr exec_ctx)
-    u64list ListBitwiseAndWithMinSize(u64list lhs, u64 rhs, ptr exec_ctx)
-    i8list  ListBitwiseAndWithMinSize(i8list lhs, i8 rhs, ptr exec_ctx)
-    i16list ListBitwiseAndWithMinSize(i16list lhs, i16 rhs, ptr exec_ctx)
-    i32list ListBitwiseAndWithMinSize(i32list lhs, i32 rhs, ptr exec_ctx)
-    i64list ListBitwiseAndWithMinSize(i64list lhs, i64 rhs, ptr exec_ctx)
-    f32list ListBitwiseAndWithMinSize(f32list lhs, f32 rhs, ptr exec_ctx)
-    f64list ListBitwiseAndWithMinSize(f64list lhs, f64 rhs, ptr exec_ctx)
+    u8list  ListBitwiseAnd(u8list lhs, u8list rhs, ptr exec_ctx)
+    u16list ListBitwiseAnd(u16list lhs, u16list rhs, ptr exec_ctx)
+    u32list ListBitwiseAnd(u32list lhs, u32list rhs, ptr exec_ctx)
+    u64list ListBitwiseAnd(u64list lhs, u64list rhs, ptr exec_ctx)
+    i8list  ListBitwiseAnd(i8list lhs, i8list rhs, ptr exec_ctx)
+    i16list ListBitwiseAnd(i16list lhs, i16list rhs, ptr exec_ctx)
+    i32list ListBitwiseAnd(i32list lhs, i32list rhs, ptr exec_ctx)
+    i64list ListBitwiseAnd(i64list lhs, i64list rhs, ptr exec_ctx)
 
 ## ListBitwiseOr
 Return a new list after performing a bitwise OR operation between all elements in the list and a given number.
@@ -602,19 +592,16 @@ Return a new list after performing a bitwise OR operation between all elements i
     f32list ListBitwiseOr(f32list lhs, f32 rhs, ptr exec_ctx)
     f64list ListBitwiseOr(f64list lhs, f64 rhs, ptr exec_ctx)
 
-## ListBitwiseOrWithMinSize
-Perform a bitwise OR operation between two lists and return a new list, using the smaller length.
+Perform a bitwise OR operation element-wise on two lists and return a new list. Both lists must have equal length.
 
-    u8list  ListBitwiseOrWithMinSize(u8list lhs, u8 rhs, ptr exec_ctx)
-    u16list ListBitwiseOrWithMinSize(u16list lhs, u16 rhs, ptr exec_ctx)
-    u32list ListBitwiseOrWithMinSize(u32list lhs, u32 rhs, ptr exec_ctx)
-    u64list ListBitwiseOrWithMinSize(u64list lhs, u64 rhs, ptr exec_ctx)
-    i8list  ListBitwiseOrWithMinSize(i8list lhs, i8 rhs, ptr exec_ctx)
-    i16list ListBitwiseOrWithMinSize(i16list lhs, i16 rhs, ptr exec_ctx)
-    i32list ListBitwiseOrWithMinSize(i32list lhs, i32 rhs, ptr exec_ctx)
-    i64list ListBitwiseOrWithMinSize(i64list lhs, i64 rhs, ptr exec_ctx)
-    f32list ListBitwiseOrWithMinSize(f32list lhs, f32 rhs, ptr exec_ctx)
-    f64list ListBitwiseOrWithMinSize(f64list lhs, f64 rhs, ptr exec_ctx)
+    u8list  ListBitwiseOr(u8list lhs, u8list rhs, ptr exec_ctx)
+    u16list ListBitwiseOr(u16list lhs, u16list rhs, ptr exec_ctx)
+    u32list ListBitwiseOr(u32list lhs, u32list rhs, ptr exec_ctx)
+    u64list ListBitwiseOr(u64list lhs, u64list rhs, ptr exec_ctx)
+    i8list  ListBitwiseOr(i8list lhs, i8list rhs, ptr exec_ctx)
+    i16list ListBitwiseOr(i16list lhs, i16list rhs, ptr exec_ctx)
+    i32list ListBitwiseOr(i32list lhs, i32list rhs, ptr exec_ctx)
+    i64list ListBitwiseOr(i64list lhs, i64list rhs, ptr exec_ctx)
 
 ## ListBitwiseXor
 Return a new list after performing a bitwise XOR operation between all elements in the list and a given number.
@@ -630,19 +617,16 @@ Return a new list after performing a bitwise XOR operation between all elements 
     f32list ListBitwiseXor(f32list lhs, f32 rhs, ptr exec_ctx)
     f64list ListBitwiseXor(f64list lhs, f64 rhs, ptr exec_ctx)
 
-## ListBitwiseXorWithMinSize
-Perform a bitwise XOR operation between two lists and return a new list, using the smaller length.
+Perform a bitwise XOR operation element-wise on two lists and return a new list. Both lists must have equal length.
 
-    u8list  ListBitwiseXorWithMinSize(u8list lhs, u8 rhs, ptr exec_ctx)
-    u16list ListBitwiseXorWithMinSize(u16list lhs, u16 rhs, ptr exec_ctx)
-    u32list ListBitwiseXorWithMinSize(u32list lhs, u32 rhs, ptr exec_ctx)
-    u64list ListBitwiseXorWithMinSize(u64list lhs, u64 rhs, ptr exec_ctx)
-    i8list  ListBitwiseXorWithMinSize(i8list lhs, i8 rhs, ptr exec_ctx)
-    i16list ListBitwiseXorWithMinSize(i16list lhs, i16 rhs, ptr exec_ctx)
-    i32list ListBitwiseXorWithMinSize(i32list lhs, i32 rhs, ptr exec_ctx)
-    i64list ListBitwiseXorWithMinSize(i64list lhs, i64 rhs, ptr exec_ctx)
-    f32list ListBitwiseXorWithMinSize(f32list lhs, f32 rhs, ptr exec_ctx)
-    f64list ListBitwiseXorWithMinSize(f64list lhs, f64 rhs, ptr exec_ctx)
+    u8list  ListBitwiseXor(u8list lhs, u8list rhs, ptr exec_ctx)
+    u16list ListBitwiseXor(u16list lhs, u16list rhs, ptr exec_ctx)
+    u32list ListBitwiseXor(u32list lhs, u32list rhs, ptr exec_ctx)
+    u64list ListBitwiseXor(u64list lhs, u64list rhs, ptr exec_ctx)
+    i8list  ListBitwiseXor(i8list lhs, i8list rhs, ptr exec_ctx)
+    i16list ListBitwiseXor(i16list lhs, i16list rhs, ptr exec_ctx)
+    i32list ListBitwiseXor(i32list lhs, i32list rhs, ptr exec_ctx)
+    i64list ListBitwiseXor(i64list lhs, i64list rhs, ptr exec_ctx)
 
 ## ListExp
 Return a new list after performing the exp operation on all elements in the list.
