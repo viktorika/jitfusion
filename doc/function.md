@@ -22,7 +22,7 @@ Computes the natural (base-e) logarithm of num.
     f64 log(u32)
     f64 log(u64)
     f32 log(f32)
-    f32 log(f64)
+    f64 log(f64)
 
 ## log2
 Computes the binary (base-2) logarithm of num.
@@ -38,7 +38,7 @@ Computes the binary (base-2) logarithm of num.
 Computes the common (base-10) logarithm of num. 
 
     f64 log10(i32)
-    f64 log10(f64)
+    f64 log10(i64)
     f64 log10(u32)
     f64 log10(u64)
     f32 log10(f32)
@@ -501,9 +501,8 @@ Multiply two lists element-wise and return a new list. Both lists must have equa
     f32list ListMul(f32list lhs, f32list rhs, ptr exec_ctx)
     f64list ListMul(f64list lhs, f64list rhs, ptr exec_ctx)
 
-# ListDiv
-Return a new list after dividing all elements in the list by a number.
-
+## ListDiv
+Return a new list after dividing all elements in the list by a given number.
     u8list  ListDiv(u8list lhs, u8 rhs, ptr exec_ctx)
     u16list ListDiv(u16list lhs, u16 rhs, ptr exec_ctx)
     u32list ListDiv(u32list lhs, u32 rhs, ptr exec_ctx)
@@ -539,8 +538,6 @@ Return a new list after applying the modulus operation to all elements in the li
     i16list ListMod(i16list lhs, i16 rhs, ptr exec_ctx)
     i32list ListMod(i32list lhs, i32 rhs, ptr exec_ctx)
     i64list ListMod(i64list lhs, i64 rhs, ptr exec_ctx)
-    f32list ListMod(f32list lhs, f32 rhs, ptr exec_ctx)
-    f64list ListMod(f64list lhs, f64 rhs, ptr exec_ctx)
 
 Apply the modulus operation element-wise on two lists and return a new list. Both lists must have equal length.
 
@@ -564,8 +561,6 @@ Return a new list after performing a bitwise AND operation between all elements 
     i16list ListBitwiseAnd(i16list lhs, i16 rhs, ptr exec_ctx)
     i32list ListBitwiseAnd(i32list lhs, i32 rhs, ptr exec_ctx)
     i64list ListBitwiseAnd(i64list lhs, i64 rhs, ptr exec_ctx)
-    f32list ListBitwiseAnd(f32list lhs, f32 rhs, ptr exec_ctx)
-    f64list ListBitwiseAnd(f64list lhs, f64 rhs, ptr exec_ctx)
 
 Perform a bitwise AND operation element-wise on two lists and return a new list. Both lists must have equal length.
 
@@ -589,8 +584,6 @@ Return a new list after performing a bitwise OR operation between all elements i
     i16list ListBitwiseOr(i16list lhs, i16 rhs, ptr exec_ctx)
     i32list ListBitwiseOr(i32list lhs, i32 rhs, ptr exec_ctx)
     i64list ListBitwiseOr(i64list lhs, i64 rhs, ptr exec_ctx)
-    f32list ListBitwiseOr(f32list lhs, f32 rhs, ptr exec_ctx)
-    f64list ListBitwiseOr(f64list lhs, f64 rhs, ptr exec_ctx)
 
 Perform a bitwise OR operation element-wise on two lists and return a new list. Both lists must have equal length.
 
@@ -614,8 +607,6 @@ Return a new list after performing a bitwise XOR operation between all elements 
     i16list ListBitwiseXor(i16list lhs, i16 rhs, ptr exec_ctx)
     i32list ListBitwiseXor(i32list lhs, i32 rhs, ptr exec_ctx)
     i64list ListBitwiseXor(i64list lhs, i64 rhs, ptr exec_ctx)
-    f32list ListBitwiseXor(f32list lhs, f32 rhs, ptr exec_ctx)
-    f64list ListBitwiseXor(f64list lhs, f64 rhs, ptr exec_ctx)
 
 Perform a bitwise XOR operation element-wise on two lists and return a new list. Both lists must have equal length.
 
@@ -744,7 +735,7 @@ Return a bitmap representation after performing a greater-than comparison on all
     u8list GenLargeBitmap(f32list, f32, ptr exec_ctx)
     u8list GenLargeBitmap(f64list, f64, ptr exec_ctx)
 
-Return a bitmap representing the results of greater-than comparisons for each element in the two lists, with the length being the minimum of the two lists.
+Return a bitmap representing the results of greater-than comparisons for each element in the two lists. Both lists must have equal length.
 
     u8list GenLargeBitmap(u8list, u8list, ptr exec_ctx)
     u8list GenLargeBitmap(u16list, u16list, ptr exec_ctx)
@@ -771,7 +762,7 @@ Return a bitmap representation after performing a greater-than or equal comparis
     u8list GenLargeEqualBitmap(f32list, f32, ptr exec_ctx)
     u8list GenLargeEqualBitmap(f64list, f64, ptr exec_ctx)
 
-Return a bitmap representing the results of greater-than or equal comparisons for each element in the two lists, with the length being the minimum of the two lists.
+Return a bitmap representing the results of greater-than or equal comparisons for each element in the two lists. Both lists must have equal length.
 
     u8list GenLargeEqualBitmap(u8list, u8list, ptr exec_ctx)
     u8list GenLargeEqualBitmap(u16list, u16list, ptr exec_ctx)
@@ -798,7 +789,7 @@ Return a bitmap representation after performing a equal comparison on all elemen
     u8list GenEqualBitmap(f32list, f32, ptr exec_ctx)
     u8list GenEqualBitmap(f64list, f64, ptr exec_ctx)
 
-Return a bitmap representing the results of equal comparisons for each element in the two lists, with the length being the minimum of the two lists.
+Return a bitmap representing the results of equal comparisons for each element in the two lists. Both lists must have equal length.
 
     u8list GenEqualBitmap(u8list, u8list, ptr exec_ctx)
     u8list GenEqualBitmap(u16list, u16list, ptr exec_ctx)
@@ -825,7 +816,7 @@ Return a bitmap representation after performing a less-than comparison on all el
     u8list GenLessBitmap(f32list, f32, ptr exec_ctx)
     u8list GenLessBitmap(f64list, f64, ptr exec_ctx)
 
-Return a bitmap representing the results of less-than comparisons for each element in the two lists, with the length being the minimum of the two lists.
+Return a bitmap representing the results of less-than comparisons for each element in the two lists. Both lists must have equal length.
 
     u8list GenLessBitmap(u8list, u8list, ptr exec_ctx)
     u8list GenLessBitmap(u16list, u16list, ptr exec_ctx)
@@ -852,7 +843,7 @@ Return a bitmap representation after performing a less-than or equal comparison 
     u8list GenLessEqualBitmap(f32list, f32, ptr exec_ctx)
     u8list GenLessEqualBitmap(f64list, f64, ptr exec_ctx)
 
-Return a bitmap representing the results of less-than or equal comparisons for each element in the two lists, with the length being the minimum of the two lists.
+Return a bitmap representing the results of less-than or equal comparisons for each element in the two lists. Both lists must have equal length.
 
     u8list GenLessEqualBitmap(u8list, u8list, ptr exec_ctx)
     u8list GenLessEqualBitmap(u16list, u16list, ptr exec_ctx)
@@ -879,7 +870,7 @@ Return a bitmap representation after performing a not equal comparison on all el
     u8list GenNotEqualBitmap(f32list, f32, ptr exec_ctx)
     u8list GenNotEqualBitmap(f64list, f64, ptr exec_ctx)
 
-Return a bitmap representing the results of not equal comparisons for each element in the two lists, with the length being the minimum of the two lists.
+Return a bitmap representing the results of not equal comparisons for each element in the two lists. Both lists must have equal length.
 
     u8list GenNotEqualBitmap(u8list, u8list, ptr exec_ctx)
     u8list GenNotEqualBitmap(u16list, u16list, ptr exec_ctx)
