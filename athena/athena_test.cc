@@ -1271,6 +1271,27 @@ TEST(FilterTest, Test1) {
   EXPECT_EQ(std::get<std::vector<std::int32_t>>(ret), expect);
 }
 
+TEST(FilterTest, Test2) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32List);
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadI32List)).ok());
+  std::string code = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  c = GenLargeBitmap(a, b, exec_ctx);
+  FilterByBitmap(a, c, CountBits(c), exec_ctx);
+  )";
+  ASSERT_TRUE(athena.Compile(code, func_registry).ok());
+  RetType ret;
+  std::array<std::vector<int32_t>, 2> value = {std::vector<int32_t>{0, 1, 2, 3, 4, 0, 1, 4, 9, 16},
+                                               std::vector<int32_t>{3, 3, 3, 3, 3, 3, 3, 3, 3, 3}};
+  ASSERT_TRUE(athena.Execute(value.data(), &ret).ok());
+  std::vector<int32_t> expect{4, 4, 9, 16};
+  EXPECT_EQ(std::get<std::vector<std::int32_t>>(ret), expect);
+}
+
 TEST(CustomPassTest, CommutativeCallCanonicalizerPass1) {
   Athena athena;
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1291,7 +1312,6 @@ TEST(CustomPassTest, CommutativeCallCanonicalizerPass1) {
   std::vector<int32_t> expect{10, 14, 18};
   EXPECT_EQ(std::get<std::vector<std::int32_t>>(ret), expect);
 }
-
 
 TEST(CustomPassTest, CommutativeCallCanonicalizerPass2) {
   Athena athena;

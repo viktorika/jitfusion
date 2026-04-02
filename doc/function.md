@@ -760,19 +760,18 @@ Return a bitmap representation after performing a greater-than comparison on all
     u8list GenLargeBitmap(f32list, f32, ptr exec_ctx)
     u8list GenLargeBitmap(f64list, f64, ptr exec_ctx)
 
-## GenLargeBitmapWithMinSize
 Return a bitmap representing the results of greater-than comparisons for each element in the two lists, with the length being the minimum of the two lists.
 
-    u8list GenLargeBitmapWithMinSize(u8list, u8list, ptr exec_ctx)
-    u8list GenLargeBitmapWithMinSize(u16list, u16list, ptr exec_ctx)
-    u8list GenLargeBitmapWithMinSize(u32list, u32list, ptr exec_ctx)
-    u8list GenLargeBitmapWithMinSize(u64list, u64list, ptr exec_ctx)
-    u8list GenLargeBitmapWithMinSize(i8list, i8list, ptr exec_ctx)
-    u8list GenLargeBitmapWithMinSize(i16list, i16list, ptr exec_ctx)
-    u8list GenLargeBitmapWithMinSize(i32list, i32list, ptr exec_ctx)
-    u8list GenLargeBitmapWithMinSize(i64list, i64list, ptr exec_ctx)
-    u8list GenLargeBitmapWithMinSize(f32list, f32list, ptr exec_ctx)
-    u8list GenLargeBitmapWithMinSize(f64list, f64list, ptr exec_ctx)
+    u8list GenLargeBitmap(u8list, u8list, ptr exec_ctx)
+    u8list GenLargeBitmap(u16list, u16list, ptr exec_ctx)
+    u8list GenLargeBitmap(u32list, u32list, ptr exec_ctx)
+    u8list GenLargeBitmap(u64list, u64list, ptr exec_ctx)
+    u8list GenLargeBitmap(i8list, i8list, ptr exec_ctx)
+    u8list GenLargeBitmap(i16list, i16list, ptr exec_ctx)
+    u8list GenLargeBitmap(i32list, i32list, ptr exec_ctx)
+    u8list GenLargeBitmap(i64list, i64list, ptr exec_ctx)
+    u8list GenLargeBitmap(f32list, f32list, ptr exec_ctx)
+    u8list GenLargeBitmap(f64list, f64list, ptr exec_ctx)
 
 ## GenLargeEqualBitmap
 Return a bitmap representation after performing a greater-than or equal comparison on all elements in the list.
@@ -788,19 +787,18 @@ Return a bitmap representation after performing a greater-than or equal comparis
     u8list GenLargeEqualBitmap(f32list, f32, ptr exec_ctx)
     u8list GenLargeEqualBitmap(f64list, f64, ptr exec_ctx)
 
-## GenLargeEqualBitmapWithMinSize
 Return a bitmap representing the results of greater-than or equal comparisons for each element in the two lists, with the length being the minimum of the two lists.
 
-    u8list GenLargeEqualBitmapWithMinSize(u8list, u8list, ptr exec_ctx)
-    u8list GenLargeEqualBitmapWithMinSize(u16list, u16list, ptr exec_ctx)
-    u8list GenLargeEqualBitmapWithMinSize(u32list, u32list, ptr exec_ctx)
-    u8list GenLargeEqualBitmapWithMinSize(u64list, u64list, ptr exec_ctx)
-    u8list GenLargeEqualBitmapWithMinSize(i8list, i8list, ptr exec_ctx)
-    u8list GenLargeEqualBitmapWithMinSize(i16list, i16list, ptr exec_ctx)
-    u8list GenLargeEqualBitmapWithMinSize(i32list, i32list, ptr exec_ctx)
-    u8list GenLargeEqualBitmapWithMinSize(i64list, i64list, ptr exec_ctx)
-    u8list GenLargeEqualBitmapWithMinSize(f32list, f32list, ptr exec_ctx)
-    u8list GenLargeEqualBitmapWithMinSize(f64list, f64list, ptr exec_ctx)
+    u8list GenLargeEqualBitmap(u8list, u8list, ptr exec_ctx)
+    u8list GenLargeEqualBitmap(u16list, u16list, ptr exec_ctx)
+    u8list GenLargeEqualBitmap(u32list, u32list, ptr exec_ctx)
+    u8list GenLargeEqualBitmap(u64list, u64list, ptr exec_ctx)
+    u8list GenLargeEqualBitmap(i8list, i8list, ptr exec_ctx)
+    u8list GenLargeEqualBitmap(i16list, i16list, ptr exec_ctx)
+    u8list GenLargeEqualBitmap(i32list, i32list, ptr exec_ctx)
+    u8list GenLargeEqualBitmap(i64list, i64list, ptr exec_ctx)
+    u8list GenLargeEqualBitmap(f32list, f32list, ptr exec_ctx)
+    u8list GenLargeEqualBitmap(f64list, f64list, ptr exec_ctx)
 
 ## GenEqualBitmap
 Return a bitmap representation after performing a equal comparison on all elements in the list.
@@ -816,19 +814,18 @@ Return a bitmap representation after performing a equal comparison on all elemen
     u8list GenEqualBitmap(f32list, f32, ptr exec_ctx)
     u8list GenEqualBitmap(f64list, f64, ptr exec_ctx)
 
-## GenEqualBitmapWithMinSize
 Return a bitmap representing the results of equal comparisons for each element in the two lists, with the length being the minimum of the two lists.
 
-    u8list GenEqualBitmapWithMinSize(u8list, u8list, ptr exec_ctx)
-    u8list GenEqualBitmapWithMinSize(u16list, u16list, ptr exec_ctx)
-    u8list GenEqualBitmapWithMinSize(u32list, u32list, ptr exec_ctx)
-    u8list GenEqualBitmapWithMinSize(u64list, u64list, ptr exec_ctx)
-    u8list GenEqualBitmapWithMinSize(i8list, i8list, ptr exec_ctx)
-    u8list GenEqualBitmapWithMinSize(i16list, i16list, ptr exec_ctx)
-    u8list GenEqualBitmapWithMinSize(i32list, i32list, ptr exec_ctx)
-    u8list GenEqualBitmapWithMinSize(i64list, i64list, ptr exec_ctx)
-    u8list GenEqualBitmapWithMinSize(f32list, f32list, ptr exec_ctx)
-    u8list GenEqualBitmapWithMinSize(f64list, f64list, ptr exec_ctx)
+    u8list GenEqualBitmap(u8list, u8list, ptr exec_ctx)
+    u8list GenEqualBitmap(u16list, u16list, ptr exec_ctx)
+    u8list GenEqualBitmap(u32list, u32list, ptr exec_ctx)
+    u8list GenEqualBitmap(u64list, u64list, ptr exec_ctx)
+    u8list GenEqualBitmap(i8list, i8list, ptr exec_ctx)
+    u8list GenEqualBitmap(i16list, i16list, ptr exec_ctx)
+    u8list GenEqualBitmap(i32list, i32list, ptr exec_ctx)
+    u8list GenEqualBitmap(i64list, i64list, ptr exec_ctx)
+    u8list GenEqualBitmap(f32list, f32list, ptr exec_ctx)
+    u8list GenEqualBitmap(f64list, f64list, ptr exec_ctx)
 
 ## GenLessBitmap
 Return a bitmap representation after performing a less-than comparison on all elements in the list.
@@ -844,19 +841,18 @@ Return a bitmap representation after performing a less-than comparison on all el
     u8list GenLessBitmap(f32list, f32, ptr exec_ctx)
     u8list GenLessBitmap(f64list, f64, ptr exec_ctx)
 
-## GenLessBitmapWithMinSize
 Return a bitmap representing the results of less-than comparisons for each element in the two lists, with the length being the minimum of the two lists.
 
-    u8list GenLessBitmapWithMinSize(u8list, u8list, ptr exec_ctx)
-    u8list GenLessBitmapWithMinSize(u16list, u16list, ptr exec_ctx)
-    u8list GenLessBitmapWithMinSize(u32list, u32list, ptr exec_ctx)
-    u8list GenLessBitmapWithMinSize(u64list, u64list, ptr exec_ctx)
-    u8list GenLessBitmapWithMinSize(i8list, i8list, ptr exec_ctx)
-    u8list GenLessBitmapWithMinSize(i16list, i16list, ptr exec_ctx)
-    u8list GenLessBitmapWithMinSize(i32list, i32list, ptr exec_ctx)
-    u8list GenLessBitmapWithMinSize(i64list, i64list, ptr exec_ctx)
-    u8list GenLessBitmapWithMinSize(f32list, f32list, ptr exec_ctx)
-    u8list GenLessBitmapWithMinSize(f64list, f64list, ptr exec_ctx)
+    u8list GenLessBitmap(u8list, u8list, ptr exec_ctx)
+    u8list GenLessBitmap(u16list, u16list, ptr exec_ctx)
+    u8list GenLessBitmap(u32list, u32list, ptr exec_ctx)
+    u8list GenLessBitmap(u64list, u64list, ptr exec_ctx)
+    u8list GenLessBitmap(i8list, i8list, ptr exec_ctx)
+    u8list GenLessBitmap(i16list, i16list, ptr exec_ctx)
+    u8list GenLessBitmap(i32list, i32list, ptr exec_ctx)
+    u8list GenLessBitmap(i64list, i64list, ptr exec_ctx)
+    u8list GenLessBitmap(f32list, f32list, ptr exec_ctx)
+    u8list GenLessBitmap(f64list, f64list, ptr exec_ctx)
 
 ## GenLessEqualBitmap
 Return a bitmap representation after performing a less-than or equal comparison on all elements in the list.
@@ -872,19 +868,18 @@ Return a bitmap representation after performing a less-than or equal comparison 
     u8list GenLessEqualBitmap(f32list, f32, ptr exec_ctx)
     u8list GenLessEqualBitmap(f64list, f64, ptr exec_ctx)
 
-## GenLessEqualBitmapWithMinSize
 Return a bitmap representing the results of less-than or equal comparisons for each element in the two lists, with the length being the minimum of the two lists.
 
-    u8list GenLessEqualBitmapWithMinSize(u8list, u8list, ptr exec_ctx)
-    u8list GenLessEqualBitmapWithMinSize(u16list, u16list, ptr exec_ctx)
-    u8list GenLessEqualBitmapWithMinSize(u32list, u32list, ptr exec_ctx)
-    u8list GenLessEqualBitmapWithMinSize(u64list, u64list, ptr exec_ctx)
-    u8list GenLessEqualBitmapWithMinSize(i8list, i8list, ptr exec_ctx)
-    u8list GenLessEqualBitmapWithMinSize(i16list, i16list, ptr exec_ctx)
-    u8list GenLessEqualBitmapWithMinSize(i32list, i32list, ptr exec_ctx)
-    u8list GenLessEqualBitmapWithMinSize(i64list, i64list, ptr exec_ctx)
-    u8list GenLessEqualBitmapWithMinSize(f32list, f32list, ptr exec_ctx)
-    u8list GenLessEqualBitmapWithMinSize(f64list, f64list, ptr exec_ctx)
+    u8list GenLessEqualBitmap(u8list, u8list, ptr exec_ctx)
+    u8list GenLessEqualBitmap(u16list, u16list, ptr exec_ctx)
+    u8list GenLessEqualBitmap(u32list, u32list, ptr exec_ctx)
+    u8list GenLessEqualBitmap(u64list, u64list, ptr exec_ctx)
+    u8list GenLessEqualBitmap(i8list, i8list, ptr exec_ctx)
+    u8list GenLessEqualBitmap(i16list, i16list, ptr exec_ctx)
+    u8list GenLessEqualBitmap(i32list, i32list, ptr exec_ctx)
+    u8list GenLessEqualBitmap(i64list, i64list, ptr exec_ctx)
+    u8list GenLessEqualBitmap(f32list, f32list, ptr exec_ctx)
+    u8list GenLessEqualBitmap(f64list, f64list, ptr exec_ctx)
 
 ## GenNotEqualBitmap
 Return a bitmap representation after performing a not equal comparison on all elements in the list.
@@ -900,19 +895,18 @@ Return a bitmap representation after performing a not equal comparison on all el
     u8list GenNotEqualBitmap(f32list, f32, ptr exec_ctx)
     u8list GenNotEqualBitmap(f64list, f64, ptr exec_ctx)
 
-## GenNotEqualBitmapWithMinSize
 Return a bitmap representing the results of not equal comparisons for each element in the two lists, with the length being the minimum of the two lists.
 
-    u8list GenNotEqualBitmapWithMinSize(u8list, u8list, ptr exec_ctx)
-    u8list GenNotEqualBitmapWithMinSize(u16list, u16list, ptr exec_ctx)
-    u8list GenNotEqualBitmapWithMinSize(u32list, u32list, ptr exec_ctx)
-    u8list GenNotEqualBitmapWithMinSize(u64list, u64list, ptr exec_ctx)
-    u8list GenNotEqualBitmapWithMinSize(i8list, i8list, ptr exec_ctx)
-    u8list GenNotEqualBitmapWithMinSize(i16list, i16list, ptr exec_ctx)
-    u8list GenNotEqualBitmapWithMinSize(i32list, i32list, ptr exec_ctx)
-    u8list GenNotEqualBitmapWithMinSize(i64list, i64list, ptr exec_ctx)
-    u8list GenNotEqualBitmapWithMinSize(f32list, f32list, ptr exec_ctx)
-    u8list GenNotEqualBitmapWithMinSize(f64list, f64list, ptr exec_ctx)
+    u8list GenNotEqualBitmap(u8list, u8list, ptr exec_ctx)
+    u8list GenNotEqualBitmap(u16list, u16list, ptr exec_ctx)
+    u8list GenNotEqualBitmap(u32list, u32list, ptr exec_ctx)
+    u8list GenNotEqualBitmap(u64list, u64list, ptr exec_ctx)
+    u8list GenNotEqualBitmap(i8list, i8list, ptr exec_ctx)
+    u8list GenNotEqualBitmap(i16list, i16list, ptr exec_ctx)
+    u8list GenNotEqualBitmap(i32list, i32list, ptr exec_ctx)
+    u8list GenNotEqualBitmap(i64list, i64list, ptr exec_ctx)
+    u8list GenNotEqualBitmap(f32list, f32list, ptr exec_ctx)
+    u8list GenNotEqualBitmap(f64list, f64list, ptr exec_ctx)
 
 ## FilterByBitmap
 Return a new list by filtering out the corresponding elements based on the bitmap.
