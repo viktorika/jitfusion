@@ -7,6 +7,8 @@
 #pragma once
 
 #include <memory>
+#include <string>
+#include <vector>
 #include "arena.h"
 #include "exec_node.h"
 #include "function_registry.h"
@@ -19,8 +21,16 @@ namespace jitfusion {
 struct ExecContext {
   explicit ExecContext(int64_t alloc_min_chunk_size) : arena(alloc_min_chunk_size) {}
   Arena arena;
+  std::vector<std::string> errors;
 
-  void Clear() { arena.Reset(); }
+  void Clear() {
+    arena.Reset();
+    errors.clear();
+  }
+
+  [[nodiscard]] bool HasErrors() const { return !errors.empty(); }
+
+  void AddError(std::string msg) { errors.emplace_back(std::move(msg)); }
 };
 
 struct ExecEngineOption {
