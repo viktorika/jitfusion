@@ -458,7 +458,7 @@ TEST(FunctionTest, ListAddTest3) {
   EXPECT_EQ(std::get<std::vector<float>>(result), expect);
 }
 
-TEST(FunctionTest, ListAddWithMinSizeTest1) {
+TEST(FunctionTest, ListAddTest4) {
   std::vector<uint8_t> data1 = {1, 2, 3, 4};
   std::vector<uint8_t> data2 = {5, 6, 7, 8};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -470,7 +470,7 @@ TEST(FunctionTest, ListAddWithMinSizeTest1) {
   args_list.emplace_back(std::move(data1_node));
   args_list.emplace_back(std::move(data2_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListAddWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListAdd", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -480,9 +480,9 @@ TEST(FunctionTest, ListAddWithMinSizeTest1) {
   EXPECT_EQ(std::get<std::vector<uint8_t>>(result), expect);
 }
 
-TEST(FunctionTest, ListAddWithMinSizeTest2) {
+TEST(FunctionTest, ListAddTest5) {
   std::vector<int64_t> data1 = {1, 2, 3, 4};
-  std::vector<int64_t> data2 = {5, 6, 7};
+  std::vector<int64_t> data2 = {5, 6, 7, 8};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto data1_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
@@ -492,19 +492,19 @@ TEST(FunctionTest, ListAddWithMinSizeTest2) {
   args_list.emplace_back(std::move(data1_node));
   args_list.emplace_back(std::move(data2_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListAddWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListAdd", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<int64_t> expect = {6, 8, 10};
+  std::vector<int64_t> expect = {6, 8, 10, 12};
   EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
 }
 
-TEST(FunctionTest, ListAddWithMinSizeTest3) {
+TEST(FunctionTest, ListAddTest6) {
   std::vector<float> data1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-  std::vector<float> data2 = {-5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15};
+  std::vector<float> data2 = {-5, -6, -7, -8, -9, -10, -11, -12, -13, -14};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto data1_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
@@ -514,7 +514,7 @@ TEST(FunctionTest, ListAddWithMinSizeTest3) {
   args_list.emplace_back(std::move(data1_node));
   args_list.emplace_back(std::move(data2_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListAddWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListAdd", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -590,7 +590,7 @@ TEST(FunctionTest, ListSubTest3) {
   EXPECT_EQ(std::get<std::vector<double>>(result), expect);
 }
 
-TEST(FunctionTest, ListSubWithMinSizeTest1) {
+TEST(FunctionTest, ListSubTest4) {
   std::vector<int8_t> data1 = {1, 2, 3, 4};
   std::vector<int8_t> data2 = {-100, -101, -102, -103};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -602,7 +602,7 @@ TEST(FunctionTest, ListSubWithMinSizeTest1) {
   args_list.emplace_back(std::move(data1_node));
   args_list.emplace_back(std::move(data2_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListSubWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListSub", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -612,7 +612,7 @@ TEST(FunctionTest, ListSubWithMinSizeTest1) {
   EXPECT_EQ(std::get<std::vector<int8_t>>(result), expect);
 }
 
-TEST(FunctionTest, ListSubWithMinSizeTest2) {
+TEST(FunctionTest, ListSubTest5) {
   std::vector<uint32_t> data1 = {100, 200, 300, 400};
   std::vector<uint32_t> data2 = {10, 11, 12, 13};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -624,7 +624,7 @@ TEST(FunctionTest, ListSubWithMinSizeTest2) {
   args_list.emplace_back(std::move(data1_node));
   args_list.emplace_back(std::move(data2_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListSubWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListSub", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -634,7 +634,7 @@ TEST(FunctionTest, ListSubWithMinSizeTest2) {
   EXPECT_EQ(std::get<std::vector<uint32_t>>(result), expect);
 }
 
-TEST(FunctionTest, ListSubWithMinSizeTest3) {
+TEST(FunctionTest, ListSubTest6) {
   std::vector<double> data1 = {100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100};
   std::vector<double> data2 = {10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -646,7 +646,7 @@ TEST(FunctionTest, ListSubWithMinSizeTest3) {
   args_list.emplace_back(std::move(data1_node));
   args_list.emplace_back(std::move(data2_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListSubWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListSub", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -722,7 +722,7 @@ TEST(FunctionTest, ListMulTest3) {
   EXPECT_EQ(std::get<std::vector<float>>(result), expect);
 }
 
-TEST(FunctionTest, ListMulWithMinSizeTest1) {
+TEST(FunctionTest, ListMulTest4) {
   std::vector<uint16_t> data1 = {1, 2, 3, 4};
   std::vector<uint16_t> data2 = {10, 20, 30, 40};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -734,7 +734,7 @@ TEST(FunctionTest, ListMulWithMinSizeTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(mul_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMulWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMul", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -744,7 +744,7 @@ TEST(FunctionTest, ListMulWithMinSizeTest1) {
   EXPECT_EQ(std::get<std::vector<uint16_t>>(result), expect);
 }
 
-TEST(FunctionTest, ListMulWithMinSizeTest2) {
+TEST(FunctionTest, ListMulTest5) {
   std::vector<int32_t> data1 = {1, 2, 3, 4};
   std::vector<int32_t> data2 = {10, 20, 30, 40};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -756,7 +756,7 @@ TEST(FunctionTest, ListMulWithMinSizeTest2) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(mul_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMulWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMul", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -766,7 +766,7 @@ TEST(FunctionTest, ListMulWithMinSizeTest2) {
   EXPECT_EQ(std::get<std::vector<int32_t>>(result), expect);
 }
 
-TEST(FunctionTest, ListMulWithMinSizeTest3) {
+TEST(FunctionTest, ListMulTest6) {
   std::vector<float> data1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
   std::vector<float> data2 = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -778,7 +778,7 @@ TEST(FunctionTest, ListMulWithMinSizeTest3) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(mul_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMulWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMul", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -854,7 +854,7 @@ TEST(FunctionTest, ListDivTest3) {
   EXPECT_EQ(std::get<std::vector<double>>(result), expect);
 }
 
-TEST(FunctionTest, ListDivWithMinSizeTest1) {
+TEST(FunctionTest, ListDivTest4) {
   std::vector<uint32_t> data1 = {1000, 2000, 3000, 4000};
   std::vector<uint32_t> data2 = {10, 20, 30, 40};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -866,7 +866,7 @@ TEST(FunctionTest, ListDivWithMinSizeTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(div_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListDivWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListDiv", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -876,7 +876,7 @@ TEST(FunctionTest, ListDivWithMinSizeTest1) {
   EXPECT_EQ(std::get<std::vector<uint32_t>>(result), expect);
 }
 
-TEST(FunctionTest, ListDivWithMinSizeTest2) {
+TEST(FunctionTest, ListDivTest5) {
   std::vector<int64_t> data1 = {1000, 2000, 3000, 4000};
   std::vector<int64_t> data2 = {10, 20, 30, 40};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -888,7 +888,7 @@ TEST(FunctionTest, ListDivWithMinSizeTest2) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(div_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListDivWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListDiv", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -898,7 +898,7 @@ TEST(FunctionTest, ListDivWithMinSizeTest2) {
   EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
 }
 
-TEST(FunctionTest, ListDivWithMinSizeTest3) {
+TEST(FunctionTest, ListDivTest6) {
   std::vector<double> data1 = {1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000};
   std::vector<double> data2 = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -910,7 +910,7 @@ TEST(FunctionTest, ListDivWithMinSizeTest3) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(div_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListDivWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListDiv", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -964,7 +964,7 @@ TEST(FunctionTest, ListModTest2) {
   EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
 }
 
-TEST(FunctionTest, ListModWithMinSizeTest1) {
+TEST(FunctionTest, ListModTest3) {
   std::vector<uint32_t> data1 = {1000, 2000, 3000, 4000};
   std::vector<uint32_t> data2 = {7, 8, 9, 10};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -976,7 +976,7 @@ TEST(FunctionTest, ListModWithMinSizeTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(mod_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListModWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMod", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -986,9 +986,9 @@ TEST(FunctionTest, ListModWithMinSizeTest1) {
   EXPECT_EQ(std::get<std::vector<uint32_t>>(result), expect);
 }
 
-TEST(FunctionTest, ListModWithMinSizeTest2) {
+TEST(FunctionTest, ListModTest4) {
   std::vector<int64_t> data1 = {1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000};
-  std::vector<int64_t> data2 = {7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
+  std::vector<int64_t> data2 = {7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
@@ -998,7 +998,7 @@ TEST(FunctionTest, ListModWithMinSizeTest2) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(mod_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListModWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMod", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1961,7 +1961,7 @@ TEST(FunctionTest, ListBitwiseAndTest2) {
   EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
 }
 
-TEST(FunctionTest, ListBitwiseAndWithMinSizeTest1) {
+TEST(FunctionTest, ListBitwiseAndTest3) {
   std::vector<uint32_t> data1 = {1000, 2000, 3000, 4000};
   std::vector<uint32_t> data2 = {10, 20, 30, 40};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1973,7 +1973,7 @@ TEST(FunctionTest, ListBitwiseAndWithMinSizeTest1) {
   args_list.emplace_back(std::move(data1_node));
   args_list.emplace_back(std::move(data2_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseAndWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseAnd", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -1983,7 +1983,7 @@ TEST(FunctionTest, ListBitwiseAndWithMinSizeTest1) {
   EXPECT_EQ(std::get<std::vector<uint32_t>>(result), expect);
 }
 
-TEST(FunctionTest, ListBitwiseAndWithMinSizeTest2) {
+TEST(FunctionTest, ListBitwiseAndTest4) {
   std::vector<int64_t> data1 = {1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000};
   std::vector<int64_t> data2 = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -1995,7 +1995,7 @@ TEST(FunctionTest, ListBitwiseAndWithMinSizeTest2) {
   args_list.emplace_back(std::move(data1_node));
   args_list.emplace_back(std::move(data2_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseAndWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseAnd", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -2050,7 +2050,7 @@ TEST(FunctionTest, ListBitwiseOrTest2) {
   EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
 }
 
-TEST(FunctionTest, ListBitwiseOrWithMinSizeTest1) {
+TEST(FunctionTest, ListBitwiseOrTest3) {
   std::vector<uint32_t> data = {1000, 2000, 3000, 4000};
   std::vector<uint32_t> or_data = {10, 10, 10, 10};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -2062,7 +2062,7 @@ TEST(FunctionTest, ListBitwiseOrWithMinSizeTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(or_data_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseOrWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseOr", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -2072,7 +2072,7 @@ TEST(FunctionTest, ListBitwiseOrWithMinSizeTest1) {
   EXPECT_EQ(std::get<std::vector<uint32_t>>(result), expect);
 }
 
-TEST(FunctionTest, ListBitwiseOrWithMinSizeTest2) {
+TEST(FunctionTest, ListBitwiseOrTest4) {
   std::vector<int64_t> data = {1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000};
   std::vector<int64_t> or_data = {10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -2084,7 +2084,7 @@ TEST(FunctionTest, ListBitwiseOrWithMinSizeTest2) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(or_data_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseOrWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseOr", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -2139,7 +2139,7 @@ TEST(FunctionTest, ListBitwiseXorTest2) {
   EXPECT_EQ(std::get<std::vector<int64_t>>(result), expect);
 }
 
-TEST(FunctionTest, ListBitwiseXorWithMinSizeTest1) {
+TEST(FunctionTest, ListBitwiseXorTest3) {
   std::vector<uint32_t> data = {1000, 2000, 3000, 4000};
   std::vector<uint32_t> xor_data = {10, 10, 10, 10};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -2151,7 +2151,7 @@ TEST(FunctionTest, ListBitwiseXorWithMinSizeTest1) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(xor_data_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseXorWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseXor", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
@@ -2161,7 +2161,7 @@ TEST(FunctionTest, ListBitwiseXorWithMinSizeTest1) {
   EXPECT_EQ(std::get<std::vector<uint32_t>>(result), expect);
 }
 
-TEST(FunctionTest, ListBitwiseXorWithMinSizeTest2) {
+TEST(FunctionTest, ListBitwiseXorTest4) {
   std::vector<int64_t> data = {1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000};
   std::vector<int64_t> xor_data = {10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10};
   std::unique_ptr<FunctionRegistry> func_registry;
@@ -2173,7 +2173,7 @@ TEST(FunctionTest, ListBitwiseXorWithMinSizeTest2) {
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(xor_data_node));
   args_list.emplace_back(std::move(exec_node));
-  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseXorWithMinSize", std::move(args_list)));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseXor", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   ASSERT_TRUE(st.ok());
