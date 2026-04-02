@@ -475,25 +475,39 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
 Status ExecEngine::Execute(void* entry_arguments, RetType* result) {
   ExecContext exec_ctx(option_.exec_ctx_arena_alloc_min_chunk_size);
   EXPAND_SWITCH_TYPE(entry_func_ptr_, ret_type_)
+  if (exec_ctx.HasErrors()) {
+    return Status::RuntimeError(exec_ctx.GetErrorMessage());
+  }
   return Status::OK();
 }
 
 Status ExecEngine::Execute(ExecContext& exec_ctx, void* entry_arguments, RetType* result) {
   EXPAND_SWITCH_TYPE(entry_func_ptr_, ret_type_)
+  Status ret = Status::OK();
+  if (exec_ctx.HasErrors()) {
+    ret = Status::RuntimeError(exec_ctx.GetErrorMessage());
+  }
   exec_ctx.Clear();
-  return Status::OK();
+  return ret;
 }
 
 Status ExecEngine::Execute(void* entry_arguments, void* result) {
   ExecContext exec_ctx(option_.exec_ctx_arena_alloc_min_chunk_size);
   reinterpret_cast<return_void_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx, result);
+  if (exec_ctx.HasErrors()) {
+    return Status::RuntimeError(exec_ctx.GetErrorMessage());
+  }
   return Status::OK();
 }
 
 Status ExecEngine::Execute(ExecContext& exec_ctx, void* entry_arguments, void* result) {
   reinterpret_cast<return_void_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx, result);
+  Status ret = Status::OK();
+  if (exec_ctx.HasErrors()) {
+    ret = Status::RuntimeError(exec_ctx.GetErrorMessage());
+  }
   exec_ctx.Clear();
-  return Status::OK();
+  return ret;
 }
 
 Status ExecEngine::BatchCompile(const std::vector<std::unique_ptr<ExecNode>>& exec_nodes,
@@ -557,6 +571,9 @@ Status ExecEngine::ExecuteAt(size_t index, void* entry_arguments, RetType* resul
   char* func_ptr = batch_entry_func_ptrs_[index];
   ValueType ret_type = batch_ret_types_[index];
   EXPAND_SWITCH_TYPE(func_ptr, ret_type)
+  if (exec_ctx.HasErrors()) {
+    return Status::RuntimeError(exec_ctx.GetErrorMessage());
+  }
   return Status::OK();
 }
 
@@ -567,8 +584,12 @@ Status ExecEngine::ExecuteAt(size_t index, ExecContext& exec_ctx, void* entry_ar
   char* func_ptr = batch_entry_func_ptrs_[index];
   ValueType ret_type = batch_ret_types_[index];
   EXPAND_SWITCH_TYPE(func_ptr, ret_type)
+  Status ret = Status::OK();
+  if (exec_ctx.HasErrors()) {
+    ret = Status::RuntimeError(exec_ctx.GetErrorMessage());
+  }
   exec_ctx.Clear();
-  return Status::OK();
+  return ret;
 }
 
 Status ExecEngine::ExecuteAt(size_t index, void* entry_arguments, void* result) {
@@ -577,6 +598,9 @@ Status ExecEngine::ExecuteAt(size_t index, void* entry_arguments, void* result) 
   }
   ExecContext exec_ctx(option_.exec_ctx_arena_alloc_min_chunk_size);
   reinterpret_cast<return_void_function_type>(batch_entry_func_ptrs_[index])(entry_arguments, &exec_ctx, result);
+  if (exec_ctx.HasErrors()) {
+    return Status::RuntimeError(exec_ctx.GetErrorMessage());
+  }
   return Status::OK();
 }
 
@@ -585,33 +609,77 @@ Status ExecEngine::ExecuteAt(size_t index, ExecContext& exec_ctx, void* entry_ar
     return Status::RuntimeError("ExecuteAt: index out of range");
   }
   reinterpret_cast<return_void_function_type>(batch_entry_func_ptrs_[index])(entry_arguments, &exec_ctx, result);
+  Status ret = Status::OK();
+  if (exec_ctx.HasErrors()) {
+    ret = Status::RuntimeError(exec_ctx.GetErrorMessage());
+  }
   exec_ctx.Clear();
-  return Status::OK();
+  return ret;
 }
 
 Status ExecEngine::ExecuteAll(void* entry_arguments, std::vector<RetType>* results) {
   results->resize(batch_entry_func_ptrs_.size());
+  std::string all_errors;
   for (size_t i = 0; i < batch_entry_func_ptrs_.size(); ++i) {
-    JF_RETURN_NOT_OK(ExecuteAt(i, entry_arguments, &(*results)[i]));
+    Status st = ExecuteAt(i, entry_arguments, &(*results)[i]);
+    if (!st.ok()) {
+      if (!all_errors.empty()) {
+        all_errors += "| ";
+      }
+      all_errors += st.ToString();
+    }
+  }
+  if (!all_errors.empty()) {
+    return Status::RuntimeError(all_errors);
   }
   return Status::OK();
 }
 Status ExecEngine::ExecuteAll(ExecContext& exec_ctx, void* entry_arguments, std::vector<RetType>* results) {
   results->resize(batch_entry_func_ptrs_.size());
+  std::string all_errors;
   for (size_t i = 0; i < batch_entry_func_ptrs_.size(); ++i) {
-    JF_RETURN_NOT_OK(ExecuteAt(i, exec_ctx, entry_arguments, &(*results)[i]));
+    Status st = ExecuteAt(i, exec_ctx, entry_arguments, &(*results)[i]);
+    if (!st.ok()) {
+      if (!all_errors.empty()) {
+        all_errors += "| ";
+      }
+      all_errors += st.ToString();
+    }
+  }
+  if (!all_errors.empty()) {
+    return Status::RuntimeError(all_errors);
   }
   return Status::OK();
 }
 Status ExecEngine::ExecuteAll(void* entry_arguments, void* results) {
+  std::string all_errors;
   for (size_t i = 0; i < batch_entry_func_ptrs_.size(); ++i) {
-    JF_RETURN_NOT_OK(ExecuteAt(i, entry_arguments, results));
+    Status st = ExecuteAt(i, entry_arguments, results);
+    if (!st.ok()) {
+      if (!all_errors.empty()) {
+        all_errors += "| ";
+      }
+      all_errors += st.ToString();
+    }
+  }
+  if (!all_errors.empty()) {
+    return Status::RuntimeError(all_errors);
   }
   return Status::OK();
 }
 Status ExecEngine::ExecuteAll(ExecContext& exec_ctx, void* entry_arguments, void* results) {
+  std::string all_errors;
   for (size_t i = 0; i < batch_entry_func_ptrs_.size(); ++i) {
-    JF_RETURN_NOT_OK(ExecuteAt(i, exec_ctx, entry_arguments, results));
+    Status st = ExecuteAt(i, exec_ctx, entry_arguments, results);
+    if (!st.ok()) {
+      if (!all_errors.empty()) {
+        all_errors += "| ";
+      }
+      all_errors += st.ToString();
+    }
+  }
+  if (!all_errors.empty()) {
+    return Status::RuntimeError(all_errors);
   }
   return Status::OK();
 }

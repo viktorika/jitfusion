@@ -30,6 +30,17 @@ struct ExecContext {
 
   [[nodiscard]] bool HasErrors() const { return !errors.empty(); }
 
+  [[nodiscard]] std::string GetErrorMessage() const {
+    std::string msg;
+    for (size_t i = 0; i < errors.size(); ++i) {
+      if (i > 0) {
+        msg += "; ";
+      }
+      msg += errors[i];
+    }
+    return msg;
+  }
+
   void AddError(std::string msg) { errors.emplace_back(std::move(msg)); }
 };
 
