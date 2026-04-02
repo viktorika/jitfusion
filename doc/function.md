@@ -735,7 +735,7 @@ Return a bitmap representation after performing a greater-than comparison on all
     u8list GenLargeBitmap(f32list, f32, ptr exec_ctx)
     u8list GenLargeBitmap(f64list, f64, ptr exec_ctx)
 
-Return a bitmap representing the results of greater-than comparisons for each element in the two lists, with the length being the minimum of the two lists.
+Return a bitmap representing the results of greater-than comparisons for each element in the two lists. Both lists must have equal length.
 
     u8list GenLargeBitmap(u8list, u8list, ptr exec_ctx)
     u8list GenLargeBitmap(u16list, u16list, ptr exec_ctx)
@@ -762,7 +762,7 @@ Return a bitmap representation after performing a greater-than or equal comparis
     u8list GenLargeEqualBitmap(f32list, f32, ptr exec_ctx)
     u8list GenLargeEqualBitmap(f64list, f64, ptr exec_ctx)
 
-Return a bitmap representing the results of greater-than or equal comparisons for each element in the two lists, with the length being the minimum of the two lists.
+Return a bitmap representing the results of greater-than or equal comparisons for each element in the two lists. Both lists must have equal length.
 
     u8list GenLargeEqualBitmap(u8list, u8list, ptr exec_ctx)
     u8list GenLargeEqualBitmap(u16list, u16list, ptr exec_ctx)
@@ -789,7 +789,7 @@ Return a bitmap representation after performing a equal comparison on all elemen
     u8list GenEqualBitmap(f32list, f32, ptr exec_ctx)
     u8list GenEqualBitmap(f64list, f64, ptr exec_ctx)
 
-Return a bitmap representing the results of equal comparisons for each element in the two lists, with the length being the minimum of the two lists.
+Return a bitmap representing the results of equal comparisons for each element in the two lists. Both lists must have equal length.
 
     u8list GenEqualBitmap(u8list, u8list, ptr exec_ctx)
     u8list GenEqualBitmap(u16list, u16list, ptr exec_ctx)
@@ -816,7 +816,7 @@ Return a bitmap representation after performing a less-than comparison on all el
     u8list GenLessBitmap(f32list, f32, ptr exec_ctx)
     u8list GenLessBitmap(f64list, f64, ptr exec_ctx)
 
-Return a bitmap representing the results of less-than comparisons for each element in the two lists, with the length being the minimum of the two lists.
+Return a bitmap representing the results of less-than comparisons for each element in the two lists. Both lists must have equal length.
 
     u8list GenLessBitmap(u8list, u8list, ptr exec_ctx)
     u8list GenLessBitmap(u16list, u16list, ptr exec_ctx)
@@ -843,7 +843,7 @@ Return a bitmap representation after performing a less-than or equal comparison 
     u8list GenLessEqualBitmap(f32list, f32, ptr exec_ctx)
     u8list GenLessEqualBitmap(f64list, f64, ptr exec_ctx)
 
-Return a bitmap representing the results of less-than or equal comparisons for each element in the two lists, with the length being the minimum of the two lists.
+Return a bitmap representing the results of less-than or equal comparisons for each element in the two lists. Both lists must have equal length.
 
     u8list GenLessEqualBitmap(u8list, u8list, ptr exec_ctx)
     u8list GenLessEqualBitmap(u16list, u16list, ptr exec_ctx)
@@ -870,7 +870,7 @@ Return a bitmap representation after performing a not equal comparison on all el
     u8list GenNotEqualBitmap(f32list, f32, ptr exec_ctx)
     u8list GenNotEqualBitmap(f64list, f64, ptr exec_ctx)
 
-Return a bitmap representing the results of not equal comparisons for each element in the two lists, with the length being the minimum of the two lists.
+Return a bitmap representing the results of not equal comparisons for each element in the two lists. Both lists must have equal length.
 
     u8list GenNotEqualBitmap(u8list, u8list, ptr exec_ctx)
     u8list GenNotEqualBitmap(u16list, u16list, ptr exec_ctx)
