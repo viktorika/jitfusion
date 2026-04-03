@@ -157,6 +157,7 @@ Type Conversion Functions
     u8  CastU8(i64)
     u8  CastU8(f32)
     u8  CastU8(f64)
+    u8  CastU8(string)
 
     i8  CastI8(u8)
     i8  CastI8(i8)
@@ -168,6 +169,7 @@ Type Conversion Functions
     i8  CastI8(i64)
     i8  CastI8(f32)
     i8  CastI8(f64)
+    i8  CastI8(string)
 
     u16 CastU16(u8)
     u16 CastU16(i8)
@@ -179,6 +181,7 @@ Type Conversion Functions
     u16 CastU16(i64)
     u16 CastU16(f32)
     u16 CastU16(f64)
+    u16 CastU16(string)
 
     i16 CastI16(u8)
     i16 CastI16(i8)
@@ -190,6 +193,7 @@ Type Conversion Functions
     i16 CastI16(i64)
     i16 CastI16(f32)
     i16 CastI16(f64)
+    i16 CastI16(string)
 
     u32 CastU32(u8)
     u32 CastU32(i8)
@@ -201,6 +205,7 @@ Type Conversion Functions
     u32 CastU32(i64)
     u32 CastU32(f32)
     u32 CastU32(f64)
+    u32 CastU32(string)
 
     i32 CastI32(u8)
     i32 CastI32(i8)
@@ -212,6 +217,7 @@ Type Conversion Functions
     i32 CastI32(i64)
     i32 CastI32(f32)
     i32 CastI32(f64)
+    i32 CastI32(string)
 
     u64 CastU64(u8)
     u64 CastU64(i8)
@@ -223,6 +229,7 @@ Type Conversion Functions
     u64 CastU64(i64)
     u64 CastU64(f32)
     u64 CastU64(f64)
+    u64 CastU64(string)
 
     i64 CastI64(u8)
     i64 CastI64(i8)
@@ -234,6 +241,7 @@ Type Conversion Functions
     i64 CastI64(i64)
     i64 CastI64(f32)
     i64 CastI64(f64)
+    i64 CastI64(string)
 
     f32 CastF32(u8)
     f32 CastF32(i8)
@@ -273,6 +281,20 @@ Compares two strings lexicographically. The sign of the result is the sign of th
 Return the length of string.
 
     u32 StringLen(string)
+
+## CastString
+Convert numeric value to string.
+
+    string CastString(u8, ptr exec_ctx)
+    string CastString(i8, ptr exec_ctx)
+    string CastString(u16, ptr exec_ctx)
+    string CastString(i16, ptr exec_ctx)
+    string CastString(u32, ptr exec_ctx)
+    string CastString(i32, ptr exec_ctx)
+    string CastString(u64, ptr exec_ctx)
+    string CastString(i64, ptr exec_ctx)
+    string CastString(f32, ptr exec_ctx)
+    string CastString(f64, ptr exec_ctx)
 
 # List Type Functions
 
