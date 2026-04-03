@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2026-02-09 14:30:21
  * @Last Modified by: victorika
- * @Last Modified time: 2026-02-09 14:42:43
+ * @Last Modified time: 2026-04-03 14:31:44
  */
 #include <cmath>
 #include <cstring>
@@ -973,35 +973,35 @@ Status InitListBitwiseAndFunc(FunctionRegistry *reg) {
       FunctionSignature("ListBitwiseAnd", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr}, ValueType::kI64List),
       reinterpret_cast<void *>(ListBitwiseAnd<I64ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseAnd", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(ListBitwiseAndList<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseAnd", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr},
                         ValueType::kU16List),
       reinterpret_cast<void *>(ListBitwiseAndList<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseAnd", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr},
                         ValueType::kU32List),
       reinterpret_cast<void *>(ListBitwiseAndList<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseAnd", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr},
                         ValueType::kU64List),
       reinterpret_cast<void *>(ListBitwiseAndList<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseAnd", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr},
                         ValueType::kI8List),
       reinterpret_cast<void *>(ListBitwiseAndList<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseAnd", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr},
                         ValueType::kI16List),
       reinterpret_cast<void *>(ListBitwiseAndList<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseAnd", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr},
                         ValueType::kI32List),
       reinterpret_cast<void *>(ListBitwiseAndList<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseAnd", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr},
                         ValueType::kI64List),
       reinterpret_cast<void *>(ListBitwiseAndList<I64ListStruct>)));
@@ -1034,33 +1034,33 @@ Status InitListBitwiseOrFunc(FunctionRegistry *reg) {
       FunctionSignature("ListBitwiseOr", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr}, ValueType::kI64List),
       reinterpret_cast<void *>(ListBitwiseOr<I64ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseOr", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
       reinterpret_cast<void *>(ListBitwiseOrList<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseOr", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr},
                         ValueType::kU16List),
       reinterpret_cast<void *>(ListBitwiseOrList<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseOr", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr},
                         ValueType::kU32List),
       reinterpret_cast<void *>(ListBitwiseOrList<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseOr", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr},
                         ValueType::kU64List),
       reinterpret_cast<void *>(ListBitwiseOrList<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseOr", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr}, ValueType::kI8List),
       reinterpret_cast<void *>(ListBitwiseOrList<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseOr", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr},
                         ValueType::kI16List),
       reinterpret_cast<void *>(ListBitwiseOrList<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseOr", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr},
                         ValueType::kI32List),
       reinterpret_cast<void *>(ListBitwiseOrList<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseOr", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr},
                         ValueType::kI64List),
       reinterpret_cast<void *>(ListBitwiseOrList<I64ListStruct>)));
@@ -1093,35 +1093,35 @@ Status InitListBitwiseXorFunc(FunctionRegistry *reg) {
       FunctionSignature("ListBitwiseXor", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr}, ValueType::kI64List),
       reinterpret_cast<void *>(ListBitwiseXor<I64ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseXor", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(ListBitwiseXorList<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseXor", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr},
                         ValueType::kU16List),
       reinterpret_cast<void *>(ListBitwiseXorList<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseXor", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr},
                         ValueType::kU32List),
       reinterpret_cast<void *>(ListBitwiseXorList<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseXor", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr},
                         ValueType::kU64List),
       reinterpret_cast<void *>(ListBitwiseXorList<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseXor", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr},
                         ValueType::kI8List),
       reinterpret_cast<void *>(ListBitwiseXorList<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseXor", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr},
                         ValueType::kI16List),
       reinterpret_cast<void *>(ListBitwiseXorList<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseXor", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr},
                         ValueType::kI32List),
       reinterpret_cast<void *>(ListBitwiseXorList<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("ListBitwiseXor", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr},
                         ValueType::kI64List),
       reinterpret_cast<void *>(ListBitwiseXorList<I64ListStruct>)));

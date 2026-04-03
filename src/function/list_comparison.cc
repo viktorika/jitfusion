@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2026-02-09 14:48:23
  * @Last Modified by: victorika
- * @Last Modified time: 2026-02-09 14:58:26
+ * @Last Modified time: 2026-04-03 14:31:05
  */
 #include <cstring>
 #include "exec_engine.h"
@@ -965,43 +965,43 @@ Status InitGenEqualBitmapFunc(FunctionRegistry *reg) {
 }
 
 Status InitGenEqualBitmapListFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenEqualBitmap", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<U8ListStruct, BinaryOPType::kEqual>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenEqualBitmap", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<U16ListStruct, BinaryOPType::kEqual>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenEqualBitmap", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<U32ListStruct, BinaryOPType::kEqual>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenEqualBitmap", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<U64ListStruct, BinaryOPType::kEqual>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenEqualBitmap", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<I8ListStruct, BinaryOPType::kEqual>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenEqualBitmap", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<I16ListStruct, BinaryOPType::kEqual>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenEqualBitmap", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<I32ListStruct, BinaryOPType::kEqual>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenEqualBitmap", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<I64ListStruct, BinaryOPType::kEqual>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenEqualBitmap", {ValueType::kF32List, ValueType::kF32List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<F32ListStruct, BinaryOPType::kEqual>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenEqualBitmap", {ValueType::kF64List, ValueType::kF64List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<F64ListStruct, BinaryOPType::kEqual>)));
@@ -1215,43 +1215,43 @@ Status InitGenNotEqualBitmapFunc(FunctionRegistry *reg) {
 }
 
 Status InitGenNotEqualBitmapListFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenNotEqualBitmap", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<U8ListStruct, BinaryOPType::kNotEqual>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenNotEqualBitmap", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<U16ListStruct, BinaryOPType::kNotEqual>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenNotEqualBitmap", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<U32ListStruct, BinaryOPType::kNotEqual>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenNotEqualBitmap", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<U64ListStruct, BinaryOPType::kNotEqual>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenNotEqualBitmap", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<I8ListStruct, BinaryOPType::kNotEqual>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenNotEqualBitmap", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<I16ListStruct, BinaryOPType::kNotEqual>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenNotEqualBitmap", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<I32ListStruct, BinaryOPType::kNotEqual>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenNotEqualBitmap", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<I64ListStruct, BinaryOPType::kNotEqual>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenNotEqualBitmap", {ValueType::kF32List, ValueType::kF32List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<F32ListStruct, BinaryOPType::kNotEqual>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
       FunctionSignature("GenNotEqualBitmap", {ValueType::kF64List, ValueType::kF64List, ValueType::kPtr},
                         ValueType::kU8List),
       reinterpret_cast<void *>(GenBitmapList<F64ListStruct, BinaryOPType::kNotEqual>)));
