@@ -265,7 +265,7 @@ Concatenating two strings returns a new string.
     string StringConcat(string lhs, string rhs, ptr exec_ctx)
 
 ## StringCmp
-Compares two null-terminated byte strings lexicographically.The sign of the result is the sign of the difference between the values of the first pair of characters (both interpreted as unsigned char) that differ in the strings being compared.The behavior is undefined if lhs or rhs are not pointers to null-terminated byte strings.
+Compares two strings lexicographically. The sign of the result is the sign of the difference between the values of the first pair of characters (both interpreted as unsigned char) that differ in the strings being compared.
 
     i32 StringCmp(string lhs, string rhs)
 
