@@ -2,11 +2,13 @@
  * @Author: victorika
  * @Date: 2026-02-09 15:09:08
  * @Last Modified by: victorika
- * @Last Modified time: 2026-02-09 15:10:47
+ * @Last Modified time: 2026-04-03 15:37:01
  */
 #include <algorithm>
+#include <charconv>
 #include <cmath>
 #include <cstring>
+#include <string>
 #include <string_view>
 #include "exec_engine.h"
 #include "function_init.h"
@@ -123,6 +125,55 @@ template <typename ListType>
 uint32_t MurmurHash3X8632(ListType a) {
   uint32_t result;
   MurmurHash3_x86_32(a.data, a.len * sizeof(typename ListType::CElementType), 0x9747b28c, &result);
+  return result;
+}
+
+template <typename InputListType, typename OutputListType>
+OutputListType ListCastNumericToNumeric(InputListType a, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  OutputListType result;
+  result.data = reinterpret_cast<typename OutputListType::CElementType *>(
+      exec_ctx->arena.Allocate(a.len * sizeof(typename OutputListType::CElementType)));
+  result.len = a.len;
+  for (uint32_t i = 0; i < a.len; i++) {
+    result.data[i] = static_cast<typename OutputListType::CElementType>(a.data[i]);  // NOLINT
+  }
+  return result;
+}
+
+template <typename InputListType>
+StringListStruct ListCastNumericToString(InputListType a, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  StringListStruct result;
+  result.data = reinterpret_cast<StringStruct *>(exec_ctx->arena.Allocate(a.len * sizeof(StringStruct)));
+  result.len = a.len;
+  char buf[64];
+  for (uint32_t i = 0; i < a.len; i++) {
+    auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), a.data[i]);
+    int written = static_cast<int>(ptr - buf);
+    result.data[i].data = reinterpret_cast<char *>(exec_ctx->arena.Allocate(written));
+    memcpy(result.data[i].data, buf, written);
+    result.data[i].len = written;
+  }
+  return result;
+}
+
+template <typename OutputListType>
+OutputListType ListCastStringToNumeric(StringListStruct a, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  OutputListType result;
+  result.data = reinterpret_cast<typename OutputListType::CElementType *>(
+      exec_ctx->arena.Allocate(a.len * sizeof(typename OutputListType::CElementType)));
+  result.len = a.len;
+  static_assert(!std::is_floating_point_v<typename OutputListType::CElementType>,
+                "C++17 std::from_chars does not support floating point types");
+  for (uint32_t i = 0; i < a.len; i++) {
+    const char *begin = a.data[i].data;
+    const char *end = begin + a.data[i].len;
+    typename OutputListType::CElementType val{};
+    std::from_chars(begin, end, val);
+    result.data[i] = val;
+  }
   return result;
 }
 
@@ -363,6 +414,93 @@ Status InitHashFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+template <typename InputListType, typename OutputListType>
+Status RegisterNumericListCast(FunctionRegistry *reg, const std::string &func_name, ValueType input_list_vt,
+                               ValueType output_list_vt) {
+  if (input_list_vt == output_list_vt) {
+    return Status::OK();
+  }
+  return reg->RegisterReadOnlyCFunc(FunctionSignature(func_name, {input_list_vt, ValueType::kPtr}, output_list_vt),
+                                    reinterpret_cast<void *>(ListCastNumericToNumeric<InputListType, OutputListType>));
+}
+
+template <typename OutputListType>
+Status RegisterAllInputsForNumericListCast(FunctionRegistry *reg, const std::string &func_name,
+                                           ValueType output_list_vt) {
+  JF_RETURN_NOT_OK(
+      (RegisterNumericListCast<U8ListStruct, OutputListType>(reg, func_name, ValueType::kU8List, output_list_vt)));
+  JF_RETURN_NOT_OK(
+      (RegisterNumericListCast<I8ListStruct, OutputListType>(reg, func_name, ValueType::kI8List, output_list_vt)));
+  JF_RETURN_NOT_OK(
+      (RegisterNumericListCast<U16ListStruct, OutputListType>(reg, func_name, ValueType::kU16List, output_list_vt)));
+  JF_RETURN_NOT_OK(
+      (RegisterNumericListCast<I16ListStruct, OutputListType>(reg, func_name, ValueType::kI16List, output_list_vt)));
+  JF_RETURN_NOT_OK(
+      (RegisterNumericListCast<U32ListStruct, OutputListType>(reg, func_name, ValueType::kU32List, output_list_vt)));
+  JF_RETURN_NOT_OK(
+      (RegisterNumericListCast<I32ListStruct, OutputListType>(reg, func_name, ValueType::kI32List, output_list_vt)));
+  JF_RETURN_NOT_OK(
+      (RegisterNumericListCast<U64ListStruct, OutputListType>(reg, func_name, ValueType::kU64List, output_list_vt)));
+  JF_RETURN_NOT_OK(
+      (RegisterNumericListCast<I64ListStruct, OutputListType>(reg, func_name, ValueType::kI64List, output_list_vt)));
+  JF_RETURN_NOT_OK(
+      (RegisterNumericListCast<F32ListStruct, OutputListType>(reg, func_name, ValueType::kF32List, output_list_vt)));
+  JF_RETURN_NOT_OK(
+      (RegisterNumericListCast<F64ListStruct, OutputListType>(reg, func_name, ValueType::kF64List, output_list_vt)));
+  if constexpr (!std::is_floating_point_v<typename OutputListType::CElementType>) {
+    JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+        FunctionSignature(func_name, {ValueType::kStringList, ValueType::kPtr}, output_list_vt),
+        reinterpret_cast<void *>(ListCastStringToNumeric<OutputListType>)));
+  }
+  return Status::OK();
+}
+
+Status InitListCastFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(RegisterAllInputsForNumericListCast<U8ListStruct>(reg, "CastU8List", ValueType::kU8List));
+  JF_RETURN_NOT_OK(RegisterAllInputsForNumericListCast<I8ListStruct>(reg, "CastI8List", ValueType::kI8List));
+  JF_RETURN_NOT_OK(RegisterAllInputsForNumericListCast<U16ListStruct>(reg, "CastU16List", ValueType::kU16List));
+  JF_RETURN_NOT_OK(RegisterAllInputsForNumericListCast<I16ListStruct>(reg, "CastI16List", ValueType::kI16List));
+  JF_RETURN_NOT_OK(RegisterAllInputsForNumericListCast<U32ListStruct>(reg, "CastU32List", ValueType::kU32List));
+  JF_RETURN_NOT_OK(RegisterAllInputsForNumericListCast<I32ListStruct>(reg, "CastI32List", ValueType::kI32List));
+  JF_RETURN_NOT_OK(RegisterAllInputsForNumericListCast<U64ListStruct>(reg, "CastU64List", ValueType::kU64List));
+  JF_RETURN_NOT_OK(RegisterAllInputsForNumericListCast<I64ListStruct>(reg, "CastI64List", ValueType::kI64List));
+  JF_RETURN_NOT_OK(RegisterAllInputsForNumericListCast<F32ListStruct>(reg, "CastF32List", ValueType::kF32List));
+  JF_RETURN_NOT_OK(RegisterAllInputsForNumericListCast<F64ListStruct>(reg, "CastF64List", ValueType::kF64List));
+
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("CastStringList", {ValueType::kU8List, ValueType::kPtr}, ValueType::kStringList),
+      reinterpret_cast<void *>(ListCastNumericToString<U8ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("CastStringList", {ValueType::kI8List, ValueType::kPtr}, ValueType::kStringList),
+      reinterpret_cast<void *>(ListCastNumericToString<I8ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("CastStringList", {ValueType::kU16List, ValueType::kPtr}, ValueType::kStringList),
+      reinterpret_cast<void *>(ListCastNumericToString<U16ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("CastStringList", {ValueType::kI16List, ValueType::kPtr}, ValueType::kStringList),
+      reinterpret_cast<void *>(ListCastNumericToString<I16ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("CastStringList", {ValueType::kU32List, ValueType::kPtr}, ValueType::kStringList),
+      reinterpret_cast<void *>(ListCastNumericToString<U32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("CastStringList", {ValueType::kI32List, ValueType::kPtr}, ValueType::kStringList),
+      reinterpret_cast<void *>(ListCastNumericToString<I32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("CastStringList", {ValueType::kU64List, ValueType::kPtr}, ValueType::kStringList),
+      reinterpret_cast<void *>(ListCastNumericToString<U64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("CastStringList", {ValueType::kI64List, ValueType::kPtr}, ValueType::kStringList),
+      reinterpret_cast<void *>(ListCastNumericToString<I64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("CastStringList", {ValueType::kF32List, ValueType::kPtr}, ValueType::kStringList),
+      reinterpret_cast<void *>(ListCastNumericToString<F32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("CastStringList", {ValueType::kF64List, ValueType::kPtr}, ValueType::kStringList),
+      reinterpret_cast<void *>(ListCastNumericToString<F64ListStruct>)));
+
+  return Status::OK();
+}
+
 }  // namespace
 
 Status InitListBasicFunc(FunctionRegistry *reg) {
@@ -372,6 +510,7 @@ Status InitListBasicFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitSortFunc(reg));
   JF_RETURN_NOT_OK(InitTruncateFunc(reg));
   JF_RETURN_NOT_OK(InitHashFunc(reg));
+  JF_RETURN_NOT_OK(InitListCastFunc(reg));
   return Status::OK();
 }
 
