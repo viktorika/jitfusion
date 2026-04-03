@@ -21,10 +21,9 @@ inline StringStruct StringConcat(StringStruct a, StringStruct b, void *exec_cont
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
   StringStruct result;
   result.len = a.len + b.len;
-  result.data = reinterpret_cast<char *>(exec_ctx->arena.Allocate((result.len + 1) * sizeof(char)));
+  result.data = reinterpret_cast<char *>(exec_ctx->arena.Allocate(result.len * sizeof(char)));
   memcpy(result.data, a.data, a.len * sizeof(char));
   memcpy(result.data + a.len, b.data, b.len * sizeof(char));
-  result.data[result.len] = '\0';
   return result;
 }
 

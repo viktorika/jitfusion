@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-21 10:38:03
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-21 16:37:45
+ * @Last Modified time: 2026-04-03 16:12:57
  */
 #include "codegen.h"
 #include "llvm/IR/Type.h"
@@ -49,9 +49,8 @@ struct MakeValueVisitor {
   llvm::Value *operator()(double v) const { return llvm::ConstantFP::get(llvm::Type::getDoubleTy(ctx_.context), v); }
 
   llvm::Value *operator()(const std::string &v) const {
-    char *str = reinterpret_cast<char *>(ctx_.const_value_arena.Allocate(static_cast<int>(v.size()) + 1));
-    memcpy(str, v.data(), v.size());
-    str[v.size()] = '\0';
+    char *str = reinterpret_cast<char *>(ctx_.const_value_arena.Allocate(static_cast<int>(v.size())));
+    memcpy(str, v.c_str(), v.size());
     llvm::Constant *str_ptr =
         llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_.context), reinterpret_cast<int64_t>(str), false);
     str_ptr = llvm::ConstantExpr::getIntToPtr(str_ptr, llvm::Type::getInt8Ty(ctx_.context)->getPointerTo());

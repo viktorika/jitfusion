@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-21 16:16:20
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-21 17:00:59
+ * @Last Modified time: 2026-04-03 16:07:20
  */
 #include "codegen.h"
 #include "llvm/IR/DerivedTypes.h"
@@ -20,9 +20,8 @@ struct MakeListVisitor {
 
     for (std::size_t idx = 0; idx < list.size(); ++idx) {
       data[idx].data =
-          reinterpret_cast<char *>(ctx_.const_value_arena.Allocate(static_cast<int>(list[idx].size()) + 1));
+          reinterpret_cast<char *>(ctx_.const_value_arena.Allocate(static_cast<int>(list[idx].size())));
       memcpy(data[idx].data, list[idx].data(), list[idx].size() * sizeof(char));
-      data[idx].data[list[idx].size()] = '\0';
       data[idx].len = list[idx].size();
     }
     llvm::Constant *data_ptr =
