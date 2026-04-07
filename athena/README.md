@@ -60,4 +60,4 @@ For more details, please refer to the athena_test.cc file.
 
 # Supported functions
 
-Currently supported function documentation：https://github.com/viktorika/jitfusion/blob/main/doc/function.md
+Currently supported function documentation：[function.md](../doc/function.md)
