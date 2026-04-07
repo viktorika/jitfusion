@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-04-09 15:44:50
  * @Last Modified by: victorika
- * @Last Modified time: 2025-04-16 16:25:46
+ * @Last Modified time: 2026-04-07 15:23:05
  */
 #include "ast_builder.h"
 #include <memory>
@@ -15,7 +15,7 @@ namespace athena {
 
 using jitfusion::NoOPNode;
 
-Status ProgramAstBuilder::BuildProgram(const std::string& code, std::unique_ptr<ExecNode>* result) {
+Status ProgramAstBuilder::BuildExpression(const std::string& code, std::unique_ptr<ExecNode>* result) {
   statements_.clear();
   var2index_.clear();
   parser_error_message_.clear();
@@ -31,24 +31,22 @@ Status ProgramAstBuilder::BuildProgram(const std::string& code, std::unique_ptr<
   return Status::OK();
 }
 
-Status ProgramAstBuilder::BuildProgram(const std::vector<std::string>& codes, std::unique_ptr<ExecNode>* result) {
+Status ProgramAstBuilder::BuildPipeline(const std::string& code, std::unique_ptr<ExecNode>* result) {
   std::vector<std::unique_ptr<ExecNode>> args;
-  for (const auto& code : codes) {
-    statements_.clear();
-    var2index_.clear();
-    parser_error_message_.clear();
-    custom_error_message_.clear();
-    location_.initialize(&code);
-    if (auto st = Scan(code); !st.ok()) {
-      return st;
-    }
-    if (!custom_error_message_.empty()) {
-      return Status::ParseError(custom_error_message_);
-    }
-    for (auto& statement : statements_) {
-      if (!statement.has_dependency) {
-        args.emplace_back(std::move(statement.expression));
-      }
+  statements_.clear();
+  var2index_.clear();
+  parser_error_message_.clear();
+  custom_error_message_.clear();
+  location_.initialize(&code);
+  if (auto st = Scan(code); !st.ok()) {
+    return st;
+  }
+  if (!custom_error_message_.empty()) {
+    return Status::ParseError(custom_error_message_);
+  }
+  for (auto& statement : statements_) {
+    if (!statement.has_dependency) {
+      args.emplace_back(std::move(statement.expression));
     }
   }
   auto root = std::unique_ptr<ExecNode>(new NoOPNode(std::move(args)));
