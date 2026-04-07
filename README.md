@@ -197,9 +197,8 @@ int main() {
 
 # Supported functions
 
-Currently supported function documentation：https://github.com/viktorika/jitfusion/blob/main/doc/function.md
+Currently supported function documentation：[function.md](doc/function.md)
 
 # Tools
 
-* athena：An execution engine utilizing DSL in combination with jitfusion. You can find more details in the athena directory.
-https://github.com/viktorika/jitfusion/tree/main/athena
+* athena：An execution engine utilizing DSL in combination with jitfusion. You can find more details in the [athena](athena) directory.
