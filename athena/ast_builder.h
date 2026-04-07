@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-04-09 15:44:37
  * @Last Modified by: victorika
- * @Last Modified time: 2025-04-16 16:25:25
+ * @Last Modified time: 2026-04-07 15:23:37
  */
 #pragma once
 
@@ -35,8 +35,8 @@ struct Statement {
 
 class ProgramAstBuilder {
  public:
-  Status BuildProgram(const std::string& code, std::unique_ptr<ExecNode>* result);
-  Status BuildProgram(const std::vector<std::string>& codes, std::unique_ptr<ExecNode>* result);
+  Status BuildExpression(const std::string& code, std::unique_ptr<ExecNode>* result);
+  Status BuildPipeline(const std::string& code, std::unique_ptr<ExecNode>* result);
 
   std::unique_ptr<ExecNode> MakeRefNode(const std::string& var_name);
   void AddStatement(Statement statement);

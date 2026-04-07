@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-04-09 15:45:31
  * @Last Modified by: victorika
- * @Last Modified time: 2026-04-02 16:51:13
+ * @Last Modified time: 2026-04-07 15:17:10
  */
 #include "athena.h"
 #include <array>
@@ -1478,6 +1478,37 @@ TEST(ExecErrorTest, BatchExecutePartialFailure) {
 
   EXPECT_EQ(output[0], 10 + 3);
   EXPECT_EQ(output[1], 10 * 3);
+}
+
+TEST(ComplexTest, TwoStoreInSingleCode) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  }
+  {
+    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kVoid);
+    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
+  }
+
+  std::string code = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  store(output, 0, a + b);
+  store(output, 1, a * b);
+  )";
+
+  std::vector<std::string> codes = {code};
+  ASSERT_TRUE(athena.Compile(codes, func_registry).ok());
+
+  std::vector<float> value = {5, 3};
+  std::vector<float> output = {0, 0};
+  ASSERT_TRUE(athena.Execute(value.data(), output.data()).ok());
+
+  EXPECT_EQ(output[0], 5 + 3);
+  EXPECT_EQ(output[1], 5 * 3);
 }
 
 GTEST_API_ int main(int argc, char** argv) {

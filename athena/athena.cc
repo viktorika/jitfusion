@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-04-09 15:44:26
  * @Last Modified by: victorika
- * @Last Modified time: 2026-03-31 14:56:54
+ * @Last Modified time: 2026-04-07 15:23:43
  */
 #include "athena.h"
 #include "ast_builder.h"
@@ -16,7 +16,7 @@ namespace athena {
 Status Athena::Compile(const std::string& code, const std::unique_ptr<FunctionRegistry>& func_registry) {
   ProgramAstBuilder ast_builder;
   std::unique_ptr<ExecNode> program_ast;
-  JF_RETURN_NOT_OK(ast_builder.BuildProgram(code, &program_ast));
+  JF_RETURN_NOT_OK(ast_builder.BuildExpression(code, &program_ast));
   return exec_engine_.Compile(program_ast, func_registry);
 }
 
@@ -31,7 +31,7 @@ Status Athena::Compile(const std::vector<std::string>& code, const std::unique_p
   std::vector<std::unique_ptr<ExecNode>> program_asts;
   for (const auto& code_str : code) {
     std::unique_ptr<ExecNode> program_ast;
-    JF_RETURN_NOT_OK(ast_builder.BuildProgram(code_str, &program_ast));
+    JF_RETURN_NOT_OK(ast_builder.BuildPipeline(code_str, &program_ast));
     program_asts.emplace_back(std::move(program_ast));
   }
   PipelineGrouper pipeline_grouper;
