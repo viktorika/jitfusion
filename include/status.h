@@ -13,7 +13,7 @@
 
 namespace jitfusion {
 
-class Status {
+class [[nodiscard]] Status {
  public:
   Status() = default;
   ~Status() = default;
@@ -95,10 +95,10 @@ class Status {
 };
 
 #define JF_RETURN_NOT_OK(expr) \
-  do {                      \
-    Status st = (expr);     \
-    if (!st.ok()) {         \
-      return st;            \
-    }                       \
+  do {                         \
+    Status st = (expr);        \
+    if (!st.ok()) {            \
+      return st;               \
+    }                          \
   } while (false)
 }  // namespace jitfusion

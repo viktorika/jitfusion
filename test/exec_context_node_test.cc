@@ -36,7 +36,7 @@ TEST(ExecContextTest, CreateDataTest) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("create_u32_list", {ValueType::kPtr}, ValueType::kU32List);
-  func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(CreateU32List));
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(CreateU32List)).ok());
 
   auto args_node = std::unique_ptr<ExecNode>(new ExecContextNode);
   std::vector<std::unique_ptr<ExecNode>> create_func_args;

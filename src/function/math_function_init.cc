@@ -21,9 +21,9 @@ llvm::Value *CallBuiltinExpFunction(const FunctionSignature &sign,
                                     const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,
                                     const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
   auto *value = arg_llvm_value_list.at(0);
-  CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), sign.GetRetType(), &value);
+  (void)CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), sign.GetRetType(), &value);
   llvm::Type *new_args_llvm_type;
-  CodeGen::ValueTypeToLLVMType(ctx, sign.GetRetType(), &new_args_llvm_type);
+  (void)CodeGen::ValueTypeToLLVMType(ctx, sign.GetRetType(), &new_args_llvm_type);
   llvm::Function *func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::exp, new_args_llvm_type);
   return ctx.builder.CreateCall(func, value, "exp");
 }
@@ -32,9 +32,9 @@ llvm::Value *CallBuiltinLogFunction(const FunctionSignature &sign,
                                     const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,
                                     const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
   auto *value = arg_llvm_value_list.at(0);
-  CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), sign.GetRetType(), &value);
+  (void)CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), sign.GetRetType(), &value);
   llvm::Type *new_args_llvm_type;
-  CodeGen::ValueTypeToLLVMType(ctx, sign.GetRetType(), &new_args_llvm_type);
+  (void)CodeGen::ValueTypeToLLVMType(ctx, sign.GetRetType(), &new_args_llvm_type);
   llvm::Function *func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::log, new_args_llvm_type);
   return ctx.builder.CreateCall(func, value, "log");
 }
@@ -43,9 +43,9 @@ llvm::Value *CallBuiltinLog2Function(const FunctionSignature &sign,
                                      const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,
                                      const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
   auto *value = arg_llvm_value_list.at(0);
-  CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), sign.GetRetType(), &value);
+  (void)CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), sign.GetRetType(), &value);
   llvm::Type *new_args_llvm_type;
-  CodeGen::ValueTypeToLLVMType(ctx, sign.GetRetType(), &new_args_llvm_type);
+  (void)CodeGen::ValueTypeToLLVMType(ctx, sign.GetRetType(), &new_args_llvm_type);
   llvm::Function *func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::log2, new_args_llvm_type);
   return ctx.builder.CreateCall(func, value, "log2");
 }
@@ -54,9 +54,9 @@ llvm::Value *CallBuiltinLog10Function(const FunctionSignature &sign,
                                       const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,
                                       const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
   auto *value = arg_llvm_value_list.at(0);
-  CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), sign.GetRetType(), &value);
+  (void)CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), sign.GetRetType(), &value);
   llvm::Type *new_args_llvm_type;
-  CodeGen::ValueTypeToLLVMType(ctx, sign.GetRetType(), &new_args_llvm_type);
+  (void)CodeGen::ValueTypeToLLVMType(ctx, sign.GetRetType(), &new_args_llvm_type);
   llvm::Function *func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::log10, new_args_llvm_type);
   return ctx.builder.CreateCall(func, value, "log10");
 }
@@ -84,10 +84,10 @@ llvm::Value *CallBuiltinPowIFunction(const FunctionSignature &sign,
   auto *value = arg_llvm_value_list.at(0);
   auto *power = arg_llvm_value_list.at(1);
   if (value->getType()->isIntegerTy()) {
-    CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), ValueType::kF64, &value);
+    (void)CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), ValueType::kF64, &value);
   }
   if (value->getType()->isDoubleTy()) {
-    CodeGen::NumericTypeConvert(ctx, ValueType::kI32, ValueType::kI16, &power);
+    (void)CodeGen::NumericTypeConvert(ctx, ValueType::kI32, ValueType::kI16, &power);
   }
   llvm::Function *func =
       llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::powi, {value->getType(), power->getType()});
@@ -139,9 +139,9 @@ llvm::Value *CallBuiltinAbsFunction(const FunctionSignature &sign, const std::ve
                                     const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
   auto *value = arg_llvm_value_list.at(0);
   if (TypeHelper::IsIntegerType(sign.GetRetType())) {
-    CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), sign.GetRetType(), &value);
+    (void)CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().at(0), sign.GetRetType(), &value);
     llvm::Type *new_args_llvm_type;
-    CodeGen::ValueTypeToLLVMType(ctx, sign.GetRetType(), &new_args_llvm_type);
+    (void)CodeGen::ValueTypeToLLVMType(ctx, sign.GetRetType(), &new_args_llvm_type);
     std::vector<llvm::Type *> abs_func_args_list = {new_args_llvm_type};
     llvm::Function *abs_func = llvm::Intrinsic::getDeclaration(&ctx.module, llvm::Intrinsic::abs, abs_func_args_list);
     llvm::Value *nsw = llvm::ConstantInt::get(llvm::Type::getInt1Ty(ctx.context), 1);
@@ -203,7 +203,7 @@ llvm::Value *CallBuiltinCastFunction(const FunctionSignature &sign,
                                      const std::vector<llvm::Type *> & /*arg_llvm_type_list*/,
                                      const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
   auto *result = arg_llvm_value_list.back();
-  CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().back(), sign.GetRetType(), &result);
+  (void)CodeGen::NumericTypeConvert(ctx, sign.GetparamTypes().back(), sign.GetRetType(), &result);
   return result;
 };
 
