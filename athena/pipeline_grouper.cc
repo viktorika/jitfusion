@@ -35,7 +35,7 @@ std::vector<std::unique_ptr<ExecNode>> PipelineGrouper::Group(std::vector<std::u
     current_root_id_ = StringHash("root_" + std::to_string(i));
     root_ids.push_back(current_root_id_);
     uint32_t height;
-    GetHeight(nodes[i].get(), &height);
+    (void)GetHeight(nodes[i].get(), &height);
   }
   std::vector<std::unique_ptr<ExecNode>> result;
   std::unordered_map<uint64_t, std::vector<std::unique_ptr<ExecNode>>> union_id_to_nodes;

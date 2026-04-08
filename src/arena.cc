@@ -81,7 +81,7 @@ void Arena::ReleaseChunks(bool retain_first) {
       retain_first = false;
       continue;
     }
-    Free(chunk.buf_);
+    (void)Free(chunk.buf_);
   }
 }
 

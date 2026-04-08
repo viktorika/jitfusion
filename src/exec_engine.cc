@@ -703,7 +703,7 @@ Status ExecEngine::CreateJitAndOptimize(const std::unique_ptr<FunctionRegistry>&
   if (auto err = jit_->get()->addIRModule(llvm::orc::ThreadSafeModule(std::move(owner), std::move(llvm_context)))) {
     return Status::RuntimeError("Failed to add module to JIT: ", llvm::toString(std::move(err)));
   }
-  func_registry->MappingToJIT(jit_->get());
+  JF_RETURN_NOT_OK(func_registry->MappingToJIT(jit_->get()));
   // optimize
   jit_->get()->getIRTransformLayer().setTransform(
       [&, this](llvm::orc::ThreadSafeModule tsm, const llvm::orc::MaterializationResponsibility& /*r*/) {
