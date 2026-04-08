@@ -9,7 +9,6 @@
 #include <functional>
 #include <map>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 #include "arena.h"
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
@@ -144,7 +143,6 @@ class FunctionRegistry {
     bool operator()(const FunctionSignature &s1, const FunctionSignature &s2) const { return s1 == s2; }
   };
 
-  std::unordered_map<std::string, std::vector<std::tuple<FunctionSignature, FunctionStructure>>> name2funclist_;
   std::unordered_map<const FunctionSignature, FunctionStructure, KeyHash, KeyEquals> signature2funcstruct_;
 
   friend FunctionRegistryFactory;
