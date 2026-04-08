@@ -106,7 +106,6 @@ Status FunctionRegistry::RegisterFunc(const FunctionSignature& func_sign, Functi
   if (FunctionType::kCFunc == func_struct.func_type && nullptr == func_struct.c_func_ptr) {
     return Status::InvalidArgument("c function must supply the c function address");
   }
-  name2funclist_[func_sign.GetName()].emplace_back(func_sign, func_struct);
   signature2funcstruct_[func_sign] = func_struct;
   return Status::OK();
 }
@@ -118,7 +117,6 @@ Status FunctionRegistry::RegisterLLVMIntrinicFunc(const FunctionSignature& func_
   FunctionStructure func_struct;
   func_struct.func_type = FunctionType::kLLVMIntrinicFunc;
   func_struct.codegen_func = std::move(codegen_func);
-  name2funclist_[func_sign.GetName()].emplace_back(func_sign, func_struct);
   signature2funcstruct_[func_sign] = func_struct;
   return Status::OK();
 }
@@ -131,7 +129,6 @@ Status FunctionRegistry::RegisterReadOnlyCFunc(const FunctionSignature& func_sig
   func_struct.func_type = FunctionType::kCFunc;
   func_struct.c_func_ptr = c_func_ptr;
   func_struct.func_attr_setter = ReadOnlyFunctionAttributeSetter;
-  name2funclist_[func_sign.GetName()].emplace_back(func_sign, func_struct);
   signature2funcstruct_[func_sign] = func_struct;
   return Status::OK();
 }
@@ -145,7 +142,6 @@ Status FunctionRegistry::RegisterStoreCFunc(const FunctionSignature& func_sign, 
   func_struct.func_type = FunctionType::kCFunc;
   func_struct.c_func_ptr = c_func_ptr;
   func_struct.func_attr_setter = StoreFunctionSetter{store_args_index};
-  name2funclist_[func_sign.GetName()].emplace_back(func_sign, func_struct);
   signature2funcstruct_[func_sign] = func_struct;
   return Status::OK();
 }
@@ -158,24 +154,18 @@ Status FunctionRegistry::RegisterCommutativeCFunc(const FunctionSignature& func_
   func_struct.func_type = FunctionType::kCFunc;
   func_struct.c_func_ptr = c_func_ptr;
   func_struct.func_attr_setter = CommutantFunctionAttributeSetter;
-  name2funclist_[func_sign.GetName()].emplace_back(func_sign, func_struct);
   signature2funcstruct_[func_sign] = func_struct;
   return Status::OK();
 }
 
 Status FunctionRegistry::GetFuncBySign(FunctionSignature& func_sign, FunctionStructure* func_struct) const {
-  auto iter = name2funclist_.find(func_sign.GetName());
-  if (iter == name2funclist_.end()) {
+  auto iter = signature2funcstruct_.find(func_sign);
+  if (iter == signature2funcstruct_.end()) {
     return Status::RuntimeError("function ", func_sign.ToString(), " not found");
   }
-  for (const auto& [sign, fs] : iter->second) {
-    if (func_sign == sign) {
-      func_sign.SetRetType(sign.GetRetType());
-      *func_struct = fs;
-      return Status::OK();
-    }
-  }
-  return Status::RuntimeError("function ", func_sign.ToString(), " not found");
+  func_sign.SetRetType(iter->first.GetRetType());
+  *func_struct = iter->second;
+  return Status::OK();
 }
 
 Status FunctionRegistry::SetCFuncAttr(llvm::Module* m) {
