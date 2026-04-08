@@ -55,12 +55,11 @@ constexpr const char *kCommutative = "commutative";
 
 struct IRCodeGenContext {
   IRCodeGenContext(llvm::LLVMContext &context, llvm::Module &module, llvm::IRBuilder<> &builder,
-                   llvm::BasicBlock *entry_bb, llvm::Function *entry_function, LLVMStructType complex_type,
+                   llvm::Function *entry_function, LLVMStructType complex_type,
                    const std::unique_ptr<FunctionRegistry> &function_registry, Arena &const_value_arena)
       : context(context),
         module(module),
         builder(builder),
-        entry_bb(entry_bb),
         entry_function(entry_function),
         complex_type(complex_type),
         function_registry(function_registry),
@@ -69,7 +68,6 @@ struct IRCodeGenContext {
   llvm::LLVMContext &context;
   llvm::Module &module;
   llvm::IRBuilder<> &builder;
-  llvm::BasicBlock *entry_bb;
   llvm::Function *entry_function;
   LLVMStructType complex_type;
   std::map<ConstantListValueType, llvm::Value *> const_list_cache;

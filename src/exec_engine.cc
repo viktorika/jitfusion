@@ -261,7 +261,7 @@ Status BuildEntryFunction(llvm::LLVMContext& llvm_context, std::unique_ptr<llvm:
   llvm::BasicBlock* entry_bb = llvm::BasicBlock::Create(llvm_context, "entryBB", entry_function);
   llvm::IRBuilder<> builder(entry_bb);
   std::unique_ptr<IRCodeGenContext> codegen_ctx = std::make_unique<IRCodeGenContext>(
-      llvm_context, *owner, builder, entry_bb, entry_function, llvm_struct_type, func_registry, const_value_arena_);
+      llvm_context, *owner, builder, entry_function, llvm_struct_type, func_registry, const_value_arena_);
 
   CodeGen codegen(*codegen_ctx);
 

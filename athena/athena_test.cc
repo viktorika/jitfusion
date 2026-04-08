@@ -1216,6 +1216,133 @@ TEST(SwitchTest, Test4) {
   EXPECT_EQ(std::get<std::string>(ret), "b");
 }
 
+TEST(NestedIfTest, Test1) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  std::string code = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  r = if(a > 10, if(b > 5, a + b, a - b), a * b);
+  )";
+  ASSERT_TRUE(athena.Compile(code, func_registry).ok());
+  RetType ret;
+  std::vector<float> value = {20, 8};
+  ASSERT_TRUE(athena.Execute(value.data(), &ret).ok());
+  EXPECT_NEAR(std::get<float>(ret), 28, 1e-5);
+}
+
+TEST(NestedIfTest, Test2) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  std::string code = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  r = if(a > 10, a + b, if(b > 5, a * b, a / b));
+  )";
+  ASSERT_TRUE(athena.Compile(code, func_registry).ok());
+  RetType ret;
+  std::vector<float> value = {3, 8};
+  ASSERT_TRUE(athena.Execute(value.data(), &ret).ok());
+  EXPECT_NEAR(std::get<float>(ret), 24, 1e-5);
+}
+
+TEST(NestedIfTest, Test3) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  std::string code = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  c = load(entry_arg, 2);
+  r = if(a > 10, if(b > 5, if(c > 1, a + b + c, a + b - c), a - b), a * b);
+  )";
+  ASSERT_TRUE(athena.Compile(code, func_registry).ok());
+  RetType ret;
+  std::vector<float> value = {20, 8, 3};
+  ASSERT_TRUE(athena.Execute(value.data(), &ret).ok());
+  EXPECT_NEAR(std::get<float>(ret), 31, 1e-5);
+}
+
+TEST(NestedIfTest, Test4) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  std::string code = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  r = if(a > 10, switch(b > 20, a + b, b > 10, a * b, a - b), a / b);
+  )";
+  ASSERT_TRUE(athena.Compile(code, func_registry).ok());
+  RetType ret;
+  std::vector<float> value = {20, 15};
+  ASSERT_TRUE(athena.Execute(value.data(), &ret).ok());
+  EXPECT_NEAR(std::get<float>(ret), 300, 1e-5);
+}
+
+TEST(NestedSwitchTest, Test1) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  std::string code = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  r = switch(a > 100, a + b, a > 10, if(b > 5, a * b, a / b), a - b);
+  )";
+  ASSERT_TRUE(athena.Compile(code, func_registry).ok());
+  RetType ret;
+  std::vector<float> value = {20, 8};
+  ASSERT_TRUE(athena.Execute(value.data(), &ret).ok());
+  EXPECT_NEAR(std::get<float>(ret), 160, 1e-5);
+}
+
+TEST(NestedSwitchTest, Test2) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  std::string code = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  r = switch(a > 100, a + b, a > 50, a * b, if(b > 5, a - b, a / b));
+  )";
+  ASSERT_TRUE(athena.Compile(code, func_registry).ok());
+  RetType ret;
+  std::vector<float> value = {3, 2};
+  ASSERT_TRUE(athena.Execute(value.data(), &ret).ok());
+  EXPECT_NEAR(std::get<float>(ret), 1.5, 1e-5);
+}
+
+TEST(NestedSwitchTest, Test3) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+  EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  std::string code = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  r = switch(a > 100, a + b, a > 10, switch(b > 20, a * b, b > 5, a - b, a / b), 0);
+  )";
+  ASSERT_TRUE(athena.Compile(code, func_registry).ok());
+  RetType ret;
+  std::vector<float> value = {20, 8};
+  ASSERT_TRUE(athena.Execute(value.data(), &ret).ok());
+  EXPECT_NEAR(std::get<float>(ret), 12, 1e-5);
+}
+
 TEST(ComplexTest, Test1) {
   Athena athena;
   std::unique_ptr<FunctionRegistry> func_registry;
