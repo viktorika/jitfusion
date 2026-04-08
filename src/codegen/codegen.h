@@ -36,6 +36,7 @@ class CodeGen : public Visitor {
  private:
   Status SolveBinaryOpNumericType(BinaryOPNode &binary_node, llvm::Value *lhs_value, llvm::Value *rhs_value);
   Status SolveBinaryOpComplexType(BinaryOPNode &binary_node, llvm::Value *lhs_value, llvm::Value *rhs_value);
+  Status SolveShortCircuitLogicalOp(BinaryOPNode &binary_op_node);
 
   IRCodeGenContext &ctx_;
   llvm::Value *value_{nullptr};

@@ -329,3 +329,77 @@ TEST(BinaryOPTest, StringConcatTest) {
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<std::string>(result), l + r);
 }
+
+TEST(BinaryOPTest, LogicalAndStringRejectTest) {
+  std::string l = "hello";
+  std::string r = "world";
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto l_node = std::unique_ptr<ExecNode>(new ConstantValueNode(l));
+  auto r_node = std::unique_ptr<ExecNode>(new ConstantValueNode(r));
+  auto op_node = std::unique_ptr<ExecNode>(new BinaryOPNode(BinaryOPType::kAnd, std::move(l_node), std::move(r_node)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  EXPECT_FALSE(st.ok());
+  EXPECT_NE(st.ToString().find("Logical operator only supports numeric types"), std::string::npos);
+}
+
+TEST(BinaryOPTest, LogicalOrStringRejectTest) {
+  std::string l = "hello";
+  std::string r = "world";
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto l_node = std::unique_ptr<ExecNode>(new ConstantValueNode(l));
+  auto r_node = std::unique_ptr<ExecNode>(new ConstantValueNode(r));
+  auto op_node = std::unique_ptr<ExecNode>(new BinaryOPNode(BinaryOPType::kOr, std::move(l_node), std::move(r_node)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  EXPECT_FALSE(st.ok());
+  EXPECT_NE(st.ToString().find("Logical operator only supports numeric types"), std::string::npos);
+}
+
+TEST(BinaryOPTest, LogicalAndMixedTypeRejectTest) {
+  std::string l = "hello";
+  uint32_t r = 42;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto l_node = std::unique_ptr<ExecNode>(new ConstantValueNode(l));
+  auto r_node = std::unique_ptr<ExecNode>(new ConstantValueNode(r));
+  auto op_node = std::unique_ptr<ExecNode>(new BinaryOPNode(BinaryOPType::kAnd, std::move(l_node), std::move(r_node)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  EXPECT_FALSE(st.ok());
+  EXPECT_NE(st.ToString().find("Logical operator only supports numeric types"), std::string::npos);
+}
+
+TEST(BinaryOPTest, AndFloatTest) {
+  float l = 0.0F;
+  float r = 1.5F;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto l_node = std::unique_ptr<ExecNode>(new ConstantValueNode(l));
+  auto r_node = std::unique_ptr<ExecNode>(new ConstantValueNode(r));
+  auto op_node = std::unique_ptr<ExecNode>(new BinaryOPNode(BinaryOPType::kAnd, std::move(l_node), std::move(r_node)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(static_cast<bool>(std::get<uint8_t>(result)), false);
+}
+
+TEST(BinaryOPTest, OrFloatTest) {
+  double l = 3.14;
+  double r = 0.0;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto l_node = std::unique_ptr<ExecNode>(new ConstantValueNode(l));
+  auto r_node = std::unique_ptr<ExecNode>(new ConstantValueNode(r));
+  auto op_node = std::unique_ptr<ExecNode>(new BinaryOPNode(BinaryOPType::kOr, std::move(l_node), std::move(r_node)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(static_cast<bool>(std::get<uint8_t>(result)), true);
+}
