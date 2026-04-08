@@ -100,7 +100,7 @@ class FunctionSignature {
 
   [[nodiscard]] const std::string &GetName() const { return func_name_; }
 
-  [[nodiscard]] const std::vector<ValueType> &GetparamTypes() const { return param_types_; }
+  [[nodiscard]] const std::vector<ValueType> &GetParamTypes() const { return param_types_; }
 
   [[nodiscard]] std::string ToString() const;
 
