@@ -153,8 +153,17 @@ Status Validator::Visit(BinaryOPNode& binary_op_node) {
     return Status::ParseError("Cant no div/mod zero");
   }
 
-  if (TypeHelper::IsRelationalBinaryOPType(binary_op_node.GetOp()) ||
-      TypeHelper::IsLogicalBinaryOPType(binary_op_node.GetOp())) {
+  if (TypeHelper::IsLogicalBinaryOPType(binary_op_node.GetOp())) {
+    if (!TypeHelper::IsNumericType(left->GetReturnType()) || !TypeHelper::IsNumericType(right->GetReturnType())) {
+      return Status::ParseError("Logical operator only supports numeric types, got ",
+                                TypeHelper::TypeToString(left->GetReturnType()), " and ",
+                                TypeHelper::TypeToString(right->GetReturnType()));
+    }
+    binary_op_node.SetReturnType(ValueType::kU8);
+    return Status::OK();
+  }
+
+  if (TypeHelper::IsRelationalBinaryOPType(binary_op_node.GetOp())) {
     binary_op_node.SetReturnType(ValueType::kU8);
     return Status::OK();
   }

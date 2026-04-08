@@ -133,11 +133,9 @@ Status CodeGen::SolveBinaryOpNumericType(BinaryOPNode &binary_node, llvm::Value 
                            : ctx_.builder.CreateURem(lhs_value, rhs_value)
                      : ctx_.builder.CreateFRem(lhs_value, rhs_value);
       } break;
-      case BinaryOPType::kAnd:
       case BinaryOPType::kBitwiseAnd: {
         value_ = ctx_.builder.CreateAnd(lhs_value, rhs_value);
       } break;
-      case BinaryOPType::kOr:
       case BinaryOPType::kBitwiseOr: {
         value_ = ctx_.builder.CreateOr(lhs_value, rhs_value);
       } break;
@@ -227,7 +225,68 @@ Status CodeGen::SolveBinaryOpComplexType(BinaryOPNode &binary_node, llvm::Value 
   return Status::OK();
 }
 
+Status CodeGen::SolveShortCircuitLogicalOp(BinaryOPNode &binary_op_node) {
+  bool is_and = (binary_op_node.GetOp() == BinaryOPType::kAnd);
+
+  llvm::Function *cur_function = ctx_.entry_function;
+  llvm::BasicBlock *eval_rhs_block = llvm::BasicBlock::Create(ctx_.context, "sc.rhs", cur_function);
+  llvm::BasicBlock *merge_block = llvm::BasicBlock::Create(ctx_.context, "sc.merge", cur_function);
+
+  llvm::Value *lhs_value{};
+  JF_RETURN_NOT_OK(GetValue(binary_op_node.GetLeft(), &lhs_value));
+
+  llvm::Value *lhs_bool{};
+  if (lhs_value->getType()->isIntegerTy()) {
+    lhs_bool = ctx_.builder.CreateICmpNE(lhs_value, llvm::ConstantInt::get(lhs_value->getType(), 0), "lhs.tobool");
+  } else if (lhs_value->getType()->isFloatingPointTy()) {
+    lhs_bool = ctx_.builder.CreateFCmpONE(lhs_value, llvm::ConstantFP::get(lhs_value->getType(), 0.0), "lhs.tobool");
+  } else {
+    return Status::RuntimeError("Unsupported type for logical operator");
+  }
+
+  llvm::BasicBlock *lhs_end_block = ctx_.builder.GetInsertBlock();
+
+  if (is_and) {
+    ctx_.builder.CreateCondBr(lhs_bool, eval_rhs_block, merge_block);
+  } else {
+    ctx_.builder.CreateCondBr(lhs_bool, merge_block, eval_rhs_block);
+  }
+
+  ctx_.builder.SetInsertPoint(eval_rhs_block);
+  llvm::Value *rhs_value{};
+  JF_RETURN_NOT_OK(GetValue(binary_op_node.GetRight(), &rhs_value));
+
+  llvm::Value *rhs_bool{};
+  if (rhs_value->getType()->isIntegerTy()) {
+    rhs_bool = ctx_.builder.CreateICmpNE(rhs_value, llvm::ConstantInt::get(rhs_value->getType(), 0), "rhs.tobool");
+  } else if (rhs_value->getType()->isFloatingPointTy()) {
+    rhs_bool = ctx_.builder.CreateFCmpONE(rhs_value, llvm::ConstantFP::get(rhs_value->getType(), 0.0), "rhs.tobool");
+  } else {
+    return Status::RuntimeError("Unsupported type for logical operator");
+  }
+
+  llvm::BasicBlock *rhs_end_block = ctx_.builder.GetInsertBlock();
+  ctx_.builder.CreateBr(merge_block);
+
+  ctx_.builder.SetInsertPoint(merge_block);
+  llvm::PHINode *phi = ctx_.builder.CreatePHI(ctx_.builder.getInt1Ty(), 2, "sc.phi");
+
+  if (is_and) {
+    phi->addIncoming(llvm::ConstantInt::getFalse(ctx_.context), lhs_end_block);
+    phi->addIncoming(rhs_bool, rhs_end_block);
+  } else {
+    phi->addIncoming(llvm::ConstantInt::getTrue(ctx_.context), lhs_end_block);
+    phi->addIncoming(rhs_bool, rhs_end_block);
+  }
+  value_ = ctx_.builder.CreateZExt(phi, ctx_.builder.getInt8Ty());
+  return Status::OK();
+}
+
 Status CodeGen::Visit(BinaryOPNode &binary_op_node) {
+  if (TypeHelper::IsLogicalBinaryOPType(binary_op_node.GetOp())) {
+    return SolveShortCircuitLogicalOp(binary_op_node);
+  }
+
   llvm::Value *lhs_value{};
   JF_RETURN_NOT_OK(GetValue(binary_op_node.GetLeft(), &lhs_value));
 
