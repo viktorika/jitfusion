@@ -7,6 +7,9 @@
 #include <algorithm>
 #include <cstring>
 #include <unordered_set>
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
 #include "function_init.h"
 #include "function_registry.h"
 #include "status.h"
@@ -47,20 +50,47 @@ inline uint32_t CountDistinct(ListType a) {
   return unique_set.size();
 }
 
-std::array<uint8_t, 256> poptable = {
-    0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 1, 2, 2, 3, 2,
-    3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3,
-    3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5,
-    6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4,
-    3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4,
-    5, 5, 6, 5, 6, 6, 7, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6,
-    6, 7, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8};
+inline uint64_t Popcountll(uint64_t x) {
+#if defined(__GNUC__) || defined(__clang__)
+  return static_cast<uint64_t>(__builtin_popcountll(x));
+#elif defined(_MSC_VER)
+  return __popcnt64(x);
+#else
+  x = x - ((x >> 1) & 0x5555555555555555ULL);
+  x = (x & 0x3333333333333333ULL) + ((x >> 2) & 0x3333333333333333ULL);
+  x = (x + (x >> 4)) & 0x0F0F0F0F0F0F0F0FULL;
+  return (x * 0x0101010101010101ULL) >> 56;
+#endif
+}
+
+inline uint32_t Popcount(uint32_t x) {
+#if defined(__GNUC__) || defined(__clang__)
+  return static_cast<uint32_t>(__builtin_popcount(x));
+#elif defined(_MSC_VER)
+  return __popcnt(x);
+#else
+  x = x - ((x >> 1) & 0x55555555U);
+  x = (x & 0x33333333U) + ((x >> 2) & 0x33333333U);
+  x = (x + (x >> 4)) & 0x0F0F0F0FU;
+  return (x * 0x01010101U) >> 24;
+#endif
+}
 
 uint32_t CountBits(U8ListStruct a) {
   uint32_t cnt = 0;
-  for (uint32_t i = 0; i < a.len; i++) {
-    cnt += poptable[a.data[i]];
+  uint32_t i = 0;
+
+  uint32_t batch_end = a.len & ~7U;
+  for (; i < batch_end; i += 8) {
+    uint64_t val;
+    memcpy(&val, a.data + i, 8);
+    cnt += static_cast<uint32_t>(Popcountll(val));
   }
+
+  for (; i < a.len; i++) {
+    cnt += Popcount(a.data[i]);
+  }
+
   return cnt;
 }
 
