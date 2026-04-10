@@ -204,6 +204,70 @@ TEST(FunctionTest, MinTest3) {
   EXPECT_EQ(std::get<float>(result), 2.3F);
 }
 
+TEST(FunctionTest, MaxEmptyListTest) {
+  std::vector<int32_t> data = {};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Max", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<int32_t>(result), 0);
+}
+
+TEST(FunctionTest, MinEmptyListTest) {
+  std::vector<int32_t> data = {};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Min", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<int32_t>(result), 0);
+}
+
+TEST(FunctionTest, MaxEmptyListFloatTest) {
+  std::vector<float> data = {};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Max", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<float>(result), 0.0F);
+}
+
+TEST(FunctionTest, MinEmptyListFloatTest) {
+  std::vector<float> data = {};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Min", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<float>(result), 0.0F);
+}
+
 TEST(FunctionTest, CountDistinctTest1) {
   std::vector<float> data = {1.1, 2.2, 1.1, 3.3, 3.3, 4.4};
   std::unique_ptr<FunctionRegistry> func_registry;

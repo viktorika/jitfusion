@@ -27,11 +27,17 @@ inline RetType Sum(ListType a) {
 
 template <typename ListType>
 inline typename ListType::CElementType Max(ListType a) {
+  if (a.len == 0) {
+    return typename ListType::CElementType{};
+  }
   return *std::max_element(a.data, a.data + a.len);
 }
 
 template <typename ListType>
 inline typename ListType::CElementType Min(ListType a) {
+  if (a.len == 0) {
+    return typename ListType::CElementType{};
+  }
   return *std::min_element(a.data, a.data + a.len);
 }
 
