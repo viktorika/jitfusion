@@ -68,7 +68,7 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        "//:jitfusion",
+        ":jitfusion",
     ],
     copts = [
         "-Wall",
