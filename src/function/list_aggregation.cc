@@ -9,7 +9,7 @@
 #include <unordered_set>
 #include <vector>
 #ifdef _MSC_VER
-#include <intrin.h>
+#  include <intrin.h>
 #endif
 #include "function_init.h"
 #include "function_registry.h"
@@ -270,36 +270,26 @@ Status InitMedianFunc(FunctionRegistry *reg) {
 }
 
 Status InitSortedMedianFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortedMedian", {ValueType::kU8List}, ValueType::kF64),
-      reinterpret_cast<void *>(SortedMedian<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortedMedian", {ValueType::kI8List}, ValueType::kF64),
-      reinterpret_cast<void *>(SortedMedian<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortedMedian", {ValueType::kU16List}, ValueType::kF64),
-      reinterpret_cast<void *>(SortedMedian<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortedMedian", {ValueType::kI16List}, ValueType::kF64),
-      reinterpret_cast<void *>(SortedMedian<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortedMedian", {ValueType::kU32List}, ValueType::kF64),
-      reinterpret_cast<void *>(SortedMedian<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortedMedian", {ValueType::kI32List}, ValueType::kF64),
-      reinterpret_cast<void *>(SortedMedian<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortedMedian", {ValueType::kU64List}, ValueType::kF64),
-      reinterpret_cast<void *>(SortedMedian<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortedMedian", {ValueType::kI64List}, ValueType::kF64),
-      reinterpret_cast<void *>(SortedMedian<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortedMedian", {ValueType::kF32List}, ValueType::kF64),
-      reinterpret_cast<void *>(SortedMedian<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortedMedian", {ValueType::kF64List}, ValueType::kF64),
-      reinterpret_cast<void *>(SortedMedian<F64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kU8List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<U8ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kI8List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<I8ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kU16List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<U16ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kI16List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<I16ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kU32List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<U32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kI32List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<I32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kU64List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<U64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kI64List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<I64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kF32List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<F32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kF64List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<F64ListStruct>)));
   return Status::OK();
 }
 
