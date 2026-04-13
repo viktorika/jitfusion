@@ -106,7 +106,7 @@ jobs:
         run: |
           find src include athena \
             -name '*.cc' -o -name '*.h' | \
-            grep -v 'parser.cc\|parser.hh\|token.cc\|location.hh' | \
+            grep -v 'parser.cc\|parser.hh\|token.cc\|location.hh\|murmurhash3' | \
             xargs -P$(nproc) -I{} clang-tidy -p build {} 2>&1 | tee clang-tidy-output.txt
           if grep -q "error:" clang-tidy-output.txt; then
             echo "clang-tidy found errors!"
