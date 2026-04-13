@@ -2843,3 +2843,93 @@ TEST(FunctionTest, ListCastU64ToStringTest) {
   std::vector<std::string> expect = {"0", "1000000000000", "18446744073709551615"};
   EXPECT_EQ(std::get<std::vector<std::string>>(result), expect);
 }
+
+TEST(FunctionTest, GetAtU32Test) {
+  std::vector<uint32_t> data = {10, 20, 30, 40, 50};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto index_node = std::unique_ptr<ExecNode>(new ConstantValueNode(static_cast<uint32_t>(2)));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(index_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GetAt", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<uint32_t>(result), 30);
+}
+
+TEST(FunctionTest, GetAtI32Test) {
+  std::vector<int32_t> data = {-10, -20, -30, -40};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto index_node = std::unique_ptr<ExecNode>(new ConstantValueNode(static_cast<uint32_t>(3)));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(index_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GetAt", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<int32_t>(result), -40);
+}
+
+TEST(FunctionTest, GetAtF64Test) {
+  std::vector<double> data = {1.1, 2.2, 3.3};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto index_node = std::unique_ptr<ExecNode>(new ConstantValueNode(static_cast<uint32_t>(1)));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(index_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GetAt", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_DOUBLE_EQ(std::get<double>(result), 2.2);
+}
+
+TEST(FunctionTest, GetAtOutOfBoundsTest) {
+  std::vector<int32_t> data = {100, 200, 300};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto index_node = std::unique_ptr<ExecNode>(new ConstantValueNode(static_cast<uint32_t>(10)));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(index_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GetAt", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<int32_t>(result), 0);
+}
+
+TEST(FunctionTest, GetAtFirstElementTest) {
+  std::vector<uint64_t> data = {999, 888, 777};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto index_node = std::unique_ptr<ExecNode>(new ConstantValueNode(static_cast<uint32_t>(0)));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(index_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("GetAt", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<uint64_t>(result), 999);
+}
