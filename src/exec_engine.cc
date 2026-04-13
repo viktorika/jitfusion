@@ -16,6 +16,7 @@
 #include "llvm/ADT/StringMap.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
+#include "llvm/ExecutionEngine/Orc/EPCDynamicLibrarySearchGenerator.h"
 #include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Value.h"
@@ -25,7 +26,6 @@
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/CodeGen.h"
-#include "llvm/ExecutionEngine/Orc/EPCDynamicLibrarySearchGenerator.h"
 #include "llvm/Support/DynamicLibrary.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
@@ -702,11 +702,10 @@ Status ExecEngine::CreateJitAndOptimize(const std::unique_ptr<FunctionRegistry>&
     return Status::RuntimeError("Failed to create LLJIT: ", llvm::toString(jit_.takeError()));
   }
   auto& jd = jit_->get()->getMainJITDylib();
-  auto dlsg = llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(
-      jit_->get()->getDataLayout().getGlobalPrefix());
+  auto dlsg =
+      llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(jit_->get()->getDataLayout().getGlobalPrefix());
   if (!dlsg) {
-    return Status::RuntimeError("Failed to create DynamicLibrarySearchGenerator: ",
-                                llvm::toString(dlsg.takeError()));
+    return Status::RuntimeError("Failed to create DynamicLibrarySearchGenerator: ", llvm::toString(dlsg.takeError()));
   }
   jd.addGenerator(std::move(*dlsg));
   if (auto err = jit_->get()->addIRModule(llvm::orc::ThreadSafeModule(std::move(owner), std::move(llvm_context)))) {
