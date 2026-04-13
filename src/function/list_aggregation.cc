@@ -29,6 +29,18 @@ inline RetType Sum(ListType a) {
 }
 
 template <typename ListType>
+inline double Avg(ListType a) {
+  if (a.len == 0) {
+    return 0.0;
+  }
+  double sum = 0.0;
+  for (std::size_t i = 0; i < a.len; ++i) {
+    sum += static_cast<double>(a.data[i]);
+  }
+  return sum / static_cast<double>(a.len);
+}
+
+template <typename ListType>
 inline typename ListType::CElementType Max(ListType a) {
   if (a.len == 0) {
     return typename ListType::CElementType{};
@@ -205,6 +217,30 @@ Status InitCountBitsFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+Status InitAvgFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Avg", {ValueType::kU8List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Avg<U8ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Avg", {ValueType::kI8List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Avg<I8ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Avg", {ValueType::kU16List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Avg<U16ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Avg", {ValueType::kI16List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Avg<I16ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Avg", {ValueType::kU32List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Avg<U32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Avg", {ValueType::kI32List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Avg<I32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Avg", {ValueType::kU64List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Avg<U64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Avg", {ValueType::kI64List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Avg<I64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Avg", {ValueType::kF32List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Avg<F32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Avg", {ValueType::kF64List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Avg<F64ListStruct>)));
+  return Status::OK();
+}
+
 }  // namespace
 
 Status InitListAggregationFunc(FunctionRegistry *reg) {
@@ -213,6 +249,7 @@ Status InitListAggregationFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitMinFunc(reg));
   JF_RETURN_NOT_OK(InitCountDistinctFunc(reg));
   JF_RETURN_NOT_OK(InitCountBitsFunc(reg));
+  JF_RETURN_NOT_OK(InitAvgFunc(reg));
   return Status::OK();
 }
 

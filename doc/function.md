@@ -404,6 +404,20 @@ Find the count of unique elements in the list.
     u32 CountDistinct(f32list)
     u32 CountDistinct(f64list)
 
+## Avg
+Calculate the average of all the numbers. Returns 0.0 for empty lists.
+
+    f64 Avg(u8list)
+    f64 Avg(i8list)
+    f64 Avg(u16list)
+    f64 Avg(i16list)
+    f64 Avg(u32list)
+    f64 Avg(i32list)
+    f64 Avg(u64list)
+    f64 Avg(i64list)
+    f64 Avg(f32list)
+    f64 Avg(f64list)
+
 ## SortAsc
 Return the sorted list in ascending order.
 
