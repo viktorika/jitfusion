@@ -708,10 +708,6 @@ Status ExecEngine::CreateJitAndOptimize(const std::unique_ptr<FunctionRegistry>&
     return Status::RuntimeError("Failed to create DynamicLibrarySearchGenerator: ", llvm::toString(dlsg.takeError()));
   }
   jd.addGenerator(std::move(*dlsg));
-  if (auto err = jit_->get()->addIRModule(llvm::orc::ThreadSafeModule(std::move(owner), std::move(llvm_context)))) {
-    return Status::RuntimeError("Failed to add module to JIT: ", llvm::toString(std::move(err)));
-  }
-  JF_RETURN_NOT_OK(func_registry->MappingToJIT(jit_->get()));
   // optimize
   jit_->get()->getIRTransformLayer().setTransform(
       [&, this](llvm::orc::ThreadSafeModule tsm, const llvm::orc::MaterializationResponsibility& /*r*/) {
@@ -744,6 +740,10 @@ Status ExecEngine::CreateJitAndOptimize(const std::unique_ptr<FunctionRegistry>&
         });
         return tsm;
       });
+  if (auto err = jit_->get()->addIRModule(llvm::orc::ThreadSafeModule(std::move(owner), std::move(llvm_context)))) {
+    return Status::RuntimeError("Failed to add module to JIT: ", llvm::toString(std::move(err)));
+  }
+  JF_RETURN_NOT_OK(func_registry->MappingToJIT(jit_->get()));
   return Status::OK();
 }
 
