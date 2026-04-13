@@ -418,6 +418,34 @@ Calculate the average of all the numbers. Returns 0.0 for empty lists.
     f64 Avg(f32list)
     f64 Avg(f64list)
 
+## Median
+Calculate the median of all the numbers. For even-length lists, returns the average of the two middle values. Uses nth_element internally, average O(n) time complexity.
+
+    f64 Median(u8list)
+    f64 Median(i8list)
+    f64 Median(u16list)
+    f64 Median(i16list)
+    f64 Median(u32list)
+    f64 Median(i32list)
+    f64 Median(u64list)
+    f64 Median(i64list)
+    f64 Median(f32list)
+    f64 Median(f64list)
+
+## SortedMedian
+Calculate the median of a pre-sorted list. For even-length lists, returns the average of the two middle values. O(1) time complexity. The input list must be sorted in ascending order.
+
+    f64 SortedMedian(u8list)
+    f64 SortedMedian(i8list)
+    f64 SortedMedian(u16list)
+    f64 SortedMedian(i16list)
+    f64 SortedMedian(u32list)
+    f64 SortedMedian(i32list)
+    f64 SortedMedian(u64list)
+    f64 SortedMedian(i64list)
+    f64 SortedMedian(f32list)
+    f64 SortedMedian(f64list)
+
 ## SortAsc
 Return the sorted list in ascending order.
 

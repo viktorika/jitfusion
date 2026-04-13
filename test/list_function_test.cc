@@ -1979,6 +1979,102 @@ TEST(FunctionTest, AvgTest3) {
   EXPECT_DOUBLE_EQ(std::get<double>(result), 0.0);
 }
 
+TEST(FunctionTest, MedianTest1) {
+  std::vector<uint32_t> data = {5, 1, 3, 2, 4};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Median", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_DOUBLE_EQ(std::get<double>(result), 3.0);
+}
+
+TEST(FunctionTest, MedianTest2) {
+  std::vector<int32_t> data = {4, 1, 3, 2};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Median", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_DOUBLE_EQ(std::get<double>(result), 2.5);
+}
+
+TEST(FunctionTest, MedianTest3) {
+  std::vector<float> data = {1.5F, 3.5F, 2.5F};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Median", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_DOUBLE_EQ(std::get<double>(result), 2.5);
+}
+
+TEST(FunctionTest, SortedMedianTest1) {
+  std::vector<uint32_t> data = {1, 2, 3, 4, 5};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("SortedMedian", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_DOUBLE_EQ(std::get<double>(result), 3.0);
+}
+
+TEST(FunctionTest, SortedMedianTest2) {
+  std::vector<int32_t> data = {1, 2, 3, 4};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("SortedMedian", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_DOUBLE_EQ(std::get<double>(result), 2.5);
+}
+
+TEST(FunctionTest, SortedMedianTest3) {
+  std::vector<double> data = {42.0};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("SortedMedian", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_DOUBLE_EQ(std::get<double>(result), 42.0);
+}
+
 TEST(FunctionTest, FilterByBitmapTest1) {
   std::vector<int32_t> data = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16,
                                17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
