@@ -7,8 +7,9 @@
 #include <algorithm>
 #include <cstring>
 #include <unordered_set>
+#include <vector>
 #ifdef _MSC_VER
-#include <intrin.h>
+#  include <intrin.h>
 #endif
 #include "function_init.h"
 #include "function_registry.h"
@@ -217,6 +218,81 @@ Status InitCountBitsFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+template <typename ListType>
+inline double Median(ListType a) {
+  if (a.len == 0) {
+    return 0.0;
+  }
+  std::vector<typename ListType::CElementType> tmp(a.data, a.data + a.len);
+  auto mid = a.len / 2;
+  std::nth_element(tmp.begin(), tmp.begin() + mid, tmp.end());
+  if (a.len % 2 == 1) {
+    return static_cast<double>(tmp[mid]);
+  }
+  auto left_max = *std::max_element(tmp.begin(), tmp.begin() + mid);
+  return (static_cast<double>(left_max) + static_cast<double>(tmp[mid])) / 2.0;
+}
+
+template <typename ListType>
+inline double SortedMedian(ListType a) {
+  if (a.len == 0) {
+    return 0.0;
+  }
+  auto mid = a.len / 2;
+  if (a.len % 2 == 1) {
+    return static_cast<double>(a.data[mid]);
+  }
+  return (static_cast<double>(a.data[mid - 1]) + static_cast<double>(a.data[mid])) / 2.0;
+}
+
+Status InitMedianFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Median", {ValueType::kU8List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Median<U8ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Median", {ValueType::kI8List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Median<I8ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Median", {ValueType::kU16List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Median<U16ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Median", {ValueType::kI16List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Median<I16ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Median", {ValueType::kU32List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Median<U32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Median", {ValueType::kI32List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Median<I32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Median", {ValueType::kU64List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Median<U64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Median", {ValueType::kI64List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Median<I64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Median", {ValueType::kF32List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Median<F32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Median", {ValueType::kF64List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(Median<F64ListStruct>)));
+  return Status::OK();
+}
+
+Status InitSortedMedianFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kU8List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<U8ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kI8List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<I8ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kU16List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<U16ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kI16List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<I16ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kU32List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<U32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kI32List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<I32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kU64List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<U64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kI64List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<I64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kF32List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<F32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("SortedMedian", {ValueType::kF64List}, ValueType::kF64),
+                                              reinterpret_cast<void *>(SortedMedian<F64ListStruct>)));
+  return Status::OK();
+}
+
 Status InitAvgFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Avg", {ValueType::kU8List}, ValueType::kF64),
                                               reinterpret_cast<void *>(Avg<U8ListStruct>)));
@@ -250,6 +326,8 @@ Status InitListAggregationFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitCountDistinctFunc(reg));
   JF_RETURN_NOT_OK(InitCountBitsFunc(reg));
   JF_RETURN_NOT_OK(InitAvgFunc(reg));
+  JF_RETURN_NOT_OK(InitMedianFunc(reg));
+  JF_RETURN_NOT_OK(InitSortedMedianFunc(reg));
   return Status::OK();
 }
 
