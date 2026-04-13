@@ -282,6 +282,11 @@ Return the length of string.
 
     u32 StringLen(string)
 
+## StringContains
+Check if the string contains the specified substring. Returns 1 if found, 0 otherwise.
+
+    u8 StringContains(string haystack, string needle)
+
 ## CastString
 Convert numeric value to string.
 

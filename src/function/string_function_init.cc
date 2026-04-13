@@ -34,6 +34,12 @@ inline int32_t StringCmp(StringStruct a, StringStruct b) {
   return va.compare(vb);
 }
 
+inline uint8_t StringContains(StringStruct haystack, StringStruct needle) {
+  std::string_view vh(haystack.data, haystack.len);
+  std::string_view vn(needle.data, needle.len);
+  return vh.find(vn) != std::string_view::npos ? 1 : 0;
+}
+
 template <typename T>
 inline StringStruct CastNumericToString(T value, void *exec_context) {
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
@@ -76,6 +82,9 @@ Status InitStringInternalFunc(FunctionRegistry *reg) {
       reinterpret_cast<void *>(StringCmp)));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(FunctionSignature("StringLen", {ValueType::kString}, ValueType::kU32),
                                                  CallBuiltinStringLenFunction));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("StringContains", {ValueType::kString, ValueType::kString}, ValueType::kU8),
+      reinterpret_cast<void *>(StringContains)));
 
   JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
       FunctionSignature("CastString", {ValueType::kU8, ValueType::kPtr}, ValueType::kString),
