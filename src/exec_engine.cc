@@ -739,8 +739,6 @@ Status ExecEngine::CreateJitAndOptimize(const std::unique_ptr<FunctionRegistry>&
 
           // Create the optimization pipeline.
           auto mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
-          mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::CallSiteSplittingPass()));
-          mpm.addPass(llvm::createModuleToFunctionPassAdaptor(llvm::SLPVectorizerPass()));
 
           mpm.run(module, mam);
           llvm::raw_string_ostream string_os(ir_code_);
