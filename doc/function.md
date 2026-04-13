@@ -446,6 +446,20 @@ Calculate the median of a pre-sorted list. For even-length lists, returns the av
     f64 SortedMedian(f32list)
     f64 SortedMedian(f64list)
 
+## GetAt
+Get the element at the specified index from the list. Returns the default value (0 for numeric types) if the index is out of bounds.
+
+    u8  GetAt(u8list, u32 index)
+    i8  GetAt(i8list, u32 index)
+    u16 GetAt(u16list, u32 index)
+    i16 GetAt(i16list, u32 index)
+    u32 GetAt(u32list, u32 index)
+    i32 GetAt(i32list, u32 index)
+    u64 GetAt(u64list, u32 index)
+    i64 GetAt(i64list, u32 index)
+    f32 GetAt(f32list, u32 index)
+    f64 GetAt(f64list, u32 index)
+
 ## SortAsc
 Return the sorted list in ascending order.
 

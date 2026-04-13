@@ -293,6 +293,48 @@ Status InitSortedMedianFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+template <typename ListType>
+inline typename ListType::CElementType GetAt(ListType a, uint32_t index) {
+  if (index >= a.len) {
+    return typename ListType::CElementType{};
+  }
+  return a.data[index];
+}
+
+Status InitGetAtFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("GetAt", {ValueType::kU8List, ValueType::kU32}, ValueType::kU8),
+                                 reinterpret_cast<void *>(GetAt<U8ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("GetAt", {ValueType::kI8List, ValueType::kU32}, ValueType::kI8),
+                                 reinterpret_cast<void *>(GetAt<I8ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("GetAt", {ValueType::kU16List, ValueType::kU32}, ValueType::kU16),
+                                 reinterpret_cast<void *>(GetAt<U16ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("GetAt", {ValueType::kI16List, ValueType::kU32}, ValueType::kI16),
+                                 reinterpret_cast<void *>(GetAt<I16ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("GetAt", {ValueType::kU32List, ValueType::kU32}, ValueType::kU32),
+                                 reinterpret_cast<void *>(GetAt<U32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("GetAt", {ValueType::kI32List, ValueType::kU32}, ValueType::kI32),
+                                 reinterpret_cast<void *>(GetAt<I32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("GetAt", {ValueType::kU64List, ValueType::kU32}, ValueType::kU64),
+                                 reinterpret_cast<void *>(GetAt<U64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("GetAt", {ValueType::kI64List, ValueType::kU32}, ValueType::kI64),
+                                 reinterpret_cast<void *>(GetAt<I64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("GetAt", {ValueType::kF32List, ValueType::kU32}, ValueType::kF32),
+                                 reinterpret_cast<void *>(GetAt<F32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("GetAt", {ValueType::kF64List, ValueType::kU32}, ValueType::kF64),
+                                 reinterpret_cast<void *>(GetAt<F64ListStruct>)));
+  return Status::OK();
+}
+
 Status InitAvgFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("Avg", {ValueType::kU8List}, ValueType::kF64),
                                               reinterpret_cast<void *>(Avg<U8ListStruct>)));
@@ -325,6 +367,7 @@ Status InitListAggregationFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitMinFunc(reg));
   JF_RETURN_NOT_OK(InitCountDistinctFunc(reg));
   JF_RETURN_NOT_OK(InitCountBitsFunc(reg));
+  JF_RETURN_NOT_OK(InitGetAtFunc(reg));
   JF_RETURN_NOT_OK(InitAvgFunc(reg));
   JF_RETURN_NOT_OK(InitMedianFunc(reg));
   JF_RETURN_NOT_OK(InitSortedMedianFunc(reg));
