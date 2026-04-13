@@ -722,7 +722,6 @@ Status ExecEngine::CreateJitAndOptimize(const std::unique_ptr<FunctionRegistry>&
           llvm::FunctionAnalysisManager fam;
           llvm::CGSCCAnalysisManager cgam;
           llvm::ModuleAnalysisManager mam;
-          llvm::MachineFunctionAnalysisManager mfm;
 
           pb.registerPeepholeEPCallback([&](llvm::FunctionPassManager& fpm, llvm::OptimizationLevel /*level*/) {
             fpm.addPass(CommutativeCallCanonicalizerPass());
@@ -733,9 +732,8 @@ Status ExecEngine::CreateJitAndOptimize(const std::unique_ptr<FunctionRegistry>&
           pb.registerCGSCCAnalyses(cgam);
           pb.registerFunctionAnalyses(fam);
           pb.registerLoopAnalyses(lam);
-          pb.registerMachineFunctionAnalyses(mfm);
 
-          pb.crossRegisterProxies(lam, fam, cgam, mam, &mfm);
+          pb.crossRegisterProxies(lam, fam, cgam, mam);
 
           // Create the optimization pipeline.
           auto mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
