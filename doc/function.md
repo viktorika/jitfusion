@@ -460,6 +460,21 @@ Get the element at the specified index from the list. Returns the default value 
     f32 GetAt(f32list, u32 index)
     f64 GetAt(f64list, u32 index)
 
+## Unique
+Remove duplicate elements from the list while preserving the original order. Returns a new list containing only the first occurrence of each element.
+
+    u8list     Unique(u8list src, ptr exec_ctx)
+    u16list    Unique(u16list src, ptr exec_ctx)
+    u32list    Unique(u32list src, ptr exec_ctx)
+    u64list    Unique(u64list src, ptr exec_ctx)
+    i8list     Unique(i8list src, ptr exec_ctx)
+    i16list    Unique(i16list src, ptr exec_ctx)
+    i32list    Unique(i32list src, ptr exec_ctx)
+    i64list    Unique(i64list src, ptr exec_ctx)
+    f32list    Unique(f32list src, ptr exec_ctx)
+    f64list    Unique(f64list src, ptr exec_ctx)
+    stringlist Unique(stringlist src, ptr exec_ctx)
+
 ## SortAsc
 Return the sorted list in ascending order.
 

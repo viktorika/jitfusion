@@ -10,6 +10,7 @@
 #include <cstring>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 #include "exec_engine.h"
 #include "function_init.h"
 #include "function_registry.h"
@@ -175,6 +176,78 @@ OutputListType ListCastStringToNumeric(StringListStruct a, void *exec_context) {
     result.data[i] = val;
   }
   return result;
+}
+
+template <typename ListType>
+ListType Unique(ListType a, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  ListType result;
+  result.data = reinterpret_cast<typename ListType::CElementType *>(
+      exec_ctx->arena.Allocate(a.len * sizeof(typename ListType::CElementType)));
+  std::unordered_set<typename ListType::CElementType> seen;
+  seen.reserve(a.len);
+  uint32_t idx = 0;
+  for (uint32_t i = 0; i < a.len; ++i) {
+    if (seen.insert(a.data[i]).second) {
+      result.data[idx++] = a.data[i];
+    }
+  }
+  result.len = idx;
+  return result;
+}
+
+inline StringListStruct UniqueString(StringListStruct a, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  StringListStruct result;
+  result.data = reinterpret_cast<StringStruct *>(exec_ctx->arena.Allocate(a.len * sizeof(StringStruct)));
+  std::unordered_set<std::string_view> seen;
+  seen.reserve(a.len);
+  uint32_t idx = 0;
+  for (uint32_t i = 0; i < a.len; ++i) {
+    std::string_view sv(a.data[i].data, a.data[i].len);
+    if (seen.insert(sv).second) {
+      result.data[idx++] = a.data[i];
+    }
+  }
+  result.len = idx;
+  return result;
+}
+
+Status InitUniqueFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("Unique", {ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
+                                 reinterpret_cast<void *>(Unique<U8ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Unique", {ValueType::kU16List, ValueType::kPtr}, ValueType::kU16List),
+      reinterpret_cast<void *>(Unique<U16ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Unique", {ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(Unique<U32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Unique", {ValueType::kU64List, ValueType::kPtr}, ValueType::kU64List),
+      reinterpret_cast<void *>(Unique<U64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("Unique", {ValueType::kI8List, ValueType::kPtr}, ValueType::kI8List),
+                                 reinterpret_cast<void *>(Unique<I8ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Unique", {ValueType::kI16List, ValueType::kPtr}, ValueType::kI16List),
+      reinterpret_cast<void *>(Unique<I16ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Unique", {ValueType::kI32List, ValueType::kPtr}, ValueType::kI32List),
+      reinterpret_cast<void *>(Unique<I32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Unique", {ValueType::kI64List, ValueType::kPtr}, ValueType::kI64List),
+      reinterpret_cast<void *>(Unique<I64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Unique", {ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
+      reinterpret_cast<void *>(Unique<F32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Unique", {ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
+      reinterpret_cast<void *>(Unique<F64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Unique", {ValueType::kStringList, ValueType::kPtr}, ValueType::kStringList),
+      reinterpret_cast<void *>(UniqueString)));
+  return Status::OK();
 }
 
 Status InitListConcatFunc(FunctionRegistry *reg) {
@@ -511,6 +584,7 @@ Status InitListBasicFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitTruncateFunc(reg));
   JF_RETURN_NOT_OK(InitHashFunc(reg));
   JF_RETURN_NOT_OK(InitListCastFunc(reg));
+  JF_RETURN_NOT_OK(InitUniqueFunc(reg));
   return Status::OK();
 }
 
