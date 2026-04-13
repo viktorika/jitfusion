@@ -106,7 +106,7 @@ Status FunctionRegistry::RegisterFunc(const FunctionSignature& func_sign, Functi
   if (FunctionType::kCFunc == func_struct.func_type && nullptr == func_struct.c_func_ptr) {
     return Status::InvalidArgument("c function must supply the c function address");
   }
-  signature2funcstruct_[func_sign] = func_struct;
+  signature2funcstruct_[func_sign] = std::move(func_struct);
   return Status::OK();
 }
 
