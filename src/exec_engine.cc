@@ -25,6 +25,7 @@
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/CodeGen.h"
+#include "llvm/ExecutionEngine/Orc/EPCDynamicLibrarySearchGenerator.h"
 #include "llvm/Support/DynamicLibrary.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
@@ -700,6 +701,14 @@ Status ExecEngine::CreateJitAndOptimize(const std::unique_ptr<FunctionRegistry>&
   if (!jit_) {
     return Status::RuntimeError("Failed to create LLJIT: ", llvm::toString(jit_.takeError()));
   }
+  auto& jd = jit_->get()->getMainJITDylib();
+  auto dlsg = llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(
+      jit_->get()->getDataLayout().getGlobalPrefix());
+  if (!dlsg) {
+    return Status::RuntimeError("Failed to create DynamicLibrarySearchGenerator: ",
+                                llvm::toString(dlsg.takeError()));
+  }
+  jd.addGenerator(std::move(*dlsg));
   if (auto err = jit_->get()->addIRModule(llvm::orc::ThreadSafeModule(std::move(owner), std::move(llvm_context)))) {
     return Status::RuntimeError("Failed to add module to JIT: ", llvm::toString(std::move(err)));
   }
