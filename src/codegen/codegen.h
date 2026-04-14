@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <string>
+#include <unordered_map>
 #include "exec_node.h"
 #include "function_registry.h"
 #include "type.h"
@@ -29,6 +31,7 @@ class CodeGen : public Visitor {
   Status Visit(NoOPNode &no_op_node) override;
   Status Visit(IfNode &if_node) override;
   Status Visit(SwitchNode &switch_node) override;
+  Status Visit(RefNode &ref_node) override;
 
   static Status NumericTypeConvert(IRCodeGenContext &ctx, ValueType from, ValueType to, llvm::Value **value);
   static Status ValueTypeToLLVMType(IRCodeGenContext &ctx, ValueType value_type, llvm::Type **llvm_type);
@@ -40,6 +43,7 @@ class CodeGen : public Visitor {
 
   IRCodeGenContext &ctx_;
   llvm::Value *value_{nullptr};
+  std::unordered_map<std::string, llvm::Value *> named_values_;
 };
 
 }  // namespace jitfusion

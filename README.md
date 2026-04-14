@@ -47,7 +47,7 @@ bazel build //:athena_test
 ```
 
 # How to use
-I considered how many types of nodes are needed to represent a function in the execution engine, and I ultimately abstracted it into 10 types of nodes:
+I considered how many types of nodes are needed to represent a function in the execution engine, and I ultimately abstracted it into 11 types of nodes:
 
     EntryArgumentNode: A node used to obtain the entry argument variables of a function.
 
@@ -66,6 +66,8 @@ I considered how many types of nodes are needed to represent a function in the e
     SwitchNode: Switch condition node.
 
     NoOPNode: No operation node.
+
+    RefNode: Reference node. Used in pipeline mode to reference a named variable defined in a previous statement within the same NoOPNode, avoiding redundant subtree cloning and reducing IR bloat.
 
     OutputNode： Used for optimizing complex scenarios. Data is not returned via a return value but is instead written using a custom store function.
 
