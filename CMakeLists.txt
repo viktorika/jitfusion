@@ -33,6 +33,26 @@ add_compile_options(
     -ftree-vectorize
 )
 
+# Sanitizer support: -DSANITIZER=address|undefined|thread
+if(DEFINED SANITIZER)
+    message(STATUS "Building with sanitizer: ${SANITIZER}")
+    if(SANITIZER STREQUAL "address")
+        add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+        add_link_options(-fsanitize=address)
+    elseif(SANITIZER STREQUAL "undefined")
+        add_compile_options(-fsanitize=undefined -fno-omit-frame-pointer)
+        add_link_options(-fsanitize=undefined)
+    elseif(SANITIZER STREQUAL "address,undefined")
+        add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
+        add_link_options(-fsanitize=address,undefined)
+    elseif(SANITIZER STREQUAL "thread")
+        add_compile_options(-fsanitize=thread -fno-omit-frame-pointer)
+        add_link_options(-fsanitize=thread)
+    else()
+        message(FATAL_ERROR "Unknown sanitizer: ${SANITIZER}. Use address, undefined, address,undefined, or thread.")
+    endif()
+endif()
+
 if(NOT DEFINED HAS_XSIMD)
     message(STATUS "default set HAS_XSIMD to ON")
     set(HAS_XSIMD ON)
