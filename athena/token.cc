@@ -2552,6 +2552,7 @@ jitfusion::Status athena::ProgramAstBuilder::Scan(const std::string &code) {
   athena::Parser parser(scanner, *this);
   int res = parser();
   yy_delete_buffer(buffer, scanner);
+  yylex_destroy(scanner);
   if (res != 0) {
     return jitfusion::Status::ParseError(parser_error_message_);
   }
