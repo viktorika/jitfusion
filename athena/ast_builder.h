@@ -44,6 +44,8 @@ class ProgramAstBuilder {
   location& GetLocation() { return location_; }
 
  private:
+  enum class BuildMode : uint8_t { kExpression, kPipeline };
+
   Status Scan(const std::string& code);
 
   std::vector<Statement> statements_;
@@ -51,6 +53,7 @@ class ProgramAstBuilder {
   std::string parser_error_message_;
   std::string custom_error_message_;
   location location_;
+  BuildMode build_mode_{BuildMode::kExpression};
 
   friend class Parser;
 };

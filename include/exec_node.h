@@ -161,17 +161,22 @@ class FunctionNode : public ExecNode {
 class NoOPNode : public ExecNode {
  public:
   NoOPNode() = delete;
-  explicit NoOPNode(std::vector<std::unique_ptr<ExecNode>> args) : args_(std::move(args)) {}
+  explicit NoOPNode(std::vector<std::unique_ptr<ExecNode>> args) : names_(args.size()), args_(std::move(args)) {}
+  NoOPNode(std::vector<std::string> names, std::vector<std::unique_ptr<ExecNode>> args)
+      : names_(std::move(names)), args_(std::move(args)) {}
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
   void AppendArgs(std::unique_ptr<ExecNode>&& arg);
+  void AppendArgs(std::string name, std::unique_ptr<ExecNode>&& arg);
   std::unique_ptr<ExecNode> Clone() override;
 
   [[nodiscard]] const std::vector<std::unique_ptr<ExecNode>>& GetArgs() const { return args_; }
+  [[nodiscard]] const std::vector<std::string>& GetNames() const { return names_; }
 
  private:
   std::string ToStringImpl(const std::string& prefix) override;
 
+  std::vector<std::string> names_;
   std::vector<std::unique_ptr<ExecNode>> args_;
 };
 
@@ -209,6 +214,22 @@ class SwitchNode : public ExecNode {
   std::vector<std::unique_ptr<ExecNode>> args_;
 };
 
+class RefNode : public ExecNode {
+ public:
+  RefNode() = delete;
+  explicit RefNode(std::string name) : name_(std::move(name)) {}
+  Status Accept(Visitor* visitor) override;
+  ExecNodeType GetExecNodeType() override;
+  std::unique_ptr<ExecNode> Clone() override;
+
+  [[nodiscard]] const std::string& GetName() const { return name_; }
+
+ private:
+  std::string ToStringImpl(const std::string& prefix) override;
+
+  std::string name_;
+};
+
 class Visitor {
  public:
   virtual ~Visitor() = default;
@@ -224,6 +245,7 @@ class Visitor {
   virtual Status Visit(NoOPNode& no_op_node) = 0;
   virtual Status Visit(IfNode& if_node) = 0;
   virtual Status Visit(SwitchNode& switch_node) = 0;
+  virtual Status Visit(RefNode& ref_node) = 0;
 };
 
 }  // namespace jitfusion

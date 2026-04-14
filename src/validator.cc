@@ -189,8 +189,13 @@ Status Validator::Visit(FunctionNode& function_node) {
 }
 
 Status Validator::Visit(NoOPNode& no_op_node) {
-  for (const auto& arg : no_op_node.GetArgs()) {
-    JF_RETURN_NOT_OK(arg->Accept(this));
+  const auto& names = no_op_node.GetNames();
+  const auto& args = no_op_node.GetArgs();
+  for (size_t i = 0; i < args.size(); ++i) {
+    JF_RETURN_NOT_OK(args[i]->Accept(this));
+    if (!names[i].empty()) {
+      named_types_[names[i]] = args[i]->GetReturnType();
+    }
   }
   no_op_node.SetReturnType(ValueType::kVoid);
   return Status::OK();
@@ -263,6 +268,15 @@ Status Validator::Visit(SwitchNode& switch_node) {
   }
   switch_node.SetReturnType(basic_type == ValueType::kUnknown ? list_type : basic_type);
 
+  return Status::OK();
+}
+
+Status Validator::Visit(RefNode& ref_node) {
+  auto it = named_types_.find(ref_node.GetName());
+  if (it == named_types_.end()) {
+    return Status::ParseError("Variable not found: ", ref_node.GetName());
+  }
+  ref_node.SetReturnType(it->second);
   return Status::OK();
 }
 

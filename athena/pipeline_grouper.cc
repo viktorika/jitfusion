@@ -144,4 +144,9 @@ Status PipelineGrouper::Visit(SwitchNode& switch_node) {
   return Status::OK();
 }
 
+Status PipelineGrouper::Visit(RefNode& /*ref_node*/) {
+  height_ = 0;
+  return Status::OK();
+}
+
 }  // namespace athena

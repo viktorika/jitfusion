@@ -21,6 +21,7 @@ using jitfusion::FunctionNode;
 using jitfusion::IfNode;
 using jitfusion::NoOPNode;
 using jitfusion::OutputNode;
+using jitfusion::RefNode;
 using jitfusion::Status;
 using jitfusion::SwitchNode;
 using jitfusion::UnaryOPNode;
@@ -48,6 +49,7 @@ class PipelineGrouper : jitfusion::Visitor {
   Status Visit(NoOPNode& no_op_node) override;
   Status Visit(IfNode& if_node) override;
   Status Visit(SwitchNode& switch_node) override;
+  Status Visit(RefNode& ref_node) override;
 
  private:
   uint32_t height_{0};

@@ -118,15 +118,25 @@ std::unique_ptr<ExecNode> FunctionNode::Clone() {
 
 std::string NoOPNode::ToStringImpl(const std::string& prefix) {
   std::string result = prefix + "|--no_op\n";
-  for (const auto& child : args_) {
-    result += child->ToString(prefix + "|   ");
+  for (size_t i = 0; i < args_.size(); ++i) {
+    if (!names_[i].empty()) {
+      result += prefix + "|   |--[" + names_[i] + "]\n";
+    }
+    result += args_[i]->ToString(prefix + "|   ");
   }
   return result;
 }
 
 Status NoOPNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType NoOPNode::GetExecNodeType() { return ExecNodeType::kNoOPNode; }
-void NoOPNode::AppendArgs(std::unique_ptr<ExecNode>&& arg) { args_.emplace_back(std::move(arg)); }
+void NoOPNode::AppendArgs(std::unique_ptr<ExecNode>&& arg) {
+  names_.emplace_back();
+  args_.emplace_back(std::move(arg));
+}
+void NoOPNode::AppendArgs(std::string name, std::unique_ptr<ExecNode>&& arg) {
+  names_.emplace_back(std::move(name));
+  args_.emplace_back(std::move(arg));
+}
 
 std::unique_ptr<ExecNode> NoOPNode::Clone() {
   std::vector<std::unique_ptr<ExecNode>> args;
@@ -134,7 +144,7 @@ std::unique_ptr<ExecNode> NoOPNode::Clone() {
   for (const auto& arg : args_) {
     args.emplace_back(arg->Clone());
   }
-  return std::make_unique<NoOPNode>(std::move(args));
+  return std::make_unique<NoOPNode>(names_, std::move(args));
 }
 
 std::string IfNode::ToStringImpl(const std::string& prefix) {
@@ -178,5 +188,10 @@ std::unique_ptr<ExecNode> SwitchNode::Clone() {
   }
   return std::make_unique<SwitchNode>(std::move(args));
 }
+
+std::string RefNode::ToStringImpl(const std::string& prefix) { return prefix + "|--ref(" + name_ + ")\n"; }
+Status RefNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
+ExecNodeType RefNode::GetExecNodeType() { return ExecNodeType::kRefNode; }
+std::unique_ptr<ExecNode> RefNode::Clone() { return std::make_unique<RefNode>(name_); }
 
 }  // namespace jitfusion

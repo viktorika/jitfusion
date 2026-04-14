@@ -14,12 +14,14 @@
 namespace athena {
 
 using jitfusion::NoOPNode;
+using jitfusion::RefNode;
 
 Status ProgramAstBuilder::BuildExpression(const std::string& code, std::unique_ptr<ExecNode>* result) {
   statements_.clear();
   var2index_.clear();
   parser_error_message_.clear();
   custom_error_message_.clear();
+  build_mode_ = BuildMode::kExpression;
   location_.initialize(&code);
   if (auto st = Scan(code); !st.ok()) {
     return st;
@@ -32,11 +34,13 @@ Status ProgramAstBuilder::BuildExpression(const std::string& code, std::unique_p
 }
 
 Status ProgramAstBuilder::BuildPipeline(const std::string& code, std::unique_ptr<ExecNode>* result) {
+  std::vector<std::string> names;
   std::vector<std::unique_ptr<ExecNode>> args;
   statements_.clear();
   var2index_.clear();
   parser_error_message_.clear();
   custom_error_message_.clear();
+  build_mode_ = BuildMode::kPipeline;
   location_.initialize(&code);
   if (auto st = Scan(code); !st.ok()) {
     return st;
@@ -44,12 +48,13 @@ Status ProgramAstBuilder::BuildPipeline(const std::string& code, std::unique_ptr
   if (!custom_error_message_.empty()) {
     return Status::ParseError(custom_error_message_);
   }
+  names.reserve(statements_.size());
+  args.reserve(statements_.size());
   for (auto& statement : statements_) {
-    if (!statement.has_dependency) {
-      args.emplace_back(std::move(statement.expression));
-    }
+    names.emplace_back(std::move(statement.var_name));
+    args.emplace_back(std::move(statement.expression));
   }
-  auto root = std::unique_ptr<ExecNode>(new NoOPNode(std::move(args)));
+  auto root = std::unique_ptr<ExecNode>(new NoOPNode(std::move(names), std::move(args)));
   *result = std::move(root);
   return Status::OK();
 }
@@ -57,6 +62,9 @@ Status ProgramAstBuilder::BuildPipeline(const std::string& code, std::unique_ptr
 std::unique_ptr<ExecNode> ProgramAstBuilder::MakeRefNode(const std::string& var_name) {
   if (auto it = var2index_.find(var_name); it != var2index_.end()) {
     statements_[it->second].has_dependency = true;
+    if (build_mode_ == BuildMode::kPipeline) {
+      return std::make_unique<RefNode>(var_name);
+    }
     return statements_[it->second].expression->Clone();
   }
   custom_error_message_ = "Variable not found: " + var_name;
