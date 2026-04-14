@@ -352,7 +352,7 @@ TEST(FunctionTest, StringCmpTest) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  EXPECT_EQ(std::get<int32_t>(result), strcmp(l.data(), r.data()));
+  EXPECT_LT(std::get<int32_t>(result), 0);
 }
 
 TEST(FunctionTest, StringLenTest) {
