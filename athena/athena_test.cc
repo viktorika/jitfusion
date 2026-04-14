@@ -25,6 +25,9 @@ using jitfusion::StringStruct;
 using jitfusion::ValueType;
 
 namespace {
+
+jitfusion::Arena g_arena;
+
 uint32_t LoadU32(void* entry_arguments, int32_t index) {
   auto* args = reinterpret_cast<uint32_t*>(entry_arguments);
   return args[index];
@@ -74,7 +77,7 @@ F64ListStruct LoadF64List(void* entry_arguments, int32_t index) {
 StringListStruct LoadStringList(void* entry_arguments, int32_t index) {
   auto* args = reinterpret_cast<std::vector<std::string>*>(entry_arguments);
   StringListStruct result;
-  result.data = new StringStruct[args[index].size()];
+  result.data = reinterpret_cast<StringStruct*>(g_arena.Allocate(sizeof(StringStruct) * args[index].size()));
   result.len = args[index].size();
   for (size_t i = 0; i < args[index].size(); ++i) {
     result.data[i].data = args[index][i].data();
