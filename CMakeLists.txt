@@ -53,6 +53,13 @@ if(DEFINED SANITIZER)
     endif()
 endif()
 
+# Coverage support: -DCOVERAGE=ON
+if(COVERAGE)
+    message(STATUS "Building with coverage instrumentation")
+    add_compile_options(--coverage -fno-inline -O0)
+    add_link_options(--coverage)
+endif()
+
 if(NOT DEFINED HAS_XSIMD)
     message(STATUS "default set HAS_XSIMD to ON")
     set(HAS_XSIMD ON)
