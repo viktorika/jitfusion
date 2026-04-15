@@ -309,3 +309,125 @@ jobs:
             echo "clang-tidy found errors!"
             exit 1
           fi
+
+  coverage:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache LLVM apt packages
+        id: cache-llvm
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/lib/llvm-19
+            /usr/bin/clang-19
+            /usr/bin/clang++-19
+            /usr/bin/llvm-config-19
+            /usr/bin/llvm-profdata-19
+            /usr/bin/llvm-cov-19
+          key: llvm-${{ env.LLVM_VERSION }}-${{ env.CACHE_VERSION }}-coverage
+
+      - name: Install LLVM 19
+        if: steps.cache-llvm.outputs.cache-hit != 'true'
+        run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+          sudo add-apt-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main"
+          sudo apt-get update
+          sudo apt-get install -y llvm-19-dev clang-19
+
+      - name: Setup LLVM alternatives
+        run: |
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-19 100
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 100
+          sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-19 100
+          sudo update-alternatives --install /usr/bin/llvm-profdata llvm-profdata /usr/bin/llvm-profdata-19 100
+          sudo update-alternatives --install /usr/bin/llvm-cov llvm-cov /usr/bin/llvm-cov-19 100
+
+      - name: Cache GTest
+        id: cache-gtest
+        uses: actions/cache@v4
+        with:
+          path: /usr/lib/libgtest*.a
+          key: gtest-${{ env.CACHE_VERSION }}
+
+      - name: Install GTest
+        if: steps.cache-gtest.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get install -y libgtest-dev cmake
+          cd /usr/src/gtest
+          sudo cmake .
+          sudo make
+          sudo cp lib/*.a /usr/lib/
+
+      - name: Cache xsimd
+        id: cache-xsimd
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/include/xsimd
+          key: xsimd-${{ env.XSIMD_VERSION }}-${{ env.CACHE_VERSION }}
+
+      - name: Install xsimd
+        if: steps.cache-xsimd.outputs.cache-hit != 'true'
+        run: |
+          cd /tmp
+          git clone --depth 1 --branch ${{ env.XSIMD_VERSION }} https://github.com/xtensor-stack/xsimd.git
+          cd xsimd
+          cmake -B build -DCMAKE_INSTALL_PREFIX=/usr/local
+          sudo cmake --install build
+
+      - name: Install lcov
+        run: sudo apt-get install -y lcov
+
+      - name: Configure CMake with Coverage
+        run: |
+          cmake -B build \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCOVERAGE=ON \
+            -DHAS_XSIMD=ON
+
+      - name: Build
+        run: cmake --build build -j$(nproc)
+
+      - name: Run JitFusion Tests
+        run: ./build/jitfusion_test
+
+      - name: Run Athena Tests
+        run: ./build/athena_test
+
+      - name: Collect coverage data
+        run: |
+          # 使用 lcov 收集覆盖率数据（用 llvm-cov gcov 作为 gcov 工具）
+          lcov --capture \
+            --directory build \
+            --output-file coverage.info \
+            --gcov-tool $(pwd)/.github/llvm-gcov.sh \
+            --ignore-errors mismatch
+
+          # 过滤掉不需要的文件（系统头文件、第三方库、测试代码、生成的 parser/token 文件）
+          lcov --remove coverage.info \
+            '/usr/*' \
+            '*/test/*' \
+            '*/gtest/*' \
+            '*/athena/parser.cc' \
+            '*/athena/parser.hh' \
+            '*/athena/token.cc' \
+            '*/athena/location.hh' \
+            '*/athena/athena_test.cc' \
+            '*/murmurhash3.*' \
+            --output-file coverage_filtered.info \
+            --ignore-errors unused
+
+          # 打印覆盖率摘要
+          lcov --list coverage_filtered.info
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage_filtered.info
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
