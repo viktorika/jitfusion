@@ -405,12 +405,12 @@ jobs:
           lcov --capture \
             --directory build \
             --output-file coverage.info \
-            --gcov-tool $(pwd)/.github/llvm-gcov.sh \
-            --ignore-errors mismatch
+            --gcov-tool $(pwd)/.github/llvm-gcov.sh
 
           # 过滤掉不需要的文件（系统头文件、第三方库、测试代码、生成的 parser/token 文件）
           lcov --remove coverage.info \
             '/usr/*' \
+            '/tmp/*' \
             '*/test/*' \
             '*/gtest/*' \
             '*/athena/parser.cc' \
@@ -419,8 +419,10 @@ jobs:
             '*/athena/location.hh' \
             '*/athena/athena_test.cc' \
             '*/murmurhash3.*' \
-            --output-file coverage_filtered.info \
-            --ignore-errors unused
+            '*/build/parser.*' \
+            '*/build/token.*' \
+            '*/build/location.*' \
+            --output-file coverage_filtered.info
 
           # 打印覆盖率摘要
           lcov --list coverage_filtered.info
