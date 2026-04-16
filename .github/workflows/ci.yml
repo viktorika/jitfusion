@@ -386,8 +386,8 @@ jobs:
 
       - name: Install Bazelisk
         run: |
-          curl -fSsL -o /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64
-          chmod +x /usr/local/bin/bazel
+          sudo curl -fSsL -o /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64
+          sudo chmod +x /usr/local/bin/bazel
 
       - name: Bazel Build
         run: bazel build //:jitfusion_test //:athena_test
