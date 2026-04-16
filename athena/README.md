@@ -56,7 +56,7 @@ EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(Stor
 ```
 
 
-For more details, please refer to the athena_test.cc file.
+For more details, please refer to the test files in the `athena/test/` directory.
 
 # Supported functions
 

@@ -42,6 +42,7 @@ cc_binary(
     ],
     linkopts = [
         "-lgtest",
+        "-lgtest_main",
     ],
 )
 
@@ -85,8 +86,11 @@ cc_library(
 
 cc_binary(
     name = "athena_test",
-    srcs = ["athena/athena_test.cc"],
+    srcs = glob(["athena/test/*.cc", "athena/test/*.h"]),
     visibility = ["//visibility:public"],
+    includes = [
+        "athena/test",
+    ],
     deps = [
         ":athena"
     ],
@@ -102,5 +106,6 @@ cc_binary(
     ],
     linkopts = [
         "-lgtest",
+        "-lgtest_main",
     ],
 )

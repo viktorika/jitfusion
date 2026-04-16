@@ -82,7 +82,7 @@ file(GLOB_RECURSE JITFUSION_TEST_SRC "test/*.cc")
 find_package(GTest REQUIRED)
 
 add_executable(jitfusion_test ${JITFUSION_TEST_SRC})
-target_link_libraries(jitfusion_test jitfusion GTest::GTest)
+target_link_libraries(jitfusion_test jitfusion GTest::GTest GTest::Main)
 
 file(GLOB_RECURSE ATHENA_SRC 
     "athena/athena.cc"
@@ -102,7 +102,8 @@ add_library(athena ${ATHENA_SRC})
 target_include_directories(jitfusion PUBLIC athena)
 target_link_libraries(athena jitfusion)
 
-file(GLOB_RECURSE ATHENA_TEST_SRC "athena/athena_test.cc")
+file(GLOB_RECURSE ATHENA_TEST_SRC "athena/test/*.cc")
 
 add_executable(athena_test ${ATHENA_TEST_SRC})
-target_link_libraries(athena_test athena GTest::GTest)
+target_include_directories(athena_test PRIVATE athena/test)
+target_link_libraries(athena_test athena GTest::GTest GTest::Main)
