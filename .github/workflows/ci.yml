@@ -310,6 +310,94 @@ jobs:
             exit 1
           fi
 
+  bazel-build-and-test:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache LLVM apt packages
+        id: cache-llvm
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/lib/llvm-19
+            /usr/bin/clang-19
+            /usr/bin/clang++-19
+            /usr/bin/llvm-config-19
+          key: llvm-${{ env.LLVM_VERSION }}-${{ env.CACHE_VERSION }}-no-tidy
+
+      - name: Install LLVM 19
+        if: steps.cache-llvm.outputs.cache-hit != 'true'
+        run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+          sudo add-apt-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main"
+          sudo apt-get update
+          sudo apt-get install -y llvm-19-dev clang-19
+
+      - name: Setup LLVM alternatives
+        run: |
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-19 100
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 100
+          sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-19 100
+
+      - name: Cache GTest
+        id: cache-gtest
+        uses: actions/cache@v4
+        with:
+          path: /usr/lib/libgtest*.a
+          key: gtest-${{ env.CACHE_VERSION }}
+
+      - name: Install GTest
+        if: steps.cache-gtest.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get install -y libgtest-dev cmake
+          cd /usr/src/gtest
+          sudo cmake .
+          sudo make
+          sudo cp lib/*.a /usr/lib/
+
+      - name: Cache xsimd
+        id: cache-xsimd
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/include/xsimd
+          key: xsimd-${{ env.XSIMD_VERSION }}-${{ env.CACHE_VERSION }}
+
+      - name: Install xsimd
+        if: steps.cache-xsimd.outputs.cache-hit != 'true'
+        run: |
+          cd /tmp
+          git clone --depth 1 --branch ${{ env.XSIMD_VERSION }} https://github.com/xtensor-stack/xsimd.git
+          cd xsimd
+          cmake -B build -DCMAKE_INSTALL_PREFIX=/usr/local
+          sudo cmake --install build
+
+      - name: Cache Bazel
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/bazel
+            ~/.cache/bazelisk
+          key: bazel-${{ env.CACHE_VERSION }}-${{ hashFiles('WORKSPACE', 'BUILD', 'llvm_repository.bzl') }}
+          restore-keys: |
+            bazel-${{ env.CACHE_VERSION }}-
+
+      - name: Install Bazelisk
+        run: |
+          sudo curl -fSsL -o /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64
+          sudo chmod +x /usr/local/bin/bazel
+
+      - name: Bazel Build
+        run: bazel build //:jitfusion_test //:athena_test
+
+      - name: Run JitFusion Tests
+        run: echo "" | ./bazel-bin/jitfusion_test
+
+      - name: Run Athena Tests
+        run: echo "" | ./bazel-bin/athena_test
+
   coverage:
     runs-on: ubuntu-22.04
 
