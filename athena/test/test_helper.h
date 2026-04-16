@@ -1,6 +1,10 @@
 #pragma once
 
+#include <array>
+#include <cmath>
 #include "athena.h"
+#include "function_registry.h"
+#include "gtest/gtest.h"
 #include "type.h"
 
 namespace test {
