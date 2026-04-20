@@ -156,7 +156,11 @@ Status PipelineGrouper::Visit(IfBlockNode& if_block_node) {
 }
 
 Status PipelineGrouper::Visit(RefNode& /*ref_node*/) {
-  height_ = 0;
+  // RefNode must have height >= 2 so that its parent node's height >= 3,
+  // which prevents the parent from triggering the Union at height == 1.
+  // Without this, pipelines with the same variable names but different
+  // computations could be incorrectly merged into the same group.
+  height_ = 2;
   return Status::OK();
 }
 
