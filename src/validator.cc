@@ -191,10 +191,24 @@ Status Validator::Visit(FunctionNode& function_node) {
 Status Validator::Visit(NoOPNode& no_op_node) {
   const auto& names = no_op_node.GetNames();
   const auto& args = no_op_node.GetArgs();
+  const bool isolated = no_op_node.IsIsolated();
   for (size_t i = 0; i < args.size(); ++i) {
+    // When isolated=true, PushScope/PopScope is used to isolate variable types
+    // between independent child groups. Each child runs in its own type scope so
+    // that variable types defined in one group are not visible to others. The scope
+    // is simply discarded after PopScope — no modified types are collected.
+    // NOTE: This scope operation differs from the one in IfBlockNode, which uses
+    // PushScope/PopScope for branch-level type scoping and type consistency checks.
+    // The two can safely nest without interference.
+    if (isolated) {
+      type_scope_stack_.PushScope();
+    }
     JF_RETURN_NOT_OK(args[i]->Accept(this));
     if (!names[i].empty()) {
       type_scope_stack_.Set(names[i], args[i]->GetReturnType());
+    }
+    if (isolated) {
+      type_scope_stack_.PopScope();
     }
   }
   no_op_node.SetReturnType(ValueType::kVoid);
@@ -293,6 +307,13 @@ Status Validator::Visit(IfBlockNode& if_block_node) {
       return Status::ParseError("If block condition must be numeric type, got ",
                                 TypeHelper::TypeToString(args[cond_idx]->GetReturnType()));
     }
+    // Branch scope isolation: PushScope creates a new scope so that type modifications
+    // within this branch are recorded separately. After executing the branch body,
+    // GetShadowed() collects the shadowed variables for type consistency checks.
+    // PopScope then discards the branch-local modifications.
+    // NOTE: This scope operation differs from NoOPNode's isolated scope, which is
+    // used for type isolation between independent child groups. The two can safely
+    // nest without interference.
     type_scope_stack_.PushScope();
     JF_RETURN_NOT_OK(args[body_idx]->Accept(this));
     if (args[body_idx]->GetReturnType() != ValueType::kVoid) {
@@ -313,6 +334,8 @@ Status Validator::Visit(IfBlockNode& if_block_node) {
   }
 
   if (has_else) {
+    // Else branch scope isolation: same as the condition branches above —
+    // PushScope, execute, GetShadowed, then PopScope.
     type_scope_stack_.PushScope();
     JF_RETURN_NOT_OK(args[num_args - 1]->Accept(this));
     if (args[num_args - 1]->GetReturnType() != ValueType::kVoid) {

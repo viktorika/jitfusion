@@ -34,6 +34,14 @@ Status CodeGen::Visit(IfBlockNode &if_block_node) {
   if (has_else) {
     llvm::BasicBlock *else_block = llvm::BasicBlock::Create(ctx_.context, "ifblock.else", cur_function);
     ctx_.builder.SetInsertPoint(else_block);
+    // Branch scope isolation: PushScope creates a new scope so that modifications
+    // to outer variables within this branch are recorded separately. After executing
+    // the branch body, GetShadowed() collects the modified variables before PopScope
+    // discards them. The collected values are later merged via PHI nodes at the
+    // merge block.
+    // NOTE: This scope operation differs from NoOPNode's isolated scope, which is
+    // used for variable isolation between independent child groups. The two can
+    // safely nest without interference.
     scope_stack_.PushScope();
     llvm::Value *else_value;
     JF_RETURN_NOT_OK(GetValue(args[num_args - 1].get(), &else_value));
@@ -73,6 +81,9 @@ Status CodeGen::Visit(IfBlockNode &if_block_node) {
     ctx_.builder.CreateCondBr(cond_value, body_block, prev_false_block);
 
     ctx_.builder.SetInsertPoint(body_block);
+    // Branch scope isolation: same as the else branch above — PushScope, execute
+    // body, GetShadowed to collect modifications, then PopScope. The collected
+    // modified variables will be merged via PHI nodes at the merge block.
     scope_stack_.PushScope();
     llvm::Value *body_value;
     JF_RETURN_NOT_OK(GetValue(args[body_idx].get(), &body_value));
