@@ -18,6 +18,7 @@ using jitfusion::EntryArgumentNode;
 using jitfusion::ExecContextNode;
 using jitfusion::ExecNode;
 using jitfusion::FunctionNode;
+using jitfusion::IfBlockNode;
 using jitfusion::IfNode;
 using jitfusion::NoOPNode;
 using jitfusion::OutputNode;
@@ -49,6 +50,7 @@ class PipelineGrouper : jitfusion::Visitor {
   Status Visit(NoOPNode& no_op_node) override;
   Status Visit(IfNode& if_node) override;
   Status Visit(SwitchNode& switch_node) override;
+  Status Visit(IfBlockNode& if_block_node) override;
   Status Visit(RefNode& ref_node) override;
 
  private:

@@ -10,11 +10,11 @@
 namespace jitfusion {
 
 Status CodeGen::Visit(RefNode& ref_node) {
-  auto it = named_values_.find(ref_node.GetName());
-  if (it == named_values_.end()) {
+  llvm::Value* val = scope_stack_.Lookup(ref_node.GetName());
+  if (nullptr == val) {
     return Status::RuntimeError("Variable not found: ", ref_node.GetName());
   }
-  value_ = it->second;
+  value_ = val;
   return Status::OK();
 }
 

@@ -189,6 +189,26 @@ std::unique_ptr<ExecNode> SwitchNode::Clone() {
   return std::make_unique<SwitchNode>(std::move(args));
 }
 
+std::string IfBlockNode::ToStringImpl(const std::string& prefix) {
+  std::string result = prefix + "|--if_block\n";
+  for (const auto& child : args_) {
+    result += child->ToString(prefix + "|   ");
+  }
+  return result;
+}
+
+Status IfBlockNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
+ExecNodeType IfBlockNode::GetExecNodeType() { return ExecNodeType::kIfBlockNode; }
+
+std::unique_ptr<ExecNode> IfBlockNode::Clone() {
+  std::vector<std::unique_ptr<ExecNode>> args;
+  args.reserve(args_.size());
+  for (const auto& arg : args_) {
+    args.emplace_back(arg->Clone());
+  }
+  return std::make_unique<IfBlockNode>(std::move(args));
+}
+
 std::string RefNode::ToStringImpl(const std::string& prefix) { return prefix + "|--ref(" + name_ + ")\n"; }
 Status RefNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType RefNode::GetExecNodeType() { return ExecNodeType::kRefNode; }

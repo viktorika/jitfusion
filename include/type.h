@@ -26,6 +26,7 @@ enum class ExecNodeType : uint8_t {
   kIfNode = 10,
   kSwitchNode = 11,
   kRefNode = 12,
+  kIfBlockNode = 13,
 };
 
 enum class BinaryOPType : uint8_t {

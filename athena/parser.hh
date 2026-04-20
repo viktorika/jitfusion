@@ -449,6 +449,8 @@ namespace athena {
       // function
       // infix_function
       // named_function
+      // when_block
+      // block
       // arg
       // boolean
       char dummy9[sizeof (std::unique_ptr<jitfusion::ExecNode>)];
@@ -474,6 +476,7 @@ namespace athena {
       // string_list
       char dummy16[sizeof (std::vector<std::string>)];
 
+      // elif_chain
       // args
       char dummy17[sizeof (std::vector<std::unique_ptr<jitfusion::ExecNode>>)];
 
@@ -555,54 +558,59 @@ namespace athena {
     TOK_YYEOF = 0,                 // "end of file"
     TOK_YYerror = 1,               // error
     TOK_YYUNDEF = 2,               // "invalid token"
-    TOK_IF = 3,                    // "if"
-    TOK_SWITCH = 4,                // "switch"
-    TOK_IN = 5,                    // "in"
-    TOK_NOT = 6,                   // "not"
-    TOK_AND = 7,                   // "and"
-    TOK_OR = 8,                    // "or"
-    TOK_TRUE = 9,                  // "true"
-    TOK_FALSE = 10,                // "false"
-    TOK_MINUS = 11,                // "-"
-    TOK_PLUS = 12,                 // "+"
-    TOK_STAR = 13,                 // "*"
-    TOK_SLASH = 14,                // "/"
-    TOK_LPAREN = 15,               // "("
-    TOK_RPAREN = 16,               // ")"
-    TOK_MODOLO = 17,               // "%"
-    TOK_BITWISE_OR = 18,           // "|"
-    TOK_BITWISE_XOR = 19,          // "^"
-    TOK_BITWISE_AND = 20,          // "&"
-    TOK_BITWISE_NOT = 21,          // "~"
-    TOK_BITWISE_LEFT = 22,         // "<<"
-    TOK_BITWISE_RIGHT = 23,        // ">>"
-    TOK_EQUAL = 24,                // "=="
-    TOK_ASSIGNMENT = 25,           // "="
-    TOK_NOT_EQUAL = 26,            // "!="
-    TOK_LESS_THAN = 27,            // "<"
-    TOK_LESS_THAN_OR_EQUAL_TO = 28, // "<="
-    TOK_GREATER_THAN = 29,         // ">"
-    TOK_GREATER_THAN_OR_EQUAL_TO = 30, // ">="
-    TOK_COMMA = 31,                // ","
-    TOK_LBRACKET = 32,             // "["
-    TOK_RBRACKET = 33,             // "]"
-    TOK_SEMI = 34,                 // ";"
-    TOK_ENTRY_ARG = 35,            // "entry_arg"
-    TOK_EXEC_CTX = 36,             // "exec_ctx"
-    TOK_OUTPUT = 37,               // "output"
-    TOK_IDENTIFIER = 38,           // "identifier"
-    TOK_I8 = 39,                   // "int8"
-    TOK_I16 = 40,                  // "int16"
-    TOK_I32 = 41,                  // "int32"
-    TOK_I64 = 42,                  // "int64"
-    TOK_U8 = 43,                   // "uint8"
-    TOK_U16 = 44,                  // "uint16"
-    TOK_U32 = 45,                  // "uint32"
-    TOK_U64 = 46,                  // "uint64"
-    TOK_F32 = 47,                  // "float"
-    TOK_F64 = 48,                  // "double"
-    TOK_STRING = 49,               // "string"
-    TOK_NEG = 50                   // NEG
+    TOK_WHEN = 3,                  // "when"
+    TOK_IF = 4,                    // "if"
+    TOK_ELIF = 5,                  // "elif"
+    TOK_ELSE = 6,                  // "else"
+    TOK_SWITCH = 7,                // "switch"
+    TOK_IN = 8,                    // "in"
+    TOK_NOT = 9,                   // "not"
+    TOK_AND = 10,                  // "and"
+    TOK_OR = 11,                   // "or"
+    TOK_TRUE = 12,                 // "true"
+    TOK_FALSE = 13,                // "false"
+    TOK_MINUS = 14,                // "-"
+    TOK_PLUS = 15,                 // "+"
+    TOK_STAR = 16,                 // "*"
+    TOK_SLASH = 17,                // "/"
+    TOK_LPAREN = 18,               // "("
+    TOK_RPAREN = 19,               // ")"
+    TOK_MODOLO = 20,               // "%"
+    TOK_BITWISE_OR = 21,           // "|"
+    TOK_BITWISE_XOR = 22,          // "^"
+    TOK_BITWISE_AND = 23,          // "&"
+    TOK_BITWISE_NOT = 24,          // "~"
+    TOK_BITWISE_LEFT = 25,         // "<<"
+    TOK_BITWISE_RIGHT = 26,        // ">>"
+    TOK_EQUAL = 27,                // "=="
+    TOK_ASSIGNMENT = 28,           // "="
+    TOK_NOT_EQUAL = 29,            // "!="
+    TOK_LESS_THAN = 30,            // "<"
+    TOK_LESS_THAN_OR_EQUAL_TO = 31, // "<="
+    TOK_GREATER_THAN = 32,         // ">"
+    TOK_GREATER_THAN_OR_EQUAL_TO = 33, // ">="
+    TOK_COMMA = 34,                // ","
+    TOK_LBRACKET = 35,             // "["
+    TOK_RBRACKET = 36,             // "]"
+    TOK_SEMI = 37,                 // ";"
+    TOK_LBRACE = 38,               // "{"
+    TOK_RBRACE = 39,               // "}"
+    TOK_ENTRY_ARG = 40,            // "entry_arg"
+    TOK_EXEC_CTX = 41,             // "exec_ctx"
+    TOK_OUTPUT = 42,               // "output"
+    TOK_IDENTIFIER = 43,           // "identifier"
+    TOK_I8 = 44,                   // "int8"
+    TOK_I16 = 45,                  // "int16"
+    TOK_I32 = 46,                  // "int32"
+    TOK_I64 = 47,                  // "int64"
+    TOK_U8 = 48,                   // "uint8"
+    TOK_U16 = 49,                  // "uint16"
+    TOK_U32 = 50,                  // "uint32"
+    TOK_U64 = 51,                  // "uint64"
+    TOK_F32 = 52,                  // "float"
+    TOK_F64 = 53,                  // "double"
+    TOK_STRING = 54,               // "string"
+    TOK_NEG = 55                   // NEG
       };
       /// Backward compatibility alias (Bison 3.6).
       typedef token_kind_type yytokentype;
@@ -619,83 +627,92 @@ namespace athena {
     {
       enum symbol_kind_type
       {
-        YYNTOKENS = 51, ///< Number of tokens.
+        YYNTOKENS = 56, ///< Number of tokens.
         S_YYEMPTY = -2,
         S_YYEOF = 0,                             // "end of file"
         S_YYerror = 1,                           // error
         S_YYUNDEF = 2,                           // "invalid token"
-        S_IF = 3,                                // "if"
-        S_SWITCH = 4,                            // "switch"
-        S_IN = 5,                                // "in"
-        S_NOT = 6,                               // "not"
-        S_AND = 7,                               // "and"
-        S_OR = 8,                                // "or"
-        S_TRUE = 9,                              // "true"
-        S_FALSE = 10,                            // "false"
-        S_MINUS = 11,                            // "-"
-        S_PLUS = 12,                             // "+"
-        S_STAR = 13,                             // "*"
-        S_SLASH = 14,                            // "/"
-        S_LPAREN = 15,                           // "("
-        S_RPAREN = 16,                           // ")"
-        S_MODOLO = 17,                           // "%"
-        S_BITWISE_OR = 18,                       // "|"
-        S_BITWISE_XOR = 19,                      // "^"
-        S_BITWISE_AND = 20,                      // "&"
-        S_BITWISE_NOT = 21,                      // "~"
-        S_BITWISE_LEFT = 22,                     // "<<"
-        S_BITWISE_RIGHT = 23,                    // ">>"
-        S_EQUAL = 24,                            // "=="
-        S_ASSIGNMENT = 25,                       // "="
-        S_NOT_EQUAL = 26,                        // "!="
-        S_LESS_THAN = 27,                        // "<"
-        S_LESS_THAN_OR_EQUAL_TO = 28,            // "<="
-        S_GREATER_THAN = 29,                     // ">"
-        S_GREATER_THAN_OR_EQUAL_TO = 30,         // ">="
-        S_COMMA = 31,                            // ","
-        S_LBRACKET = 32,                         // "["
-        S_RBRACKET = 33,                         // "]"
-        S_SEMI = 34,                             // ";"
-        S_ENTRY_ARG = 35,                        // "entry_arg"
-        S_EXEC_CTX = 36,                         // "exec_ctx"
-        S_OUTPUT = 37,                           // "output"
-        S_IDENTIFIER = 38,                       // "identifier"
-        S_I8 = 39,                               // "int8"
-        S_I16 = 40,                              // "int16"
-        S_I32 = 41,                              // "int32"
-        S_I64 = 42,                              // "int64"
-        S_U8 = 43,                               // "uint8"
-        S_U16 = 44,                              // "uint16"
-        S_U32 = 45,                              // "uint32"
-        S_U64 = 46,                              // "uint64"
-        S_F32 = 47,                              // "float"
-        S_F64 = 48,                              // "double"
-        S_STRING = 49,                           // "string"
-        S_NEG = 50,                              // NEG
-        S_YYACCEPT = 51,                         // $accept
-        S_program = 52,                          // program
-        S_statement = 53,                        // statement
-        S_expr = 54,                             // expr
-        S_term = 55,                             // term
-        S_literal = 56,                          // literal
-        S_list = 57,                             // list
-        S_i8_list = 58,                          // i8_list
-        S_i16_list = 59,                         // i16_list
-        S_i32_list = 60,                         // i32_list
-        S_i64_list = 61,                         // i64_list
-        S_u8_list = 62,                          // u8_list
-        S_u16_list = 63,                         // u16_list
-        S_u32_list = 64,                         // u32_list
-        S_u64_list = 65,                         // u64_list
-        S_f32_list = 66,                         // f32_list
-        S_f64_list = 67,                         // f64_list
-        S_string_list = 68,                      // string_list
-        S_function = 69,                         // function
-        S_infix_function = 70,                   // infix_function
-        S_named_function = 71,                   // named_function
-        S_args = 72,                             // args
-        S_arg = 73,                              // arg
-        S_boolean = 74                           // boolean
+        S_WHEN = 3,                              // "when"
+        S_IF = 4,                                // "if"
+        S_ELIF = 5,                              // "elif"
+        S_ELSE = 6,                              // "else"
+        S_SWITCH = 7,                            // "switch"
+        S_IN = 8,                                // "in"
+        S_NOT = 9,                               // "not"
+        S_AND = 10,                              // "and"
+        S_OR = 11,                               // "or"
+        S_TRUE = 12,                             // "true"
+        S_FALSE = 13,                            // "false"
+        S_MINUS = 14,                            // "-"
+        S_PLUS = 15,                             // "+"
+        S_STAR = 16,                             // "*"
+        S_SLASH = 17,                            // "/"
+        S_LPAREN = 18,                           // "("
+        S_RPAREN = 19,                           // ")"
+        S_MODOLO = 20,                           // "%"
+        S_BITWISE_OR = 21,                       // "|"
+        S_BITWISE_XOR = 22,                      // "^"
+        S_BITWISE_AND = 23,                      // "&"
+        S_BITWISE_NOT = 24,                      // "~"
+        S_BITWISE_LEFT = 25,                     // "<<"
+        S_BITWISE_RIGHT = 26,                    // ">>"
+        S_EQUAL = 27,                            // "=="
+        S_ASSIGNMENT = 28,                       // "="
+        S_NOT_EQUAL = 29,                        // "!="
+        S_LESS_THAN = 30,                        // "<"
+        S_LESS_THAN_OR_EQUAL_TO = 31,            // "<="
+        S_GREATER_THAN = 32,                     // ">"
+        S_GREATER_THAN_OR_EQUAL_TO = 33,         // ">="
+        S_COMMA = 34,                            // ","
+        S_LBRACKET = 35,                         // "["
+        S_RBRACKET = 36,                         // "]"
+        S_SEMI = 37,                             // ";"
+        S_LBRACE = 38,                           // "{"
+        S_RBRACE = 39,                           // "}"
+        S_ENTRY_ARG = 40,                        // "entry_arg"
+        S_EXEC_CTX = 41,                         // "exec_ctx"
+        S_OUTPUT = 42,                           // "output"
+        S_IDENTIFIER = 43,                       // "identifier"
+        S_I8 = 44,                               // "int8"
+        S_I16 = 45,                              // "int16"
+        S_I32 = 46,                              // "int32"
+        S_I64 = 47,                              // "int64"
+        S_U8 = 48,                               // "uint8"
+        S_U16 = 49,                              // "uint16"
+        S_U32 = 50,                              // "uint32"
+        S_U64 = 51,                              // "uint64"
+        S_F32 = 52,                              // "float"
+        S_F64 = 53,                              // "double"
+        S_STRING = 54,                           // "string"
+        S_NEG = 55,                              // NEG
+        S_YYACCEPT = 56,                         // $accept
+        S_program = 57,                          // program
+        S_statement = 58,                        // statement
+        S_expr = 59,                             // expr
+        S_term = 60,                             // term
+        S_literal = 61,                          // literal
+        S_list = 62,                             // list
+        S_i8_list = 63,                          // i8_list
+        S_i16_list = 64,                         // i16_list
+        S_i32_list = 65,                         // i32_list
+        S_i64_list = 66,                         // i64_list
+        S_u8_list = 67,                          // u8_list
+        S_u16_list = 68,                         // u16_list
+        S_u32_list = 69,                         // u32_list
+        S_u64_list = 70,                         // u64_list
+        S_f32_list = 71,                         // f32_list
+        S_f64_list = 72,                         // f64_list
+        S_string_list = 73,                      // string_list
+        S_function = 74,                         // function
+        S_infix_function = 75,                   // infix_function
+        S_named_function = 76,                   // named_function
+        S_when_block = 77,                       // when_block
+        S_elif_chain = 78,                       // elif_chain
+        S_block = 79,                            // block
+        S_80_1 = 80,                             // $@1
+        S_args = 81,                             // args
+        S_arg = 82,                              // arg
+        S_boolean = 83                           // boolean
       };
     };
 
@@ -772,6 +789,8 @@ namespace athena {
       case symbol_kind::S_function: // function
       case symbol_kind::S_infix_function: // infix_function
       case symbol_kind::S_named_function: // named_function
+      case symbol_kind::S_when_block: // when_block
+      case symbol_kind::S_block: // block
       case symbol_kind::S_arg: // arg
       case symbol_kind::S_boolean: // boolean
         value.move< std::unique_ptr<jitfusion::ExecNode> > (std::move (that.value));
@@ -805,6 +824,7 @@ namespace athena {
         value.move< std::vector<std::string> > (std::move (that.value));
         break;
 
+      case symbol_kind::S_elif_chain: // elif_chain
       case symbol_kind::S_args: // args
         value.move< std::vector<std::unique_ptr<jitfusion::ExecNode>> > (std::move (that.value));
         break;
@@ -1285,6 +1305,8 @@ namespace athena {
       case symbol_kind::S_function: // function
       case symbol_kind::S_infix_function: // infix_function
       case symbol_kind::S_named_function: // named_function
+      case symbol_kind::S_when_block: // when_block
+      case symbol_kind::S_block: // block
       case symbol_kind::S_arg: // arg
       case symbol_kind::S_boolean: // boolean
         value.copy< std::unique_ptr<jitfusion::ExecNode> > (that.value);
@@ -1318,6 +1340,7 @@ namespace athena {
         value.copy< std::vector<std::string> > (that.value);
         break;
 
+      case symbol_kind::S_elif_chain: // elif_chain
       case symbol_kind::S_args: // args
         value.copy< std::vector<std::unique_ptr<jitfusion::ExecNode>> > (that.value);
         break;
@@ -1412,6 +1435,8 @@ namespace athena {
       case symbol_kind::S_function: // function
       case symbol_kind::S_infix_function: // infix_function
       case symbol_kind::S_named_function: // named_function
+      case symbol_kind::S_when_block: // when_block
+      case symbol_kind::S_block: // block
       case symbol_kind::S_arg: // arg
       case symbol_kind::S_boolean: // boolean
         value.move< std::unique_ptr<jitfusion::ExecNode> > (std::move (that.value));
@@ -1445,6 +1470,7 @@ namespace athena {
         value.move< std::vector<std::string> > (std::move (that.value));
         break;
 
+      case symbol_kind::S_elif_chain: // elif_chain
       case symbol_kind::S_args: // args
         value.move< std::vector<std::unique_ptr<jitfusion::ExecNode>> > (std::move (that.value));
         break;
@@ -1550,6 +1576,8 @@ switch (yykind)
       case symbol_kind::S_function: // function
       case symbol_kind::S_infix_function: // infix_function
       case symbol_kind::S_named_function: // named_function
+      case symbol_kind::S_when_block: // when_block
+      case symbol_kind::S_block: // block
       case symbol_kind::S_arg: // arg
       case symbol_kind::S_boolean: // boolean
         value.template destroy< std::unique_ptr<jitfusion::ExecNode> > ();
@@ -1583,6 +1611,7 @@ switch (yykind)
         value.template destroy< std::vector<std::string> > ();
         break;
 
+      case symbol_kind::S_elif_chain: // elif_chain
       case symbol_kind::S_args: // args
         value.template destroy< std::vector<std::unique_ptr<jitfusion::ExecNode>> > ();
         break;
@@ -1960,6 +1989,21 @@ switch (yykind)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
+      make_WHEN (location_type l)
+      {
+        return symbol_type (token::TOK_WHEN, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_WHEN (const location_type& l)
+      {
+        return symbol_type (token::TOK_WHEN, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
       make_IF (location_type l)
       {
         return symbol_type (token::TOK_IF, std::move (l));
@@ -1970,6 +2014,36 @@ switch (yykind)
       make_IF (const location_type& l)
       {
         return symbol_type (token::TOK_IF, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_ELIF (location_type l)
+      {
+        return symbol_type (token::TOK_ELIF, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_ELIF (const location_type& l)
+      {
+        return symbol_type (token::TOK_ELIF, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_ELSE (location_type l)
+      {
+        return symbol_type (token::TOK_ELSE, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_ELSE (const location_type& l)
+      {
+        return symbol_type (token::TOK_ELSE, l);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
@@ -2440,6 +2514,36 @@ switch (yykind)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
+      make_LBRACE (location_type l)
+      {
+        return symbol_type (token::TOK_LBRACE, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_LBRACE (const location_type& l)
+      {
+        return symbol_type (token::TOK_LBRACE, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_RBRACE (location_type l)
+      {
+        return symbol_type (token::TOK_RBRACE, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_RBRACE (const location_type& l)
+      {
+        return symbol_type (token::TOK_RBRACE, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
       make_ENTRY_ARG (location_type l)
       {
         return symbol_type (token::TOK_ENTRY_ARG, std::move (l));
@@ -2763,7 +2867,7 @@ switch (yykind)
     static const signed char yypgoto_[];
 
     // YYDEFGOTO[NTERM-NUM].
-    static const signed char yydefgoto_[];
+    static const unsigned char yydefgoto_[];
 
     // YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
     // positive, shift that token.  If negative, reduce the rule whose
@@ -3022,8 +3126,8 @@ switch (yykind)
     enum
     {
       yylast_ = 439,     ///< Last index in yytable_.
-      yynnts_ = 24,  ///< Number of nonterminal symbols.
-      yyfinal_ = 68 ///< Termination state number.
+      yynnts_ = 28,  ///< Number of nonterminal symbols.
+      yyfinal_ = 71 ///< Termination state number.
     };
 
 
@@ -3089,6 +3193,8 @@ switch (yykind)
       case symbol_kind::S_function: // function
       case symbol_kind::S_infix_function: // infix_function
       case symbol_kind::S_named_function: // named_function
+      case symbol_kind::S_when_block: // when_block
+      case symbol_kind::S_block: // block
       case symbol_kind::S_arg: // arg
       case symbol_kind::S_boolean: // boolean
         value.copy< std::unique_ptr<jitfusion::ExecNode> > (YY_MOVE (that.value));
@@ -3122,6 +3228,7 @@ switch (yykind)
         value.copy< std::vector<std::string> > (YY_MOVE (that.value));
         break;
 
+      case symbol_kind::S_elif_chain: // elif_chain
       case symbol_kind::S_args: // args
         value.copy< std::vector<std::unique_ptr<jitfusion::ExecNode>> > (YY_MOVE (that.value));
         break;
@@ -3233,6 +3340,8 @@ switch (yykind)
       case symbol_kind::S_function: // function
       case symbol_kind::S_infix_function: // infix_function
       case symbol_kind::S_named_function: // named_function
+      case symbol_kind::S_when_block: // when_block
+      case symbol_kind::S_block: // block
       case symbol_kind::S_arg: // arg
       case symbol_kind::S_boolean: // boolean
         value.move< std::unique_ptr<jitfusion::ExecNode> > (YY_MOVE (s.value));
@@ -3266,6 +3375,7 @@ switch (yykind)
         value.move< std::vector<std::string> > (YY_MOVE (s.value));
         break;
 
+      case symbol_kind::S_elif_chain: // elif_chain
       case symbol_kind::S_args: // args
         value.move< std::vector<std::unique_ptr<jitfusion::ExecNode>> > (YY_MOVE (s.value));
         break;
@@ -3390,7 +3500,7 @@ switch (yykind)
 
 #line 10 "parser.yy"
 } // athena
-#line 3394 "parser.hh"
+#line 3504 "parser.hh"
 
 
 // "%code provides" blocks.
@@ -3401,7 +3511,7 @@ switch (yykind)
 // ... and declare it for the parser's sake.
 YY_DECL;
 
-#line 3405 "parser.hh"
+#line 3515 "parser.hh"
 
 
 #endif // !YY_YY_PARSER_HH_INCLUDED
