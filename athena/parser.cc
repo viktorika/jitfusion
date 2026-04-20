@@ -1690,6 +1690,10 @@ namespace athena {
   case 90: // when_block: "when" expr "{" block "}" elif_chain
 #line 349 "parser.yy"
                                        {
+    if (builder.IsExpressionMode()) {
+      error(yystack_[5].location, "when block is not allowed in expression mode");
+      YYERROR;
+    }
     std::vector<std::unique_ptr<jitfusion::ExecNode>> args;
     args.reserve(2 + yystack_[0].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ().size());
     args.emplace_back(std::move(yystack_[4].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
@@ -1697,84 +1701,84 @@ namespace athena {
     args.insert(args.end(), std::make_move_iterator(yystack_[0].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ().begin()), std::make_move_iterator(yystack_[0].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ().end()));
     yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::IfBlockNode>(std::move(args));
   }
-#line 1701 "parser.cc"
+#line 1705 "parser.cc"
     break;
 
   case 91: // elif_chain: %empty
-#line 360 "parser.yy"
+#line 364 "parser.yy"
          { yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > () = std::vector<std::unique_ptr<jitfusion::ExecNode>>{}; }
-#line 1707 "parser.cc"
+#line 1711 "parser.cc"
     break;
 
   case 92: // elif_chain: elif_chain "elif" expr "{" block "}"
-#line 361 "parser.yy"
+#line 365 "parser.yy"
                                        {
     yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > () = std::move(yystack_[5].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ());
     yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ().emplace_back(std::move(yystack_[3].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
     yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ().emplace_back(std::move(yystack_[1].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
   }
-#line 1717 "parser.cc"
+#line 1721 "parser.cc"
     break;
 
   case 93: // elif_chain: elif_chain "else" "{" block "}"
-#line 366 "parser.yy"
+#line 370 "parser.yy"
                                   {
     yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > () = std::move(yystack_[4].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ());
     yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ().emplace_back(std::move(yystack_[1].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
   }
-#line 1726 "parser.cc"
+#line 1730 "parser.cc"
     break;
 
   case 94: // $@1: %empty
-#line 373 "parser.yy"
+#line 377 "parser.yy"
   { builder.EnterBlock(); }
-#line 1732 "parser.cc"
+#line 1736 "parser.cc"
     break;
 
   case 95: // block: $@1 program
-#line 373 "parser.yy"
+#line 377 "parser.yy"
                                     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = builder.LeaveBlock(); }
-#line 1738 "parser.cc"
+#line 1742 "parser.cc"
     break;
 
   case 96: // args: arg
-#line 377 "parser.yy"
+#line 381 "parser.yy"
       {
     yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > () = std::vector<std::unique_ptr<jitfusion::ExecNode>>{};
     yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ().emplace_back(std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
   }
-#line 1747 "parser.cc"
+#line 1751 "parser.cc"
     break;
 
   case 97: // args: args "," arg
-#line 381 "parser.yy"
+#line 385 "parser.yy"
                {
     yystack_[2].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ().emplace_back(std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
     yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > () = std::move(yystack_[2].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ());
   }
-#line 1756 "parser.cc"
+#line 1760 "parser.cc"
     break;
 
   case 98: // arg: term
-#line 388 "parser.yy"
+#line 392 "parser.yy"
        { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
-#line 1762 "parser.cc"
+#line 1766 "parser.cc"
     break;
 
   case 99: // boolean: term "and" term
-#line 392 "parser.yy"
+#line 396 "parser.yy"
                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kAnd, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1768 "parser.cc"
+#line 1772 "parser.cc"
     break;
 
   case 100: // boolean: term "or" term
-#line 393 "parser.yy"
+#line 397 "parser.yy"
                  { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kOr, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1774 "parser.cc"
+#line 1778 "parser.cc"
     break;
 
 
-#line 1778 "parser.cc"
+#line 1782 "parser.cc"
 
             default:
               break;
@@ -2472,8 +2476,8 @@ namespace athena {
      293,   300,   301,   308,   309,   314,   315,   316,   317,   318,
      319,   320,   321,   322,   323,   324,   325,   326,   327,   328,
      329,   330,   331,   332,   333,   337,   338,   339,   340,   345,
-     349,   360,   361,   366,   373,   373,   377,   381,   388,   392,
-     393
+     349,   364,   365,   370,   377,   377,   381,   385,   392,   396,
+     397
   };
 
   void
@@ -2506,9 +2510,9 @@ namespace athena {
 
 #line 10 "parser.yy"
 } // athena
-#line 2510 "parser.cc"
+#line 2514 "parser.cc"
 
-#line 395 "parser.yy"
+#line 399 "parser.yy"
 
 
 void athena::Parser::error(const location_type &l, const std::string &m) {

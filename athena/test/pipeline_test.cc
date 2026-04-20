@@ -694,3 +694,73 @@ TEST(IsolatedScopeTest, SameVarNameStoreInsideWhen) {
   EXPECT_EQ(output[0], 16);
   EXPECT_EQ(output[1], 108);
 }
+
+TEST(ExecContextTest, ExpressionModeWithExecContext) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  }
+
+  std::string code = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  r = a + b;
+  )";
+  ASSERT_TRUE(athena.Compile(code, func_registry).ok());
+
+  athena::ExecContext exec_ctx(4096);
+  RetType ret;
+  std::vector<float> value = {10, 20};
+  ASSERT_TRUE(athena.Execute(exec_ctx, value.data(), &ret).ok());
+  EXPECT_EQ(std::get<float>(ret), 30);
+
+  std::vector<float> value2 = {5, 3};
+  ASSERT_TRUE(athena.Execute(exec_ctx, value2.data(), &ret).ok());
+  EXPECT_EQ(std::get<float>(ret), 8);
+}
+
+TEST(ExecContextTest, PipelineModeWithExecContext) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  }
+  {
+    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kVoid);
+    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
+  }
+
+  std::string code1 = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  r = a + b;
+  store(output, 0, r);
+  )";
+  std::string code2 = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  r = a * b;
+  store(output, 1, r);
+  )";
+
+  std::vector<std::string> codes = {code1, code2};
+  ASSERT_TRUE(athena.Compile(codes, func_registry).ok());
+
+  athena::ExecContext exec_ctx(4096);
+  std::vector<float> value = {5, 3};
+  std::vector<float> output = {0, 0};
+  ASSERT_TRUE(athena.Execute(exec_ctx, value.data(), output.data()).ok());
+  EXPECT_EQ(output[0], 8);
+  EXPECT_EQ(output[1], 15);
+
+  std::vector<float> value2 = {10, 4};
+  std::vector<float> output2 = {0, 0};
+  ASSERT_TRUE(athena.Execute(exec_ctx, value2.data(), output2.data()).ok());
+  EXPECT_EQ(output2[0], 14);
+  EXPECT_EQ(output2[1], 40);
+}

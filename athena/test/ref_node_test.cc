@@ -351,3 +351,47 @@ TEST(RefNodeTest, ComplexPipelineWithLogicalAndRefNode) {
   EXPECT_EQ(output[1], 40);
   EXPECT_NEAR(output[2], 20.0F, 1e-5);
 }
+
+TEST(RefNodeTest, UndefinedVariableReferenceError) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  }
+  {
+    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kVoid);
+    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
+  }
+
+  std::string code = R"(
+  a = load(entry_arg, 0);
+  b = a + undefined_var;
+  store(output, 0, b);
+  )";
+
+  std::vector<std::string> codes = {code};
+  auto status = athena.Compile(codes, func_registry);
+  EXPECT_FALSE(status.ok());
+  EXPECT_NE(status.ToString().find("Variable not found"), std::string::npos);
+}
+
+TEST(RefNodeTest, UndefinedVariableInExpressionMode) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  }
+
+  std::string code = R"(
+  a = load(entry_arg, 0);
+  nonexistent;
+  )";
+
+  auto status = athena.Compile(code, func_registry);
+  EXPECT_FALSE(status.ok());
+  EXPECT_NE(status.ToString().find("Variable not found"), std::string::npos);
+}

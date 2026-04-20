@@ -77,7 +77,7 @@ TEST(ExecErrorTest, ExecuteAtReturnsRuntimeError) {
   ASSERT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
 
   std::vector<std::unique_ptr<ExecNode>> nodes;
-  nodes.emplace_back(MakeSimpleAddNode(1, 2)); 
+  nodes.emplace_back(MakeSimpleAddNode(1, 2));
   nodes.emplace_back(MakeListAddNode({1, 2, 3}, {4, 5}));
 
   ExecEngine exec_engine;
@@ -133,7 +133,7 @@ TEST(ExecErrorTest, ExecuteAllPartialFailureCollectsAllErrors) {
   ASSERT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
 
   std::vector<std::unique_ptr<ExecNode>> nodes;
-  nodes.emplace_back(MakeSimpleAddNode(10, 20)); 
+  nodes.emplace_back(MakeSimpleAddNode(10, 20));
   nodes.emplace_back(MakeListAddNode({1, 2, 3}, {4, 5}));
   nodes.emplace_back(MakeSimpleAddNode(100, 200));
   nodes.emplace_back(MakeListAddNode({1}, {4, 5, 6}));
@@ -207,4 +207,78 @@ TEST(ExecErrorTest, MultipleExecuteCallsDoNotAccumulateErrors) {
   EXPECT_FALSE(exec_ctx.HasErrors());
 
   EXPECT_EQ(st1.ToString(), st2.ToString());
+}
+
+TEST(ExecErrorTest, BatchCompileAndExecuteAllSuccess) {
+  std::unique_ptr<FunctionRegistry> func_registry;
+  ASSERT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+
+  std::vector<std::unique_ptr<ExecNode>> nodes;
+  nodes.emplace_back(MakeSimpleAddNode(10, 20));
+  nodes.emplace_back(MakeSimpleAddNode(100, 200));
+  nodes.emplace_back(MakeSimpleAddNode(1000, 2000));
+
+  ExecEngine exec_engine;
+  ASSERT_TRUE(exec_engine.BatchCompile(nodes, func_registry).ok());
+
+  std::vector<RetType> results;
+  Status st = exec_engine.ExecuteAll(nullptr, &results);
+  EXPECT_TRUE(st.ok());
+
+  ASSERT_EQ(results.size(), 3U);
+  EXPECT_EQ(std::get<uint32_t>(results[0]), 30U);
+  EXPECT_EQ(std::get<uint32_t>(results[1]), 300U);
+  EXPECT_EQ(std::get<uint32_t>(results[2]), 3000U);
+}
+
+TEST(ExecErrorTest, BatchCompileAndExecuteAllWithCtxSuccess) {
+  std::unique_ptr<FunctionRegistry> func_registry;
+  ASSERT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+
+  std::vector<std::unique_ptr<ExecNode>> nodes;
+  nodes.emplace_back(MakeSimpleAddNode(5, 7));
+  nodes.emplace_back(MakeSimpleAddNode(11, 13));
+
+  ExecEngine exec_engine;
+  ASSERT_TRUE(exec_engine.BatchCompile(nodes, func_registry).ok());
+
+  ExecContext exec_ctx(4096);
+  std::vector<RetType> results;
+  Status st = exec_engine.ExecuteAll(exec_ctx, nullptr, &results);
+  EXPECT_TRUE(st.ok());
+
+  ASSERT_EQ(results.size(), 2U);
+  EXPECT_EQ(std::get<uint32_t>(results[0]), 12U);
+  EXPECT_EQ(std::get<uint32_t>(results[1]), 24U);
+
+  std::vector<RetType> results2;
+  Status st2 = exec_engine.ExecuteAll(exec_ctx, nullptr, &results2);
+  EXPECT_TRUE(st2.ok());
+  ASSERT_EQ(results2.size(), 2U);
+  EXPECT_EQ(std::get<uint32_t>(results2[0]), 12U);
+  EXPECT_EQ(std::get<uint32_t>(results2[1]), 24U);
+}
+
+TEST(ExecErrorTest, ExecContextNormalPathReuse) {
+  std::unique_ptr<FunctionRegistry> func_registry;
+  ASSERT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+
+  auto exec_node = MakeSimpleAddNode(42, 58);
+
+  ExecEngine exec_engine;
+  ASSERT_TRUE(exec_engine.Compile(exec_node, func_registry).ok());
+
+  ExecContext exec_ctx(4096);
+
+  RetType result1;
+  Status st1 = exec_engine.Execute(exec_ctx, nullptr, &result1);
+  EXPECT_TRUE(st1.ok());
+  EXPECT_EQ(std::get<uint32_t>(result1), 100U);
+  EXPECT_FALSE(exec_ctx.HasErrors());
+
+  RetType result2;
+  Status st2 = exec_engine.Execute(exec_ctx, nullptr, &result2);
+  EXPECT_TRUE(st2.ok());
+  EXPECT_EQ(std::get<uint32_t>(result2), 100U);
+  EXPECT_FALSE(exec_ctx.HasErrors());
 }

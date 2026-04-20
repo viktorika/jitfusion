@@ -23,10 +23,9 @@ cc_library(
     ],
 )
 
-cc_binary(
+cc_test(
     name = "jitfusion_test",
     srcs = glob(["test/**/*.cc"]),
-    visibility = ["//visibility:public"],
     deps = [
         ":jitfusion"
     ],
@@ -84,10 +83,9 @@ cc_library(
     ],
 )
 
-cc_binary(
+cc_test(
     name = "athena_test",
     srcs = glob(["athena/test/*.cc", "athena/test/*.h"]),
-    visibility = ["//visibility:public"],
     includes = [
         "athena/test",
     ],
