@@ -47,13 +47,15 @@ bazel build //:athena_test
 ```
 
 # How to use
-I considered how many types of nodes are needed to represent a function in the execution engine, and I ultimately abstracted it into 11 types of nodes:
+I considered how many types of nodes are needed to represent a function in the execution engine, and I ultimately abstracted it into 13 types of nodes:
 
     EntryArgumentNode: A node used to obtain the entry argument variables of a function.
 
     ExecContextNode: A node used to obtain the context variables of the execution engine.
 
-    ConstValueNode and ConstListValueNode: Constant nodes.
+    ConstValueNode: Scalar constant node.
+
+    ConstListValueNode: List constant node.
 
     UnaryOPNode: Unary operation node.
 
@@ -66,6 +68,8 @@ I considered how many types of nodes are needed to represent a function in the e
     SwitchNode: Switch condition node.
 
     NoOPNode: No operation node.
+
+    IfBlockNode: Block-level if node. Unlike IfNode (which is an expression returning a value), IfBlockNode is a statement-level control flow node that can modify outer-scope variables within its branches. It supports when/elif/else semantics and is used in pipeline mode.
 
     RefNode: Reference node. Used in pipeline mode to reference a named variable defined in a previous statement within the same NoOPNode, avoiding redundant subtree cloning and reducing IR bloat.
 
