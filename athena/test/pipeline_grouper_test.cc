@@ -348,6 +348,7 @@ TEST(PipelineGrouperGroupTest, ChainOverlapTwoGroups) {
   EXPECT_EQ(total, 4);
   // Find the group sizes
   std::vector<size_t> sizes;
+  sizes.reserve(groups.size());
   for (const auto& group : groups) {
     sizes.push_back(GetChildCount(group));
   }
