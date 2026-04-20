@@ -1375,3 +1375,107 @@ TEST(WhenTest, ThreeLevelWithExpressions) {
     EXPECT_NEAR(output[0], -1, 1e-5);
   }
 }
+
+TEST(WhenTest, WhenBlockNotAllowedInExpressionMode) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  }
+
+  std::string code = R"(
+  a = load(entry_arg, 0);
+  r = 0f32;
+  when a > 0 {
+    r = 1f32;
+  }
+  r;
+  )";
+
+  auto status = athena.Compile(code, func_registry);
+  EXPECT_FALSE(status.ok());
+  EXPECT_NE(status.ToString().find("when block is not allowed in expression mode"), std::string::npos);
+}
+
+TEST(WhenTest, VariableTypeMismatchInWhenBranch) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  }
+  {
+    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kVoid);
+    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
+  }
+
+  std::string code = R"(
+  a = load(entry_arg, 0);
+  r = 0.0f32;
+  when a > 5.0f32 {
+    r = 42;
+  }
+  store(output, 0, r);
+  )";
+
+  std::vector<std::string> codes = {code};
+  auto status = athena.Compile(codes, func_registry);
+  EXPECT_FALSE(status.ok());
+  EXPECT_NE(status.ToString().find("type mismatch"), std::string::npos);
+}
+
+TEST(WhenTest, VariableTypeMismatchInElseBranch) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  }
+  {
+    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kVoid);
+    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
+  }
+
+  std::string code = R"(
+  a = load(entry_arg, 0);
+  r = 0.0f32;
+  when a > 5.0f32 {
+    r = 1.0f32;
+  } else {
+    r = 42;
+  }
+  store(output, 0, r);
+  )";
+
+  std::vector<std::string> codes = {code};
+  auto status = athena.Compile(codes, func_registry);
+  EXPECT_FALSE(status.ok());
+  EXPECT_NE(status.ToString().find("type mismatch"), std::string::npos);
+}
+
+TEST(WhenTest, StringConditionReject) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kVoid);
+    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
+  }
+
+  std::string code = R"(
+  r = 0.0f32;
+  when "hello" {
+    r = 1.0f32;
+  }
+  store(output, 0, r);
+  )";
+
+  std::vector<std::string> codes = {code};
+  auto status = athena.Compile(codes, func_registry);
+  EXPECT_FALSE(status.ok());
+  EXPECT_NE(status.ToString().find("numeric type"), std::string::npos);
+}

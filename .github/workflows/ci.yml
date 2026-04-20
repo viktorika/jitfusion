@@ -389,14 +389,8 @@ jobs:
           sudo curl -fSsL -o /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64
           sudo chmod +x /usr/local/bin/bazel
 
-      - name: Bazel Build
-        run: bazel build //:jitfusion_test //:athena_test
-
-      - name: Run JitFusion Tests
-        run: echo "" | ./bazel-bin/jitfusion_test
-
-      - name: Run Athena Tests
-        run: echo "" | ./bazel-bin/athena_test
+      - name: Bazel Build and Test
+        run: bazel test //:jitfusion_test //:athena_test
 
   coverage:
     runs-on: ubuntu-22.04
