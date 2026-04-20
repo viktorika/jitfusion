@@ -245,3 +245,452 @@ TEST(ComplexTest, TwoStoreInSingleCode) {
   EXPECT_EQ(output[0], 5 + 3);
   EXPECT_EQ(output[1], 5 * 3);
 }
+
+TEST(IsolatedScopeTest, SameVarNameDifferentComputation) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  }
+  {
+    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kVoid);
+    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
+  }
+
+  std::string code1 = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  result = (a + b) * 2.0f32;
+  store(output, 0, result);
+  )";
+
+  std::string code2 = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  result = (a - b) * 3.0f32;
+  store(output, 1, result);
+  )";
+
+  std::vector<std::string> codes = {code1, code2};
+  ASSERT_TRUE(athena.Compile(codes, func_registry).ok());
+
+  std::vector<float> value = {10, 3};
+  std::vector<float> output = {0, 0};
+  ASSERT_TRUE(athena.Execute(value.data(), output.data()).ok());
+
+  EXPECT_EQ(output[0], 26);
+  EXPECT_EQ(output[1], 21);
+}
+
+TEST(IsolatedScopeTest, SameIntermediateVarDifferentChain) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  }
+  {
+    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kVoid);
+    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
+  }
+
+  std::string code1 = R"(
+  x = load(entry_arg, 0);
+  y = load(entry_arg, 1);
+  tmp = x + y;
+  result = tmp * tmp;
+  store(output, 0, result);
+  )";
+
+  std::string code2 = R"(
+  x = load(entry_arg, 0);
+  y = load(entry_arg, 1);
+  tmp = x * y;
+  result = tmp + 1.0f32;
+  store(output, 1, result);
+  )";
+
+  std::string code3 = R"(
+  x = load(entry_arg, 0);
+  y = load(entry_arg, 1);
+  tmp = x / y;
+  result = tmp - 1.0f32;
+  store(output, 2, result);
+  )";
+
+  std::vector<std::string> codes = {code1, code2, code3};
+  ASSERT_TRUE(athena.Compile(codes, func_registry).ok());
+
+  std::vector<float> value = {6, 2};
+  std::vector<float> output = {0, 0, 0};
+  ASSERT_TRUE(athena.Execute(value.data(), output.data()).ok());
+
+  EXPECT_EQ(output[0], 64);
+  EXPECT_EQ(output[1], 13);
+  EXPECT_EQ(output[2], 2);
+}
+
+TEST(IsolatedScopeTest, CrossPipelineVarReferenceError) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  }
+  {
+    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kVoid);
+    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
+  }
+
+  std::string code1 = R"(
+  a = load(entry_arg, 0);
+  my_var = a * 2.0f32;
+  store(output, 0, my_var);
+  )";
+
+  std::string code2 = R"(
+  b = load(entry_arg, 1);
+  result = b + my_var;
+  store(output, 1, result);
+  )";
+
+  std::vector<std::string> codes = {code1, code2};
+  auto status = athena.Compile(codes, func_registry);
+  EXPECT_FALSE(status.ok());
+}
+
+TEST(IsolatedScopeTest, SameVarNameDifferentLoadIndex) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  }
+  {
+    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kVoid);
+    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
+  }
+
+  std::string code1 = R"(
+  val = load(entry_arg, 0);
+  r = val * 10.0f32;
+  store(output, 0, r);
+  )";
+
+  std::string code2 = R"(
+  val = load(entry_arg, 1);
+  r = val * 20.0f32;
+  store(output, 1, r);
+  )";
+
+  std::string code3 = R"(
+  val = load(entry_arg, 2);
+  r = val * 30.0f32;
+  store(output, 2, r);
+  )";
+
+  std::vector<std::string> codes = {code1, code2, code3};
+  ASSERT_TRUE(athena.Compile(codes, func_registry).ok());
+
+  std::vector<float> value = {1, 2, 3};
+  std::vector<float> output = {0, 0, 0};
+  ASSERT_TRUE(athena.Execute(value.data(), output.data()).ok());
+
+  EXPECT_EQ(output[0], 10);
+  EXPECT_EQ(output[1], 40);
+  EXPECT_EQ(output[2], 90);
+}
+
+TEST(IsolatedScopeTest, SameVarNameWithWhenBlock) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  }
+  {
+    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kVoid);
+    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
+  }
+
+  std::string code1 = R"(
+  a = load(entry_arg, 0);
+  r = 0.0f32;
+  when a > 5.0f32 {
+    r = a * 2.0f32;
+  }
+  store(output, 0, r);
+  )";
+
+  std::string code2 = R"(
+  a = load(entry_arg, 0);
+  r = 100.0f32;
+  when a > 5.0f32 {
+    r = a * 3.0f32;
+  }
+  store(output, 1, r);
+  )";
+
+  std::vector<std::string> codes = {code1, code2};
+  ASSERT_TRUE(athena.Compile(codes, func_registry).ok());
+
+  std::vector<float> value = {10};
+  std::vector<float> output = {0, 0};
+  ASSERT_TRUE(athena.Execute(value.data(), output.data()).ok());
+
+  EXPECT_EQ(output[0], 20);
+  EXPECT_EQ(output[1], 30);
+}
+
+TEST(IsolatedScopeTest, SameVarNameWithWhenElifElse) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  }
+  {
+    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kVoid);
+    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
+  }
+
+  std::string code1 = R"(
+  a = load(entry_arg, 0);
+  r = 0.0f32;
+  when a > 10.0f32 {
+    r = a * 3.0f32;
+  } elif a > 5.0f32 {
+    r = a * 2.0f32;
+  } else {
+    r = a;
+  }
+  store(output, 0, r);
+  )";
+
+  std::string code2 = R"(
+  a = load(entry_arg, 0);
+  r = 0.0f32;
+  when a > 10.0f32 {
+    r = a + 100.0f32;
+  } elif a > 5.0f32 {
+    r = a + 50.0f32;
+  } else {
+    r = a + 10.0f32;
+  }
+  store(output, 1, r);
+  )";
+
+  std::vector<std::string> codes = {code1, code2};
+  ASSERT_TRUE(athena.Compile(codes, func_registry).ok());
+
+  std::vector<float> value = {7};
+  std::vector<float> output = {0, 0};
+  ASSERT_TRUE(athena.Execute(value.data(), output.data()).ok());
+
+  EXPECT_EQ(output[0], 14);
+  EXPECT_EQ(output[1], 57);
+}
+
+TEST(IsolatedScopeTest, FourPipelinesSameVarNames) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  }
+  {
+    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kVoid);
+    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
+  }
+
+  std::string code1 = R"(
+  x = load(entry_arg, 0);
+  y = load(entry_arg, 1);
+  z = x + y;
+  store(output, 0, z);
+  )";
+
+  std::string code2 = R"(
+  x = load(entry_arg, 0);
+  y = load(entry_arg, 1);
+  z = x - y;
+  store(output, 1, z);
+  )";
+
+  std::string code3 = R"(
+  x = load(entry_arg, 0);
+  y = load(entry_arg, 1);
+  z = x * y;
+  store(output, 2, z);
+  )";
+
+  std::string code4 = R"(
+  x = load(entry_arg, 0);
+  y = load(entry_arg, 1);
+  z = x / y;
+  store(output, 3, z);
+  )";
+
+  std::vector<std::string> codes = {code1, code2, code3, code4};
+  ASSERT_TRUE(athena.Compile(codes, func_registry).ok());
+
+  std::vector<float> value = {12, 4};
+  std::vector<float> output = {0, 0, 0, 0};
+  ASSERT_TRUE(athena.Execute(value.data(), output.data()).ok());
+
+  EXPECT_EQ(output[0], 16);
+  EXPECT_EQ(output[1], 8);
+  EXPECT_EQ(output[2], 48);
+  EXPECT_EQ(output[3], 3);
+}
+
+TEST(IsolatedScopeTest, DifferentGroupsSameVarNames) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  }
+  {
+    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kVoid);
+    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
+  }
+  std::string code1 = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  tmp = a + b;
+  store(output, 0, tmp);
+  )";
+
+  std::string code2 = R"(
+  a = load(entry_arg, 0);
+  b = load(entry_arg, 1);
+  tmp = a * b;
+  store(output, 1, tmp);
+  )";
+
+  std::string code3 = R"(
+  a = load(entry_arg, 2);
+  b = load(entry_arg, 3);
+  tmp = a - b;
+  store(output, 2, tmp);
+  )";
+
+  std::string code4 = R"(
+  a = load(entry_arg, 2);
+  b = load(entry_arg, 3);
+  tmp = max(a, b);
+  store(output, 3, tmp);
+  )";
+
+  std::vector<std::string> codes = {code1, code2, code3, code4};
+  ASSERT_TRUE(athena.Compile(codes, func_registry).ok());
+
+  std::vector<float> value = {5, 3, 20, 7};
+  std::vector<float> output = {0, 0, 0, 0};
+  ASSERT_TRUE(athena.Execute(value.data(), output.data()).ok());
+
+  EXPECT_EQ(output[0], 8);
+  EXPECT_EQ(output[1], 15);
+  EXPECT_EQ(output[2], 13);
+  EXPECT_EQ(output[3], 20);
+}
+
+TEST(IsolatedScopeTest, SameVarNameWithNestedWhen) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  }
+  {
+    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kVoid);
+    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
+  }
+
+  std::string code1 = R"(
+  a = load(entry_arg, 0);
+  r = 0.0f32;
+  when a > 0.0f32 {
+    r = 1.0f32;
+    when a > 10.0f32 {
+      r = 2.0f32;
+    }
+  }
+  store(output, 0, r);
+  )";
+
+  std::string code2 = R"(
+  a = load(entry_arg, 0);
+  r = 100.0f32;
+  when a > 0.0f32 {
+    r = 200.0f32;
+    when a > 10.0f32 {
+      r = 300.0f32;
+    }
+  }
+  store(output, 1, r);
+  )";
+
+  std::vector<std::string> codes = {code1, code2};
+  ASSERT_TRUE(athena.Compile(codes, func_registry).ok());
+
+  std::vector<float> value = {15};
+  std::vector<float> output = {0, 0};
+  ASSERT_TRUE(athena.Execute(value.data(), output.data()).ok());
+
+  EXPECT_EQ(output[0], 2);
+  EXPECT_EQ(output[1], 300);
+}
+
+TEST(IsolatedScopeTest, SameVarNameStoreInsideWhen) {
+  Athena athena;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  {
+    FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
+    EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadF32)).ok());
+  }
+  {
+    FunctionSignature sign("store", {ValueType::kPtr, ValueType::kI32, ValueType::kF32}, ValueType::kVoid);
+    EXPECT_TRUE(func_registry->RegisterStoreCFunc(sign, reinterpret_cast<void*>(StoreF32), 1).ok());
+  }
+
+  std::string code1 = R"(
+  val = load(entry_arg, 0);
+  when val > 5.0f32 {
+    store(output, 0, val * 2.0f32);
+  } else {
+    store(output, 0, val);
+  }
+  )";
+
+  std::string code2 = R"(
+  val = load(entry_arg, 0);
+  when val > 5.0f32 {
+    store(output, 1, val + 100.0f32);
+  } else {
+    store(output, 1, val + 10.0f32);
+  }
+  )";
+
+  std::vector<std::string> codes = {code1, code2};
+  ASSERT_TRUE(athena.Compile(codes, func_registry).ok());
+
+  std::vector<float> value = {8};
+  std::vector<float> output = {0, 0};
+  ASSERT_TRUE(athena.Execute(value.data(), output.data()).ok());
+
+  EXPECT_EQ(output[0], 16);
+  EXPECT_EQ(output[1], 108);
+}

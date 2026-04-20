@@ -45,7 +45,7 @@ std::vector<std::unique_ptr<ExecNode>> PipelineGrouper::Group(std::vector<std::u
   }
   result.reserve(union_id_to_nodes.size());
   for (auto& [union_id, nodes] : union_id_to_nodes) {
-    result.emplace_back(std::unique_ptr<ExecNode>(new NoOPNode(std::move(nodes))));
+    result.emplace_back(std::make_unique<NoOPNode>(std::move(nodes), true));
   }
   return result;
 }

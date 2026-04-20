@@ -162,8 +162,12 @@ class NoOPNode : public ExecNode {
  public:
   NoOPNode() = delete;
   explicit NoOPNode(std::vector<std::unique_ptr<ExecNode>> args) : names_(args.size()), args_(std::move(args)) {}
+  NoOPNode(std::vector<std::unique_ptr<ExecNode>> args, bool isolated)
+      : names_(args.size()), args_(std::move(args)), isolated_(isolated) {}
   NoOPNode(std::vector<std::string> names, std::vector<std::unique_ptr<ExecNode>> args)
       : names_(std::move(names)), args_(std::move(args)) {}
+  NoOPNode(std::vector<std::string> names, std::vector<std::unique_ptr<ExecNode>> args, bool isolated)
+      : names_(std::move(names)), args_(std::move(args)), isolated_(isolated) {}
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
   void AppendArgs(std::unique_ptr<ExecNode>&& arg);
@@ -173,11 +177,14 @@ class NoOPNode : public ExecNode {
   [[nodiscard]] const std::vector<std::unique_ptr<ExecNode>>& GetArgs() const { return args_; }
   [[nodiscard]] const std::vector<std::string>& GetNames() const { return names_; }
 
+  [[nodiscard]] bool IsIsolated() const { return isolated_; }
+
  private:
   std::string ToStringImpl(const std::string& prefix) override;
 
   std::vector<std::string> names_;
   std::vector<std::unique_ptr<ExecNode>> args_;
+  bool isolated_{false};
 };
 
 class IfNode : public ExecNode {

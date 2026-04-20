@@ -144,7 +144,8 @@ std::unique_ptr<ExecNode> NoOPNode::Clone() {
   for (const auto& arg : args_) {
     args.emplace_back(arg->Clone());
   }
-  return std::make_unique<NoOPNode>(names_, std::move(args));
+  auto node = std::make_unique<NoOPNode>(names_, std::move(args), isolated_);
+  return node;
 }
 
 std::string IfNode::ToStringImpl(const std::string& prefix) {
