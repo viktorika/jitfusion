@@ -13,7 +13,21 @@ When using it, you need to <span style="color:red">#include "athena.h"</span> an
 
 * 3.In addition to supporting various operations, expressions also support several types of special syntax. Function syntax: {function_name}({arg1}, {arg2}, ...). It also supports switch statements and if statements. Following the principle of simplicity, the syntax for switch and if statements is similar to function syntax: if({condition}, {true_expression}, {false_expression}), switch({case1}, {value1}, {case2}, {value2}..., {default_value}).
 
-* 4.You can obtain the input parameter pointer through the entry_arg name, access the ExecContext via exec_ctx and obtain the output parameter pointer through the output name.
+* 4.Block-level conditional statements are supported using the `when`/`elif`/`else` syntax (only available in pipeline mode, not in expression mode). Unlike the expression-level `if()`, `when` blocks can modify outer-scope variables within their branches. The syntax is:
+
+```
+when condition1 {
+  // statements
+} elif condition2 {
+  // statements
+} else {
+  // statements
+}
+```
+
+Note: Variables modified inside `when` branches must maintain the same type as their original declaration. Nested `when` blocks are also supported.
+
+* 5.You can obtain the input parameter pointer through the entry_arg name, access the ExecContext via exec_ctx and obtain the output parameter pointer through the output name.
 
 ## Execute Funtion
 ```c++
@@ -21,14 +35,18 @@ When using it, you need to <span style="color:red">#include "athena.h"</span> an
   // the result will be returned, similar to expression scenarios.
   Status Compile(const std::string& code, const std::unique_ptr<FunctionRegistry>& func_registry);
   Status Execute(void* entry_arguments, RetType* result);
+  Status Execute(ExecContext& exec_ctx, void* entry_arguments, RetType* result);
 
   // Applicable to complex scenarios where multiple pipelines are computed simultaneously. Each pipeline writes data
   // using a custom function, and results are not returned. This is similar to feature processing scenarios.
   Status Compile(const std::vector<std::string>& code, const std::unique_ptr<FunctionRegistry>& func_registry);
   Status Execute(void* entry_arguments, void* result);
+  Status Execute(ExecContext& exec_ctx, void* entry_arguments, void* result);
 ```
 
 The first set of functions returns a value through the last statement and requires that no write operations occur during the process; otherwise, it results in undefined behavior. The second set of functions can accept multiple sets of code, where the statement requires the user to define a custom store function to write data. The function will perform merge and optimization processing on all the code.
+
+The `Execute` overloads that accept an `ExecContext&` parameter allow you to reuse a pre-allocated ExecContext, avoiding repeated memory allocation overhead. This is useful for high-performance scenarios where the execution engine is called frequently.
 
 It is recommended to divide custom functions into two categories: read-only functions and store functions. Read-only functions can either be data loading functions or computation functions that generate an intermediate variable. It is not recommended for computation functions to directly modify parameter variables; instead, they should return the computation result by generating a new variable. In this case, you can set a read-only attribute for your function, as shown in the code below.
 

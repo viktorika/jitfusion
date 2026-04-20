@@ -16,7 +16,7 @@ Status CodeGen::Visit(NoOPNode& no_op_node) {
     llvm::Value* args_value;
     JF_RETURN_NOT_OK(GetValue(args[i].get(), &args_value));
     if (!names[i].empty()) {
-      named_values_[names[i]] = args_value;
+      scope_stack_.Set(names[i], args_value);
     }
   }
   value_ = nullptr;

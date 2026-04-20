@@ -194,7 +194,7 @@ Status Validator::Visit(NoOPNode& no_op_node) {
   for (size_t i = 0; i < args.size(); ++i) {
     JF_RETURN_NOT_OK(args[i]->Accept(this));
     if (!names[i].empty()) {
-      named_types_[names[i]] = args[i]->GetReturnType();
+      type_scope_stack_.Set(names[i], args[i]->GetReturnType());
     }
   }
   no_op_node.SetReturnType(ValueType::kVoid);
@@ -271,12 +271,81 @@ Status Validator::Visit(SwitchNode& switch_node) {
   return Status::OK();
 }
 
+Status Validator::Visit(IfBlockNode& if_block_node) {
+  const auto& args = if_block_node.GetArgs();
+  int num_args = static_cast<int>(args.size());
+  if (num_args < 2) {
+    return Status::ParseError("If block must have at least a condition and a body");
+  }
+  bool has_else = (num_args % 2 != 0);
+  int num_branches = num_args / 2;
+
+  auto type_snapshot = type_scope_stack_.Snapshot();
+
+  std::unordered_map<std::string, ValueType> all_shadowed;
+
+  for (int i = 0; i < num_branches; ++i) {
+    int cond_idx = i * 2;
+    int body_idx = (i * 2) + 1;
+
+    JF_RETURN_NOT_OK(args[cond_idx]->Accept(this));
+    if (!TypeHelper::IsNumericType(args[cond_idx]->GetReturnType())) {
+      return Status::ParseError("If block condition must be numeric type, got ",
+                                TypeHelper::TypeToString(args[cond_idx]->GetReturnType()));
+    }
+    type_scope_stack_.PushScope();
+    JF_RETURN_NOT_OK(args[body_idx]->Accept(this));
+    if (args[body_idx]->GetReturnType() != ValueType::kVoid) {
+      return Status::ParseError("If block body must be void type, got ",
+                                TypeHelper::TypeToString(args[body_idx]->GetReturnType()));
+    }
+    auto shadowed = type_scope_stack_.GetShadowed();
+    for (const auto& [name, new_type] : shadowed) {
+      auto it = type_snapshot.find(name);
+      if (it != type_snapshot.end() && it->second != new_type) {
+        return Status::ParseError("Variable '", name, "' type mismatch in if block branch: original type is ",
+                                  TypeHelper::TypeToString(it->second), ", but assigned ",
+                                  TypeHelper::TypeToString(new_type));
+      }
+      all_shadowed[name] = new_type;
+    }
+    type_scope_stack_.PopScope();
+  }
+
+  if (has_else) {
+    type_scope_stack_.PushScope();
+    JF_RETURN_NOT_OK(args[num_args - 1]->Accept(this));
+    if (args[num_args - 1]->GetReturnType() != ValueType::kVoid) {
+      return Status::ParseError("If block else body must be void type, got ",
+                                TypeHelper::TypeToString(args[num_args - 1]->GetReturnType()));
+    }
+    auto shadowed = type_scope_stack_.GetShadowed();
+    for (const auto& [name, new_type] : shadowed) {
+      auto it = type_snapshot.find(name);
+      if (it != type_snapshot.end() && it->second != new_type) {
+        return Status::ParseError("Variable '", name, "' type mismatch in if block else branch: original type is ",
+                                  TypeHelper::TypeToString(it->second), ", but assigned ",
+                                  TypeHelper::TypeToString(new_type));
+      }
+      all_shadowed[name] = new_type;
+    }
+    type_scope_stack_.PopScope();
+  }
+
+  for (const auto& [name, type] : all_shadowed) {
+    type_scope_stack_.Set(name, type);
+  }
+
+  if_block_node.SetReturnType(ValueType::kVoid);
+  return Status::OK();
+}
+
 Status Validator::Visit(RefNode& ref_node) {
-  auto it = named_types_.find(ref_node.GetName());
-  if (it == named_types_.end()) {
+  ValueType type = type_scope_stack_.Lookup(ref_node.GetName());
+  if (type == ValueType::kUnknown) {
     return Status::ParseError("Variable not found: ", ref_node.GetName());
   }
-  ref_node.SetReturnType(it->second);
+  ref_node.SetReturnType(type);
   return Status::OK();
 }
 

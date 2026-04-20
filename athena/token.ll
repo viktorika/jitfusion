@@ -104,8 +104,13 @@ blank [ \t\r]
 {blank}+   loc.step ();
 \n+        loc.lines (yyleng); loc.step ();
 
+"when"        return  athena::Parser::make_WHEN                        (loc);
 "if"          return  athena::Parser::make_IF                          (loc);
+"elif"        return  athena::Parser::make_ELIF                        (loc);
+"else"        return  athena::Parser::make_ELSE                        (loc);
 "switch"      return  athena::Parser::make_SWITCH                      (loc);
+"{"           return  athena::Parser::make_LBRACE                      (loc);
+"}"           return  athena::Parser::make_RBRACE                      (loc);
 ";"           return  athena::Parser::make_SEMI                        (loc);
 
 "in"          return  athena::Parser::make_IN                          (loc);      

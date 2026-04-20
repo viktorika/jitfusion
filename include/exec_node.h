@@ -214,6 +214,21 @@ class SwitchNode : public ExecNode {
   std::vector<std::unique_ptr<ExecNode>> args_;
 };
 
+class IfBlockNode : public ExecNode {
+ public:
+  IfBlockNode() = delete;
+  explicit IfBlockNode(std::vector<std::unique_ptr<ExecNode>> args) : args_(std::move(args)) {}
+  Status Accept(Visitor* visitor) override;
+  ExecNodeType GetExecNodeType() override;
+  std::unique_ptr<ExecNode> Clone() override;
+
+  [[nodiscard]] const std::vector<std::unique_ptr<ExecNode>>& GetArgs() const { return args_; }
+
+ private:
+  std::string ToStringImpl(const std::string& prefix) override;
+  std::vector<std::unique_ptr<ExecNode>> args_;
+};
+
 class RefNode : public ExecNode {
  public:
   RefNode() = delete;
@@ -245,6 +260,7 @@ class Visitor {
   virtual Status Visit(NoOPNode& no_op_node) = 0;
   virtual Status Visit(IfNode& if_node) = 0;
   virtual Status Visit(SwitchNode& switch_node) = 0;
+  virtual Status Visit(IfBlockNode& if_block_node) = 0;
   virtual Status Visit(RefNode& ref_node) = 0;
 };
 

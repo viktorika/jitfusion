@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <vector>
 #include "exec_node.h"
 #include "location.hh"
 #include "status.h"
@@ -41,6 +42,11 @@ class ProgramAstBuilder {
   std::unique_ptr<ExecNode> MakeRefNode(const std::string& var_name);
   void AddStatement(Statement statement);
 
+  void EnterBlock();
+  std::unique_ptr<ExecNode> LeaveBlock();
+
+  [[nodiscard]] bool IsExpressionMode() const { return build_mode_ == BuildMode::kExpression; }
+
   location& GetLocation() { return location_; }
 
  private:
@@ -54,6 +60,14 @@ class ProgramAstBuilder {
   std::string custom_error_message_;
   location location_;
   BuildMode build_mode_{BuildMode::kExpression};
+
+  struct BlockContext {
+    std::vector<Statement> statements;
+    std::unordered_map<std::string, uint32_t> var2index;
+    BlockContext(std::vector<Statement> stmts, std::unordered_map<std::string, uint32_t> var_idx)
+        : statements(std::move(stmts)), var2index(std::move(var_idx)) {}
+  };
+  std::vector<BlockContext> block_stack_;
 
   friend class Parser;
 };

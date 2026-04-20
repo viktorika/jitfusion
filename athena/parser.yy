@@ -43,7 +43,10 @@ YY_DECL;
 
 %define api.token.prefix {TOK_}
 %token
+  WHEN                        "when"
   IF                          "if"
+  ELIF                        "elif"
+  ELSE                        "else"
   SWITCH                      "switch"
   IN                          "in"
   NOT                         "not"
@@ -75,6 +78,8 @@ YY_DECL;
   LBRACKET                    "["
   RBRACKET                    "]"
   SEMI                        ";"
+  LBRACE                      "{"
+  RBRACE                      "}"
   ENTRY_ARG                   "entry_arg"
   EXEC_CTX                    "exec_ctx"
   OUTPUT                      "output"
@@ -106,6 +111,10 @@ YY_DECL;
 %nterm <std::unique_ptr<jitfusion::ExecNode>> infix_function;
 %nterm <std::unique_ptr<jitfusion::ExecNode>> named_function;
 %nterm <std::unique_ptr<jitfusion::ExecNode>> boolean;
+
+%nterm <std::unique_ptr<jitfusion::ExecNode>> when_block;
+%nterm <std::vector<std::unique_ptr<jitfusion::ExecNode>>> elif_chain;
+%nterm <std::unique_ptr<jitfusion::ExecNode>> block;
 
 
 %nterm <std::vector<std::unique_ptr<jitfusion::ExecNode>>> args;
@@ -160,6 +169,7 @@ program:
 statement: 
   IDENTIFIER "=" expr ";" { $$ = Statement(std::move($1), std::move($3)); }
 | expr ";" { $$ = Statement(std::move($1)); }
+| when_block { $$ = Statement(std::move($1)); }
 
 expr: term { $$ = std::move($1);}
 ;
@@ -333,6 +343,38 @@ named_function:
     static_cast<jitfusion::FunctionNode *>($$.get())->AppendArgs(std::move($3));
 }
 | "switch" "(" args ")" { $$ = std::make_unique<jitfusion::SwitchNode>(std::move($3)); }
+;
+
+when_block:
+  "when" expr "{" block "}" elif_chain {
+    if (builder.IsExpressionMode()) {
+      error(@1, "when block is not allowed in expression mode");
+      YYERROR;
+    }
+    std::vector<std::unique_ptr<jitfusion::ExecNode>> args;
+    args.reserve(2 + $6.size());
+    args.emplace_back(std::move($2));
+    args.emplace_back(std::move($4));
+    args.insert(args.end(), std::make_move_iterator($6.begin()), std::make_move_iterator($6.end()));
+    $$ = std::make_unique<jitfusion::IfBlockNode>(std::move(args));
+  }
+;
+
+elif_chain:
+  %empty { $$ = std::vector<std::unique_ptr<jitfusion::ExecNode>>{}; }
+| elif_chain "elif" expr "{" block "}" {
+    $$ = std::move($1);
+    $$.emplace_back(std::move($3));
+    $$.emplace_back(std::move($5));
+  }
+| elif_chain "else" "{" block "}" {
+    $$ = std::move($1);
+    $$.emplace_back(std::move($4));
+  }
+;
+
+block:
+  { builder.EnterBlock(); } program { $$ = builder.LeaveBlock(); }
 ;
 
 args:

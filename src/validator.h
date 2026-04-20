@@ -7,9 +7,9 @@
 #pragma once
 
 #include <memory>
-#include <unordered_map>
 #include "exec_node.h"
 #include "function_registry.h"
+#include "scope_stack.h"
 
 namespace jitfusion {
 
@@ -30,11 +30,12 @@ class Validator : public Visitor {
   Status Visit(NoOPNode& no_op_node) override;
   Status Visit(IfNode& if_node) override;
   Status Visit(SwitchNode& switch_node) override;
+  Status Visit(IfBlockNode& if_block_node) override;
   Status Visit(RefNode& ref_node) override;
 
  private:
   const std::unique_ptr<FunctionRegistry>& func_registry_;
-  std::unordered_map<std::string, ValueType> named_types_;
+  ScopeStack<ValueType> type_scope_stack_;
 };
 
 }  // namespace jitfusion

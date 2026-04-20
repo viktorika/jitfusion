@@ -144,6 +144,17 @@ Status PipelineGrouper::Visit(SwitchNode& switch_node) {
   return Status::OK();
 }
 
+Status PipelineGrouper::Visit(IfBlockNode& if_block_node) {
+  uint32_t max_height = 0;
+  for (const auto& child : if_block_node.GetArgs()) {
+    uint32_t height;
+    JF_RETURN_NOT_OK(GetHeight(child.get(), &height));
+    max_height = std::max(max_height, height);
+  }
+  height_ = max_height + 1;
+  return Status::OK();
+}
+
 Status PipelineGrouper::Visit(RefNode& /*ref_node*/) {
   height_ = 0;
   return Status::OK();

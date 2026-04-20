@@ -67,6 +67,15 @@ std::unique_ptr<ExecNode> ProgramAstBuilder::MakeRefNode(const std::string& var_
     }
     return statements_[it->second].expression->Clone();
   }
+  for (auto it = block_stack_.rbegin(); it != block_stack_.rend(); ++it) {
+    if (auto found = it->var2index.find(var_name); found != it->var2index.end()) {
+      it->statements[found->second].has_dependency = true;
+      if (build_mode_ == BuildMode::kPipeline) {
+        return std::make_unique<RefNode>(var_name);
+      }
+      return it->statements[found->second].expression->Clone();
+    }
+  }
   custom_error_message_ = "Variable not found: " + var_name;
   return nullptr;
 }
@@ -78,6 +87,31 @@ void ProgramAstBuilder::AddStatement(Statement statement) {
     return;
   }
   var2index_[var_name] = statements_.size() - 1;
+}
+
+void ProgramAstBuilder::EnterBlock() {
+  block_stack_.emplace_back(std::move(statements_), std::move(var2index_));
+  statements_.clear();
+  var2index_.clear();
+}
+
+std::unique_ptr<ExecNode> ProgramAstBuilder::LeaveBlock() {
+  std::vector<std::string> names;
+  std::vector<std::unique_ptr<ExecNode>> args;
+  names.reserve(statements_.size());
+  args.reserve(statements_.size());
+  for (auto& stmt : statements_) {
+    names.emplace_back(std::move(stmt.var_name));
+    args.emplace_back(std::move(stmt.expression));
+  }
+  auto block_node = std::unique_ptr<ExecNode>(new NoOPNode(std::move(names), std::move(args)));
+
+  auto& outer = block_stack_.back();
+  statements_ = std::move(outer.statements);
+  var2index_ = std::move(outer.var2index);
+  block_stack_.pop_back();
+
+  return block_node;
 }
 
 }  // namespace athena
