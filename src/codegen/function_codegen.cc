@@ -57,7 +57,7 @@ Status CodeGen::Visit(FunctionNode& function_node) {
       }
     } break;
     default:
-      return Status::NotImplemented("Unsupport func type to codegen");
+      return Status::NotImplemented("[internal] unsupported function type in codegen (compiler bug)");
   }
 
   return Status::OK();

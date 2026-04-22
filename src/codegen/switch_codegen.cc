@@ -46,7 +46,7 @@ Status CodeGen::Visit(SwitchNode &switch_node) {
     } else if (cond_value->getType()->isFloatingPointTy()) {
       cond_value = ctx_.builder.CreateFCmpONE(cond_value, llvm::ConstantFP::get(cond_value->getType(), 0.0), "to_bool");
     } else {
-      return Status::RuntimeError("Unsupported type for switch condition");
+      return Status::RuntimeError("[internal] unsupported type for switch condition (should be caught by validator)");
     }
 
     llvm::BasicBlock *then_block = llvm::BasicBlock::Create(ctx_.context, "switch.then", cur_function);

@@ -96,9 +96,9 @@ Status CodeGen::SolveBinaryOpNumericType(BinaryOPNode &binary_node, llvm::Value 
       } break;
       default:
         return Status::RuntimeError(
-            "Unknown binary operator: ", TypeHelper::TypeToString(binary_node.GetLeft()->GetReturnType()), " ",
-            TypeHelper::BinaryOPTypeToString(binary_node.GetOp()), " ",
-            TypeHelper::TypeToString(binary_node.GetRight()->GetReturnType()));
+            "[internal] unknown binary operator: ", TypeHelper::TypeToString(binary_node.GetLeft()->GetReturnType()),
+            " ", TypeHelper::BinaryOPTypeToString(binary_node.GetOp()), " ",
+            TypeHelper::TypeToString(binary_node.GetRight()->GetReturnType()), " (compiler bug)");
     }
   } else {  // calc Op
     JF_RETURN_NOT_OK(
@@ -150,9 +150,9 @@ Status CodeGen::SolveBinaryOpNumericType(BinaryOPNode &binary_node, llvm::Value 
       } break;
       default:
         return Status::RuntimeError(
-            "Unknown binary operator: ", TypeHelper::TypeToString(binary_node.GetLeft()->GetReturnType()), " ",
-            TypeHelper::BinaryOPTypeToString(binary_node.GetOp()), " ",
-            TypeHelper::TypeToString(binary_node.GetRight()->GetReturnType()));
+            "[internal] unknown binary operator: ", TypeHelper::TypeToString(binary_node.GetLeft()->GetReturnType()),
+            " ", TypeHelper::BinaryOPTypeToString(binary_node.GetOp()), " ",
+            TypeHelper::TypeToString(binary_node.GetRight()->GetReturnType()), " (compiler bug)");
     }
   }
   return Status::OK();
@@ -164,7 +164,8 @@ Status CodeGen::SolveBinaryOpComplexType(BinaryOPNode &binary_node, llvm::Value 
   } else {  // String Compare
     if (binary_node.GetLeft()->GetReturnType() != ValueType::kString ||
         binary_node.GetRight()->GetReturnType() != ValueType::kString) {
-      return Status::RuntimeError("Unknown type in StringCmp", TypeHelper::TypeToString(binary_node.GetReturnType()));
+      return Status::RuntimeError("[internal] unknown operand type in StringCmp: ",
+                                  TypeHelper::TypeToString(binary_node.GetReturnType()), " (compiler bug)");
     }
 
     FunctionSignature sign{"StringCmp", {ValueType::kString, ValueType::kString}, ValueType::kUnknown};
@@ -216,9 +217,9 @@ Status CodeGen::SolveBinaryOpComplexType(BinaryOPNode &binary_node, llvm::Value 
       } break;
       default:
         return Status::RuntimeError(
-            "Unknown binary operator: ", TypeHelper::TypeToString(binary_node.GetLeft()->GetReturnType()), " ",
-            TypeHelper::BinaryOPTypeToString(binary_node.GetOp()), " ",
-            TypeHelper::TypeToString(binary_node.GetRight()->GetReturnType()));
+            "[internal] unknown binary operator: ", TypeHelper::TypeToString(binary_node.GetLeft()->GetReturnType()),
+            " ", TypeHelper::BinaryOPTypeToString(binary_node.GetOp()), " ",
+            TypeHelper::TypeToString(binary_node.GetRight()->GetReturnType()), " (compiler bug)");
     }
     value_ = ctx_.builder.CreateZExt(value_, ctx_.builder.getInt8Ty());
   }
@@ -241,7 +242,7 @@ Status CodeGen::SolveShortCircuitLogicalOp(BinaryOPNode &binary_op_node) {
   } else if (lhs_value->getType()->isFloatingPointTy()) {
     lhs_bool = ctx_.builder.CreateFCmpONE(lhs_value, llvm::ConstantFP::get(lhs_value->getType(), 0.0), "lhs.tobool");
   } else {
-    return Status::RuntimeError("Unsupported type for logical operator");
+    return Status::RuntimeError("[internal] unsupported type for logical operator lhs (should be caught by validator)");
   }
 
   llvm::BasicBlock *lhs_end_block = ctx_.builder.GetInsertBlock();
@@ -262,7 +263,7 @@ Status CodeGen::SolveShortCircuitLogicalOp(BinaryOPNode &binary_op_node) {
   } else if (rhs_value->getType()->isFloatingPointTy()) {
     rhs_bool = ctx_.builder.CreateFCmpONE(rhs_value, llvm::ConstantFP::get(rhs_value->getType(), 0.0), "rhs.tobool");
   } else {
-    return Status::RuntimeError("Unsupported type for logical operator");
+    return Status::RuntimeError("[internal] unsupported type for logical operator rhs (should be caught by validator)");
   }
 
   llvm::BasicBlock *rhs_end_block = ctx_.builder.GetInsertBlock();

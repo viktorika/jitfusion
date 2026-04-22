@@ -335,4 +335,23 @@ bool TypeHelper::IsComplexType(ValueType type) {
   return false;
 }
 
+bool TypeHelper::IsListType(ValueType type) {
+  switch (type) {
+    case ValueType::kU8List:
+    case ValueType::kU16List:
+    case ValueType::kU32List:
+    case ValueType::kU64List:
+    case ValueType::kI8List:
+    case ValueType::kI16List:
+    case ValueType::kI32List:
+    case ValueType::kI64List:
+    case ValueType::kF32List:
+    case ValueType::kF64List:
+    case ValueType::kStringList:
+      return true;
+    default:
+      return false;
+  }
+}
+
 }  // namespace jitfusion

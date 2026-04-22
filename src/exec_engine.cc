@@ -199,7 +199,8 @@ Status GetEntryFunctionCallee(llvm::LLVMContext& context, std::unique_ptr<llvm::
           llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
     } break;
     default:
-      return Status::ParseError("Unknown return type: ", TypeHelper::TypeToString(ret_type));
+      return Status::RuntimeError("[internal] unknown return type for entry function: ",
+                                  TypeHelper::TypeToString(ret_type), " (compiler bug)");
   }
   return Status::OK();
 }
