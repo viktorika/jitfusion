@@ -113,8 +113,9 @@ Status Validator::Visit(UnaryOPNode& unary_op_node) {
           unary_op_node.SetReturnType(child_return_type);
           break;
         default:
-          return Status::NotImplemented("Type ", TypeHelper::TypeToString(child_return_type),
-                                        "  not implement minus op");
+          return Status::NotImplemented("[internal] unary minus not implemented for type ",
+                                        TypeHelper::TypeToString(child_return_type),
+                                        " (should have been caught by the numeric-type check above)");
       }
     } break;
     case UnaryOPType::kNot:
@@ -128,8 +129,8 @@ Status Validator::Visit(UnaryOPNode& unary_op_node) {
       unary_op_node.SetReturnType(child_return_type);
     } break;
     default:
-      return Status::NotImplemented("UnaryOPType ", TypeHelper::UnaryOPTypeToString(unary_op_node.GetOp()),
-                                    " not implemented");
+      return Status::NotImplemented("[internal] UnaryOPType ", TypeHelper::UnaryOPTypeToString(unary_op_node.GetOp()),
+                                    " not implemented (compiler bug)");
   }
   return Status::OK();
 }
@@ -158,33 +159,86 @@ Status Validator::Visit(BinaryOPNode& binary_op_node) {
   JF_RETURN_NOT_OK(left->Accept(this));
   JF_RETURN_NOT_OK(right->Accept(this));
   auto op = binary_op_node.GetOp();
+  auto lhs_type = left->GetReturnType();
+  auto rhs_type = right->GetReturnType();
 
-  if (ValueType::kVoid == left->GetReturnType() || ValueType::kVoid == right->GetReturnType()) {
+  if (ValueType::kVoid == lhs_type || ValueType::kVoid == rhs_type) {
     return MakeParseError(binary_op_node, "binary operator does not support void operand");
   }
 
-  // extra check
-  if ((BinaryOPType::kDiv == op || BinaryOPType::kMod == op) &&
-      right->GetExecNodeType() == ExecNodeType::kConstValueNode &&
-      std::visit(DivZeroVisit(), static_cast<ConstantValueNode*>(right)->GetVal())) {
-    return MakeParseError(binary_op_node, "division or modulo by constant zero");
-  }
-
-  if (TypeHelper::IsLogicalBinaryOPType(binary_op_node.GetOp())) {
-    if (!TypeHelper::IsNumericType(left->GetReturnType()) || !TypeHelper::IsNumericType(right->GetReturnType())) {
+  // 1) Logical operators (and, or): both sides must be numeric.
+  if (TypeHelper::IsLogicalBinaryOPType(op)) {
+    if (!TypeHelper::IsNumericType(lhs_type) || !TypeHelper::IsNumericType(rhs_type)) {
       return MakeParseError(binary_op_node, "logical operator requires numeric operands, got " +
-                                                TypeHelper::TypeToString(left->GetReturnType()) + " and " +
-                                                TypeHelper::TypeToString(right->GetReturnType()));
+                                                TypeHelper::TypeToString(lhs_type) + " and " +
+                                                TypeHelper::TypeToString(rhs_type) + " for '" +
+                                                TypeHelper::BinaryOPTypeToString(op) + "'");
     }
     binary_op_node.SetReturnType(ValueType::kU8);
     return Status::OK();
   }
 
-  if (TypeHelper::IsRelationalBinaryOPType(binary_op_node.GetOp())) {
+  // 2) Relational operators (<, <=, ==, !=, >, >=): either both numeric or both string.
+  if (TypeHelper::IsRelationalBinaryOPType(op)) {
+    const bool both_numeric = TypeHelper::IsNumericType(lhs_type) && TypeHelper::IsNumericType(rhs_type);
+    const bool both_string = (lhs_type == ValueType::kString) && (rhs_type == ValueType::kString);
+    if (!both_numeric && !both_string) {
+      return MakeParseError(binary_op_node,
+                            "relational operator requires both operands to be numeric or both to be string, got " +
+                                TypeHelper::TypeToString(lhs_type) + " and " + TypeHelper::TypeToString(rhs_type) +
+                                " for '" + TypeHelper::BinaryOPTypeToString(op) + "'");
+    }
     binary_op_node.SetReturnType(ValueType::kU8);
     return Status::OK();
   }
-  binary_op_node.SetReturnType(TypeHelper::GetPromotedType(left->GetReturnType(), right->GetReturnType()));
+
+  // 3) Bitwise operators (&, |, ^, <<, >>): both sides must be integer.
+  if (op == BinaryOPType::kBitwiseAnd || op == BinaryOPType::kBitwiseOr || op == BinaryOPType::kBitwiseXor ||
+      op == BinaryOPType::kBitwiseShiftLeft || op == BinaryOPType::kBitwiseShiftRight) {
+    if (!TypeHelper::IsIntegerType(lhs_type) || !TypeHelper::IsIntegerType(rhs_type)) {
+      return MakeParseError(binary_op_node, "bitwise operator requires integer operands, got " +
+                                                TypeHelper::TypeToString(lhs_type) + " and " +
+                                                TypeHelper::TypeToString(rhs_type) + " for '" +
+                                                TypeHelper::BinaryOPTypeToString(op) + "'");
+    }
+    binary_op_node.SetReturnType(TypeHelper::GetPromotedType(lhs_type, rhs_type));
+    return Status::OK();
+  }
+
+  // 4) Arithmetic operators.
+  if (op == BinaryOPType::kAdd) {
+    // kAdd allows numeric+numeric, string+string (concat) or same-list+same-list (concat).
+    if (TypeHelper::IsNumericType(lhs_type) && TypeHelper::IsNumericType(rhs_type)) {
+      binary_op_node.SetReturnType(TypeHelper::GetPromotedType(lhs_type, rhs_type));
+      return Status::OK();
+    }
+    if (lhs_type == ValueType::kString && rhs_type == ValueType::kString) {
+      binary_op_node.SetReturnType(ValueType::kString);
+      return Status::OK();
+    }
+    if (TypeHelper::IsListType(lhs_type) && lhs_type == rhs_type) {
+      binary_op_node.SetReturnType(lhs_type);
+      return Status::OK();
+    }
+    return MakeParseError(binary_op_node,
+                          "operator '+' requires both operands to be numeric, both string, or two lists of the "
+                          "same type, got " +
+                              TypeHelper::TypeToString(lhs_type) + " and " + TypeHelper::TypeToString(rhs_type));
+  }
+
+  // kSub/kMul/kDiv/kMod: both sides must be numeric.
+  if (!TypeHelper::IsNumericType(lhs_type) || !TypeHelper::IsNumericType(rhs_type)) {
+    return MakeParseError(binary_op_node, "arithmetic operator requires numeric operands, got " +
+                                              TypeHelper::TypeToString(lhs_type) + " and " +
+                                              TypeHelper::TypeToString(rhs_type) + " for '" +
+                                              TypeHelper::BinaryOPTypeToString(op) + "'");
+  }
+  if ((op == BinaryOPType::kDiv || op == BinaryOPType::kMod) &&
+      right->GetExecNodeType() == ExecNodeType::kConstValueNode &&
+      std::visit(DivZeroVisit(), static_cast<ConstantValueNode*>(right)->GetVal())) {
+    return MakeParseError(binary_op_node, "division or modulo by constant zero");
+  }
+  binary_op_node.SetReturnType(TypeHelper::GetPromotedType(lhs_type, rhs_type));
   return Status::OK();
 }
 
@@ -250,6 +304,11 @@ Status Validator::Visit(IfNode& if_node) {
     arg_types.emplace_back(arg->GetReturnType());
   }
 
+  if (!TypeHelper::IsNumericType(arg_types[0])) {
+    return MakeParseError(*if_node.GetArgs()[0],
+                          "if condition must be a numeric type, got " + TypeHelper::TypeToString(arg_types[0]));
+  }
+
   if (TypeHelper::IsNumericType(arg_types[1]) && TypeHelper::IsNumericType(arg_types[2])) {
     if_node.SetReturnType(TypeHelper::GetPromotedType(arg_types[1], arg_types[2]));
   } else if (arg_types[1] == arg_types[2]) {
@@ -264,44 +323,49 @@ Status Validator::Visit(IfNode& if_node) {
 Status Validator::Visit(SwitchNode& switch_node) {
   auto size = switch_node.GetArgs().size();
   if (0U == (size & 1)) {
-    return Status::ParseError("Switch node must has odd number of arguments");
+    return MakeParseError(switch_node,
+                          "switch expects an odd number of arguments (cond, then, [cond, then, ...], default), got " +
+                              std::to_string(size));
   }
   std::vector<ValueType> arg_types;
   arg_types.reserve(size);
   for (const auto& arg : switch_node.GetArgs()) {
     JF_RETURN_NOT_OK(arg->Accept(this));
     if (ValueType::kVoid == arg->GetReturnType()) {
-      return Status::ParseError("Switch node argument cant be void type");
+      return MakeParseError(*arg, "switch argument cannot be void");
     }
     arg_types.emplace_back(arg->GetReturnType());
   }
 
-  ValueType basic_type = ValueType::kUnknown;
-  ValueType list_type = ValueType::kUnknown;
+  ValueType numeric_type = ValueType::kUnknown;
+  ValueType complex_type = ValueType::kUnknown;
   for (std::size_t i = 0; i < size; i++) {
     if (i + 1 != size && i % 2 == 0 && !TypeHelper::IsNumericType(switch_node.GetArgs()[i]->GetReturnType())) {
-      // TODO(victorika): maybe condition can support complex struct
-      return Status::ParseError(
-          "Unspported type: ", TypeHelper::TypeToString(switch_node.GetArgs()[i]->GetReturnType()),
-          " in switch condition");
+      return MakeParseError(*switch_node.GetArgs()[i],
+                            "switch condition must be a numeric type, got " +
+                                TypeHelper::TypeToString(switch_node.GetArgs()[i]->GetReturnType()));
     }
     if (i % 2 != 0 || i + 1 == size) {
       if (TypeHelper::IsNumericType(switch_node.GetArgs()[i]->GetReturnType())) {
-        basic_type = TypeHelper::GetPromotedType(basic_type, switch_node.GetArgs()[i]->GetReturnType());
+        numeric_type = TypeHelper::GetPromotedType(numeric_type, switch_node.GetArgs()[i]->GetReturnType());
       } else {
-        if (list_type != ValueType::kUnknown && list_type != switch_node.GetArgs()[i]->GetReturnType()) {
-          return Status::ParseError("Unspported different type in switch: ",
-                                    TypeHelper::TypeToString(switch_node.GetArgs()[i]->GetReturnType()));
+        if (complex_type != ValueType::kUnknown && complex_type != switch_node.GetArgs()[i]->GetReturnType()) {
+          return MakeParseError(*switch_node.GetArgs()[i],
+                                "switch branch has incompatible type: got " +
+                                    TypeHelper::TypeToString(switch_node.GetArgs()[i]->GetReturnType()) +
+                                    ", previously seen " + TypeHelper::TypeToString(complex_type));
         }
-        list_type = switch_node.GetArgs()[i]->GetReturnType();
+        complex_type = switch_node.GetArgs()[i]->GetReturnType();
       }
     }
   }
 
-  if (list_type != ValueType::kUnknown && basic_type != ValueType::kUnknown) {
-    return Status::ParseError("Unspported different type in switch");
+  if (complex_type != ValueType::kUnknown && numeric_type != ValueType::kUnknown) {
+    return MakeParseError(switch_node, "switch branches have incompatible types: mix of numeric (" +
+                                           TypeHelper::TypeToString(numeric_type) + ") and non-numeric (" +
+                                           TypeHelper::TypeToString(complex_type) + ")");
   }
-  switch_node.SetReturnType(basic_type == ValueType::kUnknown ? list_type : basic_type);
+  switch_node.SetReturnType(numeric_type == ValueType::kUnknown ? complex_type : numeric_type);
 
   return Status::OK();
 }
@@ -310,7 +374,7 @@ Status Validator::Visit(IfBlockNode& if_block_node) {
   const auto& args = if_block_node.GetArgs();
   int num_args = static_cast<int>(args.size());
   if (num_args < 2) {
-    return Status::ParseError("If block must have at least a condition and a body");
+    return MakeParseError(if_block_node, "if block must have at least a condition and a body");
   }
   bool has_else = (num_args % 2 != 0);
   int num_branches = num_args / 2;
@@ -325,8 +389,8 @@ Status Validator::Visit(IfBlockNode& if_block_node) {
 
     JF_RETURN_NOT_OK(args[cond_idx]->Accept(this));
     if (!TypeHelper::IsNumericType(args[cond_idx]->GetReturnType())) {
-      return Status::ParseError("If block condition must be numeric type, got ",
-                                TypeHelper::TypeToString(args[cond_idx]->GetReturnType()));
+      return MakeParseError(*args[cond_idx], "if block condition must be a numeric type, got " +
+                                                 TypeHelper::TypeToString(args[cond_idx]->GetReturnType()));
     }
     // Branch scope isolation: PushScope creates a new scope so that type modifications
     // within this branch are recorded separately. After executing the branch body,
@@ -338,16 +402,17 @@ Status Validator::Visit(IfBlockNode& if_block_node) {
     type_scope_stack_.PushScope();
     JF_RETURN_NOT_OK(args[body_idx]->Accept(this));
     if (args[body_idx]->GetReturnType() != ValueType::kVoid) {
-      return Status::ParseError("If block body must be void type, got ",
-                                TypeHelper::TypeToString(args[body_idx]->GetReturnType()));
+      return MakeParseError(*args[body_idx], "if block body must be void, got " +
+                                                 TypeHelper::TypeToString(args[body_idx]->GetReturnType()));
     }
     auto shadowed = type_scope_stack_.GetShadowed();
     for (const auto& [name, new_type] : shadowed) {
       auto it = type_snapshot.find(name);
       if (it != type_snapshot.end() && it->second != new_type) {
-        return Status::ParseError("Variable '", name, "' type mismatch in if block branch: original type is ",
-                                  TypeHelper::TypeToString(it->second), ", but assigned ",
-                                  TypeHelper::TypeToString(new_type));
+        return MakeParseError(
+            if_block_node,
+            "variable '" + name + "' has incompatible types across if block branches: original type is " +
+                TypeHelper::TypeToString(it->second) + ", but assigned " + TypeHelper::TypeToString(new_type));
       }
       all_shadowed[name] = new_type;
     }
@@ -360,16 +425,17 @@ Status Validator::Visit(IfBlockNode& if_block_node) {
     type_scope_stack_.PushScope();
     JF_RETURN_NOT_OK(args[num_args - 1]->Accept(this));
     if (args[num_args - 1]->GetReturnType() != ValueType::kVoid) {
-      return Status::ParseError("If block else body must be void type, got ",
-                                TypeHelper::TypeToString(args[num_args - 1]->GetReturnType()));
+      return MakeParseError(*args[num_args - 1], "if block else body must be void, got " +
+                                                     TypeHelper::TypeToString(args[num_args - 1]->GetReturnType()));
     }
     auto shadowed = type_scope_stack_.GetShadowed();
     for (const auto& [name, new_type] : shadowed) {
       auto it = type_snapshot.find(name);
       if (it != type_snapshot.end() && it->second != new_type) {
-        return Status::ParseError("Variable '", name, "' type mismatch in if block else branch: original type is ",
-                                  TypeHelper::TypeToString(it->second), ", but assigned ",
-                                  TypeHelper::TypeToString(new_type));
+        return MakeParseError(
+            if_block_node,
+            "variable '" + name + "' has incompatible types across if block else branch: original type is " +
+                TypeHelper::TypeToString(it->second) + ", but assigned " + TypeHelper::TypeToString(new_type));
       }
       all_shadowed[name] = new_type;
     }

@@ -38,7 +38,8 @@ Status CodeGen::Visit(UnaryOPNode &unary_op_node) {
       value_ = ctx_.builder.CreateNot(child_value, "bitwise_not");
     } break;
     default:
-      return Status::RuntimeError("Unknown unary operator: ", TypeHelper::UnaryOPTypeToString(unary_op_node.GetOp()));
+      return Status::RuntimeError("[internal] unknown unary operator: ",
+                                  TypeHelper::UnaryOPTypeToString(unary_op_node.GetOp()), " (compiler bug)");
   }
   return Status::OK();
 }

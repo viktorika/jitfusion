@@ -146,6 +146,19 @@ TEST(DiagnosticTest, IfWrongArityProducesSourceContext) {
   EXPECT_NE(msg.find("r = if(1, 2);"), std::string::npos) << msg;
 }
 
+TEST(DiagnosticTest, IfConditionNotNumericProducesSourceContext) {
+  Athena athena;
+  auto reg = MakeRegistry();
+  std::string code = R"(r = if("hi", 1, 2);)";
+  auto st = athena.Compile(code, reg);
+  ASSERT_FALSE(st.ok());
+  const std::string msg = st.ToString();
+  EXPECT_NE(msg.find("if condition must be a numeric type"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("string"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("line 1"), std::string::npos) << msg;
+  EXPECT_NE(msg.find(R"(r = if("hi", 1, 2);)"), std::string::npos) << msg;
+}
+
 TEST(DiagnosticTest, UnknownFunctionProducesSourceContext) {
   Athena athena;
   auto reg = MakeRegistry();
@@ -156,6 +169,90 @@ TEST(DiagnosticTest, UnknownFunctionProducesSourceContext) {
   EXPECT_NE(msg.find("definitely_not_a_function"), std::string::npos) << msg;
   EXPECT_NE(msg.find("line 1"), std::string::npos) << msg;
   EXPECT_NE(msg.find("r = definitely_not_a_function(1);"), std::string::npos) << msg;
+}
+
+TEST(DiagnosticTest, RelationalStringVsNumericProducesSourceContext) {
+  Athena athena;
+  auto reg = MakeRegistry();
+  std::string code = R"(r = "hi" < 3;)";
+  auto st = athena.Compile(code, reg);
+  ASSERT_FALSE(st.ok());
+  const std::string msg = st.ToString();
+  EXPECT_NE(msg.find("relational operator"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("string"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("line 1"), std::string::npos) << msg;
+  EXPECT_NE(msg.find(R"(r = "hi" < 3;)"), std::string::npos) << msg;
+}
+
+TEST(DiagnosticTest, RelationalStringVsListProducesSourceContext) {
+  Athena athena;
+  auto reg = MakeRegistry();
+  std::string code = R"(r = "hi" < [1, 2, 3];)";
+  auto st = athena.Compile(code, reg);
+  ASSERT_FALSE(st.ok());
+  const std::string msg = st.ToString();
+  EXPECT_NE(msg.find("relational operator"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("line 1"), std::string::npos) << msg;
+}
+
+TEST(DiagnosticTest, ArithmeticStringSubProducesSourceContext) {
+  Athena athena;
+  auto reg = MakeRegistry();
+  std::string code = R"(r = "hi" - "ho";)";
+  auto st = athena.Compile(code, reg);
+  ASSERT_FALSE(st.ok());
+  const std::string msg = st.ToString();
+  EXPECT_NE(msg.find("arithmetic operator"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("requires numeric operands"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("string"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("line 1"), std::string::npos) << msg;
+}
+
+TEST(DiagnosticTest, ArithmeticStringMulProducesSourceContext) {
+  Athena athena;
+  auto reg = MakeRegistry();
+  std::string code = R"(r = "hi" * 3;)";
+  auto st = athena.Compile(code, reg);
+  ASSERT_FALSE(st.ok());
+  const std::string msg = st.ToString();
+  EXPECT_NE(msg.find("arithmetic operator"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("requires numeric operands"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("line 1"), std::string::npos) << msg;
+}
+
+TEST(DiagnosticTest, BitwiseOnFloatProducesSourceContext) {
+  Athena athena;
+  auto reg = MakeRegistry();
+  std::string code = "r = 1 & 1.0f32;";
+  auto st = athena.Compile(code, reg);
+  ASSERT_FALSE(st.ok());
+  const std::string msg = st.ToString();
+  EXPECT_NE(msg.find("bitwise operator"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("requires integer operands"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("f32"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("line 1"), std::string::npos) << msg;
+}
+
+TEST(DiagnosticTest, AddListMismatchProducesSourceContext) {
+  Athena athena;
+  auto reg = MakeRegistry();
+  std::string code = "r = [1, 2] + [1.0f32, 2.0f32];";
+  auto st = athena.Compile(code, reg);
+  ASSERT_FALSE(st.ok());
+  const std::string msg = st.ToString();
+  EXPECT_NE(msg.find("operator '+'"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("line 1"), std::string::npos) << msg;
+}
+
+TEST(DiagnosticTest, AddListAndScalarProducesSourceContext) {
+  Athena athena;
+  auto reg = MakeRegistry();
+  std::string code = "r = [1, 2] + 3;";
+  auto st = athena.Compile(code, reg);
+  ASSERT_FALSE(st.ok());
+  const std::string msg = st.ToString();
+  EXPECT_NE(msg.find("operator '+'"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("line 1"), std::string::npos) << msg;
 }
 
 TEST(DiagnosticTest, DemoRenderedOutput) {
@@ -273,4 +370,102 @@ TEST(DiagnosticTest, MultiPipelineCompileAndExecuteHappyPath) {
   ASSERT_TRUE(athena.Execute(input.data(), output.data()).ok());
   EXPECT_FLOAT_EQ(output[0], 11.0F);
   EXPECT_FLOAT_EQ(output[1], 6.0F);
+}
+
+TEST(DiagnosticTest, SwitchEvenArityProducesSourceContext) {
+  Athena athena;
+  auto reg = MakeRegistry();
+  // switch requires (cond, then, ..., default) -> odd arg count; this has 4.
+  std::string code = "r = switch(1, 2, 3, 4);";
+  auto st = athena.Compile(code, reg);
+  ASSERT_FALSE(st.ok());
+  const std::string msg = st.ToString();
+  EXPECT_NE(msg.find("switch expects an odd number of arguments"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("line 1"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("r = switch(1, 2, 3, 4);"), std::string::npos) << msg;
+}
+
+TEST(DiagnosticTest, SwitchConditionNotNumericProducesSourceContext) {
+  Athena athena;
+  auto reg = MakeRegistry();
+  std::string code = R"(r = switch("hi", 1, 2);)";
+  auto st = athena.Compile(code, reg);
+  ASSERT_FALSE(st.ok());
+  const std::string msg = st.ToString();
+  EXPECT_NE(msg.find("switch condition must be a numeric type"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("string"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("line 1"), std::string::npos) << msg;
+  EXPECT_NE(msg.find(R"(r = switch("hi", 1, 2);)"), std::string::npos) << msg;
+}
+
+TEST(DiagnosticTest, SwitchIncompatibleBranchTypesProducesSourceContext) {
+  Athena athena;
+  auto reg = MakeRegistry();
+  std::string code = R"(r = switch(1, "hi", 2);)";
+  auto st = athena.Compile(code, reg);
+  ASSERT_FALSE(st.ok());
+  const std::string msg = st.ToString();
+  EXPECT_NE(msg.find("switch branches have incompatible types"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("line 1"), std::string::npos) << msg;
+}
+
+namespace {
+std::unique_ptr<FunctionRegistry> MakeRegistryWithLoadStore() {
+  auto reg = MakeRegistry();
+  {
+    jitfusion::FunctionSignature sign("load", {jitfusion::ValueType::kPtr, jitfusion::ValueType::kI32},
+                                      jitfusion::ValueType::kF32);
+    EXPECT_TRUE(reg->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(+[](void* arg, int32_t i) -> float {
+                                             return static_cast<float*>(arg)[i];
+                                           }))
+                    .ok());
+  }
+  {
+    jitfusion::FunctionSignature sign(
+        "store", {jitfusion::ValueType::kPtr, jitfusion::ValueType::kI32, jitfusion::ValueType::kF32},
+        jitfusion::ValueType::kVoid);
+    EXPECT_TRUE(reg->RegisterStoreCFunc(sign, reinterpret_cast<void*>(+[](void* out, int32_t i, float v) {
+                                          static_cast<float*>(out)[i] = v;
+                                        }),
+                                        1)
+                    .ok());
+  }
+  return reg;
+}
+}  // namespace
+
+TEST(DiagnosticTest, IfBlockConditionNotNumericProducesSourceContext) {
+  Athena athena;
+  auto reg = MakeRegistryWithLoadStore();
+  std::string code = R"(r = 0.0f32;
+when "hello" {
+  r = 1.0f32;
+}
+store(output, 0, r);
+)";
+  std::vector<std::string> codes = {code};
+  auto st = athena.Compile(codes, reg);
+  ASSERT_FALSE(st.ok());
+  const std::string msg = st.ToString();
+  EXPECT_NE(msg.find("if block condition must be a numeric type"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("string"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("line 2"), std::string::npos) << msg;
+  EXPECT_NE(msg.find(R"(when "hello" {)"), std::string::npos) << msg;
+}
+
+TEST(DiagnosticTest, IfBlockVariableTypeMismatchProducesSourceContext) {
+  Athena athena;
+  auto reg = MakeRegistryWithLoadStore();
+  std::string code = R"(r = 0.0f32;
+when r > 0.0f32 {
+  r = 42;
+}
+store(output, 0, r);
+)";
+  std::vector<std::string> codes = {code};
+  auto st = athena.Compile(codes, reg);
+  ASSERT_FALSE(st.ok());
+  const std::string msg = st.ToString();
+  EXPECT_NE(msg.find("variable 'r'"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("incompatible types across if block"), std::string::npos) << msg;
 }

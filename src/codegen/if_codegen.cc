@@ -20,7 +20,7 @@ Status CodeGen::Visit(IfNode &if_node) {
   } else if (cond_value->getType()->isFloatingPointTy()) {
     cond_value = ctx_.builder.CreateFCmpONE(cond_value, llvm::ConstantFP::get(cond_value->getType(), 0.0), "to_bool");
   } else {
-    return Status::RuntimeError("Unsupported type for if condition");
+    return Status::RuntimeError("[internal] unsupported type for if condition (should be caught by validator)");
   }
 
   llvm::Function *cur_function = ctx_.entry_function;

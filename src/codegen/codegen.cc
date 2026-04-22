@@ -83,8 +83,8 @@ Status CodeGen::ValueTypeToLLVMType(IRCodeGenContext &ctx, ValueType value_type,
       *llvm_type = llvm::Type::getVoidTy(ctx.context)->getPointerTo();
     } break;
     default:
-      return Status::RuntimeError("ValueType ", TypeHelper::TypeToString(value_type), " ",
-                                  "can not convert to llvm type");
+      return Status::RuntimeError("[internal] ValueType ", TypeHelper::TypeToString(value_type),
+                                  " cannot convert to llvm type (compiler bug)");
   }
   return Status::OK();
 }
@@ -131,8 +131,8 @@ Status CodeGen::NumericTypeConvert(IRCodeGenContext &ctx, ValueType from, ValueT
       return Status::OK();
     }
   }
-  return Status::RuntimeError("Unknown convert in TypeConvert, from ", TypeHelper::TypeToString(from), " to ",
-                              TypeHelper::TypeToString(to));
+  return Status::RuntimeError("[internal] unsupported numeric conversion: from ", TypeHelper::TypeToString(from),
+                              " to ", TypeHelper::TypeToString(to), " (compiler bug)");
 }
 
 }  // namespace jitfusion

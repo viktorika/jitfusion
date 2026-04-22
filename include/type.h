@@ -210,6 +210,7 @@ class TypeHelper {
   static bool IsSignedType(ValueType type);
   static bool IsFloatType(ValueType type);
   static bool IsComplexType(ValueType type);
+  static bool IsListType(ValueType type);
 
   static bool IsRelationalBinaryOPType(BinaryOPType type);
   static bool IsLogicalBinaryOPType(BinaryOPType type);

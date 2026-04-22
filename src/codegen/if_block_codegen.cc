@@ -74,7 +74,7 @@ Status CodeGen::Visit(IfBlockNode &if_block_node) {
     } else if (cond_value->getType()->isFloatingPointTy()) {
       cond_value = ctx_.builder.CreateFCmpONE(cond_value, llvm::ConstantFP::get(cond_value->getType(), 0.0), "to_bool");
     } else {
-      return Status::RuntimeError("Unsupported type for if block condition");
+      return Status::RuntimeError("[internal] unsupported type for if block condition (should be caught by validator)");
     }
 
     llvm::BasicBlock *body_block = llvm::BasicBlock::Create(ctx_.context, "ifblock.body", cur_function);
