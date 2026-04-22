@@ -7,6 +7,7 @@
 #pragma once
 
 #include <memory>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 #include "exec_node.h"
@@ -51,9 +52,7 @@ class ProgramAstBuilder {
 
   location& GetLocation() { return location_; }
 
-  // Original source text kept around so diagnostic renderers can pull the
-  // offending line(s) out when they receive a node's SourceLocation.
-  [[nodiscard]] const std::string& GetSourceCode() const { return source_code_; }
+  [[nodiscard]] std::string_view GetSourceCode() const { return source_code_; }
 
  private:
   enum class BuildMode : uint8_t { kExpression, kPipeline };
@@ -64,7 +63,7 @@ class ProgramAstBuilder {
   std::unordered_map<std::string, uint32_t> var2index_;
   std::string parser_error_message_;
   std::string custom_error_message_;
-  std::string source_code_;
+  std::string_view source_code_;
   location location_;
   BuildMode build_mode_{BuildMode::kExpression};
 
