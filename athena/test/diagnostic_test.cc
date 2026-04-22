@@ -96,6 +96,68 @@ TEST(DiagnosticTest, DivByZeroProducesSourceContext) {
   EXPECT_NE(msg.find("division or modulo by constant zero"), std::string::npos) << msg;
 }
 
+TEST(DiagnosticTest, LogicalOpOnStringsProducesSourceContext) {
+  Athena athena;
+  auto reg = MakeRegistry();
+  std::string code = R"(r = "hi" and "world";)";
+  auto st = athena.Compile(code, reg);
+  ASSERT_FALSE(st.ok());
+  const std::string msg = st.ToString();
+  EXPECT_NE(msg.find("logical operator requires numeric operands"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("string"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("line 1"), std::string::npos) << msg;
+  EXPECT_NE(msg.find(R"(r = "hi" and "world";)"), std::string::npos) << msg;
+}
+
+TEST(DiagnosticTest, BitwiseNotOnFloatProducesSourceContext) {
+  Athena athena;
+  auto reg = MakeRegistry();
+  std::string code = "r = ~1.5f32;";
+  auto st = athena.Compile(code, reg);
+  ASSERT_FALSE(st.ok());
+  const std::string msg = st.ToString();
+  EXPECT_NE(msg.find("bitwise-not requires an integer operand"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("f32"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("line 1"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("r = ~1.5f32;"), std::string::npos) << msg;
+}
+
+TEST(DiagnosticTest, UnaryMinusOnStringProducesSourceContext) {
+  Athena athena;
+  auto reg = MakeRegistry();
+  std::string code = R"(r = -"hi";)";
+  auto st = athena.Compile(code, reg);
+  ASSERT_FALSE(st.ok());
+  const std::string msg = st.ToString();
+  EXPECT_NE(msg.find("unary operator requires a numeric operand"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("string"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("line 1"), std::string::npos) << msg;
+}
+
+TEST(DiagnosticTest, IfWrongArityProducesSourceContext) {
+  Athena athena;
+  auto reg = MakeRegistry();
+  std::string code = "r = if(1, 2);";
+  auto st = athena.Compile(code, reg);
+  ASSERT_FALSE(st.ok());
+  const std::string msg = st.ToString();
+  EXPECT_NE(msg.find("if expects exactly 3 arguments"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("line 1"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("r = if(1, 2);"), std::string::npos) << msg;
+}
+
+TEST(DiagnosticTest, UnknownFunctionProducesSourceContext) {
+  Athena athena;
+  auto reg = MakeRegistry();
+  std::string code = "r = definitely_not_a_function(1);";
+  auto st = athena.Compile(code, reg);
+  ASSERT_FALSE(st.ok());
+  const std::string msg = st.ToString();
+  EXPECT_NE(msg.find("definitely_not_a_function"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("line 1"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("r = definitely_not_a_function(1);"), std::string::npos) << msg;
+}
+
 TEST(DiagnosticTest, DemoRenderedOutput) {
   auto reg = MakeRegistry();
   {
