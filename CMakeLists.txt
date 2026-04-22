@@ -28,7 +28,7 @@ add_compile_options(
     -Wall
     -Wextra
     -Wno-float-equal
-    -O2
+    -O3
     -DNDEBUG
     -ftree-vectorize
 )
