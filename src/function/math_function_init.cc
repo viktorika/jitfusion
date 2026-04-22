@@ -184,7 +184,7 @@ llvm::Value *CallBuiltinMinFunction(const FunctionSignature &sign,
                                ? TypeHelper::IsSignedType(sign.GetRetType())
                                      ? ctx.builder.CreateICmpSGT(arg_llvm_value_list.at(0), arg_llvm_value_list.at(1))
                                      : ctx.builder.CreateICmpUGT(arg_llvm_value_list.at(0), arg_llvm_value_list.at(1))
-                               : ctx.builder.CreateFCmpUGT(arg_llvm_value_list.at(0), arg_llvm_value_list.at(1));
+                               : ctx.builder.CreateFCmpOGT(arg_llvm_value_list.at(0), arg_llvm_value_list.at(1));
   return ctx.builder.CreateSelect(condition, arg_llvm_value_list.at(1), arg_llvm_value_list.at(0), "min");
 };
 
@@ -195,7 +195,7 @@ llvm::Value *CallBuiltinMaxFunction(const FunctionSignature &sign,
                                ? TypeHelper::IsSignedType(sign.GetRetType())
                                      ? ctx.builder.CreateICmpSGT(arg_llvm_value_list.at(0), arg_llvm_value_list.at(1))
                                      : ctx.builder.CreateICmpUGT(arg_llvm_value_list.at(0), arg_llvm_value_list.at(1))
-                               : ctx.builder.CreateFCmpUGT(arg_llvm_value_list.at(0), arg_llvm_value_list.at(1));
+                               : ctx.builder.CreateFCmpOGT(arg_llvm_value_list.at(0), arg_llvm_value_list.at(1));
   return ctx.builder.CreateSelect(condition, arg_llvm_value_list.at(0), arg_llvm_value_list.at(1), "max");
 };
 
