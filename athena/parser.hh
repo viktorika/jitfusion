@@ -49,6 +49,8 @@
 
   #pragma once
   #include <string>
+  #include <string_view>
+  #include <utility>
   #include "exec_engine.h"
   #include "ast_builder.h"
 
@@ -57,7 +59,25 @@
   #define yylex athena_yylex
   #endif
 
-#line 61 "parser.hh"
+  namespace athena {
+  // Copy Bison's location (together with the original source text) into the
+  // AST node and return the node as unique_ptr<ExecNode>. Used by every
+  // grammar rule that constructs an AST node so that later diagnostic passes
+  // (validator / runtime) can render source snippets straight from the
+  // node's SourceLocation without needing the source string threaded through
+  // every API.
+  template <typename T, typename Loc>
+  inline std::unique_ptr<jitfusion::ExecNode> WithLoc(std::unique_ptr<T> node, const Loc& l,
+                                                      std::string_view source_code) {
+    if (node) {
+      node->SetLocation({source_code, static_cast<int>(l.begin.line), static_cast<int>(l.begin.column),
+                         static_cast<int>(l.end.line), static_cast<int>(l.end.column)});
+    }
+    return node;
+  }
+  }
+
+#line 81 "parser.hh"
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -198,7 +218,7 @@
 
 #line 10 "parser.yy"
 namespace athena {
-#line 202 "parser.hh"
+#line 222 "parser.hh"
 
 
 
@@ -3500,18 +3520,18 @@ switch (yykind)
 
 #line 10 "parser.yy"
 } // athena
-#line 3504 "parser.hh"
+#line 3524 "parser.hh"
 
 
 // "%code provides" blocks.
-#line 28 "parser.yy"
+#line 48 "parser.yy"
 
 // Give Flex the prototype of yylex we want ...
 #define YY_DECL athena::Parser::symbol_type athena_yylex(yyscan_t yyscanner, athena::ProgramAstBuilder &builder)
 // ... and declare it for the parser's sake.
 YY_DECL;
 
-#line 3515 "parser.hh"
+#line 3535 "parser.hh"
 
 
 #endif // !YY_YY_PARSER_HH_INCLUDED

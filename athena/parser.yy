@@ -13,6 +13,8 @@
 %code requires {
   #pragma once
   #include <string>
+  #include <string_view>
+  #include <utility>
   #include "exec_engine.h"
   #include "ast_builder.h"
 
@@ -20,6 +22,24 @@
   #ifndef yylex
   #define yylex athena_yylex
   #endif
+
+  namespace athena {
+  // Copy Bison's location (together with the original source text) into the
+  // AST node and return the node as unique_ptr<ExecNode>. Used by every
+  // grammar rule that constructs an AST node so that later diagnostic passes
+  // (validator / runtime) can render source snippets straight from the
+  // node's SourceLocation without needing the source string threaded through
+  // every API.
+  template <typename T, typename Loc>
+  inline std::unique_ptr<jitfusion::ExecNode> WithLoc(std::unique_ptr<T> node, const Loc& l,
+                                                      std::string_view source_code) {
+    if (node) {
+      node->SetLocation({source_code, static_cast<int>(l.begin.line), static_cast<int>(l.begin.column),
+                         static_cast<int>(l.end.line), static_cast<int>(l.end.column)});
+    }
+    return node;
+  }
+  }
 }
 
 %parse-param { yyscan_t scanner }
@@ -179,41 +199,43 @@ term:
 | function { $$ = std::move($1); }
 | boolean { $$ = std::move($1); }
 | "(" term ")" { $$ = std::move($2); }
-| IDENTIFIER { $$ = builder.MakeRefNode(std::move($1)); }
-| ENTRY_ARG { $$ = std::unique_ptr<jitfusion::ExecNode>(new jitfusion::EntryArgumentNode); }
-| EXEC_CTX { $$ = std::unique_ptr<jitfusion::ExecNode>(new jitfusion::ExecContextNode); }
-| OUTPUT { $$ = std::unique_ptr<jitfusion::ExecNode>(new jitfusion::OutputNode); }
+| IDENTIFIER { $$ = WithLoc(builder.MakeRefNode(std::move($1),
+                                                        static_cast<int>(@$.begin.line), static_cast<int>(@$.begin.column),
+                                                        static_cast<int>(@$.end.line), static_cast<int>(@$.end.column)), @$, builder.GetSourceCode()); }
+| ENTRY_ARG { $$ = WithLoc(std::unique_ptr<jitfusion::EntryArgumentNode>(new jitfusion::EntryArgumentNode), @$, builder.GetSourceCode()); }
+| EXEC_CTX { $$ = WithLoc(std::unique_ptr<jitfusion::ExecContextNode>(new jitfusion::ExecContextNode), @$, builder.GetSourceCode()); }
+| OUTPUT { $$ = WithLoc(std::unique_ptr<jitfusion::OutputNode>(new jitfusion::OutputNode), @$, builder.GetSourceCode()); }
 ;
 
 literal:
-  I8 { $$ = std::make_unique<jitfusion::ConstantValueNode>($1); }
-| I16 { $$ = std::make_unique<jitfusion::ConstantValueNode>($1); }
-| I32 { $$ = std::make_unique<jitfusion::ConstantValueNode>($1); }
-| I64 { $$ = std::make_unique<jitfusion::ConstantValueNode>($1); }
-| U8 { $$ = std::make_unique<jitfusion::ConstantValueNode>($1); }
-| U16 { $$ = std::make_unique<jitfusion::ConstantValueNode>($1); }
-| U32 { $$ = std::make_unique<jitfusion::ConstantValueNode>($1); }
-| U64 { $$ = std::make_unique<jitfusion::ConstantValueNode>($1); }
-| F32 { $$ = std::make_unique<jitfusion::ConstantValueNode>($1); }
-| F64 { $$ = std::make_unique<jitfusion::ConstantValueNode>($1); }
-| STRING { $$ = std::make_unique<jitfusion::ConstantValueNode>($1); }
+  I8 { $$ = WithLoc(std::make_unique<jitfusion::ConstantValueNode>($1), @$, builder.GetSourceCode()); }
+| I16 { $$ = WithLoc(std::make_unique<jitfusion::ConstantValueNode>($1), @$, builder.GetSourceCode()); }
+| I32 { $$ = WithLoc(std::make_unique<jitfusion::ConstantValueNode>($1), @$, builder.GetSourceCode()); }
+| I64 { $$ = WithLoc(std::make_unique<jitfusion::ConstantValueNode>($1), @$, builder.GetSourceCode()); }
+| U8 { $$ = WithLoc(std::make_unique<jitfusion::ConstantValueNode>($1), @$, builder.GetSourceCode()); }
+| U16 { $$ = WithLoc(std::make_unique<jitfusion::ConstantValueNode>($1), @$, builder.GetSourceCode()); }
+| U32 { $$ = WithLoc(std::make_unique<jitfusion::ConstantValueNode>($1), @$, builder.GetSourceCode()); }
+| U64 { $$ = WithLoc(std::make_unique<jitfusion::ConstantValueNode>($1), @$, builder.GetSourceCode()); }
+| F32 { $$ = WithLoc(std::make_unique<jitfusion::ConstantValueNode>($1), @$, builder.GetSourceCode()); }
+| F64 { $$ = WithLoc(std::make_unique<jitfusion::ConstantValueNode>($1), @$, builder.GetSourceCode()); }
+| STRING { $$ = WithLoc(std::make_unique<jitfusion::ConstantValueNode>($1), @$, builder.GetSourceCode()); }
 | list { $$ = std::move($1); }
-| "true" { $$ = std::make_unique<jitfusion::ConstantValueNode>(uint8_t(1)); }
-| "false" { $$ = std::make_unique<jitfusion::ConstantValueNode>(uint8_t(0)); }
+| "true" { $$ = WithLoc(std::make_unique<jitfusion::ConstantValueNode>(uint8_t(1)), @$, builder.GetSourceCode()); }
+| "false" { $$ = WithLoc(std::make_unique<jitfusion::ConstantValueNode>(uint8_t(0)), @$, builder.GetSourceCode()); }
 ;
 
 list:
-  "[" i8_list "]" { $$ = std::make_unique<jitfusion::ConstantListValueNode>($2); }
-| "[" i16_list "]" { $$ = std::make_unique<jitfusion::ConstantListValueNode>($2); }
-| "[" i32_list "]" { $$ = std::make_unique<jitfusion::ConstantListValueNode>($2); }
-| "[" i64_list "]" { $$ = std::make_unique<jitfusion::ConstantListValueNode>($2); }
-| "[" u8_list "]" { $$ = std::make_unique<jitfusion::ConstantListValueNode>($2); }
-| "[" u16_list "]" { $$ = std::make_unique<jitfusion::ConstantListValueNode>($2); }
-| "[" u32_list "]" { $$ = std::make_unique<jitfusion::ConstantListValueNode>($2); }
-| "[" u64_list "]" { $$ = std::make_unique<jitfusion::ConstantListValueNode>($2); }
-| "[" f32_list "]" { $$ = std::make_unique<jitfusion::ConstantListValueNode>($2); }
-| "[" f64_list "]" { $$ = std::make_unique<jitfusion::ConstantListValueNode>($2); }
-| "[" string_list "]" { $$ = std::make_unique<jitfusion::ConstantListValueNode>($2); }
+  "[" i8_list "]" { $$ = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>($2), @$, builder.GetSourceCode()); }
+| "[" i16_list "]" { $$ = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>($2), @$, builder.GetSourceCode()); }
+| "[" i32_list "]" { $$ = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>($2), @$, builder.GetSourceCode()); }
+| "[" i64_list "]" { $$ = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>($2), @$, builder.GetSourceCode()); }
+| "[" u8_list "]" { $$ = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>($2), @$, builder.GetSourceCode()); }
+| "[" u16_list "]" { $$ = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>($2), @$, builder.GetSourceCode()); }
+| "[" u32_list "]" { $$ = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>($2), @$, builder.GetSourceCode()); }
+| "[" u64_list "]" { $$ = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>($2), @$, builder.GetSourceCode()); }
+| "[" f32_list "]" { $$ = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>($2), @$, builder.GetSourceCode()); }
+| "[" f64_list "]" { $$ = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>($2), @$, builder.GetSourceCode()); }
+| "[" string_list "]" { $$ = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>($2), @$, builder.GetSourceCode()); }
 ;
 
 i8_list:
@@ -311,38 +333,39 @@ function:
 
 
 infix_function:
-  "-" term %prec NEG { $$ = std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kMinus, std::move($2)); }
-| "not" term %prec NEG { $$ = std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kNot, std::move($2)); }
-| "+" term %prec NEG { $$ = std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kPlus, std::move($2)); }
-| "~" term %prec NEG { $$ = std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kBitwiseNot, std::move($2)); }
-| term "+" term { $$ = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kAdd, std::move($1), std::move($3)); }
-| term "-" term { $$ = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kSub, std::move($1), std::move($3)); }
-| term "*" term { $$ = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kMul, std::move($1), std::move($3)); }
-| term "/" term { $$ = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kDiv, std::move($1), std::move($3)); }
-| term "%" term { $$ = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kMod, std::move($1), std::move($3)); }
-| term "&" term { $$ = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseAnd, std::move($1), std::move($3)); }
-| term "|" term { $$ = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseOr, std::move($1), std::move($3)); }
-| term "^" term { $$ = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseXor, std::move($1), std::move($3)); }
-| term "==" term { $$ = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kEqual, std::move($1), std::move($3)); }
-| term "!=" term { $$ = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kNotEqual, std::move($1), std::move($3)); }
-| term ">" term { $$ = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLarge, std::move($1), std::move($3)); }
-| term ">=" term { $$ = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLargeEqual, std::move($1), std::move($3)); }
-| term "<" term { $$ = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLess, std::move($1), std::move($3)); }
-| term "<=" term { $$ = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLessEqual, std::move($1), std::move($3)); }
-| term "<<" term { $$ = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseShiftLeft, std::move($1), std::move($3)); }
-| term ">>" term { $$ = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseShiftRight, std::move($1), std::move($3)); }
+  "-" term %prec NEG { $$ = WithLoc(std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kMinus, std::move($2)), @$, builder.GetSourceCode()); }
+| "not" term %prec NEG { $$ = WithLoc(std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kNot, std::move($2)), @$, builder.GetSourceCode()); }
+| "+" term %prec NEG { $$ = WithLoc(std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kPlus, std::move($2)), @$, builder.GetSourceCode()); }
+| "~" term %prec NEG { $$ = WithLoc(std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kBitwiseNot, std::move($2)), @$, builder.GetSourceCode()); }
+| term "+" term { $$ = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kAdd, std::move($1), std::move($3)), @$, builder.GetSourceCode()); }
+| term "-" term { $$ = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kSub, std::move($1), std::move($3)), @$, builder.GetSourceCode()); }
+| term "*" term { $$ = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kMul, std::move($1), std::move($3)), @$, builder.GetSourceCode()); }
+| term "/" term { $$ = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kDiv, std::move($1), std::move($3)), @$, builder.GetSourceCode()); }
+| term "%" term { $$ = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kMod, std::move($1), std::move($3)), @$, builder.GetSourceCode()); }
+| term "&" term { $$ = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseAnd, std::move($1), std::move($3)), @$, builder.GetSourceCode()); }
+| term "|" term { $$ = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseOr, std::move($1), std::move($3)), @$, builder.GetSourceCode()); }
+| term "^" term { $$ = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseXor, std::move($1), std::move($3)), @$, builder.GetSourceCode()); }
+| term "==" term { $$ = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kEqual, std::move($1), std::move($3)), @$, builder.GetSourceCode()); }
+| term "!=" term { $$ = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kNotEqual, std::move($1), std::move($3)), @$, builder.GetSourceCode()); }
+| term ">" term { $$ = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLarge, std::move($1), std::move($3)), @$, builder.GetSourceCode()); }
+| term ">=" term { $$ = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLargeEqual, std::move($1), std::move($3)), @$, builder.GetSourceCode()); }
+| term "<" term { $$ = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLess, std::move($1), std::move($3)), @$, builder.GetSourceCode()); }
+| term "<=" term { $$ = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLessEqual, std::move($1), std::move($3)), @$, builder.GetSourceCode()); }
+| term "<<" term { $$ = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseShiftLeft, std::move($1), std::move($3)), @$, builder.GetSourceCode()); }
+| term ">>" term { $$ = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseShiftRight, std::move($1), std::move($3)), @$, builder.GetSourceCode()); }
 ;
 
 named_function:
-  "if" "(" args ")" { $$ = std::make_unique<jitfusion::IfNode>(std::move($3)); }
-|  IDENTIFIER "(" args ")" { $$ = std::make_unique<jitfusion::FunctionNode>(std::move($1), std::move($3)); }
-|  IDENTIFIER "(" ")" { $$ = std::make_unique<jitfusion::FunctionNode>(std::move($1), std::vector<std::unique_ptr<ExecNode>>{});}
+  "if" "(" args ")" { $$ = WithLoc(std::make_unique<jitfusion::IfNode>(std::move($3)), @$, builder.GetSourceCode()); }
+|  IDENTIFIER "(" args ")" { $$ = WithLoc(std::make_unique<jitfusion::FunctionNode>(std::move($1), std::move($3)), @$, builder.GetSourceCode()); }
+|  IDENTIFIER "(" ")" { $$ = WithLoc(std::make_unique<jitfusion::FunctionNode>(std::move($1), std::vector<std::unique_ptr<ExecNode>>{}), @$, builder.GetSourceCode());}
 | term "in" term {
-    $$ = std::make_unique<jitfusion::FunctionNode>("in", std::vector<std::unique_ptr<jitfusion::ExecNode>>());
-    static_cast<jitfusion::FunctionNode *>($$.get())->AppendArgs(std::move($1));
-    static_cast<jitfusion::FunctionNode *>($$.get())->AppendArgs(std::move($3));
+    auto node = std::make_unique<jitfusion::FunctionNode>("in", std::vector<std::unique_ptr<jitfusion::ExecNode>>());
+    node->AppendArgs(std::move($1));
+    node->AppendArgs(std::move($3));
+    $$ = WithLoc(std::move(node), @$, builder.GetSourceCode());
 }
-| "switch" "(" args ")" { $$ = std::make_unique<jitfusion::SwitchNode>(std::move($3)); }
+| "switch" "(" args ")" { $$ = WithLoc(std::make_unique<jitfusion::SwitchNode>(std::move($3)), @$, builder.GetSourceCode()); }
 ;
 
 when_block:
@@ -356,7 +379,7 @@ when_block:
     args.emplace_back(std::move($2));
     args.emplace_back(std::move($4));
     args.insert(args.end(), std::make_move_iterator($6.begin()), std::make_move_iterator($6.end()));
-    $$ = std::make_unique<jitfusion::IfBlockNode>(std::move(args));
+    $$ = WithLoc(std::make_unique<jitfusion::IfBlockNode>(std::move(args)), @$, builder.GetSourceCode());
   }
 ;
 
@@ -393,8 +416,8 @@ arg:
 ;
 
 boolean:
-  term "and" term { $$ = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kAnd, std::move($1), std::move($3)); }
-| term "or" term { $$ = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kOr, std::move($1), std::move($3)); }
+  term "and" term { $$ = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kAnd, std::move($1), std::move($3)), @$, builder.GetSourceCode()); }
+| term "or" term { $$ = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kOr, std::move($1), std::move($3)), @$, builder.GetSourceCode()); }
 
 %%
 

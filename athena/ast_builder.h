@@ -39,7 +39,9 @@ class ProgramAstBuilder {
   Status BuildExpression(const std::string& code, std::unique_ptr<ExecNode>* result);
   Status BuildPipeline(const std::string& code, std::unique_ptr<ExecNode>* result);
 
-  std::unique_ptr<ExecNode> MakeRefNode(const std::string& var_name);
+  std::unique_ptr<ExecNode> MakeRefNode(const std::string& var_name, int begin_line, int begin_col, int end_line,
+                                        int end_col);
+
   void AddStatement(Statement statement);
 
   void EnterBlock();
@@ -48,6 +50,10 @@ class ProgramAstBuilder {
   [[nodiscard]] bool IsExpressionMode() const { return build_mode_ == BuildMode::kExpression; }
 
   location& GetLocation() { return location_; }
+
+  // Original source text kept around so diagnostic renderers can pull the
+  // offending line(s) out when they receive a node's SourceLocation.
+  [[nodiscard]] const std::string& GetSourceCode() const { return source_code_; }
 
  private:
   enum class BuildMode : uint8_t { kExpression, kPipeline };
@@ -58,6 +64,7 @@ class ProgramAstBuilder {
   std::unordered_map<std::string, uint32_t> var2index_;
   std::string parser_error_message_;
   std::string custom_error_message_;
+  std::string source_code_;
   location location_;
   BuildMode build_mode_{BuildMode::kExpression};
 

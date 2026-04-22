@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <memory>
 #include <string>
+#include <string_view>
 #include "status.h"
 #include "type.h"
 
@@ -16,6 +17,16 @@ namespace jitfusion {
 
 class ExecNode;
 class Visitor;
+
+struct SourceLocation {
+  std::string_view source_code;
+  int begin_line{0};
+  int begin_col{0};
+  int end_line{0};
+  int end_col{0};
+
+  [[nodiscard]] bool Valid() const { return begin_line > 0; }
+};
 
 /**
  * This is the base class node of the execution engine.
@@ -26,45 +37,51 @@ class ExecNode {
   std::string ToString(const std::string& prefix = "");
   virtual Status Accept(Visitor* visitor) = 0;
   virtual ExecNodeType GetExecNodeType() = 0;
-  virtual std::unique_ptr<ExecNode> Clone() = 0;
+
+  std::unique_ptr<ExecNode> Clone();
 
   [[nodiscard]] ValueType GetReturnType() const { return return_type_; }
   void SetReturnType(ValueType return_type) { return_type_ = return_type; }
 
+  [[nodiscard]] const SourceLocation& GetLocation() const { return loc_; }
+  void SetLocation(const SourceLocation& loc) { loc_ = loc; }
+
  private:
   virtual std::string ToStringImpl(const std::string& prefix) = 0;
+  virtual std::unique_ptr<ExecNode> CloneImpl() = 0;
 
   ValueType return_type_{ValueType::kUnknown};
+  SourceLocation loc_{};
 };
 
 class EntryArgumentNode : public ExecNode {
  public:
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
-  std::unique_ptr<ExecNode> Clone() override;
 
  private:
   std::string ToStringImpl(const std::string& prefix) override;
+  std::unique_ptr<ExecNode> CloneImpl() override;
 };
 
 class ExecContextNode : public ExecNode {
  public:
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
-  std::unique_ptr<ExecNode> Clone() override;
 
  private:
   std::string ToStringImpl(const std::string& prefix) override;
+  std::unique_ptr<ExecNode> CloneImpl() override;
 };
 
 class OutputNode : public ExecNode {
  public:
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
-  std::unique_ptr<ExecNode> Clone() override;
 
  private:
   std::string ToStringImpl(const std::string& prefix) override;
+  std::unique_ptr<ExecNode> CloneImpl() override;
 };
 
 class ConstantValueNode : public ExecNode {
@@ -73,12 +90,12 @@ class ConstantValueNode : public ExecNode {
   explicit ConstantValueNode(ConstantValueType val) : val_(std::move(val)) {}
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
-  std::unique_ptr<ExecNode> Clone() override;
 
   [[nodiscard]] const ConstantValueType& GetVal() const { return val_; }
 
  private:
   std::string ToStringImpl(const std::string& prefix) override;
+  std::unique_ptr<ExecNode> CloneImpl() override;
 
   ConstantValueType val_;
 };
@@ -89,12 +106,12 @@ class ConstantListValueNode : public ExecNode {
   explicit ConstantListValueNode(ConstantListValueType val_list) : val_list_(std::move(val_list)) {}
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
-  std::unique_ptr<ExecNode> Clone() override;
 
   [[nodiscard]] const ConstantListValueType& GetValList() const { return val_list_; }
 
  private:
   std::string ToStringImpl(const std::string& prefix) override;
+  std::unique_ptr<ExecNode> CloneImpl() override;
 
   ConstantListValueType val_list_;
 };
@@ -105,13 +122,13 @@ class UnaryOPNode : public ExecNode {
   UnaryOPNode(UnaryOPType op, std::unique_ptr<ExecNode> child) : op_(op), child_(std::move(child)) {}
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
-  std::unique_ptr<ExecNode> Clone() override;
 
   [[nodiscard]] ExecNode* GetChild() const { return child_.get(); }
   [[nodiscard]] UnaryOPType GetOp() const { return op_; }
 
  private:
   std::string ToStringImpl(const std::string& prefix) override;
+  std::unique_ptr<ExecNode> CloneImpl() override;
 
   UnaryOPType op_;
   std::unique_ptr<ExecNode> child_;
@@ -124,7 +141,6 @@ class BinaryOPNode : public ExecNode {
       : op_(op), left_(std::move(left)), right_(std::move(right)) {}
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
-  std::unique_ptr<ExecNode> Clone() override;
 
   [[nodiscard]] ExecNode* GetLeft() const { return left_.get(); }
   [[nodiscard]] ExecNode* GetRight() const { return right_.get(); }
@@ -133,6 +149,7 @@ class BinaryOPNode : public ExecNode {
 
  private:
   std::string ToStringImpl(const std::string& prefix) override;
+  std::unique_ptr<ExecNode> CloneImpl() override;
 
   BinaryOPType op_;
   std::unique_ptr<ExecNode> left_, right_;
@@ -146,13 +163,13 @@ class FunctionNode : public ExecNode {
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
   void AppendArgs(std::unique_ptr<ExecNode>&& arg);
-  std::unique_ptr<ExecNode> Clone() override;
 
   [[nodiscard]] std::string GetFuncName() const { return func_name_; }
   [[nodiscard]] const std::vector<std::unique_ptr<ExecNode>>& GetArgs() const { return args_; }
 
  private:
   std::string ToStringImpl(const std::string& prefix) override;
+  std::unique_ptr<ExecNode> CloneImpl() override;
 
   std::string func_name_;
   std::vector<std::unique_ptr<ExecNode>> args_;
@@ -172,7 +189,6 @@ class NoOPNode : public ExecNode {
   ExecNodeType GetExecNodeType() override;
   void AppendArgs(std::unique_ptr<ExecNode>&& arg);
   void AppendArgs(std::string name, std::unique_ptr<ExecNode>&& arg);
-  std::unique_ptr<ExecNode> Clone() override;
 
   [[nodiscard]] const std::vector<std::unique_ptr<ExecNode>>& GetArgs() const { return args_; }
   [[nodiscard]] const std::vector<std::string>& GetNames() const { return names_; }
@@ -181,6 +197,7 @@ class NoOPNode : public ExecNode {
 
  private:
   std::string ToStringImpl(const std::string& prefix) override;
+  std::unique_ptr<ExecNode> CloneImpl() override;
 
   std::vector<std::string> names_;
   std::vector<std::unique_ptr<ExecNode>> args_;
@@ -193,7 +210,6 @@ class IfNode : public ExecNode {
   explicit IfNode(std::vector<std::unique_ptr<ExecNode>> args) : args_(std::move(args)) {}
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
-  std::unique_ptr<ExecNode> Clone() override;
 
   void AppendArgs(std::unique_ptr<ExecNode>&& arg);
 
@@ -201,6 +217,7 @@ class IfNode : public ExecNode {
 
  private:
   std::string ToStringImpl(const std::string& prefix) override;
+  std::unique_ptr<ExecNode> CloneImpl() override;
   std::vector<std::unique_ptr<ExecNode>> args_;
 };
 
@@ -210,7 +227,6 @@ class SwitchNode : public ExecNode {
   explicit SwitchNode(std::vector<std::unique_ptr<ExecNode>> args) : args_(std::move(args)) {}
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
-  std::unique_ptr<ExecNode> Clone() override;
 
   void AppendArgs(std::unique_ptr<ExecNode>&& arg);
 
@@ -218,6 +234,7 @@ class SwitchNode : public ExecNode {
 
  private:
   std::string ToStringImpl(const std::string& prefix) override;
+  std::unique_ptr<ExecNode> CloneImpl() override;
   std::vector<std::unique_ptr<ExecNode>> args_;
 };
 
@@ -227,12 +244,12 @@ class IfBlockNode : public ExecNode {
   explicit IfBlockNode(std::vector<std::unique_ptr<ExecNode>> args) : args_(std::move(args)) {}
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
-  std::unique_ptr<ExecNode> Clone() override;
 
   [[nodiscard]] const std::vector<std::unique_ptr<ExecNode>>& GetArgs() const { return args_; }
 
  private:
   std::string ToStringImpl(const std::string& prefix) override;
+  std::unique_ptr<ExecNode> CloneImpl() override;
   std::vector<std::unique_ptr<ExecNode>> args_;
 };
 
@@ -242,12 +259,12 @@ class RefNode : public ExecNode {
   explicit RefNode(std::string name) : name_(std::move(name)) {}
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
-  std::unique_ptr<ExecNode> Clone() override;
 
   [[nodiscard]] const std::string& GetName() const { return name_; }
 
  private:
   std::string ToStringImpl(const std::string& prefix) override;
+  std::unique_ptr<ExecNode> CloneImpl() override;
 
   std::string name_;
 };
