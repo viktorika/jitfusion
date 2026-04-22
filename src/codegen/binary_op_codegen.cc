@@ -146,7 +146,8 @@ Status CodeGen::SolveBinaryOpNumericType(BinaryOPNode &binary_node, llvm::Value 
         value_ = ctx_.builder.CreateShl(lhs_value, rhs_value);
       } break;
       case BinaryOPType::kBitwiseShiftRight: {
-        value_ = ctx_.builder.CreateAShr(lhs_value, rhs_value);
+        value_ = TypeHelper::IsSignedType(binary_node.GetReturnType()) ? ctx_.builder.CreateAShr(lhs_value, rhs_value)
+                                                                       : ctx_.builder.CreateLShr(lhs_value, rhs_value);
       } break;
       default:
         return Status::RuntimeError(
