@@ -314,6 +314,91 @@ TEST(BinaryOPTest, BitwiseShiftRightTest) {
   EXPECT_EQ(std::get<uint64_t>(result), l >> r);
 }
 
+TEST(BinaryOPTest, BitwiseShiftRightUnsignedHighBitTest) {
+  uint32_t l = 0x80000000U;
+  uint32_t r = 1;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto l_node = std::unique_ptr<ExecNode>(new ConstantValueNode(l));
+  auto r_node = std::unique_ptr<ExecNode>(new ConstantValueNode(r));
+  auto op_node = std::unique_ptr<ExecNode>(
+      new BinaryOPNode(BinaryOPType::kBitwiseShiftRight, std::move(l_node), std::move(r_node)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<uint32_t>(result), l >> r);  // expect 0x40000000
+}
+
+TEST(BinaryOPTest, BitwiseShiftRightUnsignedU64HighBitTest) {
+  uint64_t l = 0x8000000000000000ULL;
+  uint32_t r = 4;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto l_node = std::unique_ptr<ExecNode>(new ConstantValueNode(l));
+  auto r_node = std::unique_ptr<ExecNode>(new ConstantValueNode(r));
+  auto op_node = std::unique_ptr<ExecNode>(
+      new BinaryOPNode(BinaryOPType::kBitwiseShiftRight, std::move(l_node), std::move(r_node)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<uint64_t>(result), l >> r);  // expect 0x0800000000000000
+}
+
+TEST(BinaryOPTest, BitwiseShiftRightSignedNegativeTest) {
+  int32_t l = -16;
+  int32_t r = 2;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto l_node = std::unique_ptr<ExecNode>(new ConstantValueNode(l));
+  auto r_node = std::unique_ptr<ExecNode>(new ConstantValueNode(r));
+  auto op_node = std::unique_ptr<ExecNode>(
+      new BinaryOPNode(BinaryOPType::kBitwiseShiftRight, std::move(l_node), std::move(r_node)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<int32_t>(result), l >> r);  // expect -4 (sign-preserving)
+}
+
+TEST(BinaryOPTest, BitwiseShiftRightRhsDoesNotPromoteTest) {
+  uint32_t l = 0x80000000U;
+  int64_t r = 1;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto l_node = std::unique_ptr<ExecNode>(new ConstantValueNode(l));
+  auto r_node = std::unique_ptr<ExecNode>(new ConstantValueNode(r));
+  auto op_node = std::unique_ptr<ExecNode>(
+      new BinaryOPNode(BinaryOPType::kBitwiseShiftRight, std::move(l_node), std::move(r_node)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<uint32_t>(result), 0x40000000U);
+}
+
+TEST(BinaryOPTest, BitwiseShiftLeftRhsDoesNotPromoteTest) {
+  uint8_t l = 0x01;
+  int32_t r = 3;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto l_node = std::unique_ptr<ExecNode>(new ConstantValueNode(l));
+  auto r_node = std::unique_ptr<ExecNode>(new ConstantValueNode(r));
+  auto op_node = std::unique_ptr<ExecNode>(
+      new BinaryOPNode(BinaryOPType::kBitwiseShiftLeft, std::move(l_node), std::move(r_node)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<uint8_t>(result), static_cast<uint8_t>(0x08));
+}
+
 TEST(BinaryOPTest, StringConcatTest) {
   std::string l = "123";
   std::string r = "456";

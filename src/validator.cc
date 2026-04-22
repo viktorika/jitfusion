@@ -201,7 +201,11 @@ Status Validator::Visit(BinaryOPNode& binary_op_node) {
                                                 TypeHelper::TypeToString(rhs_type) + " for '" +
                                                 TypeHelper::BinaryOPTypeToString(op) + "'");
     }
-    binary_op_node.SetReturnType(TypeHelper::GetPromotedType(lhs_type, rhs_type));
+    if (op == BinaryOPType::kBitwiseShiftLeft || op == BinaryOPType::kBitwiseShiftRight) {
+      binary_op_node.SetReturnType(lhs_type);
+    } else {
+      binary_op_node.SetReturnType(TypeHelper::GetPromotedType(lhs_type, rhs_type));
+    }
     return Status::OK();
   }
 
