@@ -337,8 +337,8 @@ Status Validator::Visit(SwitchNode& switch_node) {
     arg_types.emplace_back(arg->GetReturnType());
   }
 
-  ValueType basic_type = ValueType::kUnknown;
-  ValueType list_type = ValueType::kUnknown;
+  ValueType numeric_type = ValueType::kUnknown;
+  ValueType complex_type = ValueType::kUnknown;
   for (std::size_t i = 0; i < size; i++) {
     if (i + 1 != size && i % 2 == 0 && !TypeHelper::IsNumericType(switch_node.GetArgs()[i]->GetReturnType())) {
       return MakeParseError(*switch_node.GetArgs()[i],
@@ -347,25 +347,25 @@ Status Validator::Visit(SwitchNode& switch_node) {
     }
     if (i % 2 != 0 || i + 1 == size) {
       if (TypeHelper::IsNumericType(switch_node.GetArgs()[i]->GetReturnType())) {
-        basic_type = TypeHelper::GetPromotedType(basic_type, switch_node.GetArgs()[i]->GetReturnType());
+        numeric_type = TypeHelper::GetPromotedType(numeric_type, switch_node.GetArgs()[i]->GetReturnType());
       } else {
-        if (list_type != ValueType::kUnknown && list_type != switch_node.GetArgs()[i]->GetReturnType()) {
+        if (complex_type != ValueType::kUnknown && complex_type != switch_node.GetArgs()[i]->GetReturnType()) {
           return MakeParseError(*switch_node.GetArgs()[i],
                                 "switch branch has incompatible type: got " +
                                     TypeHelper::TypeToString(switch_node.GetArgs()[i]->GetReturnType()) +
-                                    ", previously seen " + TypeHelper::TypeToString(list_type));
+                                    ", previously seen " + TypeHelper::TypeToString(complex_type));
         }
-        list_type = switch_node.GetArgs()[i]->GetReturnType();
+        complex_type = switch_node.GetArgs()[i]->GetReturnType();
       }
     }
   }
 
-  if (list_type != ValueType::kUnknown && basic_type != ValueType::kUnknown) {
+  if (complex_type != ValueType::kUnknown && numeric_type != ValueType::kUnknown) {
     return MakeParseError(switch_node, "switch branches have incompatible types: mix of numeric (" +
-                                           TypeHelper::TypeToString(basic_type) + ") and non-numeric (" +
-                                           TypeHelper::TypeToString(list_type) + ")");
+                                           TypeHelper::TypeToString(numeric_type) + ") and non-numeric (" +
+                                           TypeHelper::TypeToString(complex_type) + ")");
   }
-  switch_node.SetReturnType(basic_type == ValueType::kUnknown ? list_type : basic_type);
+  switch_node.SetReturnType(numeric_type == ValueType::kUnknown ? complex_type : numeric_type);
 
   return Status::OK();
 }
