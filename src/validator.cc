@@ -6,10 +6,25 @@
  */
 #include "validator.h"
 #include <exec_node.h>
+#include "diagnostic.h"
 #include "status.h"
 #include "type.h"
 
 namespace jitfusion {
+
+namespace {
+
+// Build a Status::ParseError whose message is a rendered Diagnostic. The
+// Diagnostic pulls both its source location and the original source text
+// from `node.GetLocation()`, so no separate source_code argument is needed.
+template <typename... Notes>
+Status MakeParseError(const ExecNode& node, std::string message, Notes&&... notes) {
+  Diagnostic diag(Diagnostic::Level::kError, std::move(message), node.GetLocation());
+  (diag.WithNote(std::forward<Notes>(notes)), ...);
+  return Status::ParseError(diag.Render());
+}
+
+}  // namespace
 
 Status Validator::Validate(ExecNode* node) { return node->Accept(this); }
 
@@ -70,10 +85,11 @@ Status Validator::Visit(UnaryOPNode& unary_op_node) {
   JF_RETURN_NOT_OK(unary_op_node.GetChild()->Accept(this));
   auto child_return_type = unary_op_node.GetChild()->GetReturnType();
   if (ValueType::kVoid == child_return_type) {
-    return Status::ParseError("Unary OP not support void type");
+    return MakeParseError(unary_op_node, "unary operator does not support void operand");
   }
   if (!TypeHelper::IsNumericType(child_return_type)) {
-    return Status::ParseError("Unary OP only support numeric type");
+    return MakeParseError(
+        unary_op_node, "unary operator requires a numeric operand, got " + TypeHelper::TypeToString(child_return_type));
   }
 
   switch (unary_op_node.GetOp()) {
@@ -106,7 +122,8 @@ Status Validator::Visit(UnaryOPNode& unary_op_node) {
       break;
     case UnaryOPType::kBitwiseNot: {
       if (!TypeHelper::IsIntegerType(child_return_type)) {
-        return Status::ParseError("BitwiseNot operation, child type is not integer");
+        return MakeParseError(unary_op_node, "bitwise-not requires an integer operand, got " +
+                                                 TypeHelper::TypeToString(child_return_type));
       }
       unary_op_node.SetReturnType(child_return_type);
     } break;
@@ -143,21 +160,21 @@ Status Validator::Visit(BinaryOPNode& binary_op_node) {
   auto op = binary_op_node.GetOp();
 
   if (ValueType::kVoid == left->GetReturnType() || ValueType::kVoid == right->GetReturnType()) {
-    return Status::ParseError("Binary OP not support void type");
+    return MakeParseError(binary_op_node, "binary operator does not support void operand");
   }
 
   // extra check
   if ((BinaryOPType::kDiv == op || BinaryOPType::kMod == op) &&
       right->GetExecNodeType() == ExecNodeType::kConstValueNode &&
       std::visit(DivZeroVisit(), static_cast<ConstantValueNode*>(right)->GetVal())) {
-    return Status::ParseError("Cant no div/mod zero");
+    return MakeParseError(binary_op_node, "division or modulo by constant zero");
   }
 
   if (TypeHelper::IsLogicalBinaryOPType(binary_op_node.GetOp())) {
     if (!TypeHelper::IsNumericType(left->GetReturnType()) || !TypeHelper::IsNumericType(right->GetReturnType())) {
-      return Status::ParseError("Logical operator only supports numeric types, got ",
-                                TypeHelper::TypeToString(left->GetReturnType()), " and ",
-                                TypeHelper::TypeToString(right->GetReturnType()));
+      return MakeParseError(binary_op_node, "logical operator requires numeric operands, got " +
+                                                TypeHelper::TypeToString(left->GetReturnType()) + " and " +
+                                                TypeHelper::TypeToString(right->GetReturnType()));
     }
     binary_op_node.SetReturnType(ValueType::kU8);
     return Status::OK();
@@ -177,13 +194,16 @@ Status Validator::Visit(FunctionNode& function_node) {
   for (const auto& arg : function_node.GetArgs()) {
     JF_RETURN_NOT_OK(arg->Accept(this));
     if (ValueType::kVoid == arg->GetReturnType()) {
-      return Status::ParseError("Function ", function_node.GetFuncName(), " argument cant be void type");
+      return MakeParseError(function_node, "function '" + function_node.GetFuncName() + "' argument cannot be void");
     }
     arg_types.emplace_back(arg->GetReturnType());
   }
   FunctionSignature sign(function_node.GetFuncName(), arg_types, ValueType::kUnknown);
   FunctionStructure function_structure;
-  JF_RETURN_NOT_OK(func_registry_->GetFuncBySign(sign, &function_structure));
+  if (auto st = func_registry_->GetFuncBySign(sign, &function_structure); !st.ok()) {
+    // Upgrade the registry's message to a diagnostic carrying source location.
+    return MakeParseError(function_node, st.ToString());
+  }
   function_node.SetReturnType(sign.GetRetType());
   return Status::OK();
 }
@@ -217,14 +237,15 @@ Status Validator::Visit(NoOPNode& no_op_node) {
 
 Status Validator::Visit(IfNode& if_node) {
   if (if_node.GetArgs().size() != 3) {
-    return Status::ParseError("If node must has 3 arguments");
+    return MakeParseError(if_node, "if expects exactly 3 arguments (condition, then, else), got " +
+                                       std::to_string(if_node.GetArgs().size()));
   }
   std::vector<ValueType> arg_types;
   arg_types.reserve(if_node.GetArgs().size());
   for (const auto& arg : if_node.GetArgs()) {
     JF_RETURN_NOT_OK(arg->Accept(this));
     if (ValueType::kVoid == arg->GetReturnType()) {
-      return Status::ParseError("If node argument cant be void type");
+      return MakeParseError(*arg, "if argument cannot be void");
     }
     arg_types.emplace_back(arg->GetReturnType());
   }
@@ -234,8 +255,8 @@ Status Validator::Visit(IfNode& if_node) {
   } else if (arg_types[1] == arg_types[2]) {
     if_node.SetReturnType(arg_types[1]);
   } else {
-    return Status::ParseError("If node is support for child type ", TypeHelper::TypeToString(arg_types[1]), " ",
-                              TypeHelper::TypeToString(arg_types[2]));
+    return MakeParseError(if_node, "if branches have incompatible types: " + TypeHelper::TypeToString(arg_types[1]) +
+                                       " vs " + TypeHelper::TypeToString(arg_types[2]));
   }
   return Status::OK();
 }
@@ -366,7 +387,7 @@ Status Validator::Visit(IfBlockNode& if_block_node) {
 Status Validator::Visit(RefNode& ref_node) {
   ValueType type = type_scope_stack_.Lookup(ref_node.GetName());
   if (type == ValueType::kUnknown) {
-    return Status::ParseError("Variable not found: ", ref_node.GetName());
+    return MakeParseError(ref_node, "variable '" + ref_node.GetName() + "' is not defined");
   }
   ref_node.SetReturnType(type);
   return Status::OK();

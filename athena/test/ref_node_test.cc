@@ -374,7 +374,7 @@ TEST(RefNodeTest, UndefinedVariableReferenceError) {
   std::vector<std::string> codes = {code};
   auto status = athena.Compile(codes, func_registry);
   EXPECT_FALSE(status.ok());
-  EXPECT_NE(status.ToString().find("Variable not found"), std::string::npos);
+  EXPECT_NE(status.ToString().find("'undefined_var' is not defined"), std::string::npos);
 }
 
 TEST(RefNodeTest, UndefinedVariableInExpressionMode) {
@@ -393,5 +393,5 @@ TEST(RefNodeTest, UndefinedVariableInExpressionMode) {
 
   auto status = athena.Compile(code, func_registry);
   EXPECT_FALSE(status.ok());
-  EXPECT_NE(status.ToString().find("Variable not found"), std::string::npos);
+  EXPECT_NE(status.ToString().find("'nonexistent' is not defined"), std::string::npos);
 }

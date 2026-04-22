@@ -11,20 +11,26 @@ namespace jitfusion {
 
 std::string ExecNode::ToString(const std::string& prefix) { return ToStringImpl(prefix); }
 
+std::unique_ptr<ExecNode> ExecNode::Clone() {
+  auto cloned = CloneImpl();
+  cloned->SetLocation(loc_);
+  return cloned;
+}
+
 std::string EntryArgumentNode::ToStringImpl(const std::string& prefix) { return prefix + "|--entry_argument\n"; }
 Status EntryArgumentNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType EntryArgumentNode::GetExecNodeType() { return ExecNodeType::kEntryArgumentNode; }
-std::unique_ptr<ExecNode> EntryArgumentNode::Clone() { return std::make_unique<EntryArgumentNode>(); }
+std::unique_ptr<ExecNode> EntryArgumentNode::CloneImpl() { return std::make_unique<EntryArgumentNode>(); }
 
 std::string ExecContextNode::ToStringImpl(const std::string& prefix) { return prefix + "|--exec_context\n"; }
 Status ExecContextNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType ExecContextNode::GetExecNodeType() { return ExecNodeType::kExecContextNode; }
-std::unique_ptr<ExecNode> ExecContextNode::Clone() { return std::make_unique<ExecContextNode>(); }
+std::unique_ptr<ExecNode> ExecContextNode::CloneImpl() { return std::make_unique<ExecContextNode>(); }
 
 std::string OutputNode::ToStringImpl(const std::string& prefix) { return prefix + "|--output\n"; }
 Status OutputNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType OutputNode::GetExecNodeType() { return ExecNodeType::kOutputNode; }
-std::unique_ptr<ExecNode> OutputNode::Clone() { return std::make_unique<OutputNode>(); }
+std::unique_ptr<ExecNode> OutputNode::CloneImpl() { return std::make_unique<OutputNode>(); }
 
 struct ValueToString {
   template <typename T>
@@ -43,7 +49,7 @@ std::string ConstantValueNode::ToStringImpl(const std::string& prefix) {
 
 Status ConstantValueNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType ConstantValueNode::GetExecNodeType() { return ExecNodeType::kConstValueNode; }
-std::unique_ptr<ExecNode> ConstantValueNode::Clone() { return std::make_unique<ConstantValueNode>(*this); }
+std::unique_ptr<ExecNode> ConstantValueNode::CloneImpl() { return std::make_unique<ConstantValueNode>(*this); }
 
 struct VectorValueToString {
   template <typename T>
@@ -72,7 +78,7 @@ std::string ConstantListValueNode::ToStringImpl(const std::string& prefix) {
 
 Status ConstantListValueNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType ConstantListValueNode::GetExecNodeType() { return ExecNodeType::kConstListValueNode; }
-std::unique_ptr<ExecNode> ConstantListValueNode::Clone() { return std::make_unique<ConstantListValueNode>(*this); }
+std::unique_ptr<ExecNode> ConstantListValueNode::CloneImpl() { return std::make_unique<ConstantListValueNode>(*this); }
 
 std::string UnaryOPNode::ToStringImpl(const std::string& prefix) {
   std::string result = prefix + "|--" + TypeHelper::UnaryOPTypeToString(op_) + "\n" + child_->ToString(prefix + "|   ");
@@ -81,7 +87,7 @@ std::string UnaryOPNode::ToStringImpl(const std::string& prefix) {
 
 Status UnaryOPNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType UnaryOPNode::GetExecNodeType() { return ExecNodeType::kUnaryOPNode; }
-std::unique_ptr<ExecNode> UnaryOPNode::Clone() { return std::make_unique<UnaryOPNode>(op_, child_->Clone()); }
+std::unique_ptr<ExecNode> UnaryOPNode::CloneImpl() { return std::make_unique<UnaryOPNode>(op_, child_->Clone()); }
 
 std::string BinaryOPNode::ToStringImpl(const std::string& prefix) {
   return prefix + "|--" + TypeHelper::BinaryOPTypeToString(op_) + "\n" + left_->ToString(prefix + "|   ") +
@@ -91,7 +97,7 @@ std::string BinaryOPNode::ToStringImpl(const std::string& prefix) {
 Status BinaryOPNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType BinaryOPNode::GetExecNodeType() { return ExecNodeType::kBinaryOPNode; }
 
-std::unique_ptr<ExecNode> BinaryOPNode::Clone() {
+std::unique_ptr<ExecNode> BinaryOPNode::CloneImpl() {
   return std::make_unique<BinaryOPNode>(op_, left_->Clone(), right_->Clone());
 }
 
@@ -107,7 +113,7 @@ void FunctionNode::AppendArgs(std::unique_ptr<ExecNode>&& arg) { args_.emplace_b
 Status FunctionNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType FunctionNode::GetExecNodeType() { return ExecNodeType::kFunctionNode; }
 
-std::unique_ptr<ExecNode> FunctionNode::Clone() {
+std::unique_ptr<ExecNode> FunctionNode::CloneImpl() {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.reserve(args_.size());
   for (const auto& arg : args_) {
@@ -138,14 +144,13 @@ void NoOPNode::AppendArgs(std::string name, std::unique_ptr<ExecNode>&& arg) {
   args_.emplace_back(std::move(arg));
 }
 
-std::unique_ptr<ExecNode> NoOPNode::Clone() {
+std::unique_ptr<ExecNode> NoOPNode::CloneImpl() {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.reserve(args_.size());
   for (const auto& arg : args_) {
     args.emplace_back(arg->Clone());
   }
-  auto node = std::make_unique<NoOPNode>(names_, std::move(args), isolated_);
-  return node;
+  return std::make_unique<NoOPNode>(names_, std::move(args), isolated_);
 }
 
 std::string IfNode::ToStringImpl(const std::string& prefix) {
@@ -160,7 +165,7 @@ Status IfNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType IfNode::GetExecNodeType() { return ExecNodeType::kIfNode; }
 void IfNode::AppendArgs(std::unique_ptr<ExecNode>&& arg) { args_.emplace_back(std::move(arg)); }
 
-std::unique_ptr<ExecNode> IfNode::Clone() {
+std::unique_ptr<ExecNode> IfNode::CloneImpl() {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.reserve(args_.size());
   for (const auto& arg : args_) {
@@ -181,7 +186,7 @@ Status SwitchNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType SwitchNode::GetExecNodeType() { return ExecNodeType::kSwitchNode; }
 void SwitchNode::AppendArgs(std::unique_ptr<ExecNode>&& arg) { args_.emplace_back(std::move(arg)); }
 
-std::unique_ptr<ExecNode> SwitchNode::Clone() {
+std::unique_ptr<ExecNode> SwitchNode::CloneImpl() {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.reserve(args_.size());
   for (const auto& arg : args_) {
@@ -201,7 +206,7 @@ std::string IfBlockNode::ToStringImpl(const std::string& prefix) {
 Status IfBlockNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType IfBlockNode::GetExecNodeType() { return ExecNodeType::kIfBlockNode; }
 
-std::unique_ptr<ExecNode> IfBlockNode::Clone() {
+std::unique_ptr<ExecNode> IfBlockNode::CloneImpl() {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.reserve(args_.size());
   for (const auto& arg : args_) {
@@ -213,6 +218,6 @@ std::unique_ptr<ExecNode> IfBlockNode::Clone() {
 std::string RefNode::ToStringImpl(const std::string& prefix) { return prefix + "|--ref(" + name_ + ")\n"; }
 Status RefNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType RefNode::GetExecNodeType() { return ExecNodeType::kRefNode; }
-std::unique_ptr<ExecNode> RefNode::Clone() { return std::make_unique<RefNode>(name_); }
+std::unique_ptr<ExecNode> RefNode::CloneImpl() { return std::make_unique<RefNode>(name_); }
 
 }  // namespace jitfusion

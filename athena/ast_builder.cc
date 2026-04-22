@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "diagnostic.h"
 #include "exec_node.h"
 #include "status.h"
 
@@ -21,6 +22,7 @@ Status ProgramAstBuilder::BuildExpression(const std::string& code, std::unique_p
   var2index_.clear();
   parser_error_message_.clear();
   custom_error_message_.clear();
+  source_code_ = code;
   build_mode_ = BuildMode::kExpression;
   location_.initialize(&code);
   if (auto st = Scan(code); !st.ok()) {
@@ -40,6 +42,7 @@ Status ProgramAstBuilder::BuildPipeline(const std::string& code, std::unique_ptr
   var2index_.clear();
   parser_error_message_.clear();
   custom_error_message_.clear();
+  source_code_ = code;
   build_mode_ = BuildMode::kPipeline;
   location_.initialize(&code);
   if (auto st = Scan(code); !st.ok()) {
@@ -59,7 +62,8 @@ Status ProgramAstBuilder::BuildPipeline(const std::string& code, std::unique_ptr
   return Status::OK();
 }
 
-std::unique_ptr<ExecNode> ProgramAstBuilder::MakeRefNode(const std::string& var_name) {
+std::unique_ptr<ExecNode> ProgramAstBuilder::MakeRefNode(const std::string& var_name, int begin_line, int begin_col,
+                                                         int end_line, int end_col) {
   if (auto it = var2index_.find(var_name); it != var2index_.end()) {
     statements_[it->second].has_dependency = true;
     if (build_mode_ == BuildMode::kPipeline) {
@@ -76,7 +80,11 @@ std::unique_ptr<ExecNode> ProgramAstBuilder::MakeRefNode(const std::string& var_
       return it->statements[found->second].expression->Clone();
     }
   }
-  custom_error_message_ = "Variable not found: " + var_name;
+  // Variable not found — emit a diagnostic-style error with a source snippet
+  // and caret underline, anchored at the identifier's location.
+  jitfusion::Diagnostic diag(jitfusion::Diagnostic::Level::kError, "variable '" + var_name + "' is not defined",
+                             jitfusion::SourceLocation{source_code_, begin_line, begin_col, end_line, end_col});
+  custom_error_message_ = diag.Render();
   return nullptr;
 }
 

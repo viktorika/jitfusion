@@ -341,7 +341,7 @@ TEST(BinaryOPTest, LogicalAndStringRejectTest) {
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   EXPECT_FALSE(st.ok());
-  EXPECT_NE(st.ToString().find("Logical operator only supports numeric types"), std::string::npos);
+  EXPECT_NE(st.ToString().find("logical operator requires numeric operands"), std::string::npos);
 }
 
 TEST(BinaryOPTest, LogicalOrStringRejectTest) {
@@ -355,7 +355,7 @@ TEST(BinaryOPTest, LogicalOrStringRejectTest) {
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   EXPECT_FALSE(st.ok());
-  EXPECT_NE(st.ToString().find("Logical operator only supports numeric types"), std::string::npos);
+  EXPECT_NE(st.ToString().find("logical operator requires numeric operands"), std::string::npos);
 }
 
 TEST(BinaryOPTest, LogicalAndMixedTypeRejectTest) {
@@ -369,7 +369,7 @@ TEST(BinaryOPTest, LogicalAndMixedTypeRejectTest) {
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
   EXPECT_FALSE(st.ok());
-  EXPECT_NE(st.ToString().find("Logical operator only supports numeric types"), std::string::npos);
+  EXPECT_NE(st.ToString().find("logical operator requires numeric operands"), std::string::npos);
 }
 
 TEST(BinaryOPTest, AndFloatTest) {

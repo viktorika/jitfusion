@@ -1117,7 +1117,7 @@ namespace athena {
           switch (yyn)
             {
   case 2: // program: statement
-#line 160 "parser.yy"
+#line 180 "parser.yy"
             { 
     builder.AddStatement(std::move(yystack_[0].value.as < Statement > ()));
     yylhs.value.as < void* > () = nullptr;
@@ -1126,7 +1126,7 @@ namespace athena {
     break;
 
   case 3: // program: program statement
-#line 164 "parser.yy"
+#line 184 "parser.yy"
                     {
   builder.AddStatement(std::move(yystack_[0].value.as < Statement > ()));
   yylhs.value.as < void* > () = nullptr;
@@ -1135,560 +1135,563 @@ namespace athena {
     break;
 
   case 4: // statement: "identifier" "=" expr ";"
-#line 170 "parser.yy"
+#line 190 "parser.yy"
                           { yylhs.value.as < Statement > () = Statement(std::move(yystack_[3].value.as < std::string > ()), std::move(yystack_[1].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1141 "parser.cc"
     break;
 
   case 5: // statement: expr ";"
-#line 171 "parser.yy"
+#line 191 "parser.yy"
            { yylhs.value.as < Statement > () = Statement(std::move(yystack_[1].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1147 "parser.cc"
     break;
 
   case 6: // statement: when_block
-#line 172 "parser.yy"
+#line 192 "parser.yy"
              { yylhs.value.as < Statement > () = Statement(std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
 #line 1153 "parser.cc"
     break;
 
   case 7: // expr: term
-#line 174 "parser.yy"
+#line 194 "parser.yy"
            { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ());}
 #line 1159 "parser.cc"
     break;
 
   case 8: // term: literal
-#line 178 "parser.yy"
+#line 198 "parser.yy"
           { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
 #line 1165 "parser.cc"
     break;
 
   case 9: // term: function
-#line 179 "parser.yy"
+#line 199 "parser.yy"
            { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
 #line 1171 "parser.cc"
     break;
 
   case 10: // term: boolean
-#line 180 "parser.yy"
+#line 200 "parser.yy"
           { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
 #line 1177 "parser.cc"
     break;
 
   case 11: // term: "(" term ")"
-#line 181 "parser.yy"
+#line 201 "parser.yy"
                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[1].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
 #line 1183 "parser.cc"
     break;
 
   case 12: // term: "identifier"
-#line 182 "parser.yy"
-             { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = builder.MakeRefNode(std::move(yystack_[0].value.as < std::string > ())); }
-#line 1189 "parser.cc"
+#line 202 "parser.yy"
+             { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(builder.MakeRefNode(std::move(yystack_[0].value.as < std::string > ()),
+                                                        static_cast<int>(yylhs.location.begin.line), static_cast<int>(yylhs.location.begin.column),
+                                                        static_cast<int>(yylhs.location.end.line), static_cast<int>(yylhs.location.end.column)), yylhs.location, builder.GetSourceCode()); }
+#line 1191 "parser.cc"
     break;
 
   case 13: // term: "entry_arg"
-#line 183 "parser.yy"
-            { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::unique_ptr<jitfusion::ExecNode>(new jitfusion::EntryArgumentNode); }
-#line 1195 "parser.cc"
+#line 205 "parser.yy"
+            { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::unique_ptr<jitfusion::EntryArgumentNode>(new jitfusion::EntryArgumentNode), yylhs.location, builder.GetSourceCode()); }
+#line 1197 "parser.cc"
     break;
 
   case 14: // term: "exec_ctx"
-#line 184 "parser.yy"
-           { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::unique_ptr<jitfusion::ExecNode>(new jitfusion::ExecContextNode); }
-#line 1201 "parser.cc"
+#line 206 "parser.yy"
+           { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::unique_ptr<jitfusion::ExecContextNode>(new jitfusion::ExecContextNode), yylhs.location, builder.GetSourceCode()); }
+#line 1203 "parser.cc"
     break;
 
   case 15: // term: "output"
-#line 185 "parser.yy"
-         { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::unique_ptr<jitfusion::ExecNode>(new jitfusion::OutputNode); }
-#line 1207 "parser.cc"
+#line 207 "parser.yy"
+         { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::unique_ptr<jitfusion::OutputNode>(new jitfusion::OutputNode), yylhs.location, builder.GetSourceCode()); }
+#line 1209 "parser.cc"
     break;
 
   case 16: // literal: "int8"
-#line 189 "parser.yy"
-     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < int8_t > ()); }
-#line 1213 "parser.cc"
+#line 211 "parser.yy"
+     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < int8_t > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1215 "parser.cc"
     break;
 
   case 17: // literal: "int16"
-#line 190 "parser.yy"
-      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < int16_t > ()); }
-#line 1219 "parser.cc"
+#line 212 "parser.yy"
+      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < int16_t > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1221 "parser.cc"
     break;
 
   case 18: // literal: "int32"
-#line 191 "parser.yy"
-      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < int32_t > ()); }
-#line 1225 "parser.cc"
+#line 213 "parser.yy"
+      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < int32_t > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1227 "parser.cc"
     break;
 
   case 19: // literal: "int64"
-#line 192 "parser.yy"
-      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < int64_t > ()); }
-#line 1231 "parser.cc"
+#line 214 "parser.yy"
+      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < int64_t > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1233 "parser.cc"
     break;
 
   case 20: // literal: "uint8"
-#line 193 "parser.yy"
-     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < uint8_t > ()); }
-#line 1237 "parser.cc"
+#line 215 "parser.yy"
+     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < uint8_t > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1239 "parser.cc"
     break;
 
   case 21: // literal: "uint16"
-#line 194 "parser.yy"
-      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < uint16_t > ()); }
-#line 1243 "parser.cc"
+#line 216 "parser.yy"
+      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < uint16_t > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1245 "parser.cc"
     break;
 
   case 22: // literal: "uint32"
-#line 195 "parser.yy"
-      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < uint32_t > ()); }
-#line 1249 "parser.cc"
+#line 217 "parser.yy"
+      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < uint32_t > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1251 "parser.cc"
     break;
 
   case 23: // literal: "uint64"
-#line 196 "parser.yy"
-      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < uint64_t > ()); }
-#line 1255 "parser.cc"
+#line 218 "parser.yy"
+      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < uint64_t > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1257 "parser.cc"
     break;
 
   case 24: // literal: "float"
-#line 197 "parser.yy"
-      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < float > ()); }
-#line 1261 "parser.cc"
+#line 219 "parser.yy"
+      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < float > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1263 "parser.cc"
     break;
 
   case 25: // literal: "double"
-#line 198 "parser.yy"
-      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < double > ()); }
-#line 1267 "parser.cc"
+#line 220 "parser.yy"
+      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < double > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1269 "parser.cc"
     break;
 
   case 26: // literal: "string"
-#line 199 "parser.yy"
-         { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < std::string > ()); }
-#line 1273 "parser.cc"
+#line 221 "parser.yy"
+         { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantValueNode>(yystack_[0].value.as < std::string > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1275 "parser.cc"
     break;
 
   case 27: // literal: list
-#line 200 "parser.yy"
+#line 222 "parser.yy"
        { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
-#line 1279 "parser.cc"
+#line 1281 "parser.cc"
     break;
 
   case 28: // literal: "true"
-#line 201 "parser.yy"
-         { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(uint8_t(1)); }
-#line 1285 "parser.cc"
+#line 223 "parser.yy"
+         { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantValueNode>(uint8_t(1)), yylhs.location, builder.GetSourceCode()); }
+#line 1287 "parser.cc"
     break;
 
   case 29: // literal: "false"
-#line 202 "parser.yy"
-          { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantValueNode>(uint8_t(0)); }
-#line 1291 "parser.cc"
+#line 224 "parser.yy"
+          { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantValueNode>(uint8_t(0)), yylhs.location, builder.GetSourceCode()); }
+#line 1293 "parser.cc"
     break;
 
   case 30: // list: "[" i8_list "]"
-#line 206 "parser.yy"
-                  { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<int8_t> > ()); }
-#line 1297 "parser.cc"
+#line 228 "parser.yy"
+                  { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<int8_t> > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1299 "parser.cc"
     break;
 
   case 31: // list: "[" i16_list "]"
-#line 207 "parser.yy"
-                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<int16_t> > ()); }
-#line 1303 "parser.cc"
+#line 229 "parser.yy"
+                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<int16_t> > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1305 "parser.cc"
     break;
 
   case 32: // list: "[" i32_list "]"
-#line 208 "parser.yy"
-                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<int32_t> > ()); }
-#line 1309 "parser.cc"
+#line 230 "parser.yy"
+                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<int32_t> > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1311 "parser.cc"
     break;
 
   case 33: // list: "[" i64_list "]"
-#line 209 "parser.yy"
-                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<int64_t> > ()); }
-#line 1315 "parser.cc"
+#line 231 "parser.yy"
+                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<int64_t> > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1317 "parser.cc"
     break;
 
   case 34: // list: "[" u8_list "]"
-#line 210 "parser.yy"
-                  { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<uint8_t> > ()); }
-#line 1321 "parser.cc"
+#line 232 "parser.yy"
+                  { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<uint8_t> > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1323 "parser.cc"
     break;
 
   case 35: // list: "[" u16_list "]"
-#line 211 "parser.yy"
-                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<uint16_t> > ()); }
-#line 1327 "parser.cc"
+#line 233 "parser.yy"
+                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<uint16_t> > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1329 "parser.cc"
     break;
 
   case 36: // list: "[" u32_list "]"
-#line 212 "parser.yy"
-                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<uint32_t> > ()); }
-#line 1333 "parser.cc"
+#line 234 "parser.yy"
+                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<uint32_t> > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1335 "parser.cc"
     break;
 
   case 37: // list: "[" u64_list "]"
-#line 213 "parser.yy"
-                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<uint64_t> > ()); }
-#line 1339 "parser.cc"
+#line 235 "parser.yy"
+                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<uint64_t> > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1341 "parser.cc"
     break;
 
   case 38: // list: "[" f32_list "]"
-#line 214 "parser.yy"
-                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<float> > ()); }
-#line 1345 "parser.cc"
+#line 236 "parser.yy"
+                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<float> > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1347 "parser.cc"
     break;
 
   case 39: // list: "[" f64_list "]"
-#line 215 "parser.yy"
-                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<double> > ()); }
-#line 1351 "parser.cc"
+#line 237 "parser.yy"
+                   { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<double> > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1353 "parser.cc"
     break;
 
   case 40: // list: "[" string_list "]"
-#line 216 "parser.yy"
-                      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<std::string> > ()); }
-#line 1357 "parser.cc"
+#line 238 "parser.yy"
+                      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::ConstantListValueNode>(yystack_[1].value.as < std::vector<std::string> > ()), yylhs.location, builder.GetSourceCode()); }
+#line 1359 "parser.cc"
     break;
 
   case 41: // i8_list: "int8"
-#line 220 "parser.yy"
+#line 242 "parser.yy"
      { yylhs.value.as < std::vector<int8_t> > () = std::vector<int8_t>{yystack_[0].value.as < int8_t > ()}; }
-#line 1363 "parser.cc"
+#line 1365 "parser.cc"
     break;
 
   case 42: // i8_list: i8_list "," "int8"
-#line 221 "parser.yy"
+#line 243 "parser.yy"
                  {
   yystack_[2].value.as < std::vector<int8_t> > ().emplace_back(std::move(yystack_[0].value.as < int8_t > ()));
   yylhs.value.as < std::vector<int8_t> > () = std::move(yystack_[2].value.as < std::vector<int8_t> > ());
 }
-#line 1372 "parser.cc"
+#line 1374 "parser.cc"
     break;
 
   case 43: // i16_list: "int16"
-#line 228 "parser.yy"
+#line 250 "parser.yy"
       { yylhs.value.as < std::vector<int16_t> > () = std::vector<int16_t>{yystack_[0].value.as < int16_t > ()}; }
-#line 1378 "parser.cc"
+#line 1380 "parser.cc"
     break;
 
   case 44: // i16_list: i16_list "," "int16"
-#line 229 "parser.yy"
+#line 251 "parser.yy"
                    {
   yystack_[2].value.as < std::vector<int16_t> > ().emplace_back(std::move(yystack_[0].value.as < int16_t > ()));
   yylhs.value.as < std::vector<int16_t> > () = std::move(yystack_[2].value.as < std::vector<int16_t> > ());
 }
-#line 1387 "parser.cc"
+#line 1389 "parser.cc"
     break;
 
   case 45: // i32_list: "int32"
-#line 236 "parser.yy"
+#line 258 "parser.yy"
       { yylhs.value.as < std::vector<int32_t> > () = std::vector<int32_t>{yystack_[0].value.as < int32_t > ()}; }
-#line 1393 "parser.cc"
+#line 1395 "parser.cc"
     break;
 
   case 46: // i32_list: i32_list "," "int32"
-#line 237 "parser.yy"
+#line 259 "parser.yy"
                    {
   yystack_[2].value.as < std::vector<int32_t> > ().emplace_back(std::move(yystack_[0].value.as < int32_t > ()));
   yylhs.value.as < std::vector<int32_t> > () = std::move(yystack_[2].value.as < std::vector<int32_t> > ());
 }
-#line 1402 "parser.cc"
+#line 1404 "parser.cc"
     break;
 
   case 47: // i64_list: "int64"
-#line 244 "parser.yy"
+#line 266 "parser.yy"
       { yylhs.value.as < std::vector<int64_t> > () = std::vector<int64_t>{yystack_[0].value.as < int64_t > ()}; }
-#line 1408 "parser.cc"
+#line 1410 "parser.cc"
     break;
 
   case 48: // i64_list: i64_list "," "int64"
-#line 245 "parser.yy"
+#line 267 "parser.yy"
                    {
   yystack_[2].value.as < std::vector<int64_t> > ().emplace_back(std::move(yystack_[0].value.as < int64_t > ()));
   yylhs.value.as < std::vector<int64_t> > () = std::move(yystack_[2].value.as < std::vector<int64_t> > ());
 }
-#line 1417 "parser.cc"
+#line 1419 "parser.cc"
     break;
 
   case 49: // u8_list: "uint8"
-#line 252 "parser.yy"
+#line 274 "parser.yy"
      { yylhs.value.as < std::vector<uint8_t> > () = std::vector<uint8_t>{yystack_[0].value.as < uint8_t > ()}; }
-#line 1423 "parser.cc"
+#line 1425 "parser.cc"
     break;
 
   case 50: // u8_list: u8_list "," "uint8"
-#line 253 "parser.yy"
+#line 275 "parser.yy"
                  {
   yystack_[2].value.as < std::vector<uint8_t> > ().emplace_back(std::move(yystack_[0].value.as < uint8_t > ()));
   yylhs.value.as < std::vector<uint8_t> > () = std::move(yystack_[2].value.as < std::vector<uint8_t> > ());
 }
-#line 1432 "parser.cc"
+#line 1434 "parser.cc"
     break;
 
   case 51: // u16_list: "uint16"
-#line 260 "parser.yy"
+#line 282 "parser.yy"
       { yylhs.value.as < std::vector<uint16_t> > () = std::vector<uint16_t>{yystack_[0].value.as < uint16_t > ()}; }
-#line 1438 "parser.cc"
+#line 1440 "parser.cc"
     break;
 
   case 52: // u16_list: u16_list "," "uint16"
-#line 261 "parser.yy"
+#line 283 "parser.yy"
                    {
   yystack_[2].value.as < std::vector<uint16_t> > ().emplace_back(std::move(yystack_[0].value.as < uint16_t > ()));
   yylhs.value.as < std::vector<uint16_t> > () = std::move(yystack_[2].value.as < std::vector<uint16_t> > ());
 }
-#line 1447 "parser.cc"
+#line 1449 "parser.cc"
     break;
 
   case 53: // u32_list: "uint32"
-#line 268 "parser.yy"
+#line 290 "parser.yy"
       { yylhs.value.as < std::vector<uint32_t> > () = std::vector<uint32_t>{yystack_[0].value.as < uint32_t > ()}; }
-#line 1453 "parser.cc"
+#line 1455 "parser.cc"
     break;
 
   case 54: // u32_list: u32_list "," "uint32"
-#line 269 "parser.yy"
+#line 291 "parser.yy"
                    {
   yystack_[2].value.as < std::vector<uint32_t> > ().emplace_back(std::move(yystack_[0].value.as < uint32_t > ()));
   yylhs.value.as < std::vector<uint32_t> > () = std::move(yystack_[2].value.as < std::vector<uint32_t> > ());
 }
-#line 1462 "parser.cc"
+#line 1464 "parser.cc"
     break;
 
   case 55: // u64_list: "uint64"
-#line 276 "parser.yy"
+#line 298 "parser.yy"
       { yylhs.value.as < std::vector<uint64_t> > () = std::vector<uint64_t>{yystack_[0].value.as < uint64_t > ()}; }
-#line 1468 "parser.cc"
+#line 1470 "parser.cc"
     break;
 
   case 56: // u64_list: u64_list "," "uint64"
-#line 277 "parser.yy"
+#line 299 "parser.yy"
                    {
   yystack_[2].value.as < std::vector<uint64_t> > ().emplace_back(std::move(yystack_[0].value.as < uint64_t > ()));
   yylhs.value.as < std::vector<uint64_t> > () = std::move(yystack_[2].value.as < std::vector<uint64_t> > ());
 }
-#line 1477 "parser.cc"
+#line 1479 "parser.cc"
     break;
 
   case 57: // f32_list: "float"
-#line 284 "parser.yy"
+#line 306 "parser.yy"
       { yylhs.value.as < std::vector<float> > () = std::vector<float>{yystack_[0].value.as < float > ()}; }
-#line 1483 "parser.cc"
+#line 1485 "parser.cc"
     break;
 
   case 58: // f32_list: f32_list "," "float"
-#line 285 "parser.yy"
+#line 307 "parser.yy"
                    {
   yystack_[2].value.as < std::vector<float> > ().emplace_back(std::move(yystack_[0].value.as < float > ()));
   yylhs.value.as < std::vector<float> > () = std::move(yystack_[2].value.as < std::vector<float> > ());
 }
-#line 1492 "parser.cc"
+#line 1494 "parser.cc"
     break;
 
   case 59: // f64_list: "double"
-#line 292 "parser.yy"
+#line 314 "parser.yy"
       { yylhs.value.as < std::vector<double> > () = std::vector<double>{yystack_[0].value.as < double > ()}; }
-#line 1498 "parser.cc"
+#line 1500 "parser.cc"
     break;
 
   case 60: // f64_list: f64_list "," "double"
-#line 293 "parser.yy"
+#line 315 "parser.yy"
                    {
   yystack_[2].value.as < std::vector<double> > ().emplace_back(std::move(yystack_[0].value.as < double > ()));
   yylhs.value.as < std::vector<double> > () = std::move(yystack_[2].value.as < std::vector<double> > ());
 }
-#line 1507 "parser.cc"
+#line 1509 "parser.cc"
     break;
 
   case 61: // string_list: "string"
-#line 300 "parser.yy"
+#line 322 "parser.yy"
          { yylhs.value.as < std::vector<std::string> > () = std::vector<std::string>{yystack_[0].value.as < std::string > ()}; }
-#line 1513 "parser.cc"
+#line 1515 "parser.cc"
     break;
 
   case 62: // string_list: string_list "," "string"
-#line 301 "parser.yy"
+#line 323 "parser.yy"
                          {
   yystack_[2].value.as < std::vector<std::string> > ().emplace_back(std::move(yystack_[0].value.as < std::string > ()));
   yylhs.value.as < std::vector<std::string> > () = std::move(yystack_[2].value.as < std::vector<std::string> > ());
 }
-#line 1522 "parser.cc"
+#line 1524 "parser.cc"
     break;
 
   case 63: // function: infix_function
-#line 308 "parser.yy"
+#line 330 "parser.yy"
                  { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
-#line 1528 "parser.cc"
+#line 1530 "parser.cc"
     break;
 
   case 64: // function: named_function
-#line 309 "parser.yy"
+#line 331 "parser.yy"
                  { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
-#line 1534 "parser.cc"
+#line 1536 "parser.cc"
     break;
 
   case 65: // infix_function: "-" term
-#line 314 "parser.yy"
-                     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kMinus, std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1540 "parser.cc"
+#line 336 "parser.yy"
+                     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kMinus, std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1542 "parser.cc"
     break;
 
   case 66: // infix_function: "not" term
-#line 315 "parser.yy"
-                       { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kNot, std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1546 "parser.cc"
+#line 337 "parser.yy"
+                       { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kNot, std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1548 "parser.cc"
     break;
 
   case 67: // infix_function: "+" term
-#line 316 "parser.yy"
-                     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kPlus, std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1552 "parser.cc"
+#line 338 "parser.yy"
+                     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kPlus, std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1554 "parser.cc"
     break;
 
   case 68: // infix_function: "~" term
-#line 317 "parser.yy"
-                     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kBitwiseNot, std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1558 "parser.cc"
+#line 339 "parser.yy"
+                     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::UnaryOPNode>(jitfusion::UnaryOPType::kBitwiseNot, std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1560 "parser.cc"
     break;
 
   case 69: // infix_function: term "+" term
-#line 318 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kAdd, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1564 "parser.cc"
+#line 340 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kAdd, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1566 "parser.cc"
     break;
 
   case 70: // infix_function: term "-" term
-#line 319 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kSub, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1570 "parser.cc"
+#line 341 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kSub, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1572 "parser.cc"
     break;
 
   case 71: // infix_function: term "*" term
-#line 320 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kMul, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1576 "parser.cc"
+#line 342 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kMul, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1578 "parser.cc"
     break;
 
   case 72: // infix_function: term "/" term
-#line 321 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kDiv, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1582 "parser.cc"
+#line 343 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kDiv, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1584 "parser.cc"
     break;
 
   case 73: // infix_function: term "%" term
-#line 322 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kMod, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1588 "parser.cc"
+#line 344 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kMod, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1590 "parser.cc"
     break;
 
   case 74: // infix_function: term "&" term
-#line 323 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseAnd, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1594 "parser.cc"
+#line 345 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseAnd, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1596 "parser.cc"
     break;
 
   case 75: // infix_function: term "|" term
-#line 324 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseOr, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1600 "parser.cc"
+#line 346 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseOr, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1602 "parser.cc"
     break;
 
   case 76: // infix_function: term "^" term
-#line 325 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseXor, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1606 "parser.cc"
+#line 347 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseXor, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1608 "parser.cc"
     break;
 
   case 77: // infix_function: term "==" term
-#line 326 "parser.yy"
-                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kEqual, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1612 "parser.cc"
+#line 348 "parser.yy"
+                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kEqual, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1614 "parser.cc"
     break;
 
   case 78: // infix_function: term "!=" term
-#line 327 "parser.yy"
-                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kNotEqual, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1618 "parser.cc"
+#line 349 "parser.yy"
+                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kNotEqual, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1620 "parser.cc"
     break;
 
   case 79: // infix_function: term ">" term
-#line 328 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLarge, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1624 "parser.cc"
+#line 350 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLarge, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1626 "parser.cc"
     break;
 
   case 80: // infix_function: term ">=" term
-#line 329 "parser.yy"
-                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLargeEqual, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1630 "parser.cc"
+#line 351 "parser.yy"
+                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLargeEqual, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1632 "parser.cc"
     break;
 
   case 81: // infix_function: term "<" term
-#line 330 "parser.yy"
-                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLess, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1636 "parser.cc"
+#line 352 "parser.yy"
+                { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLess, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1638 "parser.cc"
     break;
 
   case 82: // infix_function: term "<=" term
-#line 331 "parser.yy"
-                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLessEqual, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1642 "parser.cc"
+#line 353 "parser.yy"
+                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kLessEqual, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1644 "parser.cc"
     break;
 
   case 83: // infix_function: term "<<" term
-#line 332 "parser.yy"
-                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseShiftLeft, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1648 "parser.cc"
+#line 354 "parser.yy"
+                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseShiftLeft, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1650 "parser.cc"
     break;
 
   case 84: // infix_function: term ">>" term
-#line 333 "parser.yy"
-                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseShiftRight, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1654 "parser.cc"
+#line 355 "parser.yy"
+                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kBitwiseShiftRight, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1656 "parser.cc"
     break;
 
   case 85: // named_function: "if" "(" args ")"
-#line 337 "parser.yy"
-                    { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::IfNode>(std::move(yystack_[1].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ())); }
-#line 1660 "parser.cc"
+#line 359 "parser.yy"
+                    { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::IfNode>(std::move(yystack_[1].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1662 "parser.cc"
     break;
 
   case 86: // named_function: "identifier" "(" args ")"
-#line 338 "parser.yy"
-                           { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::FunctionNode>(std::move(yystack_[3].value.as < std::string > ()), std::move(yystack_[1].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ())); }
-#line 1666 "parser.cc"
+#line 360 "parser.yy"
+                           { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::FunctionNode>(std::move(yystack_[3].value.as < std::string > ()), std::move(yystack_[1].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1668 "parser.cc"
     break;
 
   case 87: // named_function: "identifier" "(" ")"
-#line 339 "parser.yy"
-                      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::FunctionNode>(std::move(yystack_[2].value.as < std::string > ()), std::vector<std::unique_ptr<ExecNode>>{});}
-#line 1672 "parser.cc"
+#line 361 "parser.yy"
+                      { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::FunctionNode>(std::move(yystack_[2].value.as < std::string > ()), std::vector<std::unique_ptr<ExecNode>>{}), yylhs.location, builder.GetSourceCode());}
+#line 1674 "parser.cc"
     break;
 
   case 88: // named_function: term "in" term
-#line 340 "parser.yy"
+#line 362 "parser.yy"
                  {
-    yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::FunctionNode>("in", std::vector<std::unique_ptr<jitfusion::ExecNode>>());
-    static_cast<jitfusion::FunctionNode *>(yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > ().get())->AppendArgs(std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
-    static_cast<jitfusion::FunctionNode *>(yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > ().get())->AppendArgs(std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
+    auto node = std::make_unique<jitfusion::FunctionNode>("in", std::vector<std::unique_ptr<jitfusion::ExecNode>>());
+    node->AppendArgs(std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
+    node->AppendArgs(std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
+    yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::move(node), yylhs.location, builder.GetSourceCode());
 }
-#line 1682 "parser.cc"
+#line 1685 "parser.cc"
     break;
 
   case 89: // named_function: "switch" "(" args ")"
-#line 345 "parser.yy"
-                        { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::SwitchNode>(std::move(yystack_[1].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ())); }
-#line 1688 "parser.cc"
+#line 368 "parser.yy"
+                        { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::SwitchNode>(std::move(yystack_[1].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1691 "parser.cc"
     break;
 
   case 90: // when_block: "when" expr "{" block "}" elif_chain
-#line 349 "parser.yy"
+#line 372 "parser.yy"
                                        {
     if (builder.IsExpressionMode()) {
       error(yystack_[5].location, "when block is not allowed in expression mode");
@@ -1699,86 +1702,86 @@ namespace athena {
     args.emplace_back(std::move(yystack_[4].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
     args.emplace_back(std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
     args.insert(args.end(), std::make_move_iterator(yystack_[0].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ().begin()), std::make_move_iterator(yystack_[0].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ().end()));
-    yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::IfBlockNode>(std::move(args));
+    yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::IfBlockNode>(std::move(args)), yylhs.location, builder.GetSourceCode());
   }
-#line 1705 "parser.cc"
+#line 1708 "parser.cc"
     break;
 
   case 91: // elif_chain: %empty
-#line 364 "parser.yy"
+#line 387 "parser.yy"
          { yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > () = std::vector<std::unique_ptr<jitfusion::ExecNode>>{}; }
-#line 1711 "parser.cc"
+#line 1714 "parser.cc"
     break;
 
   case 92: // elif_chain: elif_chain "elif" expr "{" block "}"
-#line 365 "parser.yy"
+#line 388 "parser.yy"
                                        {
     yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > () = std::move(yystack_[5].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ());
     yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ().emplace_back(std::move(yystack_[3].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
     yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ().emplace_back(std::move(yystack_[1].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
   }
-#line 1721 "parser.cc"
+#line 1724 "parser.cc"
     break;
 
   case 93: // elif_chain: elif_chain "else" "{" block "}"
-#line 370 "parser.yy"
+#line 393 "parser.yy"
                                   {
     yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > () = std::move(yystack_[4].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ());
     yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ().emplace_back(std::move(yystack_[1].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
   }
-#line 1730 "parser.cc"
+#line 1733 "parser.cc"
     break;
 
   case 94: // $@1: %empty
-#line 377 "parser.yy"
+#line 400 "parser.yy"
   { builder.EnterBlock(); }
-#line 1736 "parser.cc"
+#line 1739 "parser.cc"
     break;
 
   case 95: // block: $@1 program
-#line 377 "parser.yy"
+#line 400 "parser.yy"
                                     { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = builder.LeaveBlock(); }
-#line 1742 "parser.cc"
+#line 1745 "parser.cc"
     break;
 
   case 96: // args: arg
-#line 381 "parser.yy"
+#line 404 "parser.yy"
       {
     yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > () = std::vector<std::unique_ptr<jitfusion::ExecNode>>{};
     yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ().emplace_back(std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
   }
-#line 1751 "parser.cc"
+#line 1754 "parser.cc"
     break;
 
   case 97: // args: args "," arg
-#line 385 "parser.yy"
+#line 408 "parser.yy"
                {
     yystack_[2].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ().emplace_back(std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()));
     yylhs.value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > () = std::move(yystack_[2].value.as < std::vector<std::unique_ptr<jitfusion::ExecNode>> > ());
   }
-#line 1760 "parser.cc"
+#line 1763 "parser.cc"
     break;
 
   case 98: // arg: term
-#line 392 "parser.yy"
+#line 415 "parser.yy"
        { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ()); }
-#line 1766 "parser.cc"
+#line 1769 "parser.cc"
     break;
 
   case 99: // boolean: term "and" term
-#line 396 "parser.yy"
-                  { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kAnd, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1772 "parser.cc"
+#line 419 "parser.yy"
+                  { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kAnd, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1775 "parser.cc"
     break;
 
   case 100: // boolean: term "or" term
-#line 397 "parser.yy"
-                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kOr, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())); }
-#line 1778 "parser.cc"
+#line 420 "parser.yy"
+                 { yylhs.value.as < std::unique_ptr<jitfusion::ExecNode> > () = WithLoc(std::make_unique<jitfusion::BinaryOPNode>(jitfusion::BinaryOPType::kOr, std::move(yystack_[2].value.as < std::unique_ptr<jitfusion::ExecNode> > ()), std::move(yystack_[0].value.as < std::unique_ptr<jitfusion::ExecNode> > ())), yylhs.location, builder.GetSourceCode()); }
+#line 1781 "parser.cc"
     break;
 
 
-#line 1782 "parser.cc"
+#line 1785 "parser.cc"
 
             default:
               break;
@@ -2467,17 +2470,17 @@ namespace athena {
   const short
   Parser::yyrline_[] =
   {
-       0,   160,   160,   164,   170,   171,   172,   174,   178,   179,
-     180,   181,   182,   183,   184,   185,   189,   190,   191,   192,
-     193,   194,   195,   196,   197,   198,   199,   200,   201,   202,
-     206,   207,   208,   209,   210,   211,   212,   213,   214,   215,
-     216,   220,   221,   228,   229,   236,   237,   244,   245,   252,
-     253,   260,   261,   268,   269,   276,   277,   284,   285,   292,
-     293,   300,   301,   308,   309,   314,   315,   316,   317,   318,
-     319,   320,   321,   322,   323,   324,   325,   326,   327,   328,
-     329,   330,   331,   332,   333,   337,   338,   339,   340,   345,
-     349,   364,   365,   370,   377,   377,   381,   385,   392,   396,
-     397
+       0,   180,   180,   184,   190,   191,   192,   194,   198,   199,
+     200,   201,   202,   205,   206,   207,   211,   212,   213,   214,
+     215,   216,   217,   218,   219,   220,   221,   222,   223,   224,
+     228,   229,   230,   231,   232,   233,   234,   235,   236,   237,
+     238,   242,   243,   250,   251,   258,   259,   266,   267,   274,
+     275,   282,   283,   290,   291,   298,   299,   306,   307,   314,
+     315,   322,   323,   330,   331,   336,   337,   338,   339,   340,
+     341,   342,   343,   344,   345,   346,   347,   348,   349,   350,
+     351,   352,   353,   354,   355,   359,   360,   361,   362,   368,
+     372,   387,   388,   393,   400,   400,   404,   408,   415,   419,
+     420
   };
 
   void
@@ -2510,9 +2513,9 @@ namespace athena {
 
 #line 10 "parser.yy"
 } // athena
-#line 2514 "parser.cc"
+#line 2517 "parser.cc"
 
-#line 399 "parser.yy"
+#line 422 "parser.yy"
 
 
 void athena::Parser::error(const location_type &l, const std::string &m) {

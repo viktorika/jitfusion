@@ -401,7 +401,7 @@ TEST(LogicalOpTest, StringAndReject) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto st = athena.Compile(R"(r = "hello" and "world";)", func_registry);
   EXPECT_FALSE(st.ok());
-  EXPECT_NE(st.ToString().find("Logical operator only supports numeric types"), std::string::npos);
+  EXPECT_NE(st.ToString().find("logical operator requires numeric operands"), std::string::npos);
 }
 
 TEST(LogicalOpTest, StringOrReject) {
@@ -410,5 +410,5 @@ TEST(LogicalOpTest, StringOrReject) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto st = athena.Compile(R"(r = "hello" or "world";)", func_registry);
   EXPECT_FALSE(st.ok());
-  EXPECT_NE(st.ToString().find("Logical operator only supports numeric types"), std::string::npos);
+  EXPECT_NE(st.ToString().find("logical operator requires numeric operands"), std::string::npos);
 }

@@ -7,6 +7,7 @@
 #pragma once
 
 #include <memory>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 #include "exec_node.h"
@@ -39,7 +40,9 @@ class ProgramAstBuilder {
   Status BuildExpression(const std::string& code, std::unique_ptr<ExecNode>* result);
   Status BuildPipeline(const std::string& code, std::unique_ptr<ExecNode>* result);
 
-  std::unique_ptr<ExecNode> MakeRefNode(const std::string& var_name);
+  std::unique_ptr<ExecNode> MakeRefNode(const std::string& var_name, int begin_line, int begin_col, int end_line,
+                                        int end_col);
+
   void AddStatement(Statement statement);
 
   void EnterBlock();
@@ -48,6 +51,8 @@ class ProgramAstBuilder {
   [[nodiscard]] bool IsExpressionMode() const { return build_mode_ == BuildMode::kExpression; }
 
   location& GetLocation() { return location_; }
+
+  [[nodiscard]] std::string_view GetSourceCode() const { return source_code_; }
 
  private:
   enum class BuildMode : uint8_t { kExpression, kPipeline };
@@ -58,6 +63,7 @@ class ProgramAstBuilder {
   std::unordered_map<std::string, uint32_t> var2index_;
   std::string parser_error_message_;
   std::string custom_error_message_;
+  std::string_view source_code_;
   location location_;
   BuildMode build_mode_{BuildMode::kExpression};
 

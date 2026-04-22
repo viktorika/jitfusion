@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 #include "arena.h"
 #include "exec_node.h"
@@ -57,6 +58,7 @@ class ExecEngine {
   ExecEngine& operator=(const ExecEngine&) = delete;
 
   Status Compile(const std::unique_ptr<ExecNode>& exec_node, const std::unique_ptr<FunctionRegistry>& func_registry);
+
   // Applicable to scenarios with similar expressions, a result is returned through the root node.
   // If you need to optimize the memory allocation issue of ExecContext, you can use the function passed to ExecContext.
   Status Execute(void* entry_arguments, RetType* result);
