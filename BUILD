@@ -107,3 +107,24 @@ cc_test(
         "-lgtest_main",
     ],
 )
+
+cc_binary(
+    name = "engine_benchmark",
+    srcs = ["benchmark/engine_benchmark.cc"],
+    deps = [
+        ":jitfusion",
+    ],
+    copts = [
+        "-Wall",
+        "-Wextra",
+        "-Wno-float-equal",
+        "-std=c++17",
+        "-O3",
+        "-DNDEBUG",
+        "-ftree-vectorize",
+    ],
+    linkopts = [
+        "-lbenchmark",
+        "-lpthread",
+    ],
+)
