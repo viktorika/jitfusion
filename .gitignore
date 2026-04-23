@@ -6,14 +6,3 @@ compile_commands.json
 MODULE.bazel.lock
 /CMakeBuild
 .bazelrc
-
-# CMake local build dirs & artifacts
-/build
-/build_*
-CMakeCache.txt
-CMakeFiles/
-cmake_install.cmake
-Makefile
-*.o
-*.o.d
-*.a
