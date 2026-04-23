@@ -81,10 +81,13 @@ target_link_libraries(jitfusion ${LLVM_LIBS})
 
 file(GLOB_RECURSE JITFUSION_TEST_SRC "test/*.cc")
 
-find_package(GTest REQUIRED)
+option(BUILD_TEST "Build unit tests (requires GTest)" ON)
+if(BUILD_TEST)
+    find_package(GTest REQUIRED)
 
-add_executable(jitfusion_test ${JITFUSION_TEST_SRC})
-target_link_libraries(jitfusion_test jitfusion GTest::GTest GTest::Main)
+    add_executable(jitfusion_test ${JITFUSION_TEST_SRC})
+    target_link_libraries(jitfusion_test jitfusion GTest::GTest GTest::Main)
+endif()
 
 file(GLOB_RECURSE ATHENA_SRC 
     "athena/athena.cc"
@@ -106,9 +109,11 @@ target_link_libraries(athena jitfusion)
 
 file(GLOB_RECURSE ATHENA_TEST_SRC "athena/test/*.cc")
 
-add_executable(athena_test ${ATHENA_TEST_SRC})
-target_include_directories(athena_test PRIVATE athena/test)
-target_link_libraries(athena_test athena GTest::GTest GTest::Main)
+if(BUILD_TEST)
+    add_executable(athena_test ${ATHENA_TEST_SRC})
+    target_include_directories(athena_test PRIVATE athena/test)
+    target_link_libraries(athena_test athena GTest::GTest GTest::Main)
+endif()
 
 option(BUILD_BENCHMARK "Build google-benchmark based micro benchmarks" OFF)
 if(BUILD_BENCHMARK)
