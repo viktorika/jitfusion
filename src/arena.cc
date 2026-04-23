@@ -6,24 +6,64 @@
  */
 #include "arena.h"
 
+#include <cassert>
+#include <cstddef>
+#include <cstdlib>
+
 namespace jitfusion {
 
-uint8_t* Arena::Allocate(int64_t size) {
-  if (avail_bytes_ < size) {
-    auto status = AllocateChunk(std::max(size, min_chunk_size_));
+uint8_t* Arena::Allocate(size_t size, size_t alignment) {
+  // Zero-sized allocation is not a meaningful request and is disallowed:
+  // the returned pointer could not be dereferenced safely anyway, and
+  // callers asking for 0 bytes almost always indicate a bug at the call
+  // site (e.g. forgetting to special-case an empty list/string). Rejecting
+  // it here with an assert surfaces such bugs loudly in debug builds.
+  assert(size > 0 && "Arena::Allocate called with size == 0");
+  // Alignment must be a power of two and non-zero.
+  assert(alignment > 0 && (alignment & (alignment - 1)) == 0);
+
+  // Compute the padding needed to align avail_buf_ up to `alignment`.
+  // Using the classic `(-addr) & mask` trick: when addr is already
+  // aligned the result is 0, otherwise it equals `alignment - (addr & mask)`.
+  // Works correctly even when avail_buf_ is nullptr (no chunk yet),
+  // because in that case avail_bytes_ is 0 and we will fall into
+  // AllocateChunk below, whose returned chunk is guaranteed to be
+  // aligned to alignof(std::max_align_t) (>= 8) by operator new[].
+  const auto mask = static_cast<uintptr_t>(alignment) - 1;
+  auto addr = reinterpret_cast<uintptr_t>(avail_buf_);
+  auto padding = static_cast<size_t>((-addr) & mask);
+
+  if (avail_bytes_ < size + padding) {
+    // New chunk base address from operator new[] is max_align_t aligned,
+    // which covers alignment values up to alignof(std::max_align_t).
+    // For users requesting stricter alignment than max_align_t, we
+    // over-allocate so that we can still align within the chunk.
+    size_t chunk_size = std::max(size + alignment - 1, min_chunk_size_);
+    auto status = AllocateChunk(chunk_size);
     if (!status.ok()) {
       return nullptr;
     }
+    // Recompute padding against the fresh chunk.
+    addr = reinterpret_cast<uintptr_t>(avail_buf_);
+    padding = static_cast<size_t>((-addr) & mask);
   }
 
-  uint8_t* ret = avail_buf_;
-  avail_buf_ += size;
-  avail_bytes_ -= size;
+  uint8_t* ret = avail_buf_ + padding;
+  avail_buf_ += size + padding;
+  avail_bytes_ -= size + padding;
   return ret;
 }
 
-Status Arena::Allocate(uint8_t** buf, int64_t size) {
-  auto* tmp = new uint8_t[size];
+Status Arena::Allocate(uint8_t** buf, size_t size) {
+  // Use std::malloc for raw byte buffer allocation. This matches the
+  // "untyped bytes that will be interpreted by the caller" semantics of
+  // Arena better than `new uint8_t[]`, and unlike `new` it reports
+  // allocation failure via nullptr return instead of throwing, which fits
+  // the non-throwing failure-propagation style used across this codebase.
+  // Alignment: C standard guarantees malloc returns memory aligned to
+  // alignof(std::max_align_t), same as operator new[], so chunk base
+  // addresses are still suitable for all scalar types used here.
+  auto* tmp = static_cast<uint8_t*>(malloc(size));
   if (tmp == nullptr) {
     return Status::RuntimeError("failure to allocate");
   }
@@ -31,16 +71,17 @@ Status Arena::Allocate(uint8_t** buf, int64_t size) {
   return Status::OK();
 }
 
-Status Arena::Free(const uint8_t* buf) {
-  if (buf == nullptr) {
-    return Status::RuntimeError("failure to allocate");
-  }
-  delete[] buf;
-  buf = nullptr;
-  return Status::OK();
+void Arena::Free(uint8_t* buf) {
+  // Free is a private helper only invoked on buffers previously obtained
+  // from the internal Allocate(uint8_t**, size_t). A null pointer here
+  // means an internal invariant has been violated (e.g. a Chunk with a
+  // null buf_ slipped into chunks_), which is a programming bug worth
+  // catching loudly rather than silently papering over.
+  assert(buf != nullptr && "Arena::Free called with nullptr (internal invariant violated)");
+  free(buf);
 }
 
-Status Arena::AllocateChunk(int64_t size) {
+Status Arena::AllocateChunk(size_t size) {
   uint8_t* out;
 
   auto status = Allocate(&out, size);
@@ -81,7 +122,7 @@ void Arena::ReleaseChunks(bool retain_first) {
       retain_first = false;
       continue;
     }
-    (void)Free(chunk.buf_);
+    Free(chunk.buf_);
   }
 }
 
