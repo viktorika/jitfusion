@@ -8,6 +8,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 
 namespace jitfusion {
@@ -28,16 +29,25 @@ uint8_t* Arena::Allocate(size_t size, size_t alignment) {
   // Works correctly even when avail_buf_ is nullptr (no chunk yet),
   // because in that case avail_bytes_ is 0 and we will fall into
   // AllocateChunk below, whose returned chunk is guaranteed to be
-  // aligned to alignof(std::max_align_t) (>= 8) by operator new[].
+  // aligned to alignof(std::max_align_t) (>= 8) by malloc().
   const auto mask = static_cast<uintptr_t>(alignment) - 1;
   auto addr = reinterpret_cast<uintptr_t>(avail_buf_);
   auto padding = static_cast<size_t>((-addr) & mask);
 
+  // Guard against pathological sizes that would wrap size_t when combined
+  // with padding or alignment slack. Real call sites in this codebase only
+  // ever request sizes bounded by row/batch metadata (way below SIZE_MAX),
+  // so hitting either assert means a bug at the caller rather than a
+  // recoverable runtime condition — fail loudly in debug, zero cost in
+  // release.
+  assert(size <= SIZE_MAX - padding && "Arena::Allocate size + padding overflows");
+
   if (avail_bytes_ < size + padding) {
-    // New chunk base address from operator new[] is max_align_t aligned,
+    // New chunk base address from malloc() is max_align_t aligned,
     // which covers alignment values up to alignof(std::max_align_t).
     // For users requesting stricter alignment than max_align_t, we
     // over-allocate so that we can still align within the chunk.
+    assert(size <= SIZE_MAX - (alignment - 1) && "Arena::Allocate size + alignment overflows");
     size_t chunk_size = std::max(size + alignment - 1, min_chunk_size_);
     auto status = AllocateChunk(chunk_size);
     if (!status.ok()) {
