@@ -44,11 +44,6 @@ Status CodeGen::Visit(FunctionNode& function_node) {
 
       llvm::FunctionCallee call_func_callee = ctx_.module.getOrInsertFunction(sign.ToString(), func_type);
 
-      std::string error_info;
-      llvm::raw_string_ostream error_stream(error_info);
-      if (llvm::verifyFunction(llvm::cast<llvm::Function>(*call_func_callee.getCallee()), &error_stream)) {
-        return Status::RuntimeError("Verify function failed in function_codegen in call_func_callee: " + error_info);
-      }
       if (function_node.GetReturnType() == ValueType::kVoid) {
         ctx_.builder.CreateCall(call_func_callee, args_llvm_value_list);
         value_ = nullptr;
