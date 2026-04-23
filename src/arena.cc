@@ -8,10 +8,17 @@
 
 #include <cassert>
 #include <cstddef>
+#include <cstdlib>
 
 namespace jitfusion {
 
 uint8_t* Arena::Allocate(size_t size, size_t alignment) {
+  // Zero-sized allocation is not a meaningful request and is disallowed:
+  // the returned pointer could not be dereferenced safely anyway, and
+  // callers asking for 0 bytes almost always indicate a bug at the call
+  // site (e.g. forgetting to special-case an empty list/string). Rejecting
+  // it here with an assert surfaces such bugs loudly in debug builds.
+  assert(size > 0 && "Arena::Allocate called with size == 0");
   // Alignment must be a power of two and non-zero.
   assert(alignment > 0 && (alignment & (alignment - 1)) == 0);
 
@@ -48,7 +55,15 @@ uint8_t* Arena::Allocate(size_t size, size_t alignment) {
 }
 
 Status Arena::Allocate(uint8_t** buf, size_t size) {
-  auto* tmp = new uint8_t[size];
+  // Use std::malloc for raw byte buffer allocation. This matches the
+  // "untyped bytes that will be interpreted by the caller" semantics of
+  // Arena better than `new uint8_t[]`, and unlike `new` it reports
+  // allocation failure via nullptr return instead of throwing, which fits
+  // the non-throwing failure-propagation style used across this codebase.
+  // Alignment: C standard guarantees malloc returns memory aligned to
+  // alignof(std::max_align_t), same as operator new[], so chunk base
+  // addresses are still suitable for all scalar types used here.
+  auto* tmp = static_cast<uint8_t*>(malloc(size));
   if (tmp == nullptr) {
     return Status::RuntimeError("failure to allocate");
   }
@@ -56,13 +71,14 @@ Status Arena::Allocate(uint8_t** buf, size_t size) {
   return Status::OK();
 }
 
-Status Arena::Free(const uint8_t* buf) {
-  if (buf == nullptr) {
-    return Status::RuntimeError("failure to allocate");
-  }
-  delete[] buf;
-  buf = nullptr;
-  return Status::OK();
+void Arena::Free(uint8_t* buf) {
+  // Free is a private helper only invoked on buffers previously obtained
+  // from the internal Allocate(uint8_t**, size_t). A null pointer here
+  // means an internal invariant has been violated (e.g. a Chunk with a
+  // null buf_ slipped into chunks_), which is a programming bug worth
+  // catching loudly rather than silently papering over.
+  assert(buf != nullptr && "Arena::Free called with nullptr (internal invariant violated)");
+  free(buf);
 }
 
 Status Arena::AllocateChunk(size_t size) {
@@ -106,7 +122,7 @@ void Arena::ReleaseChunks(bool retain_first) {
       retain_first = false;
       continue;
     }
-    (void)Free(chunk.buf_);
+    Free(chunk.buf_);
   }
 }
 
