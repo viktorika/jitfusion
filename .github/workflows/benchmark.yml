@@ -112,7 +112,7 @@ jobs:
             --benchmark_out=benchmark_result.json \
             --benchmark_repetitions=5 \
             --benchmark_report_aggregates_only=true \
-            --benchmark_min_time=0.2s
+            --benchmark_min_time=0.2
 
       - name: Upload benchmark result (artifact)
         uses: actions/upload-artifact@v4
