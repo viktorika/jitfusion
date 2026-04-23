@@ -19,6 +19,15 @@
 
 namespace jitfusion {
 
+// Per-call mutable state used during Execute*.
+// An ExecContext holds a memory arena (for values whose lifetime equals one
+// execution) and an error list (populated by user-supplied C functions via
+// AddError()). It is NOT thread-safe: a single ExecContext must never be shared
+// across threads. For parallel execution, give each worker thread its own
+// ExecContext; a single ExecEngine can be shared by all of them after Compile().
+// Within one thread, reusing an ExecContext across calls (via the
+// `Execute(ExecContext&, ...)` overloads) avoids re-allocating the arena on
+// each call.
 struct ExecContext {
   explicit ExecContext(int64_t alloc_min_chunk_size) : arena(alloc_min_chunk_size) {}
   Arena arena;
@@ -54,6 +63,21 @@ struct ExecEngineOption {
   bool dump_ir{false};
 };
 
+// Thread-safety contract:
+// - Compile() / BatchCompile() are NOT thread-safe and must not run concurrently
+//   with any other method on the same ExecEngine instance. They mutate the
+//   engine's internal JIT state, const-value arena and function-pointer table.
+// - After a successful Compile() / BatchCompile(), the Execute* / ExecuteAt* /
+//   ExecuteAll* overloads are safe to invoke concurrently from multiple threads
+//   on the same ExecEngine, provided each thread uses its own ExecContext.
+//   During execution the engine itself is only read; all per-call mutable state
+//   (arena, error list, intermediate allocations) lives inside ExecContext.
+// - Overloads that do not take an explicit ExecContext internally construct a
+//   fresh one on every call. They are thread-safe but pay per-call allocation
+//   cost; prefer the ExecContext& overloads on hot paths so the arena can be
+//   reused.
+// - A single ExecContext must NOT be shared across threads. Recommended pattern
+//   for parallel execution: 1 ExecEngine + N ExecContexts (one per worker).
 class ExecEngine {
  public:
   explicit ExecEngine(ExecEngineOption option = {});

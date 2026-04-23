@@ -49,6 +49,17 @@ using jitfusion::U8ListStruct;
 using jitfusion::UnaryOPType;
 using jitfusion::ValueType;
 
+// Thread-safety contract (mirrors the underlying ExecEngine):
+// - Compile() is NOT thread-safe and must not run concurrently with any other
+//   method on the same Athena instance.
+// - After a successful Compile(), the Execute() overloads are safe to invoke
+//   concurrently from multiple threads on the same Athena instance, provided
+//   each thread uses its own ExecContext.
+// - The Execute() overloads that do not take an ExecContext internally construct
+//   a fresh one on every call; they are thread-safe but allocate per call.
+//   Prefer the ExecContext& overloads on hot paths to reuse the arena.
+// - A single ExecContext must NOT be shared across threads. Recommended pattern
+//   for parallel execution: 1 Athena + N ExecContexts (one per worker).
 class Athena {
  public:
   explicit Athena(ExecEngineOption option = {}) : exec_engine_(option) {}
