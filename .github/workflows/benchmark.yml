@@ -95,6 +95,7 @@ jobs:
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_BUILD_TYPE=Release \
             -DHAS_XSIMD=ON \
+            -DBUILD_TEST=OFF \
             -DBUILD_BENCHMARK=ON
 
       - name: Build
