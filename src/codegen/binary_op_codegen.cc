@@ -33,14 +33,6 @@ Status ListOrStringConcat(BinaryOPNode &binary_node, ValueType type, llvm::Value
   llvm::FunctionCallee add_func_callee;
   add_func_callee = ctx_.module.getOrInsertFunction(sign.ToString(), func_type);
 
-  std::string error_info;
-  llvm::raw_string_ostream error_stream(error_info);
-  if (llvm::verifyFunction(llvm::cast<llvm::Function>(*add_func_callee.getCallee()), &error_stream)) {
-    llvm::cast<llvm::Function>(*add_func_callee.getCallee()).print(error_stream);
-    error_stream.flush();
-    return Status::RuntimeError("verify function failed in binary_op_codegen in add_func_callee: " + error_info);
-  }
-
   *ret_value = ctx_.builder.CreateCall(add_func_callee, {lhs, rhs, ctx_.entry_function->getArg(1)}, "calltmp");
   return Status::OK();
 }
@@ -176,14 +168,6 @@ Status CodeGen::SolveBinaryOpComplexType(BinaryOPNode &binary_node, llvm::Value 
     llvm::FunctionCallee string_call_func_callee =
         ctx_.module.getOrInsertFunction(sign.ToString(), llvm::Type::getInt32Ty(ctx_.context),
                                         ctx_.complex_type.string_type, ctx_.complex_type.string_type);
-
-    std::string error_info;
-    llvm::raw_string_ostream error_stream(error_info);
-    if (llvm::verifyFunction(llvm::cast<llvm::Function>(*string_call_func_callee.getCallee()), &error_stream)) {
-      llvm::cast<llvm::Function>(*string_call_func_callee.getCallee()).print(error_stream);
-      error_stream.flush();
-      return Status::RuntimeError("verify function failed in binary_op_codegen in StringCmp: " + error_info);
-    }
 
     switch (binary_node.GetOp()) {
       case BinaryOPType::kLarge: {
