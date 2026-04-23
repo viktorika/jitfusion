@@ -199,8 +199,8 @@ Status GetEntryFunctionCallee(llvm::LLVMContext& context, std::unique_ptr<llvm::
           llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
     } break;
     default:
-      return Status::RuntimeError("[internal] unknown return type for entry function: ",
-                                  TypeHelper::TypeToString(ret_type), " (compiler bug)");
+      return Status::RuntimeError(
+          "[internal] unknown return type for entry function: ", TypeHelper::TypeToString(ret_type), " (compiler bug)");
   }
   return Status::OK();
 }
@@ -736,8 +736,11 @@ Status ExecEngine::CreateJitAndOptimize(const std::unique_ptr<FunctionRegistry>&
           auto mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
 
           mpm.run(module, mam);
-          llvm::raw_string_ostream string_os(ir_code_);
-          module.print(string_os, nullptr);
+          if (option_.dump_ir) {
+            ir_code_.clear();
+            llvm::raw_string_ostream string_os(ir_code_);
+            module.print(string_os, nullptr);
+          }
         });
         return tsm;
       });
