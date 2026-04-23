@@ -65,9 +65,11 @@ if(NOT DEFINED HAS_XSIMD)
     set(HAS_XSIMD ON)
 endif()
 
-if(DEFINED HAS_XSIMD)
+if(HAS_XSIMD)
     message(STATUS "compile with xsimd")
     add_compile_definitions(HAS_XSIMD)
+else()
+    message(STATUS "compile without xsimd")
 endif()
 
 file(GLOB_RECURSE JITFUSION_SRC "src/*.cc" "src/*.h")
