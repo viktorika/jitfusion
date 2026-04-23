@@ -1,0 +1,138 @@
+name: Benchmark
+
+on:
+  push:
+    branches: [ main, master ]
+  # 手动触发也可用，方便本地调试完 push 一个分支临时跑一下。
+  workflow_dispatch:
+
+env:
+  LLVM_VERSION: "19"
+  XSIMD_VERSION: "13.2.0"
+  CACHE_VERSION: v1
+
+# 需要写入权限把历史数据 push 到 gh-pages 分支。
+permissions:
+  contents: write
+  deployments: write
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-22.04
+    # 同一时刻只跑一个 benchmark，避免并发竞争 gh-pages 分支。
+    concurrency:
+      group: benchmark-${{ github.ref }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache LLVM apt packages
+        id: cache-llvm
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/lib/llvm-19
+            /usr/bin/clang-19
+            /usr/bin/clang++-19
+            /usr/bin/llvm-config-19
+          key: llvm-${{ env.LLVM_VERSION }}-${{ env.CACHE_VERSION }}-no-tidy
+
+      - name: Install LLVM 19
+        if: steps.cache-llvm.outputs.cache-hit != 'true'
+        run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+          sudo add-apt-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main"
+          sudo apt-get update
+          sudo apt-get install -y llvm-19-dev clang-19
+
+      - name: Setup LLVM alternatives
+        run: |
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-19 100
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 100
+          sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-19 100
+
+      - name: Cache xsimd
+        id: cache-xsimd
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/include/xsimd
+          key: xsimd-${{ env.XSIMD_VERSION }}-${{ env.CACHE_VERSION }}
+
+      - name: Install xsimd
+        if: steps.cache-xsimd.outputs.cache-hit != 'true'
+        run: |
+          cd /tmp
+          git clone --depth 1 --branch ${{ env.XSIMD_VERSION }} https://github.com/xtensor-stack/xsimd.git
+          cd xsimd
+          cmake -B build -DCMAKE_INSTALL_PREFIX=/usr/local
+          sudo cmake --install build
+
+      - name: Install google benchmark
+        run: sudo apt-get install -y libbenchmark-dev
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-bench-${{ github.sha }}
+          restore-keys: |
+            ccache-bench-
+
+      - name: Setup ccache
+        run: |
+          sudo apt-get install -y ccache
+          echo "/usr/lib/ccache" >> $GITHUB_PATH
+          ccache --set-config=max_size=500M
+          ccache --zero-stats
+
+      - name: Configure CMake
+        run: |
+          cmake -B build \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DHAS_XSIMD=ON \
+            -DBUILD_BENCHMARK=ON
+
+      - name: Build
+        run: cmake --build build --target engine_benchmark -j$(nproc)
+
+      - name: ccache stats
+        run: ccache --show-stats
+
+      - name: Run Benchmark
+        # 多次 repetition + 只输出聚合结果，降低公共 runner 抖动。
+        run: |
+          ./build/engine_benchmark \
+            --benchmark_format=json \
+            --benchmark_out=benchmark_result.json \
+            --benchmark_repetitions=5 \
+            --benchmark_report_aggregates_only=true \
+            --benchmark_min_time=0.2s
+
+      - name: Upload benchmark result (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-result
+          path: benchmark_result.json
+
+      # 把结果推到 gh-pages 分支并生成趋势图。
+      # 仅在 push 到 main/master 时执行；手动触发（workflow_dispatch）不落盘。
+      - name: Store benchmark result
+        if: github.event_name == 'push'
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: JitFusion Engine Benchmark
+          tool: googlecpp
+          output-file-path: benchmark_result.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          # 超过基线 130% 视为性能回退（仅在 PR 上评论，不让 CI fail）。
+          alert-threshold: '130%'
+          comment-on-alert: true
+          fail-on-alert: false
+          # 结果页面：https://<owner>.github.io/JitFusion/dev/bench/
+          benchmark-data-dir-path: dev/bench
