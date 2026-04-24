@@ -1116,9 +1116,35 @@ JITFUSION_DEFINE_LIST_BINARY_BM(ListSub);
 JITFUSION_DEFINE_LIST_BINARY_BM(ListMul);
 JITFUSION_DEFINE_LIST_BINARY_BM(ListDiv);
 JITFUSION_DEFINE_LIST_BINARY_BM(ListMod);
-JITFUSION_DEFINE_LIST_BINARY_BM(ListMax);
-JITFUSION_DEFINE_LIST_BINARY_BM(ListMin);
 #undef JITFUSION_DEFINE_LIST_BINARY_BM
+
+// ListMax / ListMin are only registered in the list-scalar (broadcast) form:
+// there is no list-list overload in the current function registry. Exercising
+// the `_LL` variant would cause Compile() to fail (no matching signature),
+// which in turn aborts the whole benchmark binary via CompileOrDie(). Keep
+// only the scalar shape here — if list-list versions get added later, move
+// these two back into JITFUSION_DEFINE_LIST_BINARY_BM.
+#define JITFUSION_DEFINE_LIST_BINARY_SCALAR_ONLY_BM(NAME)                  \
+  void BM_Execute_##NAME##_Scalar(benchmark::State& state) {               \
+    const int len = static_cast<int>(state.range(0));                      \
+    auto reg = MakeRegistry();                                             \
+    auto engine = CompileOrDie(MakeListScalarCtxCall(#NAME, len, 2), reg); \
+    ExecContext ctx(4096);                                                 \
+    for (auto _ : state) {                                                 \
+      ctx.Clear();                                                         \
+      RetType result;                                                      \
+      auto st = engine->Execute(ctx, nullptr, &result);                    \
+      benchmark::DoNotOptimize(result);                                    \
+      if (!st.ok()) {                                                      \
+        state.SkipWithError("execute failed");                             \
+      }                                                                    \
+    }                                                                      \
+  }                                                                        \
+  BENCHMARK(BM_Execute_##NAME##_Scalar)->Arg(4096)  // NOLINT
+
+JITFUSION_DEFINE_LIST_BINARY_SCALAR_ONLY_BM(ListMax);
+JITFUSION_DEFINE_LIST_BINARY_SCALAR_ONLY_BM(ListMin);
+#undef JITFUSION_DEFINE_LIST_BINARY_SCALAR_ONLY_BM
 
 // Bitwise kernels are only registered for unsigned integer types.
 #define JITFUSION_DEFINE_LIST_BITWISE_BM(NAME)                                      \
@@ -1224,15 +1250,16 @@ JITFUSION_DEFINE_LIST_IFSELECT_BM(IfLessEqual);
 
 #undef JITFUSION_DEFINE_LIST_IFSELECT_BM
 
-// IfByBitmap(bitmap_list<u8>, value_list<i64>, alt_scalar<i64>, ctx).
-// For each i: bitmap[i] ? value_list[i] : alt_scalar.
+// IfByBitmap(packed_bitmap<u8>, value_list<i64>, alt_scalar<i64>, ctx).
+// For each element i: packed_bitmap bit i set ? value_list[i] : alt_scalar.
+// `packed_bitmap` is a U8List of ceil(len/8) bytes, LSB = first element.
 void BM_Execute_IfByBitmap(benchmark::State& state) {
   const int len = static_cast<int>(state.range(0));
+  const int bitmap_bytes = (len + 7) / 8;
   auto reg = MakeRegistry();
-  std::vector<uint8_t> bitmap(len);
+  std::vector<uint8_t> bitmap(bitmap_bytes, static_cast<uint8_t>(0x55));  // every other bit set
   std::vector<int64_t> values(len);
   for (int i = 0; i < len; ++i) {
-    bitmap[i] = static_cast<uint8_t>(i & 1);
     values[i] = i;
   }
   std::vector<std::unique_ptr<ExecNode>> args;
@@ -1256,20 +1283,33 @@ void BM_Execute_IfByBitmap(benchmark::State& state) {
 }
 BENCHMARK(BM_Execute_IfByBitmap)->Arg(4096);
 
-// FilterByBitmap(value_list<i64>, bitmap_list<u8>, popcount<u32>, ctx).
-// Returns value_list[i] for all i where bitmap[i] != 0; popcount tells the
-// kernel how much to allocate up front (here: len / 2 since the bitmap
-// alternates 0/1).
+// FilterByBitmap(value_list<i64>, packed_bitmap<u8>, popcount<u32>, ctx).
+//
+// NOTE: unlike IfByBitmap (whose U8List is a per-element 0/1 array), here the
+// bitmap is a *packed* bitmap — each byte encodes 8 elements (LSB = first
+// element). So its length must be exactly ceil(values.size() / 8), and
+// `popcnt` is the number of 1-bits across all bytes. Using a per-element
+// bitmap triggers "bitmap len is not corresponding to list len" at runtime.
+// Using 0x55 (0b01010101) gives 4 ones per byte → every other element kept.
 void BM_Execute_FilterByBitmap(benchmark::State& state) {
   const int len = static_cast<int>(state.range(0));
+  const int bitmap_bytes = (len + 7) / 8;
   auto reg = MakeRegistry();
   std::vector<int64_t> values(len);
-  std::vector<uint8_t> bitmap(len);
+  std::vector<uint8_t> bitmap(bitmap_bytes, static_cast<uint8_t>(0x55));
   uint32_t popcnt = 0;
   for (int i = 0; i < len; ++i) {
     values[i] = i;
-    bitmap[i] = static_cast<uint8_t>(i & 1);
-    popcnt += bitmap[i];
+  }
+  // Count set bits per byte. This runs once during benchmark setup, not in
+  // the timed loop, so a plain portable loop is fine — no need for
+  // __builtin_popcount / std::popcount.
+  for (int b = 0; b < bitmap_bytes; ++b) {
+    uint8_t byte = bitmap[b];
+    while (byte != 0) {
+      popcnt += static_cast<uint32_t>(byte & 1U);
+      byte = static_cast<uint8_t>(byte >> 1);
+    }
   }
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(new ConstantListValueNode(std::move(values)));
