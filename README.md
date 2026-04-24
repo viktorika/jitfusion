@@ -120,6 +120,35 @@ The EntryArgumentNode will consistently return a pointer value, which is the inp
 
 The intermediate processes can all be converted into corresponding op nodes, function nodes, condition nodes, etc. Additionally, there are usually multiple execution flows within a single task, and these flows may use the same variables. To achieve maximum optimization, you can have all the store nodes ultimately point to a NoOP node, allowing LLVM to perform the optimization for you.
 
+## Batch compilation
+
+If you have many small expressions that all operate on the same inputs, you can compile them together into a single LLVM module with `BatchCompile`. All functions share the same JIT engine, so they use fewer memory pages and are slightly faster to initialize overall than compiling each expression in its own `ExecEngine`.
+
+```c++
+std::vector<std::unique_ptr<ExecNode>> nodes;
+nodes.emplace_back(MakeExpr1());
+nodes.emplace_back(MakeExpr2());
+nodes.emplace_back(MakeExpr3());
+
+ExecEngine exec_engine;
+auto st = exec_engine.BatchCompile(nodes, func_registry);
+
+// Execute a single one by index:
+RetType r0, r1, r2;
+exec_engine.ExecuteAt(0, entry_args, &r0);
+exec_engine.ExecuteAt(1, entry_args, &r1);
+exec_engine.ExecuteAt(2, entry_args, &r2);
+
+// Or execute all of them in one call (results vector is resized automatically):
+std::vector<RetType> results;
+exec_engine.ExecuteAll(entry_args, &results);
+
+// For batch-compiled functions whose root is a NoOPNode (void return type),
+// use the overloads that take a `void*` result pointer instead.
+```
+
+Each expression may have its own return type; use `GetBatchFunctionReturnType(index)` to introspect.
+
 # Optimize
 It is more recommended to use this interface.
 ```c++
@@ -163,6 +192,38 @@ If you find that you have significant overhead in memory allocation, you can per
   Status Execute(ExecContext& exec_ctx, void* entry_arguments, void* result);
 ```
 
+Between two calls that reuse the same `ExecContext`, remember to invoke `exec_ctx.Clear()` — this resets the arena and clears any errors carried over from the previous call.
+
+## Engine options
+
+`ExecEngine` accepts an `ExecEngineOption` struct at construction time. All fields have sensible defaults; tweak them if the defaults don't fit your workload.
+
+| Field | Default | Purpose |
+| --- | --- | --- |
+| `const_value_arena_alloc_min_chunk_size` | `4096` | Minimum chunk size (in bytes) for the engine-owned arena that backs constant values embedded in the IR. Raise it if you embed large constant lists / strings and want to avoid chunk churn during compilation. |
+| `exec_ctx_arena_alloc_min_chunk_size` | `4096` | Minimum chunk size for the per-execution arena created when you call an `Execute*` overload that does **not** take an explicit `ExecContext`. Ignored for the `ExecContext&` overloads (the caller owns the arena). |
+| `dump_ir` | `false` | When `true`, the fully optimized LLVM IR text is captured during `Compile` / `BatchCompile` and made available via `GetIRCode()`. Useful for debugging; avoid enabling in production because serializing a large Module to text is expensive. |
+| `fp_math_mode` | `FPMathMode::kFast` | Floating-point semantics requested from the JIT backend. `kFast` enables FMA fusion and `-ffast-math`-style algebraic rewrites (1.3x - 2x faster on FP-heavy list kernels). Switch to `kStrict` if you need bit-for-bit IEEE-754 reproducibility (finance / risk / regression tests). |
+
+Example:
+
+```c++
+ExecEngineOption opt;
+opt.fp_math_mode = FPMathMode::kStrict;
+opt.dump_ir      = true;
+ExecEngine exec_engine(opt);
+```
+
+# Thread safety
+
+The library is designed around a "compile once, execute from many threads" pattern.
+
+* `Compile()` / `BatchCompile()` are **not** thread-safe. Call them from exactly one thread and finish them before any `Execute*` call.
+* After a successful compile, the `Execute*` / `ExecuteAt*` / `ExecuteAll*` overloads are safe to invoke concurrently from multiple threads on the same `ExecEngine` — as long as each thread supplies its own `ExecContext`.
+* A single `ExecContext` must **never** be shared across threads.
+* The `Execute*` overloads that do not take an explicit `ExecContext` internally construct a fresh one on every call. They remain thread-safe but pay per-call allocation cost; prefer the `ExecContext&` overloads on hot paths.
+
+Recommended pattern for parallel execution: one shared `ExecEngine` plus one `ExecContext` per worker thread.
 
 # Attention
 1.If you need to allocate memory that you cannot manage yourself and require the execution engine to manage it for you, you need to use the ExecContextNode. The ExecContext structure corresponding to ExecContextNode contains an arena. By using it to allocate memory, the memory will be automatically released when the execution is complete.
