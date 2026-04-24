@@ -690,12 +690,15 @@ Status ExecEngine::CreateJitAndOptimize(const std::unique_ptr<FunctionRegistry>&
                                         std::unique_ptr<llvm::Module> owner,
                                         std::unique_ptr<llvm::LLVMContext> llvm_context) {
   static auto machine = LLVMInit();
+  const auto fp_mode = option_.fp_math_mode;
   jit_ = llvm::orc::LLJITBuilder()
-             .setCompileFunctionCreator([&](llvm::orc::JITTargetMachineBuilder jtmb)
+             .setCompileFunctionCreator([fp_mode](llvm::orc::JITTargetMachineBuilder jtmb)
                                             -> llvm::Expected<std::unique_ptr<llvm::orc::IRCompileLayer::IRCompiler>> {
                jtmb.setCodeGenOptLevel(llvm::CodeGenOptLevel::Aggressive);
-               jtmb.getOptions().AllowFPOpFusion = llvm::FPOpFusion::Fast;
-               jtmb.getOptions().UnsafeFPMath = true;
+               if (fp_mode == FPMathMode::kFast) {
+                 jtmb.getOptions().AllowFPOpFusion = llvm::FPOpFusion::Fast;
+                 jtmb.getOptions().UnsafeFPMath = true;
+               }
                return std::make_unique<llvm::orc::ConcurrentIRCompiler>(std::move(jtmb));
              })
              .create();

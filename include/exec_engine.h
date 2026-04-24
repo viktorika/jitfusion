@@ -6,6 +6,7 @@
  */
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -54,6 +55,30 @@ struct ExecContext {
   void AddError(std::string msg) { errors.emplace_back(std::move(msg)); }
 };
 
+// Floating-point semantics to request from the JIT code generator.
+//
+// kStrict
+//   IEEE-754 conformant: NaN / +-Inf / signed zero / rounding mode are all
+//   preserved. No fused multiply-add reassociation, no algebraic rewrites
+//   that could change bit-for-bit results. Pick this for finance / risk /
+//   anything where reproducibility across machines & LLVM versions matters.
+//
+// kFast
+//   Equivalent to enabling `-ffast-math` globally:
+//     * fused multiply-add (AllowFPOpFusion = Fast)
+//     * unsafe algebraic transforms (UnsafeFPMath = true), which implies
+//       NaN / Inf / signed-zero may be ignored and reassociation is allowed.
+//   Typically 1.3x - 2x faster on FP-heavy list kernels, but results can
+//   differ slightly from strict IEEE. Pick this for analytics / ML / search
+//   ranking where throughput dominates.
+//
+// The default is kFast for backwards compatibility with releases prior to
+// the introduction of this switch.
+enum class FPMathMode : std::uint8_t {
+  kStrict,
+  kFast,
+};
+
 struct ExecEngineOption {
   int64_t const_value_arena_alloc_min_chunk_size{4096};
   int64_t exec_ctx_arena_alloc_min_chunk_size{4096};
@@ -61,6 +86,9 @@ struct ExecEngineOption {
   // Mainly for debugging: serializing a large Module to text is expensive (can be hundreds of KB and requires a
   // full Module walk), so it is disabled by default in production.
   bool dump_ir{false};
+  // See FPMathMode above. Default stays kFast so that existing users'
+  // observed numeric behavior does not change when they upgrade.
+  FPMathMode fp_math_mode{FPMathMode::kFast};
 };
 
 // Thread-safety contract:
