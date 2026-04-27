@@ -112,21 +112,25 @@ class FunctionSignature {
 
 class FunctionRegistry {
  public:
-  // Register function to registry
-  Status RegisterFunc(const FunctionSignature &func_sign, FunctionStructure func_struct);
+  // Register function to registry.
+  // If allow_override is false (default), registering a function whose signature is already
+  // present returns Status::InvalidArgument; set it to true to intentionally overwrite.
+  Status RegisterFunc(const FunctionSignature &func_sign, FunctionStructure func_struct, bool allow_override = false);
 
   // Register LLVMIntrinicFunc
-  Status RegisterLLVMIntrinicFunc(const FunctionSignature &func_sign, CodeGenFunc codegen_func);
+  Status RegisterLLVMIntrinicFunc(const FunctionSignature &func_sign, CodeGenFunc codegen_func,
+                                  bool allow_override = false);
 
   // Register ReadOnlyCFunc
-  Status RegisterReadOnlyCFunc(const FunctionSignature &func_sign, void *c_func_ptr);
+  Status RegisterReadOnlyCFunc(const FunctionSignature &func_sign, void *c_func_ptr, bool allow_override = false);
 
   // Register StoreCFunc
   // store_args_index is the index of the args in the function signature that is OuputNode
-  Status RegisterStoreCFunc(const FunctionSignature &func_sign, void *c_func_ptr, uint32_t store_args_index);
+  Status RegisterStoreCFunc(const FunctionSignature &func_sign, void *c_func_ptr, uint32_t store_args_index,
+                            bool allow_override = false);
 
   // Register a function that satisfies the commutative property.
-  Status RegisterCommutativeCFunc(const FunctionSignature &func_sign, void *c_func_ptr);
+  Status RegisterCommutativeCFunc(const FunctionSignature &func_sign, void *c_func_ptr, bool allow_override = false);
 
   Status GetFuncBySign(FunctionSignature &func_sign, FunctionStructure *func_struct) const;
 

@@ -99,29 +99,35 @@ std::string FunctionSignature::ToString() const {
   return s.str();
 }
 
-Status FunctionRegistry::RegisterFunc(const FunctionSignature& func_sign, FunctionStructure func_struct) {
+Status FunctionRegistry::RegisterFunc(const FunctionSignature& func_sign, FunctionStructure func_struct,
+                                      bool allow_override) {
   if (FunctionType::kLLVMIntrinicFunc == func_struct.func_type && !func_struct.codegen_func) {
     return Status::InvalidArgument("llvm instrinic function must supply codegen function");
   }
   if (FunctionType::kCFunc == func_struct.func_type && nullptr == func_struct.c_func_ptr) {
     return Status::InvalidArgument("c function must supply the c function address");
   }
+  if (!allow_override && signature2funcstruct_.find(func_sign) != signature2funcstruct_.end()) {
+    return Status::InvalidArgument("function ", func_sign.ToString(),
+                                   " is already registered; pass allow_override=true to overwrite");
+  }
   signature2funcstruct_[func_sign] = std::move(func_struct);
   return Status::OK();
 }
 
-Status FunctionRegistry::RegisterLLVMIntrinicFunc(const FunctionSignature& func_sign, CodeGenFunc codegen_func) {
+Status FunctionRegistry::RegisterLLVMIntrinicFunc(const FunctionSignature& func_sign, CodeGenFunc codegen_func,
+                                                  bool allow_override) {
   if (nullptr == codegen_func) {
     return Status::InvalidArgument("codegen function is nullptr");
   }
   FunctionStructure func_struct;
   func_struct.func_type = FunctionType::kLLVMIntrinicFunc;
   func_struct.codegen_func = std::move(codegen_func);
-  signature2funcstruct_[func_sign] = func_struct;
-  return Status::OK();
+  return RegisterFunc(func_sign, std::move(func_struct), allow_override);
 }
 
-Status FunctionRegistry::RegisterReadOnlyCFunc(const FunctionSignature& func_sign, void* c_func_ptr) {
+Status FunctionRegistry::RegisterReadOnlyCFunc(const FunctionSignature& func_sign, void* c_func_ptr,
+                                               bool allow_override) {
   if (nullptr == c_func_ptr) {
     return Status::InvalidArgument("c_func_ptr is nullptr");
   }
@@ -129,12 +135,11 @@ Status FunctionRegistry::RegisterReadOnlyCFunc(const FunctionSignature& func_sig
   func_struct.func_type = FunctionType::kCFunc;
   func_struct.c_func_ptr = c_func_ptr;
   func_struct.func_attr_setter = ReadOnlyFunctionAttributeSetter;
-  signature2funcstruct_[func_sign] = func_struct;
-  return Status::OK();
+  return RegisterFunc(func_sign, std::move(func_struct), allow_override);
 }
 
 Status FunctionRegistry::RegisterStoreCFunc(const FunctionSignature& func_sign, void* c_func_ptr,
-                                            uint32_t store_args_index) {
+                                            uint32_t store_args_index, bool allow_override) {
   if (nullptr == c_func_ptr) {
     return Status::InvalidArgument("c_func_ptr is nullptr");
   }
@@ -142,11 +147,11 @@ Status FunctionRegistry::RegisterStoreCFunc(const FunctionSignature& func_sign, 
   func_struct.func_type = FunctionType::kCFunc;
   func_struct.c_func_ptr = c_func_ptr;
   func_struct.func_attr_setter = StoreFunctionSetter{store_args_index};
-  signature2funcstruct_[func_sign] = func_struct;
-  return Status::OK();
+  return RegisterFunc(func_sign, std::move(func_struct), allow_override);
 }
 
-Status FunctionRegistry::RegisterCommutativeCFunc(const FunctionSignature& func_sign, void* c_func_ptr) {
+Status FunctionRegistry::RegisterCommutativeCFunc(const FunctionSignature& func_sign, void* c_func_ptr,
+                                                  bool allow_override) {
   if (nullptr == c_func_ptr) {
     return Status::InvalidArgument("c_func_ptr is nullptr");
   }
@@ -154,8 +159,7 @@ Status FunctionRegistry::RegisterCommutativeCFunc(const FunctionSignature& func_
   func_struct.func_type = FunctionType::kCFunc;
   func_struct.c_func_ptr = c_func_ptr;
   func_struct.func_attr_setter = CommutantFunctionAttributeSetter;
-  signature2funcstruct_[func_sign] = func_struct;
-  return Status::OK();
+  return RegisterFunc(func_sign, std::move(func_struct), allow_override);
 }
 
 Status FunctionRegistry::GetFuncBySign(FunctionSignature& func_sign, FunctionStructure* func_struct) const {
