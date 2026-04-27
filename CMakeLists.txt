@@ -4,6 +4,15 @@ project(jitfusion_project)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING
+        "Choose the type of build (Debug, Release, RelWithDebInfo, MinSizeRel)." FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+        "Debug" "Release" "RelWithDebInfo" "MinSizeRel")
+endif()
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 find_program(LLVM_CONFIG llvm-config)
 if(NOT LLVM_CONFIG)
     message(FATAL_ERROR "Could not find llvm-config in PATH")
@@ -28,8 +37,6 @@ add_compile_options(
     -Wall
     -Wextra
     -Wno-float-equal
-    -O3
-    -DNDEBUG
     -ftree-vectorize
 )
 
@@ -55,8 +62,9 @@ endif()
 
 # Coverage support: -DCOVERAGE=ON
 if(COVERAGE)
-    message(STATUS "Building with coverage instrumentation")
-    add_compile_options(--coverage -fno-inline -O0)
+    message(STATUS "Building with coverage instrumentation (forcing CMAKE_BUILD_TYPE=Debug)")
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Forced to Debug for coverage" FORCE)
+    add_compile_options(--coverage -fno-inline)
     add_link_options(--coverage)
 endif()
 
@@ -120,5 +128,10 @@ if(BUILD_BENCHMARK)
     find_package(benchmark REQUIRED)
     add_executable(engine_benchmark benchmark/engine_benchmark.cc)
     target_link_libraries(engine_benchmark jitfusion benchmark::benchmark)
-    target_compile_options(engine_benchmark PRIVATE -O3 -DNDEBUG)
+
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        message(WARNING
+            "BUILD_BENCHMARK=ON with CMAKE_BUILD_TYPE=Debug: results will be "
+            "meaningless. Reconfigure with -DCMAKE_BUILD_TYPE=Release.")
+    endif()
 endif()
