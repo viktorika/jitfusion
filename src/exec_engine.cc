@@ -60,135 +60,88 @@ struct LLVMInit {
 
 LLVMStructType CreateLLVMStructType(llvm::LLVMContext& context) {
   LLVMStructType llvm_struct_type;
-  llvm_struct_type.string_type = llvm::StructType::create(
-      context, {llvm::Type::getInt8Ty(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "StringStruct");
-  llvm_struct_type.u8list_type = llvm::StructType::create(
-      context, {llvm::Type::getInt8Ty(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "U8ListStruct");
-  llvm_struct_type.u16list_type = llvm::StructType::create(
-      context, {llvm::Type::getInt16Ty(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "U16ListStruct");
-  llvm_struct_type.u32list_type = llvm::StructType::create(
-      context, {llvm::Type::getInt32Ty(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "U32ListStruct");
-  llvm_struct_type.u64list_type = llvm::StructType::create(
-      context, {llvm::Type::getInt64Ty(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "U64ListStruct");
-  llvm_struct_type.i8list_type = llvm::StructType::create(
-      context, {llvm::Type::getInt8Ty(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "I8ListStruct");
-  llvm_struct_type.i16list_type = llvm::StructType::create(
-      context, {llvm::Type::getInt16Ty(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "I16ListStruct");
-  llvm_struct_type.i32list_type = llvm::StructType::create(
-      context, {llvm::Type::getInt32Ty(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "I32ListStruct");
-  llvm_struct_type.i64list_type = llvm::StructType::create(
-      context, {llvm::Type::getInt64Ty(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "I64ListStruct");
-  llvm_struct_type.f32list_type = llvm::StructType::create(
-      context, {llvm::Type::getFloatTy(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "F32ListStruct");
-  llvm_struct_type.f64list_type = llvm::StructType::create(
-      context, {llvm::Type::getDoubleTy(context)->getPointerTo(), llvm::Type::getInt32Ty(context)}, "F64ListStruct");
-  llvm_struct_type.stringlist_type = llvm::StructType::create(
-      context, {llvm_struct_type.string_type->getPointerTo(), llvm::Type::getInt32Ty(context)}, "StringListStruct");
+  auto* ptr_ty = llvm::PointerType::getUnqual(context);
+  auto* i32_ty = llvm::Type::getInt32Ty(context);
+  llvm_struct_type.string_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "StringStruct");
+  llvm_struct_type.u8list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "U8ListStruct");
+  llvm_struct_type.u16list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "U16ListStruct");
+  llvm_struct_type.u32list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "U32ListStruct");
+  llvm_struct_type.u64list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "U64ListStruct");
+  llvm_struct_type.i8list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "I8ListStruct");
+  llvm_struct_type.i16list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "I16ListStruct");
+  llvm_struct_type.i32list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "I32ListStruct");
+  llvm_struct_type.i64list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "I64ListStruct");
+  llvm_struct_type.f32list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "F32ListStruct");
+  llvm_struct_type.f64list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "F64ListStruct");
+  llvm_struct_type.stringlist_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "StringListStruct");
   return llvm_struct_type;
 }
 
 Status GetEntryFunctionCallee(llvm::LLVMContext& context, std::unique_ptr<llvm::Module>& m,
                               const LLVMStructType& llvm_struct_type, const std::string& func_name, ValueType ret_type,
                               llvm::FunctionCallee* entry_func_callee) {
+  auto* ptr_ty = llvm::PointerType::getUnqual(context);
   switch (ret_type) {
     case ValueType::kVoid: {
-      *entry_func_callee = m->getOrInsertFunction(
-          func_name, llvm::Type::getVoidTy(context), llvm::Type::getVoidTy(context)->getPointerTo(),
-          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+      *entry_func_callee = m->getOrInsertFunction(func_name, llvm::Type::getVoidTy(context), ptr_ty, ptr_ty, ptr_ty);
     } break;
     case ValueType::kU8:
     case ValueType::kI8: {
-      *entry_func_callee = m->getOrInsertFunction(
-          func_name, llvm::Type::getInt8Ty(context), llvm::Type::getVoidTy(context)->getPointerTo(),
-          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+      *entry_func_callee = m->getOrInsertFunction(func_name, llvm::Type::getInt8Ty(context), ptr_ty, ptr_ty, ptr_ty);
     } break;
     case ValueType::kU16:
     case ValueType::kI16: {
-      *entry_func_callee = m->getOrInsertFunction(
-          func_name, llvm::Type::getInt16Ty(context), llvm::Type::getVoidTy(context)->getPointerTo(),
-          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+      *entry_func_callee = m->getOrInsertFunction(func_name, llvm::Type::getInt16Ty(context), ptr_ty, ptr_ty, ptr_ty);
     } break;
     case ValueType::kU32:
     case ValueType::kI32: {
-      *entry_func_callee = m->getOrInsertFunction(
-          func_name, llvm::Type::getInt32Ty(context), llvm::Type::getVoidTy(context)->getPointerTo(),
-          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+      *entry_func_callee = m->getOrInsertFunction(func_name, llvm::Type::getInt32Ty(context), ptr_ty, ptr_ty, ptr_ty);
     } break;
     case ValueType::kU64:
     case ValueType::kI64: {
-      *entry_func_callee = m->getOrInsertFunction(
-          func_name, llvm::Type::getInt64Ty(context), llvm::Type::getVoidTy(context)->getPointerTo(),
-          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+      *entry_func_callee = m->getOrInsertFunction(func_name, llvm::Type::getInt64Ty(context), ptr_ty, ptr_ty, ptr_ty);
     } break;
     case ValueType::kF32: {
-      *entry_func_callee = m->getOrInsertFunction(
-          func_name, llvm::Type::getFloatTy(context), llvm::Type::getVoidTy(context)->getPointerTo(),
-          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+      *entry_func_callee = m->getOrInsertFunction(func_name, llvm::Type::getFloatTy(context), ptr_ty, ptr_ty, ptr_ty);
     } break;
     case ValueType::kF64: {
-      *entry_func_callee = m->getOrInsertFunction(
-          func_name, llvm::Type::getDoubleTy(context), llvm::Type::getVoidTy(context)->getPointerTo(),
-          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+      *entry_func_callee = m->getOrInsertFunction(func_name, llvm::Type::getDoubleTy(context), ptr_ty, ptr_ty, ptr_ty);
     } break;
     case ValueType::kString: {
-      *entry_func_callee = m->getOrInsertFunction(
-          func_name, llvm_struct_type.string_type, llvm::Type::getVoidTy(context)->getPointerTo(),
-          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.string_type, ptr_ty, ptr_ty, ptr_ty);
     } break;
     case ValueType::kU8List: {
-      *entry_func_callee = m->getOrInsertFunction(
-          func_name, llvm_struct_type.u8list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
-          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.u8list_type, ptr_ty, ptr_ty, ptr_ty);
     } break;
     case ValueType::kU16List: {
-      *entry_func_callee = m->getOrInsertFunction(
-          func_name, llvm_struct_type.u16list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
-          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.u16list_type, ptr_ty, ptr_ty, ptr_ty);
     } break;
     case ValueType::kU32List: {
-      *entry_func_callee = m->getOrInsertFunction(
-          func_name, llvm_struct_type.u32list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
-          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.u32list_type, ptr_ty, ptr_ty, ptr_ty);
     } break;
     case ValueType::kU64List: {
-      *entry_func_callee = m->getOrInsertFunction(
-          func_name, llvm_struct_type.u64list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
-          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.u64list_type, ptr_ty, ptr_ty, ptr_ty);
     } break;
     case ValueType::kI8List: {
-      *entry_func_callee = m->getOrInsertFunction(
-          func_name, llvm_struct_type.i8list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
-          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.i8list_type, ptr_ty, ptr_ty, ptr_ty);
     } break;
     case ValueType::kI16List: {
-      *entry_func_callee = m->getOrInsertFunction(
-          func_name, llvm_struct_type.i16list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
-          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.i16list_type, ptr_ty, ptr_ty, ptr_ty);
     } break;
     case ValueType::kI32List: {
-      *entry_func_callee = m->getOrInsertFunction(
-          func_name, llvm_struct_type.i32list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
-          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.i32list_type, ptr_ty, ptr_ty, ptr_ty);
     } break;
     case ValueType::kI64List: {
-      *entry_func_callee = m->getOrInsertFunction(
-          func_name, llvm_struct_type.i64list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
-          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.i64list_type, ptr_ty, ptr_ty, ptr_ty);
     } break;
     case ValueType::kF32List: {
-      *entry_func_callee = m->getOrInsertFunction(
-          func_name, llvm_struct_type.f32list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
-          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.f32list_type, ptr_ty, ptr_ty, ptr_ty);
     } break;
     case ValueType::kF64List: {
-      *entry_func_callee = m->getOrInsertFunction(
-          func_name, llvm_struct_type.f64list_type, llvm::Type::getVoidTy(context)->getPointerTo(),
-          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.f64list_type, ptr_ty, ptr_ty, ptr_ty);
     } break;
     case ValueType::kStringList: {
-      *entry_func_callee = m->getOrInsertFunction(
-          func_name, llvm_struct_type.stringlist_type, llvm::Type::getVoidTy(context)->getPointerTo(),
-          llvm::Type::getVoidTy(context)->getPointerTo(), llvm::Type::getVoidTy(context)->getPointerTo());
+      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.stringlist_type, ptr_ty, ptr_ty, ptr_ty);
     } break;
     default:
       return Status::RuntimeError(

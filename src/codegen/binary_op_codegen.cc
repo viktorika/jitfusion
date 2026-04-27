@@ -27,7 +27,7 @@ Status ListOrStringConcat(BinaryOPNode &binary_node, ValueType type, llvm::Value
                                                           {
                                                               lhs->getType(),
                                                               rhs->getType(),
-                                                              llvm::Type::getVoidTy(ctx_.context)->getPointerTo(),
+                                                              llvm::PointerType::getUnqual(ctx_.context),
                                                           },
                                                           false);
   llvm::FunctionCallee add_func_callee;
