@@ -159,7 +159,6 @@ TEST(ConstListValueTest, StringListTest) {
   EXPECT_EQ(std::get<std::vector<std::string>>(result), value);
 }
 
-
 TEST(ConstListValueTest, EmptyNumericListTest) {
   const std::vector<int32_t> value;
   std::unique_ptr<FunctionRegistry> func_registry;
