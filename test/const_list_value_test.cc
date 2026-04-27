@@ -158,3 +158,42 @@ TEST(ConstListValueTest, StringListTest) {
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
   EXPECT_EQ(std::get<std::vector<std::string>>(result), value);
 }
+
+TEST(ConstListValueTest, EmptyNumericListTest) {
+  const std::vector<int32_t> value;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(value));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_TRUE(std::get<std::vector<int32_t>>(result).empty());
+}
+
+TEST(ConstListValueTest, EmptyStringListTest) {
+  const std::vector<std::string> value;
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(value));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_TRUE(std::get<std::vector<std::string>>(result).empty());
+}
+
+TEST(ConstListValueTest, StringListWithEmptyElementsTest) {
+  const std::vector<std::string> value = {"aaa", "", "ccc", ""};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(value));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(args_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  EXPECT_EQ(std::get<std::vector<std::string>>(result), value);
+}

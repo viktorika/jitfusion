@@ -49,8 +49,11 @@ struct MakeValueVisitor {
   llvm::Value *operator()(double v) const { return llvm::ConstantFP::get(llvm::Type::getDoubleTy(ctx_.context), v); }
 
   llvm::Value *operator()(const std::string &v) const {
-    char *str = reinterpret_cast<char *>(ctx_.const_value_arena.Allocate(static_cast<int>(v.size())));
-    memcpy(str, v.c_str(), v.size());
+    char *str = nullptr;
+    if (!v.empty()) {
+      str = reinterpret_cast<char *>(ctx_.const_value_arena.Allocate(v.size()));
+      memcpy(str, v.c_str(), v.size());
+    }
     llvm::Constant *str_ptr =
         llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_.context), reinterpret_cast<int64_t>(str), false);
     str_ptr = llvm::ConstantExpr::getIntToPtr(str_ptr, llvm::Type::getInt8Ty(ctx_.context)->getPointerTo());
