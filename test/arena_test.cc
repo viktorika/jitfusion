@@ -271,4 +271,42 @@ TEST(ArenaTest, DestructorReleasesAllChunks) {
   SUCCEED();
 }
 
+TEST(ArenaTest, AllocateZeroReturnsNullptr) {
+  Arena arena;
+  EXPECT_EQ(arena.Allocate(size_t{0}), nullptr);
+  EXPECT_EQ(arena.Allocate(size_t{0}, size_t{1}), nullptr);
+  EXPECT_EQ(arena.Allocate(size_t{0}, size_t{16}), nullptr);
+  EXPECT_EQ(arena.Allocate(size_t{0}, size_t{64}), nullptr);
+}
+
+TEST(ArenaTest, AllocateZeroDoesNotConsumeChunk) {
+  Arena arena(/*min_chunk_size=*/128);
+  EXPECT_EQ(arena.total_bytes(), 0U);
+
+  EXPECT_EQ(arena.Allocate(0), nullptr);
+  EXPECT_EQ(arena.total_bytes(), 0U);
+  EXPECT_EQ(arena.avail_bytes(), 0U);
+}
+
+TEST(ArenaTest, AllocateZeroInterleavedWithNormalAllocs) {
+  Arena arena;
+  uint8_t* p1 = arena.Allocate(8);
+  ASSERT_NE(p1, nullptr);
+
+  EXPECT_EQ(arena.Allocate(0), nullptr);
+
+  uint8_t* p2 = arena.Allocate(8);
+  ASSERT_NE(p2, nullptr);
+  EXPECT_EQ(p2 - p1, 8);
+}
+
+TEST(ArenaTest, AllocateZeroAfterReset) {
+  Arena arena;
+  (void)arena.Allocate(32);
+  arena.Reset();
+  EXPECT_EQ(arena.Allocate(0), nullptr);
+  uint8_t* p = arena.Allocate(1);
+  ASSERT_NE(p, nullptr);
+}
+
 }  // namespace jitfusion
