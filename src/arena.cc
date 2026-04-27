@@ -14,12 +14,9 @@
 namespace jitfusion {
 
 uint8_t* Arena::Allocate(size_t size, size_t alignment) {
-  // Zero-sized allocation is not a meaningful request and is disallowed:
-  // the returned pointer could not be dereferenced safely anyway, and
-  // callers asking for 0 bytes almost always indicate a bug at the call
-  // site (e.g. forgetting to special-case an empty list/string). Rejecting
-  // it here with an assert surfaces such bugs loudly in debug builds.
-  assert(size > 0 && "Arena::Allocate called with size == 0");
+  if (size == 0) {
+    return nullptr;
+  }
   // Alignment must be a power of two and non-zero.
   assert(alignment > 0 && (alignment & (alignment - 1)) == 0);
 

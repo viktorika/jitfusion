@@ -204,6 +204,9 @@ U8ListStruct GenBitmap(ListType a, typename ListType::CElementType b, void *exec
   result.len = (a.len + 7) / 8;
   result.data = reinterpret_cast<U8ListStruct::CElementType *>(
       exec_ctx->arena.Allocate(result.len * sizeof(U8ListStruct::CElementType)));
+  if (a.len == 0) {
+    return result;
+  }
   uint32_t vec_loop_len = a.len & (~7U);
   uint32_t i = 0;
   for (; i < vec_loop_len; i += 8) {
@@ -261,6 +264,9 @@ U8ListStruct GenBitmapList(ListType a, ListType b, void *exec_context) {
   result.len = (len + 7) / 8;
   result.data = reinterpret_cast<U8ListStruct::CElementType *>(
       exec_ctx->arena.Allocate(result.len * sizeof(U8ListStruct::CElementType)));
+  if (len == 0) {
+    return result;
+  }
   uint32_t vec_loop_len = len & (~7U);
   uint32_t i = 0;
   for (; i < vec_loop_len; i += 8) {
