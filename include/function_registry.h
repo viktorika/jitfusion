@@ -147,7 +147,7 @@ class FunctionRegistry {
     bool operator()(const FunctionSignature &s1, const FunctionSignature &s2) const { return s1 == s2; }
   };
 
-  std::unordered_map<const FunctionSignature, FunctionStructure, KeyHash, KeyEquals> signature2funcstruct_;
+  std::unordered_map<FunctionSignature, FunctionStructure, KeyHash, KeyEquals> signature2funcstruct_;
 
   friend FunctionRegistryFactory;
 
