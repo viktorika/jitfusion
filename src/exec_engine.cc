@@ -298,6 +298,12 @@ using return_stringlist_function_type = StringListStruct (*)(void*, void*, void*
 ExecEngine::ExecEngine(ExecEngineOption option)
     : const_value_arena_(option.const_value_arena_alloc_min_chunk_size), jit_(nullptr), option_(option) {}
 
+ExecEngine::~ExecEngine() {
+  if (!jit_) {
+    llvm::consumeError(jit_.takeError());
+  }
+}
+
 Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
                            const std::unique_ptr<FunctionRegistry>& func_registry) {
   // validator

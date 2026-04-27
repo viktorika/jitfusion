@@ -109,7 +109,7 @@ struct ExecEngineOption {
 class ExecEngine {
  public:
   explicit ExecEngine(ExecEngineOption option = {});
-  ~ExecEngine() = default;
+  ~ExecEngine();
   ExecEngine(const ExecEngine&) = delete;
   ExecEngine& operator=(const ExecEngine&) = delete;
 
