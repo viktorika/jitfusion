@@ -249,19 +249,10 @@ using return_stringlist_function_type = StringListStruct (*)(void*, void*, void*
 }  // namespace
 
 ExecEngine::ExecEngine(ExecEngineOption option)
-    : const_value_arena_(option.const_value_arena_alloc_min_chunk_size), jit_(nullptr), option_(option) {}
-
-ExecEngine::~ExecEngine() {
-  if (!jit_) {
-    llvm::consumeError(jit_.takeError());
-  }
-}
+    : const_value_arena_(option.const_value_arena_alloc_min_chunk_size), option_(option) {}
 
 void ExecEngine::ResetCompiledState() {
-  if (!jit_) {
-    llvm::consumeError(jit_.takeError());
-  }
-  jit_ = nullptr;
+  jit_.reset();
   batch_entry_func_ptrs_.clear();
   batch_ret_types_.clear();
   ir_code_.clear();
@@ -293,7 +284,7 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
     return Status::RuntimeError("Module verification failed: ", error_info);
   }
   JF_RETURN_NOT_OK(CreateJitAndOptimize(func_registry, std::move(owner), std::move(llvm_context)));
-  auto entry_func_offset = jit_->get()->lookup("entry");
+  auto entry_func_offset = jit_->lookup("entry");
   if (!entry_func_offset) {
     return Status::RuntimeError("Failed to find entry function");
   }
@@ -488,7 +479,7 @@ Status ExecEngine::BatchCompile(const std::vector<std::unique_ptr<ExecNode>>& ex
 
   batch_entry_func_ptrs_.resize(func_names.size());
   for (size_t i = 0; i < func_names.size(); ++i) {
-    auto func_offset = jit_->get()->lookup(func_names[i]);
+    auto func_offset = jit_->lookup(func_names[i]);
     if (!func_offset) {
       return Status::RuntimeError("Failed to lookup function: ", func_names[i],
                                   ", error: ", llvm::toString(func_offset.takeError()));
@@ -627,29 +618,30 @@ Status ExecEngine::CreateJitAndOptimize(const std::unique_ptr<FunctionRegistry>&
                                         std::unique_ptr<llvm::LLVMContext> llvm_context) {
   static auto machine = LLVMInit();
   const auto fp_mode = option_.fp_math_mode;
-  jit_ = llvm::orc::LLJITBuilder()
-             .setCompileFunctionCreator([fp_mode](llvm::orc::JITTargetMachineBuilder jtmb)
-                                            -> llvm::Expected<std::unique_ptr<llvm::orc::IRCompileLayer::IRCompiler>> {
-               jtmb.setCodeGenOptLevel(llvm::CodeGenOptLevel::Aggressive);
-               if (fp_mode == FPMathMode::kFast) {
-                 jtmb.getOptions().AllowFPOpFusion = llvm::FPOpFusion::Fast;
-                 jtmb.getOptions().UnsafeFPMath = true;
-               }
-               return std::make_unique<llvm::orc::ConcurrentIRCompiler>(std::move(jtmb));
-             })
-             .create();
-  if (!jit_) {
-    return Status::RuntimeError("Failed to create LLJIT: ", llvm::toString(jit_.takeError()));
+  auto jit_or_err =
+      llvm::orc::LLJITBuilder()
+          .setCompileFunctionCreator([fp_mode](llvm::orc::JITTargetMachineBuilder jtmb)
+                                         -> llvm::Expected<std::unique_ptr<llvm::orc::IRCompileLayer::IRCompiler>> {
+            jtmb.setCodeGenOptLevel(llvm::CodeGenOptLevel::Aggressive);
+            if (fp_mode == FPMathMode::kFast) {
+              jtmb.getOptions().AllowFPOpFusion = llvm::FPOpFusion::Fast;
+              jtmb.getOptions().UnsafeFPMath = true;
+            }
+            return std::make_unique<llvm::orc::ConcurrentIRCompiler>(std::move(jtmb));
+          })
+          .create();
+  if (!jit_or_err) {
+    return Status::RuntimeError("Failed to create LLJIT: ", llvm::toString(jit_or_err.takeError()));
   }
-  auto& jd = jit_->get()->getMainJITDylib();
-  auto dlsg =
-      llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(jit_->get()->getDataLayout().getGlobalPrefix());
+  jit_ = std::move(*jit_or_err);
+  auto& jd = jit_->getMainJITDylib();
+  auto dlsg = llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(jit_->getDataLayout().getGlobalPrefix());
   if (!dlsg) {
     return Status::RuntimeError("Failed to create DynamicLibrarySearchGenerator: ", llvm::toString(dlsg.takeError()));
   }
   jd.addGenerator(std::move(*dlsg));
   // optimize
-  jit_->get()->getIRTransformLayer().setTransform(
+  jit_->getIRTransformLayer().setTransform(
       [&, this](llvm::orc::ThreadSafeModule tsm, const llvm::orc::MaterializationResponsibility& /*r*/) {
         tsm.withModuleDo([this](llvm::Module& module) {
           llvm::PassBuilder pb;
@@ -682,10 +674,10 @@ Status ExecEngine::CreateJitAndOptimize(const std::unique_ptr<FunctionRegistry>&
         });
         return tsm;
       });
-  if (auto err = jit_->get()->addIRModule(llvm::orc::ThreadSafeModule(std::move(owner), std::move(llvm_context)))) {
+  if (auto err = jit_->addIRModule(llvm::orc::ThreadSafeModule(std::move(owner), std::move(llvm_context)))) {
     return Status::RuntimeError("Failed to add module to JIT: ", llvm::toString(std::move(err)));
   }
-  JF_RETURN_NOT_OK(func_registry->MappingToJIT(jit_->get()));
+  JF_RETURN_NOT_OK(func_registry->MappingToJIT(jit_.get()));
   return Status::OK();
 }
 
