@@ -17,12 +17,32 @@ llvm-config --version
 
 ## CMake Build
 ```bash
-mkdir CMakeBuild
-cd CMakeBuild
-cmake .. && make
+cmake -B build
+cmake --build build -j
 ```
 
-If you don't need xsimd, you can use -DHAS_XSIMD=OFF.
+The build defaults to `Release` (`-O3 -DNDEBUG`) when `CMAKE_BUILD_TYPE` is
+not specified. Override with `-DCMAKE_BUILD_TYPE=Debug` / `RelWithDebInfo` /
+`MinSizeRel` as needed.
+
+### xsimd
+
+xsimd acceleration is optional. The `HAS_XSIMD` option accepts three values:
+
+* `AUTO` *(default)* — detect xsimd during configure; use it if found,
+  silently fall back to the scalar code path otherwise. This lets a fresh
+  clone build on machines without xsimd installed.
+* `ON` — require xsimd; configure fails with a clear error if the headers
+  are not found. Recommended for CI and release builds.
+* `OFF` — disable xsimd entirely and always use the scalar code path.
+
+Example:
+
+```bash
+cmake -B build -DHAS_XSIMD=ON      # require xsimd
+cmake -B build -DHAS_XSIMD=OFF     # disable xsimd
+cmake -B build                     # AUTO (default)
+```
 
 ## Bazel Build
 If you are using version <span style="color:red">Bazel 8</span> or above, you will need to use the --enable_workspace=true option.

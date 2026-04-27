@@ -68,14 +68,59 @@ if(COVERAGE)
     add_link_options(--coverage)
 endif()
 
-if(NOT DEFINED HAS_XSIMD)
-    message(STATUS "default set HAS_XSIMD to ON")
-    set(HAS_XSIMD ON)
+# xsimd support.
+#
+# HAS_XSIMD accepts three values:
+#   ON   : xsimd is required; configure fails if the headers are not found.
+#   OFF  : xsimd is disabled; the fallback scalar code path is used.
+#   AUTO : try to detect xsimd and silently fall back to OFF if not available.
+#          This is the default so a fresh clone still builds on machines that
+#          do not have xsimd installed, while still picking it up when present.
+#
+# Detection is done here in the configure step rather than being deferred to
+# the first #include <xsimd/xsimd.hpp> so that a misconfiguration is surfaced
+# immediately and with a meaningful error message.
+set(HAS_XSIMD "AUTO" CACHE STRING "Enable xsimd acceleration (ON / OFF / AUTO)")
+set_property(CACHE HAS_XSIMD PROPERTY STRINGS "ON" "OFF" "AUTO")
+
+set(JITFUSION_USE_XSIMD OFF)
+set(JITFUSION_XSIMD_INCLUDE_DIRS "")
+
+if(NOT HAS_XSIMD STREQUAL "OFF")
+    # Prefer the upstream CMake package when it is installed (xsimd >= 9 ships
+    # xsimdConfig.cmake), otherwise fall back to a header-only lookup. Using
+    # QUIET here so AUTO stays silent on failure.
+    find_package(xsimd CONFIG QUIET)
+    if(xsimd_FOUND)
+        set(JITFUSION_USE_XSIMD ON)
+        # Config-mode package exposes the imported target xsimd::xsimd; we
+        # therefore do not need to set include dirs by hand.
+        message(STATUS "xsimd: found via CMake config package (version ${xsimd_VERSION})")
+    else()
+        find_path(JITFUSION_XSIMD_INCLUDE_DIR
+            NAMES xsimd/xsimd.hpp
+            DOC "Directory that contains xsimd/xsimd.hpp")
+        if(JITFUSION_XSIMD_INCLUDE_DIR)
+            set(JITFUSION_USE_XSIMD ON)
+            set(JITFUSION_XSIMD_INCLUDE_DIRS "${JITFUSION_XSIMD_INCLUDE_DIR}")
+            message(STATUS "xsimd: found headers at ${JITFUSION_XSIMD_INCLUDE_DIR}")
+        endif()
+    endif()
+
+    if(NOT JITFUSION_USE_XSIMD)
+        if(HAS_XSIMD STREQUAL "ON")
+            message(FATAL_ERROR
+                "HAS_XSIMD=ON was requested but xsimd headers could not be found. "
+                "Either install xsimd (see README) or reconfigure with "
+                "-DHAS_XSIMD=OFF / -DHAS_XSIMD=AUTO.")
+        else()
+            message(STATUS "xsimd: not found, falling back to scalar code path (HAS_XSIMD=AUTO)")
+        endif()
+    endif()
 endif()
 
-if(HAS_XSIMD)
+if(JITFUSION_USE_XSIMD)
     message(STATUS "compile with xsimd")
-    add_compile_definitions(HAS_XSIMD)
 else()
     message(STATUS "compile without xsimd")
 endif()
@@ -86,6 +131,19 @@ file(GLOB JITFUSION_HDRS "include/*.h")
 add_library(jitfusion ${JITFUSION_SRC} ${JITFUSION_HDRS})
 target_include_directories(jitfusion PUBLIC include PRIVATE src)
 target_link_libraries(jitfusion ${LLVM_LIBS})
+
+# xsimd is only used by src/function/list_arithmetic.cc and never leaks into
+# any public header under include/, so PRIVATE is the correct visibility here.
+# This keeps the athena / test / benchmark targets free of the xsimd include
+# path and the HAS_XSIMD macro.
+if(JITFUSION_USE_XSIMD)
+    target_compile_definitions(jitfusion PRIVATE HAS_XSIMD)
+    if(TARGET xsimd::xsimd)
+        target_link_libraries(jitfusion PRIVATE xsimd::xsimd)
+    else()
+        target_include_directories(jitfusion PRIVATE ${JITFUSION_XSIMD_INCLUDE_DIRS})
+    endif()
+endif()
 
 file(GLOB_RECURSE JITFUSION_TEST_SRC "test/*.cc")
 
