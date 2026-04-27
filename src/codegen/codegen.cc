@@ -80,7 +80,7 @@ Status CodeGen::ValueTypeToLLVMType(IRCodeGenContext &ctx, ValueType value_type,
       *llvm_type = ctx.complex_type.stringlist_type;
     } break;
     case ValueType::kPtr: {
-      *llvm_type = llvm::Type::getVoidTy(ctx.context)->getPointerTo();
+      *llvm_type = llvm::PointerType::getUnqual(ctx.context);
     } break;
     default:
       return Status::RuntimeError("[internal] ValueType ", TypeHelper::TypeToString(value_type),

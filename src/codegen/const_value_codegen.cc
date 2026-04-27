@@ -54,12 +54,12 @@ struct MakeValueVisitor {
       str = reinterpret_cast<char *>(ctx_.const_value_arena.Allocate(v.size()));
       memcpy(str, v.c_str(), v.size());
     }
-    llvm::Constant *str_ptr =
-        llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_.context), reinterpret_cast<int64_t>(str), false);
-    str_ptr = llvm::ConstantExpr::getIntToPtr(str_ptr, llvm::Type::getInt8Ty(ctx_.context)->getPointerTo());
-    llvm::Constant *str_len = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx_.context), v.size(), false);
-    std::vector<llvm::Constant *> struct_const_elements = {str_ptr, str_len};
-    llvm::Value *ret = llvm::ConstantStruct::get(ctx_.complex_type.string_type, struct_const_elements);
+    auto &builder = ctx_.builder;
+    llvm::Value *str_ptr = builder.CreateIntToPtr(builder.getInt64(reinterpret_cast<uintptr_t>(str)),
+                                                  llvm::PointerType::getUnqual(ctx_.context));
+    llvm::Value *ret = llvm::UndefValue::get(ctx_.complex_type.string_type);
+    ret = builder.CreateInsertValue(ret, str_ptr, 0);
+    ret = builder.CreateInsertValue(ret, builder.getInt32(v.size()), 1);
     return ret;
   }
 };
