@@ -4,5 +4,5 @@
 .DS_Store
 compile_commands.json
 MODULE.bazel.lock
-/CMakeBuild
+/build
 .bazelrc

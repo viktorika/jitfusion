@@ -15,14 +15,18 @@ struct MakeListVisitor {
   IRCodeGenContext &ctx_;
 
   llvm::Value *operator()(const std::vector<std::string> &list) const {
-    auto *data = reinterpret_cast<StringStruct *>(
-        ctx_.const_value_arena.Allocate(static_cast<int>(list.size()) * sizeof(StringStruct)));
-
-    for (std::size_t idx = 0; idx < list.size(); ++idx) {
-      data[idx].data =
-          reinterpret_cast<char *>(ctx_.const_value_arena.Allocate(static_cast<int>(list[idx].size())));
-      memcpy(data[idx].data, list[idx].data(), list[idx].size() * sizeof(char));
-      data[idx].len = list[idx].size();
+    StringStruct *data = nullptr;
+    if (!list.empty()) {
+      data = reinterpret_cast<StringStruct *>(ctx_.const_value_arena.Allocate(list.size() * sizeof(StringStruct)));
+      for (std::size_t idx = 0; idx < list.size(); ++idx) {
+        if (list[idx].empty()) {
+          data[idx].data = nullptr;
+        } else {
+          data[idx].data = reinterpret_cast<char *>(ctx_.const_value_arena.Allocate(list[idx].size()));
+          memcpy(data[idx].data, list[idx].data(), list[idx].size() * sizeof(char));
+        }
+        data[idx].len = list[idx].size();
+      }
     }
     llvm::Constant *data_ptr =
         llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_.context), reinterpret_cast<int64_t>(data), false);
@@ -37,8 +41,11 @@ struct MakeListVisitor {
   template <typename ValueType>
   llvm::Value *CreateNumberList(const std::vector<ValueType> &list, llvm::PointerType *element_pointer_type,
                                 llvm::StructType *struct_type) const {
-    void *data = ctx_.const_value_arena.Allocate(static_cast<int>(list.size()) * sizeof(ValueType));
-    memcpy(data, list.data(), list.size() * sizeof(ValueType));
+    void *data = nullptr;
+    if (!list.empty()) {
+      data = ctx_.const_value_arena.Allocate(list.size() * sizeof(ValueType));
+      memcpy(data, list.data(), list.size() * sizeof(ValueType));
+    }
 
     llvm::Constant *data_ptr =
         llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_.context), reinterpret_cast<int64_t>(data), false);
