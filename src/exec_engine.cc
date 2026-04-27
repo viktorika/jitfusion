@@ -394,90 +394,60 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
     case ValueType::kU8List: {                                                                              \
       U8ListStruct list =                                                                                   \
           reinterpret_cast<return_u8list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);     \
-      std::vector<uint8_t> res;                                                                             \
-      res.resize(list.len);                                                                                 \
-      memcpy(res.data(), list.data, list.len * sizeof(uint8_t));                                            \
-      *result = std::move(res);                                                                             \
+      *result = std::vector<uint8_t>(list.data, list.data + list.len);                                      \
     } break;                                                                                                \
     case ValueType::kU16List: {                                                                             \
       U16ListStruct list =                                                                                  \
           reinterpret_cast<return_u16list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);    \
-      std::vector<uint16_t> res;                                                                            \
-      res.resize(list.len);                                                                                 \
-      memcpy(res.data(), list.data, list.len * sizeof(uint16_t));                                           \
-      *result = std::move(res);                                                                             \
+      *result = std::vector<uint16_t>(list.data, list.data + list.len);                                     \
     } break;                                                                                                \
     case ValueType::kU32List: {                                                                             \
       U32ListStruct list =                                                                                  \
           reinterpret_cast<return_u32list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);    \
-      std::vector<uint32_t> res;                                                                            \
-      res.resize(list.len);                                                                                 \
-      memcpy(res.data(), list.data, list.len * sizeof(uint32_t));                                           \
-      *result = std::move(res);                                                                             \
+      *result = std::vector<uint32_t>(list.data, list.data + list.len);                                     \
     } break;                                                                                                \
     case ValueType::kU64List: {                                                                             \
       U64ListStruct list =                                                                                  \
           reinterpret_cast<return_u64list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);    \
-      std::vector<uint64_t> res;                                                                            \
-      res.resize(list.len);                                                                                 \
-      memcpy(res.data(), list.data, list.len * sizeof(uint64_t));                                           \
-      *result = std::move(res);                                                                             \
+      *result = std::vector<uint64_t>(list.data, list.data + list.len);                                     \
     } break;                                                                                                \
     case ValueType::kI8List: {                                                                              \
       I8ListStruct list =                                                                                   \
           reinterpret_cast<return_i8list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);     \
-      std::vector<int8_t> res;                                                                              \
-      res.resize(list.len);                                                                                 \
-      memcpy(res.data(), list.data, list.len * sizeof(int8_t));                                             \
-      *result = std::move(res);                                                                             \
+      *result = std::vector<int8_t>(list.data, list.data + list.len);                                       \
     } break;                                                                                                \
     case ValueType::kI16List: {                                                                             \
       I16ListStruct list =                                                                                  \
           reinterpret_cast<return_i16list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);    \
-      std::vector<int16_t> res;                                                                             \
-      res.resize(list.len);                                                                                 \
-      memcpy(res.data(), list.data, list.len * sizeof(int16_t));                                            \
-      *result = std::move(res);                                                                             \
+      *result = std::vector<int16_t>(list.data, list.data + list.len);                                      \
     } break;                                                                                                \
     case ValueType::kI32List: {                                                                             \
       I32ListStruct list =                                                                                  \
           reinterpret_cast<return_i32list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);    \
-      std::vector<int32_t> res;                                                                             \
-      res.resize(list.len);                                                                                 \
-      memcpy(res.data(), list.data, list.len * sizeof(int32_t));                                            \
-      *result = std::move(res);                                                                             \
+      *result = std::vector<int32_t>(list.data, list.data + list.len);                                      \
     } break;                                                                                                \
     case ValueType::kI64List: {                                                                             \
       I64ListStruct list =                                                                                  \
           reinterpret_cast<return_i64list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);    \
-      std::vector<int64_t> res;                                                                             \
-      res.resize(list.len);                                                                                 \
-      memcpy(res.data(), list.data, list.len * sizeof(int64_t));                                            \
-      *result = std::move(res);                                                                             \
+      *result = std::vector<int64_t>(list.data, list.data + list.len);                                      \
     } break;                                                                                                \
     case ValueType::kF32List: {                                                                             \
       F32ListStruct list =                                                                                  \
           reinterpret_cast<return_f32list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);    \
-      std::vector<float> res;                                                                               \
-      res.resize(list.len);                                                                                 \
-      memcpy(res.data(), list.data, list.len * sizeof(float));                                              \
-      *result = std::move(res);                                                                             \
+      *result = std::vector<float>(list.data, list.data + list.len);                                        \
     } break;                                                                                                \
     case ValueType::kF64List: {                                                                             \
       F64ListStruct list =                                                                                  \
           reinterpret_cast<return_f64list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);    \
-      std::vector<double> res;                                                                              \
-      res.resize(list.len);                                                                                 \
-      memcpy(res.data(), list.data, list.len * sizeof(double));                                             \
-      *result = std::move(res);                                                                             \
+      *result = std::vector<double>(list.data, list.data + list.len);                                       \
     } break;                                                                                                \
     case ValueType::kStringList: {                                                                          \
       StringListStruct list =                                                                               \
           reinterpret_cast<return_stringlist_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr); \
       std::vector<std::string> res;                                                                         \
-      res.resize(list.len);                                                                                 \
+      res.reserve(list.len);                                                                                \
       for (uint32_t i = 0; i < list.len; ++i) {                                                             \
-        res[i] = std::string(list.data[i].data, list.data[i].len);                                          \
+        res.emplace_back(list.data[i].data, list.data[i].len);                                              \
       }                                                                                                     \
       *result = std::move(res);                                                                             \
     } break;                                                                                                \
