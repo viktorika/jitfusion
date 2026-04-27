@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
-project(jitfusion_project)
+project(jitfusion VERSION 1.2.1 LANGUAGES CXX)
+
+# GNUInstallDirs defines CMAKE_INSTALL_{LIBDIR,INCLUDEDIR,BINDIR,DOCDIR,...}
+# so we need it before any target_include_directories(... $<INSTALL_INTERFACE:...> ...)
+# reference below.
+include(GNUInstallDirs)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -129,7 +134,12 @@ file(GLOB_RECURSE JITFUSION_SRC "src/*.cc" "src/*.h")
 file(GLOB JITFUSION_HDRS "include/*.h")
 
 add_library(jitfusion ${JITFUSION_SRC} ${JITFUSION_HDRS})
-target_include_directories(jitfusion PUBLIC include PRIVATE src)
+target_include_directories(jitfusion
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    PRIVATE
+        src)
 target_link_libraries(jitfusion ${LLVM_LIBS})
 
 # xsimd is only used by src/function/list_arithmetic.cc and never leaks into
@@ -170,7 +180,9 @@ file(GLOB_RECURSE ATHENA_SRC
 )
 
 add_library(athena ${ATHENA_SRC})
-target_include_directories(athena PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/athena)
+target_include_directories(athena PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/athena>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 target_link_libraries(athena jitfusion)
 
 file(GLOB_RECURSE ATHENA_TEST_SRC "athena/test/*.cc")
@@ -192,4 +204,101 @@ if(BUILD_BENCHMARK)
             "BUILD_BENCHMARK=ON with CMAKE_BUILD_TYPE=Debug: results will be "
             "meaningless. Reconfigure with -DCMAKE_BUILD_TYPE=Release.")
     endif()
+endif()
+
+# -----------------------------------------------------------------------------
+# Install / export
+#
+# `cmake --install <build_dir> --prefix <prefix>` will produce:
+#   <prefix>/lib/libjitfusion.{a,so}
+#   <prefix>/lib/libathena.{a,so}
+#   <prefix>/include/jitfusion/*.h
+#   <prefix>/include/athena/*.{h,hh}
+#   <prefix>/lib/cmake/jitfusion/jitfusion{Config,ConfigVersion,Targets}.cmake
+#
+# Downstream usage:
+#   find_package(jitfusion 1.2 REQUIRED)
+#   target_link_libraries(my_app PRIVATE jitfusion::jitfusion jitfusion::athena)
+#
+# Set JITFUSION_INSTALL=OFF if you are embedding jitfusion via
+# add_subdirectory() from a larger project and do not want install rules.
+# -----------------------------------------------------------------------------
+option(JITFUSION_INSTALL "Generate install rules for jitfusion" ON)
+
+if(JITFUSION_INSTALL)
+    include(CMakePackageConfigHelpers)
+
+    set(JITFUSION_CMAKE_CONFIG_INSTALL_DIR
+        "${CMAKE_INSTALL_LIBDIR}/cmake/jitfusion")
+
+    install(TARGETS jitfusion athena
+        EXPORT jitfusionTargets
+        ARCHIVE  DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        LIBRARY  DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        RUNTIME  DESTINATION "${CMAKE_INSTALL_BINDIR}")
+
+    # jitfusion public headers -> <prefix>/include/jitfusion/
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/jitfusion"
+        FILES_MATCHING PATTERN "*.h")
+
+    # athena public headers -> <prefix>/include/athena/
+    # Only the files referenced by athena/athena.h (directly or transitively)
+    # are part of the public surface; implementation headers like token.ll
+    # or the generated shell script are excluded.
+    install(FILES
+            "${CMAKE_CURRENT_SOURCE_DIR}/athena/athena.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/athena/ast_builder.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/athena/dsu.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/athena/pipeline_grouper.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/athena/location.hh"
+            "${CMAKE_CURRENT_SOURCE_DIR}/athena/parser.hh"
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/athena")
+
+    # Export the targets so downstream projects pick them up via find_package.
+    install(EXPORT jitfusionTargets
+        FILE jitfusionTargets.cmake
+        NAMESPACE jitfusion::
+        DESTINATION "${JITFUSION_CMAKE_CONFIG_INSTALL_DIR}")
+
+    write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/jitfusionConfigVersion.cmake"
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY SameMajorVersion)
+
+    # Generate the Config file from an inline template. `@PACKAGE_INIT@` is
+    # expanded by configure_package_config_file() and provides a minimal
+    # prelude that makes relative paths inside the config file relocatable.
+    set(JITFUSION_CONFIG_TEMPLATE
+        "${CMAKE_CURRENT_BINARY_DIR}/jitfusionConfig.cmake.in")
+    file(WRITE "${JITFUSION_CONFIG_TEMPLATE}"
+[=[@PACKAGE_INIT@
+
+# jitfusion links against LLVM libraries reported by `llvm-config --libs` at
+# build time. Those library references are baked into jitfusionTargets.cmake
+# as INTERFACE_LINK_LIBRARIES; downstream projects must ensure the matching
+# LLVM installation is discoverable by the linker (typically by having
+# llvm-config on PATH or by adding -L<llvm-prefix>/lib). jitfusion does not
+# call find_package(LLVM) here to avoid forcing CMake-mode LLVM discovery on
+# consumers that already link against LLVM through other means.
+
+include("${CMAKE_CURRENT_LIST_DIR}/jitfusionTargets.cmake")
+check_required_components(jitfusion)
+]=])
+
+    configure_package_config_file(
+        "${JITFUSION_CONFIG_TEMPLATE}"
+        "${CMAKE_CURRENT_BINARY_DIR}/jitfusionConfig.cmake"
+        INSTALL_DESTINATION "${JITFUSION_CMAKE_CONFIG_INSTALL_DIR}")
+
+    install(FILES
+            "${CMAKE_CURRENT_BINARY_DIR}/jitfusionConfig.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/jitfusionConfigVersion.cmake"
+        DESTINATION "${JITFUSION_CMAKE_CONFIG_INSTALL_DIR}")
+
+    install(FILES
+            "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE"
+            "${CMAKE_CURRENT_SOURCE_DIR}/README.md"
+        DESTINATION "${CMAKE_INSTALL_DOCDIR}"
+        OPTIONAL)
 endif()
