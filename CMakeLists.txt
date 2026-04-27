@@ -104,7 +104,7 @@ file(GLOB_RECURSE ATHENA_SRC
 )
 
 add_library(athena ${ATHENA_SRC})
-target_include_directories(jitfusion PUBLIC athena)
+target_include_directories(athena PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/athena)
 target_link_libraries(athena jitfusion)
 
 file(GLOB_RECURSE ATHENA_TEST_SRC "athena/test/*.cc")
