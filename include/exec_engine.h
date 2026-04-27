@@ -153,6 +153,8 @@ class ExecEngine {
   Status CreateJitAndOptimize(const std::unique_ptr<FunctionRegistry>& func_registry,
                               std::unique_ptr<llvm::Module> owner, std::unique_ptr<llvm::LLVMContext> llvm_context);
 
+  void ResetCompiledState();
+
   Arena const_value_arena_;
   llvm::Expected<std::unique_ptr<llvm::orc::LLJIT>> jit_;
   char* entry_func_ptr_;
