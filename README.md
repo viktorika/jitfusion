@@ -45,23 +45,23 @@ cmake -B build                     # AUTO (default)
 ```
 
 ## Bazel Build
-If you are using version <span style="color:red">Bazel 8</span> or above, you will need to use the --enable_workspace=true option.
+If you are using <span style="color:red">Bazel 8</span> or above, you will need to use the --enable_workspace=true option.
 
-You can get the library use the following command.
+You can build the library with the following command.
 ```bash
 bazel build //:jitfusion
 ```
-You can get the unit test binary use the following command.
+You can build the unit test binary with the following command.
 ```bash
 bazel build //:jitfusion_test
 ```
 
-You can get the athena use the following command.
+You can build athena with the following command.
 ```bash
 bazel build //:athena
 ```
 
-You can get the athena unit test binary use the following command.
+You can build the athena unit test binary with the following command.
 ```bash
 bazel build //:athena_test
 ```
@@ -93,7 +93,7 @@ I considered how many types of nodes are needed to represent a function in the e
 
     RefNode: Reference node. Used in pipeline mode to reference a named variable defined in a previous statement within the same NoOPNode, avoiding redundant subtree cloning and reducing IR bloat.
 
-    OutputNode： Used for optimizing complex scenarios. Data is not returned via a return value but is instead written using a custom store function.
+    OutputNode: Used for optimizing complex scenarios. Data is not returned via a return value but is instead written using a custom store function.
 
 
 
@@ -104,11 +104,11 @@ For example, generally speaking, the process of an execution flow graph might lo
 
 
 <div align=center><img src="doc/exec_pipeline_example.png" width="50%" height="50%"></div>
-</br>
+<br/>
 
 Typically, the initial node is a data loading node. After a series of operations in the middle to obtain the desired value, the process is completed with a data storing node at the end.
 
-The data reading and writing nodes can both be implemented using EntryArgumentNode and FunctionNode. You can refer to test/entry_argument_node_test.cc for more details. for example:
+Data can be read by combining an `EntryArgumentNode` with a custom `FunctionNode`. Writing back is typically done via an `OutputNode` paired with a store function registered through `RegisterStoreCFunc` (see the *Optimize* section below). You can refer to `test/entry_argument_node_test.cc` for more details. For example:
 
 ```c++
 using namespace jitfusion;
@@ -129,14 +129,21 @@ int main() {
 
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(load_func_node, func_registry);
-  std::cout << st.ToString() << std::endl;
+  if (!st.ok()) {
+    std::cerr << st.ToString() << std::endl;
+    return 1;
+  }
   RetType result;
   std::vector<int32_t> data_list = {100, 200, 300, 400};
-  exec_engine.Execute(data_list.data(), &result);
+  st = exec_engine.Execute(data_list.data(), &result);
+  if (!st.ok()) {
+    std::cerr << st.ToString() << std::endl;
+    return 1;
+  }
 }
 ```
 
-The EntryArgumentNode will consistently return a pointer value, which is the input parameter for the execution engine's Execute function. By passing this value to a custom function, you can perform operations on this parameter.If you want to achieve maximum performance, you can implement the codegen function. You can refer to the implementations in the src/function directory for guidance.
+The EntryArgumentNode always returns a pointer value, which is the input parameter passed to the execution engine's `Execute` function. By forwarding this pointer to a custom function, you can perform arbitrary operations on the input. If you want to achieve maximum performance, you can implement the codegen function. You can refer to the implementations in the `src/function` directory for guidance.
 
 The intermediate processes can all be converted into corresponding op nodes, function nodes, condition nodes, etc. Additionally, there are usually multiple execution flows within a single task, and these flows may use the same variables. To achieve maximum optimization, you can have all the store nodes ultimately point to a NoOP node, allowing LLVM to perform the optimization for you.
 
@@ -176,7 +183,7 @@ It is more recommended to use this interface.
   // and it will not return data from the root node. and root node must be the NoOpNode.
   Status Execute(void* entry_arguments, void* result);
 ```
-This function does not return data through the root node; instead, the user provides a pointer for writing, which can be obtained through the OutputNode.This function require that the root node must be the NoOpNode.
+This function does not return data through the root node; instead, the user provides a pointer for writing, which can be obtained through the OutputNode. This function requires that the root node be the NoOpNode.
 
 It is recommended to divide custom functions into two categories: read-only functions and store functions. Read-only functions can either be data loading functions or computation functions that generate an intermediate variable. It is not recommended for computation functions to directly modify parameter variables; instead, they should return the computation result by generating a new variable. In this case, you can set a read-only attribute for your function, as shown in the code below.
 
@@ -190,7 +197,7 @@ FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU
 EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadU32)).ok());
 ```
 
-When use store functions, it is recommended to set the OutputNode as a corresponding attribute, similar to the code below.
+When using store functions, it is recommended to set the OutputNode as a corresponding attribute, similar to the code below.
 The third parameter of RegisterStoreCFunc is used to tell jitfusion which argument is the OutputNode.
 
 ```c++
@@ -246,9 +253,9 @@ The library is designed around a "compile once, execute from many threads" patte
 Recommended pattern for parallel execution: one shared `ExecEngine` plus one `ExecContext` per worker thread.
 
 # Attention
-1.If you need to allocate memory that you cannot manage yourself and require the execution engine to manage it for you, you need to use the ExecContextNode. The ExecContext structure corresponding to ExecContextNode contains an arena. By using it to allocate memory, the memory will be automatically released when the execution is complete.
+1. If you need to allocate memory that you cannot manage yourself and require the execution engine to manage it for you, you need to use the ExecContextNode. The ExecContext structure corresponding to ExecContextNode contains an arena. By using it to allocate memory, the memory will be automatically released when the execution is complete.
 
-You can refer to test/exec_context_node_test.cc for more details. for example:
+You can refer to test/exec_context_node_test.cc for more details. For example:
 
 ```c++
 using namespace jitfusion;
@@ -277,15 +284,23 @@ int main() {
 
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(create_func_node, func_registry);
+  if (!st.ok()) {
+    std::cerr << st.ToString() << std::endl;
+    return 1;
+  }
   RetType result;
-  exec_engine.Execute(nullptr, &result);
+  st = exec_engine.Execute(nullptr, &result);
+  if (!st.ok()) {
+    std::cerr << st.ToString() << std::endl;
+    return 1;
+  }
 }
 ```
 
 # Supported functions
 
-Currently supported function documentation：[function.md](doc/function.md)
+Currently supported function documentation: [function.md](doc/function.md)
 
 # Tools
 
-* athena：An execution engine utilizing DSL in combination with jitfusion. You can find more details in the [athena](athena) directory.
+* athena: An execution engine utilizing DSL in combination with jitfusion. You can find more details in the [athena](athena) directory.
