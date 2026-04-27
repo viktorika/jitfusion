@@ -44,6 +44,53 @@ cmake -B build -DHAS_XSIMD=OFF     # disable xsimd
 cmake -B build                     # AUTO (default)
 ```
 
+### Install
+
+After configuring and building, you can install the libraries, public
+headers and a CMake package config so that downstream projects can consume
+jitfusion via `find_package`.
+
+```bash
+cmake -B build
+cmake --build build -j
+cmake --install build --prefix /path/to/install
+```
+
+Layout of the install tree:
+
+```
+<prefix>/
+├── include/
+│   ├── jitfusion/   # jitfusion public headers
+│   └── athena/      # athena public headers
+├── lib/
+│   ├── libjitfusion.{a,so}
+│   ├── libathena.{a,so}
+│   └── cmake/jitfusion/
+│       ├── jitfusionConfig.cmake
+│       ├── jitfusionConfigVersion.cmake
+│       └── jitfusionTargets.cmake
+└── share/doc/jitfusion/           # LICENSE, README.md
+```
+
+Downstream `CMakeLists.txt`:
+
+```cmake
+find_package(jitfusion 1.2 REQUIRED)
+add_executable(my_app main.cc)
+target_link_libraries(my_app PRIVATE jitfusion::jitfusion jitfusion::athena)
+# Downstream source uses: #include <jitfusion/exec_engine.h> etc.
+```
+
+Notes:
+
+* The installed package records the LLVM libraries reported by
+  `llvm-config --libs` at build time as its link interface. Consumers
+  must therefore have the matching LLVM installation discoverable by the
+  linker (e.g. via `-L<llvm-prefix>/lib`).
+* Pass `-DJITFUSION_INSTALL=OFF` if you embed jitfusion via
+  `add_subdirectory()` from a larger project and do not want install rules.
+
 ## Bazel Build
 If you are using <span style="color:red">Bazel 8</span> or above, you will need to use the --enable_workspace=true option.
 
