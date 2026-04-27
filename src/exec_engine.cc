@@ -304,12 +304,25 @@ ExecEngine::~ExecEngine() {
   }
 }
 
+void ExecEngine::ResetCompiledState() {
+  if (!jit_) {
+    llvm::consumeError(jit_.takeError());
+  }
+  jit_ = nullptr;
+  batch_entry_func_ptrs_.clear();
+  batch_ret_types_.clear();
+  ir_code_.clear();
+  const_value_arena_.Reset();
+}
+
 Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
                            const std::unique_ptr<FunctionRegistry>& func_registry) {
   // validator
   Validator validator(func_registry);
   JF_RETURN_NOT_OK(validator.Validate(exec_node.get()));
   ret_type_ = exec_node->GetReturnType();
+
+  ResetCompiledState();
 
   // codegen
   std::unique_ptr<llvm::LLVMContext> llvm_context = std::make_unique<llvm::LLVMContext>();
@@ -520,6 +533,8 @@ Status ExecEngine::BatchCompile(const std::vector<std::unique_ptr<ExecNode>>& ex
   for (const auto& exec_node : exec_nodes) {
     JF_RETURN_NOT_OK(validator.Validate(exec_node.get()));
   }
+
+  ResetCompiledState();
 
   std::unique_ptr<llvm::LLVMContext> llvm_context = std::make_unique<llvm::LLVMContext>();
   std::unique_ptr<llvm::Module> owner = std::make_unique<llvm::Module>("module", *llvm_context);
@@ -738,7 +753,6 @@ Status ExecEngine::CreateJitAndOptimize(const std::unique_ptr<FunctionRegistry>&
 
           mpm.run(module, mam);
           if (option_.dump_ir) {
-            ir_code_.clear();
             llvm::raw_string_ostream string_os(ir_code_);
             module.print(string_os, nullptr);
           }
