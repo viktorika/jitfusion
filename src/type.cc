@@ -5,8 +5,10 @@
  * @Last Modified time: 2025-01-23 16:58:33
  */
 #include "type.h"
+#include <array>
+#include <cstddef>
+#include <cstdint>
 #include <string>
-#include <unordered_map>
 
 namespace jitfusion {
 
@@ -159,15 +161,37 @@ bool TypeHelper::IsIntegerType(ValueType type) {
 }
 
 ValueType TypeHelper::GetPromotedType(ValueType lhs, ValueType rhs) {
-  static const std::unordered_map<ValueType, int32_t> kWeight = {
-      {ValueType::kUnknown, -1}, {ValueType::kVoid, -1},    {ValueType::kI8, 0},       {ValueType::kU8, 1},
-      {ValueType::kI16, 2},      {ValueType::kU16, 3},      {ValueType::kI32, 4},      {ValueType::kU32, 5},
-      {ValueType::kI64, 6},      {ValueType::kU64, 7},      {ValueType::kF32, 8},      {ValueType::kF64, 9},
-      {ValueType::kString, 10},  {ValueType::kI8List, 11},  {ValueType::kU8List, 12},  {ValueType::kI16List, 13},
-      {ValueType::kU16List, 14}, {ValueType::kI32List, 15}, {ValueType::kU32List, 16}, {ValueType::kI64List, 17},
-      {ValueType::kU64List, 18}, {ValueType::kF32List, 19}, {ValueType::kF64List, 20}, {ValueType::kStringList, 21}};
-  auto left_weight = kWeight.at(lhs);
-  auto right_weight = kWeight.at(rhs);
+  static constexpr auto kWeightTable = []() {
+    std::array<int8_t, 256> table{};
+    for (auto& v : table) {
+      v = -1;
+    }
+    table[static_cast<size_t>(ValueType::kI8)] = 0;
+    table[static_cast<size_t>(ValueType::kU8)] = 1;
+    table[static_cast<size_t>(ValueType::kI16)] = 2;
+    table[static_cast<size_t>(ValueType::kU16)] = 3;
+    table[static_cast<size_t>(ValueType::kI32)] = 4;
+    table[static_cast<size_t>(ValueType::kU32)] = 5;
+    table[static_cast<size_t>(ValueType::kI64)] = 6;
+    table[static_cast<size_t>(ValueType::kU64)] = 7;
+    table[static_cast<size_t>(ValueType::kF32)] = 8;
+    table[static_cast<size_t>(ValueType::kF64)] = 9;
+    table[static_cast<size_t>(ValueType::kString)] = 10;
+    table[static_cast<size_t>(ValueType::kI8List)] = 11;
+    table[static_cast<size_t>(ValueType::kU8List)] = 12;
+    table[static_cast<size_t>(ValueType::kI16List)] = 13;
+    table[static_cast<size_t>(ValueType::kU16List)] = 14;
+    table[static_cast<size_t>(ValueType::kI32List)] = 15;
+    table[static_cast<size_t>(ValueType::kU32List)] = 16;
+    table[static_cast<size_t>(ValueType::kI64List)] = 17;
+    table[static_cast<size_t>(ValueType::kU64List)] = 18;
+    table[static_cast<size_t>(ValueType::kF32List)] = 19;
+    table[static_cast<size_t>(ValueType::kF64List)] = 20;
+    table[static_cast<size_t>(ValueType::kStringList)] = 21;
+    return table;
+  }();
+  const int8_t left_weight = kWeightTable[static_cast<uint8_t>(lhs)];
+  const int8_t right_weight = kWeightTable[static_cast<uint8_t>(rhs)];
   return left_weight > right_weight ? lhs : rhs;
 }
 

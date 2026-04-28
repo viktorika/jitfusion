@@ -109,7 +109,7 @@ struct ExecEngineOption {
 class ExecEngine {
  public:
   explicit ExecEngine(ExecEngineOption option = {});
-  ~ExecEngine();
+  ~ExecEngine() = default;
   ExecEngine(const ExecEngine&) = delete;
   ExecEngine& operator=(const ExecEngine&) = delete;
 
@@ -156,7 +156,7 @@ class ExecEngine {
   void ResetCompiledState();
 
   Arena const_value_arena_;
-  llvm::Expected<std::unique_ptr<llvm::orc::LLJIT>> jit_;
+  std::unique_ptr<llvm::orc::LLJIT> jit_;
   char* entry_func_ptr_;
   ValueType ret_type_;
   ExecEngineOption option_;
