@@ -11,6 +11,11 @@
 #include "status.h"
 #include "type.h"
 
+#ifdef HAS_XSIMD
+#  include <xsimd/xsimd.hpp>
+namespace xs = xsimd;
+#endif
+
 namespace jitfusion {
 
 namespace {
@@ -124,10 +129,27 @@ ListType IfByBitmapLLRB(U8ListStruct bitmap, ListType lhs, typename ListType::CE
   for (int j = 0; i + j < result.len; j++) {
     result.data[i + j] = (bitmap.data[last_index] >> j) & 1;
   }
-  for (uint32_t j = 0; j < result.len; j++) {
-    typename ListType::CElementType mask = (result.data[j] > 0);
-    result.data[j] = lhs.data[j] * mask + rhs * (1 - mask);
+#ifdef HAS_XSIMD
+  using batch_type = xs::batch<typename ListType::CElementType, xs::default_arch>;
+  constexpr std::size_t kBatchSize = batch_type::size;
+  batch_type zero_vec(static_cast<typename ListType::CElementType>(0));
+  batch_type rhs_vec(rhs);
+  std::size_t vec_size = result.len - (result.len % kBatchSize);
+  for (std::size_t j = 0; j < vec_size; j += kBatchSize) {
+    auto mask_vec = batch_type::load_unaligned(result.data + j);
+    auto lhs_vec = batch_type::load_unaligned(lhs.data + j);
+    auto cond = mask_vec > zero_vec;
+    auto out = xs::select(cond, lhs_vec, rhs_vec);
+    out.store_unaligned(result.data + j);
   }
+  for (std::size_t j = vec_size; j < result.len; ++j) {
+    result.data[j] = (result.data[j] > 0) ? lhs.data[j] : rhs;
+  }
+#else
+  for (uint32_t j = 0; j < result.len; j++) {
+    result.data[j] = (result.data[j] > 0) ? lhs.data[j] : rhs;
+  }
+#endif
   return result;
 }
 
@@ -155,10 +177,27 @@ ListType IfByBitmapLBRL(U8ListStruct bitmap, typename ListType::CElementType lhs
   for (int j = 0; i + j < result.len; j++) {
     result.data[i + j] = (bitmap.data[last_index] >> j) & 1;
   }
-  for (uint32_t j = 0; j < result.len; j++) {
-    typename ListType::CElementType mask = (result.data[j] > 0);
-    result.data[j] = lhs * mask + rhs.data[j] * (1 - mask);
+#ifdef HAS_XSIMD
+  using batch_type = xs::batch<typename ListType::CElementType, xs::default_arch>;
+  constexpr std::size_t kBatchSize = batch_type::size;
+  batch_type zero_vec(static_cast<typename ListType::CElementType>(0));
+  batch_type lhs_vec(lhs);
+  std::size_t vec_size = result.len - (result.len % kBatchSize);
+  for (std::size_t j = 0; j < vec_size; j += kBatchSize) {
+    auto mask_vec = batch_type::load_unaligned(result.data + j);
+    auto rhs_vec = batch_type::load_unaligned(rhs.data + j);
+    auto cond = mask_vec > zero_vec;
+    auto out = xs::select(cond, lhs_vec, rhs_vec);
+    out.store_unaligned(result.data + j);
   }
+  for (std::size_t j = vec_size; j < result.len; ++j) {
+    result.data[j] = (result.data[j] > 0) ? lhs : rhs.data[j];
+  }
+#else
+  for (uint32_t j = 0; j < result.len; j++) {
+    result.data[j] = (result.data[j] > 0) ? lhs : rhs.data[j];
+  }
+#endif
   return result;
 }
 
@@ -190,10 +229,27 @@ ListType IfByBitmapLLRL(U8ListStruct bitmap, ListType lhs, ListType rhs, void *e
   for (int j = 0; i + j < result.len; j++) {
     result.data[i + j] = (bitmap.data[last_index] >> j) & 1;
   }
-  for (uint32_t j = 0; j < result.len; j++) {
-    typename ListType::CElementType mask = (result.data[j] > 0);
-    result.data[j] = lhs.data[j] * mask + rhs.data[j] * (1 - mask);
+#ifdef HAS_XSIMD
+  using batch_type = xs::batch<typename ListType::CElementType, xs::default_arch>;
+  constexpr std::size_t kBatchSize = batch_type::size;
+  batch_type zero_vec(static_cast<typename ListType::CElementType>(0));
+  std::size_t vec_size = result.len - (result.len % kBatchSize);
+  for (std::size_t j = 0; j < vec_size; j += kBatchSize) {
+    auto mask_vec = batch_type::load_unaligned(result.data + j);
+    auto lhs_vec = batch_type::load_unaligned(lhs.data + j);
+    auto rhs_vec = batch_type::load_unaligned(rhs.data + j);
+    auto cond = mask_vec > zero_vec;
+    auto out = xs::select(cond, lhs_vec, rhs_vec);
+    out.store_unaligned(result.data + j);
   }
+  for (std::size_t j = vec_size; j < result.len; ++j) {
+    result.data[j] = (result.data[j] > 0) ? lhs.data[j] : rhs.data[j];
+  }
+#else
+  for (uint32_t j = 0; j < result.len; j++) {
+    result.data[j] = (result.data[j] > 0) ? lhs.data[j] : rhs.data[j];
+  }
+#endif
   return result;
 }
 
