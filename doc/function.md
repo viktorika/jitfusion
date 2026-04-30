@@ -1076,16 +1076,16 @@ Return a bitmap representing the results of not equal comparisons for each eleme
 ## FilterByBitmap
 Return a new list by filtering out the corresponding elements based on the bitmap.
 
-    u8list  FilterByBitmap(u8list src, u8list bitmap, u32 bits_count, ptr exec_ctx)
-    u16list FilterByBitmap(u16list src, u8list bitmap, u32 bits_count, ptr exec_ctx)
-    u32list FilterByBitmap(u32list src, u8list bitmap, u32 bits_count, ptr exec_ctx)
-    u64list FilterByBitmap(u64list src, u8list bitmap, u32 bits_count, ptr exec_ctx)
-    i8list  FilterByBitmap(i8list src, u8list bitmap, u32 bits_count, ptr exec_ctx)
-    i16list FilterByBitmap(i16list src, u8list bitmap, u32 bits_count, ptr exec_ctx)
-    i32list FilterByBitmap(i32list src, u8list bitmap, u32 bits_count, ptr exec_ctx)
-    i64list FilterByBitmap(i64list src, u8list bitmap, u32 bits_count, ptr exec_ctx)
-    f32list FilterByBitmap(f32list src, u8list bitmap, u32 bits_count, ptr exec_ctx)
-    f64list FilterByBitmap(f64list src, u8list bitmap, u32 bits_count, ptr exec_ctx)
+    u8list  FilterByBitmap(u8list src, u8list bitmap, ptr exec_ctx)
+    u16list FilterByBitmap(u16list src, u8list bitmap, ptr exec_ctx)
+    u32list FilterByBitmap(u32list src, u8list bitmap, ptr exec_ctx)
+    u64list FilterByBitmap(u64list src, u8list bitmap, ptr exec_ctx)
+    i8list  FilterByBitmap(i8list src, u8list bitmap, ptr exec_ctx)
+    i16list FilterByBitmap(i16list src, u8list bitmap, ptr exec_ctx)
+    i32list FilterByBitmap(i32list src, u8list bitmap, ptr exec_ctx)
+    i64list FilterByBitmap(i64list src, u8list bitmap, ptr exec_ctx)
+    f32list FilterByBitmap(f32list src, u8list bitmap, ptr exec_ctx)
+    f64list FilterByBitmap(f64list src, u8list bitmap, ptr exec_ctx)
 
 ## CountBits
 Count the number of 1s in the bitmap.

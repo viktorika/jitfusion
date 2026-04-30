@@ -198,6 +198,7 @@ if(BUILD_BENCHMARK)
     find_package(benchmark REQUIRED)
     file(GLOB ENGINE_BENCHMARK_SRC "benchmark/*.cc" "benchmark/*.h")
     add_executable(engine_benchmark ${ENGINE_BENCHMARK_SRC})
+    target_include_directories(engine_benchmark PRIVATE ${CMAKE_SOURCE_DIR})
     target_link_libraries(engine_benchmark jitfusion benchmark::benchmark)
 
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
