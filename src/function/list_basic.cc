@@ -188,7 +188,7 @@ ListType Unique(ListType a, void *exec_context) {
   seen.reserve(a.len);
   uint32_t idx = 0;
   for (uint32_t i = 0; i < a.len; ++i) {
-    if (seen.insert(a.data[i]).second) {
+    if (seen.emplace(a.data[i]).second) {
       result.data[idx++] = a.data[i];
     }
   }
@@ -205,7 +205,7 @@ inline StringListStruct UniqueString(StringListStruct a, void *exec_context) {
   uint32_t idx = 0;
   for (uint32_t i = 0; i < a.len; ++i) {
     std::string_view sv(a.data[i].data, a.data[i].len);
-    if (seen.insert(sv).second) {
+    if (seen.emplace(sv).second) {
       result.data[idx++] = a.data[i];
     }
   }
