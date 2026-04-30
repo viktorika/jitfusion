@@ -110,7 +110,10 @@ cc_test(
 
 cc_binary(
     name = "engine_benchmark",
-    srcs = ["benchmark/engine_benchmark.cc"],
+    srcs = glob([
+        "benchmark/*.cc",
+        "benchmark/*.h",
+    ]),
     deps = [
         ":jitfusion",
     ],

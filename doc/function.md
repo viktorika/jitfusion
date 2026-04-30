@@ -446,6 +446,97 @@ Calculate the median of a pre-sorted list. For even-length lists, returns the av
     f64 SortedMedian(f32list)
     f64 SortedMedian(f64list)
 
+## GroupIndex
+Assign each element in `keys` a dense group id in first-appearance order, starting from 0. Duplicate keys get the same id, so the resulting `u32list` has the same length as `keys` and is the shared input of every other `Group*` function below.
+
+    u32list GroupIndex(u8list keys, ptr exec_ctx)
+    u32list GroupIndex(i8list keys, ptr exec_ctx)
+    u32list GroupIndex(u16list keys, ptr exec_ctx)
+    u32list GroupIndex(i16list keys, ptr exec_ctx)
+    u32list GroupIndex(u32list keys, ptr exec_ctx)
+    u32list GroupIndex(i32list keys, ptr exec_ctx)
+    u32list GroupIndex(u64list keys, ptr exec_ctx)
+    u32list GroupIndex(i64list keys, ptr exec_ctx)
+    u32list GroupIndex(f32list keys, ptr exec_ctx)
+    u32list GroupIndex(f64list keys, ptr exec_ctx)
+    u32list GroupIndex(stringlist keys, ptr exec_ctx)
+
+## GroupCount
+Return the number of distinct groups encoded in a `group_index` produced by `GroupIndex`. Returns 0 for empty input.
+
+    u32 GroupCount(u32list group_index)
+
+## GroupKeys
+Return the distinct keys in first-appearance order, one per group. The output length equals the number of distinct groups. `keys` and `group_index` must have the same length; `group_index` is typically the result of `GroupIndex(keys, exec_ctx)`.
+
+    u8list     GroupKeys(u8list keys, u32list group_index, ptr exec_ctx)
+    i8list     GroupKeys(i8list keys, u32list group_index, ptr exec_ctx)
+    u16list    GroupKeys(u16list keys, u32list group_index, ptr exec_ctx)
+    i16list    GroupKeys(i16list keys, u32list group_index, ptr exec_ctx)
+    u32list    GroupKeys(u32list keys, u32list group_index, ptr exec_ctx)
+    i32list    GroupKeys(i32list keys, u32list group_index, ptr exec_ctx)
+    u64list    GroupKeys(u64list keys, u32list group_index, ptr exec_ctx)
+    i64list    GroupKeys(i64list keys, u32list group_index, ptr exec_ctx)
+    f32list    GroupKeys(f32list keys, u32list group_index, ptr exec_ctx)
+    f64list    GroupKeys(f64list keys, u32list group_index, ptr exec_ctx)
+    stringlist GroupKeys(stringlist keys, u32list group_index, ptr exec_ctx)
+
+## GroupSum
+Per-group sum of `values`. The output has one entry per distinct group, in the same order as `GroupKeys`. Signed integers promote to `i64`, unsigned to `u64`, floats to `f64` — matching the ungrouped `Sum`. `values.len` must equal `group_index.len`.
+
+    i64list GroupSum(i8list values, u32list group_index, ptr exec_ctx)
+    i64list GroupSum(i16list values, u32list group_index, ptr exec_ctx)
+    i64list GroupSum(i32list values, u32list group_index, ptr exec_ctx)
+    i64list GroupSum(i64list values, u32list group_index, ptr exec_ctx)
+    u64list GroupSum(u8list values, u32list group_index, ptr exec_ctx)
+    u64list GroupSum(u16list values, u32list group_index, ptr exec_ctx)
+    u64list GroupSum(u32list values, u32list group_index, ptr exec_ctx)
+    u64list GroupSum(u64list values, u32list group_index, ptr exec_ctx)
+    f64list GroupSum(f32list values, u32list group_index, ptr exec_ctx)
+    f64list GroupSum(f64list values, u32list group_index, ptr exec_ctx)
+
+## GroupMax
+Per-group maximum of `values`. Output type matches the input element type (no promotion, same rule as the ungrouped `Max`). `values.len` must equal `group_index.len`.
+
+    u8list  GroupMax(u8list values, u32list group_index, ptr exec_ctx)
+    i8list  GroupMax(i8list values, u32list group_index, ptr exec_ctx)
+    u16list GroupMax(u16list values, u32list group_index, ptr exec_ctx)
+    i16list GroupMax(i16list values, u32list group_index, ptr exec_ctx)
+    u32list GroupMax(u32list values, u32list group_index, ptr exec_ctx)
+    i32list GroupMax(i32list values, u32list group_index, ptr exec_ctx)
+    u64list GroupMax(u64list values, u32list group_index, ptr exec_ctx)
+    i64list GroupMax(i64list values, u32list group_index, ptr exec_ctx)
+    f32list GroupMax(f32list values, u32list group_index, ptr exec_ctx)
+    f64list GroupMax(f64list values, u32list group_index, ptr exec_ctx)
+
+## GroupMin
+Per-group minimum of `values`. Output type matches the input element type (no promotion, same rule as the ungrouped `Min`). `values.len` must equal `group_index.len`.
+
+    u8list  GroupMin(u8list values, u32list group_index, ptr exec_ctx)
+    i8list  GroupMin(i8list values, u32list group_index, ptr exec_ctx)
+    u16list GroupMin(u16list values, u32list group_index, ptr exec_ctx)
+    i16list GroupMin(i16list values, u32list group_index, ptr exec_ctx)
+    u32list GroupMin(u32list values, u32list group_index, ptr exec_ctx)
+    i32list GroupMin(i32list values, u32list group_index, ptr exec_ctx)
+    u64list GroupMin(u64list values, u32list group_index, ptr exec_ctx)
+    i64list GroupMin(i64list values, u32list group_index, ptr exec_ctx)
+    f32list GroupMin(f32list values, u32list group_index, ptr exec_ctx)
+    f64list GroupMin(f64list values, u32list group_index, ptr exec_ctx)
+
+## GroupAvg
+Per-group average of `values`. Output is always `f64list` with one entry per distinct group, matching the ungrouped `Avg`. `values.len` must equal `group_index.len`.
+
+    f64list GroupAvg(u8list values, u32list group_index, ptr exec_ctx)
+    f64list GroupAvg(i8list values, u32list group_index, ptr exec_ctx)
+    f64list GroupAvg(u16list values, u32list group_index, ptr exec_ctx)
+    f64list GroupAvg(i16list values, u32list group_index, ptr exec_ctx)
+    f64list GroupAvg(u32list values, u32list group_index, ptr exec_ctx)
+    f64list GroupAvg(i32list values, u32list group_index, ptr exec_ctx)
+    f64list GroupAvg(u64list values, u32list group_index, ptr exec_ctx)
+    f64list GroupAvg(i64list values, u32list group_index, ptr exec_ctx)
+    f64list GroupAvg(f32list values, u32list group_index, ptr exec_ctx)
+    f64list GroupAvg(f64list values, u32list group_index, ptr exec_ctx)
+
 ## GetAt
 Get the element at the specified index from the list. Returns the default value (0 for numeric types) if the index is out of bounds.
 
