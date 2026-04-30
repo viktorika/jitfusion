@@ -20,12 +20,10 @@ TEST(FunctionTest, FilterByBitmapTest1) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto bitmap_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(bitmap));
-  auto bits_cnt_node = std::unique_ptr<ExecNode>(new ConstantValueNode(12U));
   auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(bitmap_node));
-  args_list.emplace_back(std::move(bits_cnt_node));
   args_list.emplace_back(std::move(exec_node));
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("FilterByBitmap", std::move(args_list)));
   ExecEngine exec_engine;
@@ -45,6 +43,32 @@ TEST(FunctionTest, FilterByBitmapTest2) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto bitmap_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(bitmap));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(args_node));
+  args_list.emplace_back(std::move(bitmap_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("FilterByBitmap", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<double> expect = {1, 2, 3, 4, 5, 6, 7, 8, 9, 18, 25, 27};
+  EXPECT_EQ(std::get<std::vector<double>>(result), expect);
+}
+
+// Keep one test exercising the 4-arg explicit-bits_cnt kernel directly, so the
+// underlying kernel (and its validation logic) stays under coverage even after
+// the 3-arg sugar became the recommended path.
+TEST(FunctionTest, FilterByBitmapExplicitBitsCntTest) {
+  std::vector<int32_t> data = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16,
+                               17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
+  std::vector<uint8_t> bitmap = {0xFF, 0x1, 0x2, 0x5};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
+  auto bitmap_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(bitmap));
   auto bits_cnt_node = std::unique_ptr<ExecNode>(new ConstantValueNode(12U));
   auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
@@ -58,8 +82,39 @@ TEST(FunctionTest, FilterByBitmapTest2) {
   ASSERT_TRUE(st.ok());
   RetType result;
   EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
-  std::vector<double> expect = {1, 2, 3, 4, 5, 6, 7, 8, 9, 18, 25, 27};
-  EXPECT_EQ(std::get<std::vector<double>>(result), expect);
+  std::vector<int32_t> expect = {1, 2, 3, 4, 5, 6, 7, 8, 9, 18, 25, 27};
+  EXPECT_EQ(std::get<std::vector<int32_t>>(result), expect);
+}
+
+// Sugar form where the bitmap comes from another function call (GenLargeBitmap)
+// rather than a constant. Ensures that `CountBits` is emitted correctly over a
+// non-constant bitmap SSA value and that CSE doesn't break semantics.
+TEST(FunctionTest, FilterByBitmapSugarFromGenBitmapTest) {
+  std::vector<int32_t> data = {0, 1, 2, 3, 4, 0, 1, 4, 9, 16};
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+
+  // bitmap = GenLargeBitmap(data, 3, exec_ctx)   -> keep elements > 3
+  std::vector<std::unique_ptr<ExecNode>> gen_args;
+  gen_args.emplace_back(new ConstantListValueNode(data));
+  gen_args.emplace_back(new ConstantValueNode(static_cast<int32_t>(3)));
+  gen_args.emplace_back(new ExecContextNode());
+  auto bitmap_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeBitmap", std::move(gen_args)));
+
+  // FilterByBitmap(data, bitmap, exec_ctx) -- sugar, no bits_cnt.
+  std::vector<std::unique_ptr<ExecNode>> filter_args;
+  filter_args.emplace_back(new ConstantListValueNode(data));
+  filter_args.emplace_back(std::move(bitmap_node));
+  filter_args.emplace_back(new ExecContextNode());
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("FilterByBitmap", std::move(filter_args)));
+
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  ASSERT_TRUE(st.ok());
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  std::vector<int32_t> expect = {4, 4, 9, 16};
+  EXPECT_EQ(std::get<std::vector<int32_t>>(result), expect);
 }
 
 TEST(FunctionTest, MurmurHash3X8632Test1) {

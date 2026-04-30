@@ -5,9 +5,12 @@
  * @Last Modified time: 2026-04-03 14:31:05
  */
 #include <cstring>
+#include "codegen/codegen.h"
 #include "exec_engine.h"
 #include "function_init.h"
 #include "function_registry.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/Type.h"
 #include "status.h"
 #include "type.h"
 
@@ -1364,6 +1367,79 @@ Status InitFilterByBitmapFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+llvm::Value *EmitFilterByBitmapSugar(const FunctionSignature &sign, const std::vector<llvm::Type *> &arg_llvm_type_list,
+                                     const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
+  auto *list_value = arg_llvm_value_list.at(0);
+  auto *bitmap_value = arg_llvm_value_list.at(1);
+  auto *exec_context_value = arg_llvm_value_list.at(2);
+  auto *list_llvm_type = arg_llvm_type_list.at(0);
+
+  auto *i32_ty = llvm::Type::getInt32Ty(ctx.context);
+  auto *ptr_ty = llvm::PointerType::getUnqual(ctx.context);
+  auto *u8list_llvm_type = ctx.complex_type.u8list_type;
+
+  // CountBits(bitmap) -> u32
+  FunctionSignature count_bits_sign("CountBits", {ValueType::kU8List}, ValueType::kU32);
+  auto *count_bits_func_type = llvm::FunctionType::get(i32_ty, {u8list_llvm_type}, false);
+  llvm::FunctionCallee count_bits_callee =
+      ctx.module.getOrInsertFunction(count_bits_sign.ToString(), count_bits_func_type);
+  llvm::Value *bits_cnt_value = ctx.builder.CreateCall(count_bits_callee, {bitmap_value}, "bits_cnt");
+
+  // FilterByBitmap(list, bitmap, bits_cnt, ctx) -> <list_type>
+  FunctionSignature filter_sign("FilterByBitmap",
+                                {sign.GetParamTypes().at(0), ValueType::kU8List, ValueType::kU32, ValueType::kPtr},
+                                sign.GetRetType());
+  auto *filter_func_type =
+      llvm::FunctionType::get(list_llvm_type, {list_llvm_type, u8list_llvm_type, i32_ty, ptr_ty}, false);
+  llvm::FunctionCallee filter_callee = ctx.module.getOrInsertFunction(filter_sign.ToString(), filter_func_type);
+  return ctx.builder.CreateCall(filter_callee, {list_value, bitmap_value, bits_cnt_value, exec_context_value},
+                                "filter_by_bitmap");
+}
+
+Status InitFilterByBitmapSugarFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
+      FunctionSignature("FilterByBitmap", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr},
+                        ValueType::kU8List),
+      EmitFilterByBitmapSugar));
+  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
+      FunctionSignature("FilterByBitmap", {ValueType::kU16List, ValueType::kU8List, ValueType::kPtr},
+                        ValueType::kU16List),
+      EmitFilterByBitmapSugar));
+  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
+      FunctionSignature("FilterByBitmap", {ValueType::kU32List, ValueType::kU8List, ValueType::kPtr},
+                        ValueType::kU32List),
+      EmitFilterByBitmapSugar));
+  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
+      FunctionSignature("FilterByBitmap", {ValueType::kU64List, ValueType::kU8List, ValueType::kPtr},
+                        ValueType::kU64List),
+      EmitFilterByBitmapSugar));
+  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
+      FunctionSignature("FilterByBitmap", {ValueType::kI8List, ValueType::kU8List, ValueType::kPtr},
+                        ValueType::kI8List),
+      EmitFilterByBitmapSugar));
+  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
+      FunctionSignature("FilterByBitmap", {ValueType::kI16List, ValueType::kU8List, ValueType::kPtr},
+                        ValueType::kI16List),
+      EmitFilterByBitmapSugar));
+  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
+      FunctionSignature("FilterByBitmap", {ValueType::kI32List, ValueType::kU8List, ValueType::kPtr},
+                        ValueType::kI32List),
+      EmitFilterByBitmapSugar));
+  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
+      FunctionSignature("FilterByBitmap", {ValueType::kI64List, ValueType::kU8List, ValueType::kPtr},
+                        ValueType::kI64List),
+      EmitFilterByBitmapSugar));
+  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
+      FunctionSignature("FilterByBitmap", {ValueType::kF32List, ValueType::kU8List, ValueType::kPtr},
+                        ValueType::kF32List),
+      EmitFilterByBitmapSugar));
+  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
+      FunctionSignature("FilterByBitmap", {ValueType::kF64List, ValueType::kU8List, ValueType::kPtr},
+                        ValueType::kF64List),
+      EmitFilterByBitmapSugar));
+  return Status::OK();
+}
+
 Status InitIfFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitIfLargeFunc(reg));
   JF_RETURN_NOT_OK(InitIfLargeEqualFunc(reg));
@@ -1391,6 +1467,7 @@ Status InitFilterFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitGenNotEqualBitmapFunc(reg));
   JF_RETURN_NOT_OK(InitGenNotEqualBitmapListFunc(reg));
   JF_RETURN_NOT_OK(InitFilterByBitmapFunc(reg));
+  JF_RETURN_NOT_OK(InitFilterByBitmapSugarFunc(reg));
   return Status::OK();
 }
 

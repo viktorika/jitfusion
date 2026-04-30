@@ -4,16 +4,16 @@
 
 namespace {
 
-using ::jitfusion::bench::CompileOrDie;
-using ::jitfusion::bench::MakeListIfSelectCall;
-using ::jitfusion::bench::MakeListScalarCtxCall;
-using ::jitfusion::bench::MakeRegistry;
 using ::jitfusion::ConstantListValueNode;
 using ::jitfusion::ConstantValueNode;
 using ::jitfusion::ExecContext;
 using ::jitfusion::ExecNode;
 using ::jitfusion::FunctionNode;
 using ::jitfusion::RetType;
+using ::jitfusion::bench::CompileOrDie;
+using ::jitfusion::bench::MakeListIfSelectCall;
+using ::jitfusion::bench::MakeListScalarCtxCall;
+using ::jitfusion::bench::MakeRegistry;
 
 // =============================================================================
 // J. List comparison / bitmap kernels
@@ -111,38 +111,25 @@ void BM_Execute_IfByBitmap(benchmark::State& state) {
 }
 BENCHMARK(BM_Execute_IfByBitmap)->Arg(4096);
 
-// FilterByBitmap(value_list<i64>, packed_bitmap<u8>, popcount<u32>, ctx).
+// FilterByBitmap(value_list<i64>, packed_bitmap<u8>, ctx) — sugar form.
 //
-// NOTE: unlike IfByBitmap (whose U8List is a per-element 0/1 array), here the
-// bitmap is a *packed* bitmap — each byte encodes 8 elements (LSB = first
-// element). So its length must be exactly ceil(values.size() / 8), and
-// `popcnt` is the number of 1-bits across all bytes. Using a per-element
-// bitmap triggers "bitmap len is not corresponding to list len" at runtime.
-// Using 0x55 (0b01010101) gives 4 ones per byte → every other element kept.
+// The `packed_bitmap` is ceil(values.size() / 8) bytes; each byte encodes 8
+// elements (LSB = first element). 0x55 (0b01010101) gives 4 ones per byte →
+// every other element is kept. The 3-arg sugar auto-derives `bits_cnt` via
+// CountBits(bitmap) at codegen time, so we no longer have to precompute and
+// pass the popcount explicitly (and can no longer get it wrong).
 void BM_Execute_FilterByBitmap(benchmark::State& state) {
   const int len = static_cast<int>(state.range(0));
   const int bitmap_bytes = (len + 7) / 8;
   auto reg = MakeRegistry();
   std::vector<int64_t> values(len);
   std::vector<uint8_t> bitmap(bitmap_bytes, static_cast<uint8_t>(0x55));
-  uint32_t popcnt = 0;
   for (int i = 0; i < len; ++i) {
     values[i] = i;
-  }
-  // Count set bits per byte. This runs once during benchmark setup, not in
-  // the timed loop, so a plain portable loop is fine — no need for
-  // __builtin_popcount / std::popcount.
-  for (int b = 0; b < bitmap_bytes; ++b) {
-    uint8_t byte = bitmap[b];
-    while (byte != 0) {
-      popcnt += static_cast<uint32_t>(byte & 1U);
-      byte = static_cast<uint8_t>(byte >> 1);
-    }
   }
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(new ConstantListValueNode(std::move(values)));
   args.emplace_back(new ConstantListValueNode(std::move(bitmap)));
-  args.emplace_back(new ConstantValueNode(popcnt));
   args.emplace_back(new jitfusion::ExecContextNode());
   std::unique_ptr<ExecNode> node(new FunctionNode("FilterByBitmap", std::move(args)));
 
