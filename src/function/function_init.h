@@ -13,6 +13,7 @@ Status InitListArithmeticFunc(FunctionRegistry *reg);
 Status InitListComparisonFunc(FunctionRegistry *reg);
 Status InitListAggregationFunc(FunctionRegistry *reg);
 Status InitListBasicFunc(FunctionRegistry *reg);
+Status InitListGroupFunc(FunctionRegistry *reg);
 
 Status InitMathInternalFunc(FunctionRegistry *reg);
 Status InitStringInternalFunc(FunctionRegistry *reg);
@@ -21,6 +22,7 @@ inline Status InitListInternalFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitListComparisonFunc(reg));
   JF_RETURN_NOT_OK(InitListAggregationFunc(reg));
   JF_RETURN_NOT_OK(InitListBasicFunc(reg));
+  JF_RETURN_NOT_OK(InitListGroupFunc(reg));
   return Status::OK();
 }
 
