@@ -18,7 +18,7 @@ cc_library(
         "-DNDEBUG",
         "-ftree-vectorize",
         #"-g",
-        #"-Rpass=loop-vectorize",
+        "-Rpass=loop-vectorize",
         "-DHAS_XSIMD",
     ],
 )
@@ -110,7 +110,10 @@ cc_test(
 
 cc_binary(
     name = "engine_benchmark",
-    srcs = ["benchmark/engine_benchmark.cc"],
+    srcs = glob([
+        "benchmark/*.cc",
+        "benchmark/*.h",
+    ]),
     deps = [
         ":jitfusion",
     ],
