@@ -161,4 +161,118 @@ void BM_Execute_ListGather(benchmark::State& state) {
 }
 BENCHMARK(BM_Execute_ListGather)->Arg(256)->Arg(4096);
 
+// Find(a<i64>, value<i64>). Two patterns:
+//   * Middle-hit: value lives in the middle of the list (avg-case ~len/2 scan).
+//   * All-miss : value is absent (worst-case full scan, len comparisons).
+void BM_Execute_Find_MidHit(benchmark::State& state) {
+  const int len = static_cast<int>(state.range(0));
+  auto reg = MakeRegistry();
+  std::vector<int64_t> a;
+  a.reserve(len);
+  for (int i = 0; i < len; ++i) {
+    a.push_back(i);
+  }
+  std::vector<std::unique_ptr<ExecNode>> args;
+  args.emplace_back(new ConstantListValueNode(std::move(a)));
+  args.emplace_back(new ConstantValueNode(static_cast<int64_t>(len / 2)));
+  std::unique_ptr<ExecNode> node(new FunctionNode("Find", std::move(args)));
+
+  auto engine = CompileOrDie(std::move(node), reg);
+  ExecContext ctx(4096);
+  for (auto _ : state) {
+    ctx.Clear();
+    RetType result;
+    auto st = engine->Execute(ctx, nullptr, &result);
+    benchmark::DoNotOptimize(result);
+    if (!st.ok()) {
+      state.SkipWithError("execute failed");
+    }
+  }
+}
+BENCHMARK(BM_Execute_Find_MidHit)->Arg(256)->Arg(4096);
+
+void BM_Execute_Find_AllMiss(benchmark::State& state) {
+  const int len = static_cast<int>(state.range(0));
+  auto reg = MakeRegistry();
+  std::vector<int64_t> a;
+  a.reserve(len);
+  for (int i = 0; i < len; ++i) {
+    a.push_back(i);
+  }
+  std::vector<std::unique_ptr<ExecNode>> args;
+  args.emplace_back(new ConstantListValueNode(std::move(a)));
+  args.emplace_back(new ConstantValueNode(static_cast<int64_t>(-1)));  // not present
+  std::unique_ptr<ExecNode> node(new FunctionNode("Find", std::move(args)));
+
+  auto engine = CompileOrDie(std::move(node), reg);
+  ExecContext ctx(4096);
+  for (auto _ : state) {
+    ctx.Clear();
+    RetType result;
+    auto st = engine->Execute(ctx, nullptr, &result);
+    benchmark::DoNotOptimize(result);
+    if (!st.ok()) {
+      state.SkipWithError("execute failed");
+    }
+  }
+}
+BENCHMARK(BM_Execute_Find_AllMiss)->Arg(256)->Arg(4096);
+
+// FindSorted: O(log n) binary-search counterpart of Find. Expected to scale far
+// better than Find on large sorted lists; paired with the Find benchmarks so
+// the gap is easy to read off.
+void BM_Execute_FindSorted_MidHit(benchmark::State& state) {
+  const int len = static_cast<int>(state.range(0));
+  auto reg = MakeRegistry();
+  std::vector<int64_t> a;
+  a.reserve(len);
+  for (int i = 0; i < len; ++i) {
+    a.push_back(i);  // already sorted ascending
+  }
+  std::vector<std::unique_ptr<ExecNode>> args;
+  args.emplace_back(new ConstantListValueNode(std::move(a)));
+  args.emplace_back(new ConstantValueNode(static_cast<int64_t>(len / 2)));
+  std::unique_ptr<ExecNode> node(new FunctionNode("FindSorted", std::move(args)));
+
+  auto engine = CompileOrDie(std::move(node), reg);
+  ExecContext ctx(4096);
+  for (auto _ : state) {
+    ctx.Clear();
+    RetType result;
+    auto st = engine->Execute(ctx, nullptr, &result);
+    benchmark::DoNotOptimize(result);
+    if (!st.ok()) {
+      state.SkipWithError("execute failed");
+    }
+  }
+}
+BENCHMARK(BM_Execute_FindSorted_MidHit)->Arg(256)->Arg(4096);
+
+void BM_Execute_FindSorted_AllMiss(benchmark::State& state) {
+  const int len = static_cast<int>(state.range(0));
+  auto reg = MakeRegistry();
+  std::vector<int64_t> a;
+  a.reserve(len);
+  for (int i = 0; i < len; ++i) {
+    a.push_back(i);
+  }
+  std::vector<std::unique_ptr<ExecNode>> args;
+  args.emplace_back(new ConstantListValueNode(std::move(a)));
+  args.emplace_back(new ConstantValueNode(static_cast<int64_t>(-1)));  // below min
+  std::unique_ptr<ExecNode> node(new FunctionNode("FindSorted", std::move(args)));
+
+  auto engine = CompileOrDie(std::move(node), reg);
+  ExecContext ctx(4096);
+  for (auto _ : state) {
+    ctx.Clear();
+    RetType result;
+    auto st = engine->Execute(ctx, nullptr, &result);
+    benchmark::DoNotOptimize(result);
+    if (!st.ok()) {
+      state.SkipWithError("execute failed");
+    }
+  }
+}
+BENCHMARK(BM_Execute_FindSorted_AllMiss)->Arg(256)->Arg(4096);
+
 }  // namespace

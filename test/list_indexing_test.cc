@@ -56,6 +56,31 @@ std::unique_ptr<ExecNode> MakeGather(std::unique_ptr<ExecNode> values, std::uniq
   return std::make_unique<FunctionNode>("ListGather", std::move(args));
 }
 
+std::unique_ptr<ExecNode> MakeFind(std::unique_ptr<ExecNode> a, std::unique_ptr<ExecNode> value) {
+  std::vector<std::unique_ptr<ExecNode>> args;
+  args.emplace_back(std::move(a));
+  args.emplace_back(std::move(value));
+  return std::make_unique<FunctionNode>("Find", std::move(args));
+}
+
+std::unique_ptr<ExecNode> MakeFindSorted(std::unique_ptr<ExecNode> a, std::unique_ptr<ExecNode> value) {
+  std::vector<std::unique_ptr<ExecNode>> args;
+  args.emplace_back(std::move(a));
+  args.emplace_back(std::move(value));
+  return std::make_unique<FunctionNode>("FindSorted", std::move(args));
+}
+
+std::unique_ptr<ExecNode> MakeFindMiss() {
+  return std::make_unique<FunctionNode>("FindMiss", std::vector<std::unique_ptr<ExecNode>>{});
+}
+
+std::unique_ptr<ExecNode> MakeGetAt(std::unique_ptr<ExecNode> values, std::unique_ptr<ExecNode> index) {
+  std::vector<std::unique_ptr<ExecNode>> args;
+  args.emplace_back(std::move(values));
+  args.emplace_back(std::move(index));
+  return std::make_unique<FunctionNode>("GetAt", std::move(args));
+}
+
 RetType RunExpr(std::unique_ptr<ExecNode> root, Status *status_out = nullptr) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
@@ -359,4 +384,229 @@ TEST(ListIndexingTest, E2EJoinFilteredStringKeys) {
   auto r = RunExpr(std::move(gather));
   std::vector<int32_t> expect = {111, 333};  // alice -> 111, carol -> 333
   EXPECT_EQ(std::get<std::vector<int32_t>>(r), expect);
+}
+
+// -----------------------------------------------------------------------------
+// Find: return the index of the first occurrence of `value` in the list.
+// Miss -> std::numeric_limits<uint32_t>::max() (kMiss), which naturally
+// composes with GetAt (out-of-bounds -> zero-valued default).
+// -----------------------------------------------------------------------------
+
+TEST(ListIndexingTest, FindI32Basic) {
+  std::vector<int32_t> a = {10, 20, 30, 40};
+  auto node = MakeFind(std::make_unique<ConstantListValueNode>(a),
+                       std::make_unique<ConstantValueNode>(static_cast<int32_t>(30)));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), 2U);
+}
+
+TEST(ListIndexingTest, FindI32Miss) {
+  std::vector<int32_t> a = {10, 20, 30};
+  auto node = MakeFind(std::make_unique<ConstantListValueNode>(a),
+                       std::make_unique<ConstantValueNode>(static_cast<int32_t>(99)));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), kMiss);
+}
+
+TEST(ListIndexingTest, FindI32DuplicateReturnsFirst) {
+  std::vector<int32_t> a = {7, 8, 7, 7};
+  auto node = MakeFind(std::make_unique<ConstantListValueNode>(a),
+                       std::make_unique<ConstantValueNode>(static_cast<int32_t>(7)));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), 0U);
+}
+
+TEST(ListIndexingTest, FindEmptyList) {
+  std::vector<int32_t> a = {};
+  auto node = MakeFind(std::make_unique<ConstantListValueNode>(a),
+                       std::make_unique<ConstantValueNode>(static_cast<int32_t>(1)));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), kMiss);
+}
+
+TEST(ListIndexingTest, FindU64) {
+  std::vector<uint64_t> a = {100, 200, 300};
+  auto node = MakeFind(std::make_unique<ConstantListValueNode>(a),
+                       std::make_unique<ConstantValueNode>(static_cast<uint64_t>(300)));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), 2U);
+}
+
+TEST(ListIndexingTest, FindF64) {
+  std::vector<double> a = {1.5, 2.5, 3.5};
+  auto node = MakeFind(std::make_unique<ConstantListValueNode>(a), std::make_unique<ConstantValueNode>(2.5));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), 1U);
+}
+
+TEST(ListIndexingTest, FindString) {
+  std::vector<std::string> a = {"alice", "bob", "carol"};
+  auto node =
+      MakeFind(std::make_unique<ConstantListValueNode>(a), std::make_unique<ConstantValueNode>(std::string("carol")));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), 2U);
+}
+
+TEST(ListIndexingTest, FindStringMiss) {
+  std::vector<std::string> a = {"alice", "bob"};
+  auto node =
+      MakeFind(std::make_unique<ConstantListValueNode>(a), std::make_unique<ConstantValueNode>(std::string("zoe")));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), kMiss);
+}
+
+// E2E: scalar join == GetAt(values, Find(keys, k))
+// Hit: returns the matched value; Miss: Find -> kMiss, GetAt -> zero-valued
+// default (0 for ints). This demonstrates the intended composition.
+TEST(ListIndexingTest, E2EScalarJoinHit) {
+  std::vector<int32_t> keys = {10, 20, 30};
+  std::vector<int32_t> values = {100, 200, 300};
+  auto find = MakeFind(std::make_unique<ConstantListValueNode>(keys),
+                       std::make_unique<ConstantValueNode>(static_cast<int32_t>(20)));
+  auto getat = MakeGetAt(std::make_unique<ConstantListValueNode>(values), std::move(find));
+  auto result = RunExpr(std::move(getat));
+  EXPECT_EQ(std::get<int32_t>(result), 200);
+}
+
+TEST(ListIndexingTest, E2EScalarJoinMiss) {
+  std::vector<int32_t> keys = {10, 20, 30};
+  std::vector<int32_t> values = {100, 200, 300};
+  auto find = MakeFind(std::make_unique<ConstantListValueNode>(keys),
+                       std::make_unique<ConstantValueNode>(static_cast<int32_t>(99)));
+  auto getat = MakeGetAt(std::make_unique<ConstantListValueNode>(values), std::move(find));
+  auto result = RunExpr(std::move(getat));
+  // Find returns kMiss -> GetAt goes out-of-bounds -> returns 0 for int32.
+  EXPECT_EQ(std::get<int32_t>(result), 0);
+}
+
+// -----------------------------------------------------------------------------
+// FindSorted: O(log n) binary search variant of Find. The caller MUST guarantee
+// the list is sorted in ascending order; otherwise the result is unspecified
+// (same contract as std::lower_bound). On miss returns kMiss.
+// -----------------------------------------------------------------------------
+
+TEST(ListIndexingTest, FindSortedI32MidHit) {
+  std::vector<int32_t> a = {10, 20, 30, 40, 50};
+  auto node = MakeFindSorted(std::make_unique<ConstantListValueNode>(a),
+                             std::make_unique<ConstantValueNode>(static_cast<int32_t>(30)));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), 2U);
+}
+
+TEST(ListIndexingTest, FindSortedI32LeftBoundary) {
+  std::vector<int32_t> a = {10, 20, 30};
+  auto node = MakeFindSorted(std::make_unique<ConstantListValueNode>(a),
+                             std::make_unique<ConstantValueNode>(static_cast<int32_t>(10)));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), 0U);
+}
+
+TEST(ListIndexingTest, FindSortedI32RightBoundary) {
+  std::vector<int32_t> a = {10, 20, 30};
+  auto node = MakeFindSorted(std::make_unique<ConstantListValueNode>(a),
+                             std::make_unique<ConstantValueNode>(static_cast<int32_t>(30)));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), 2U);
+}
+
+TEST(ListIndexingTest, FindSortedI32MissBelow) {
+  std::vector<int32_t> a = {10, 20, 30};
+  auto node = MakeFindSorted(std::make_unique<ConstantListValueNode>(a),
+                             std::make_unique<ConstantValueNode>(static_cast<int32_t>(5)));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), kMiss);
+}
+
+TEST(ListIndexingTest, FindSortedI32MissAbove) {
+  std::vector<int32_t> a = {10, 20, 30};
+  auto node = MakeFindSorted(std::make_unique<ConstantListValueNode>(a),
+                             std::make_unique<ConstantValueNode>(static_cast<int32_t>(99)));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), kMiss);
+}
+
+TEST(ListIndexingTest, FindSortedI32MissInGap) {
+  std::vector<int32_t> a = {10, 20, 30};
+  auto node = MakeFindSorted(std::make_unique<ConstantListValueNode>(a),
+                             std::make_unique<ConstantValueNode>(static_cast<int32_t>(15)));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), kMiss);
+}
+
+TEST(ListIndexingTest, FindSortedEmptyList) {
+  std::vector<int32_t> a = {};
+  auto node = MakeFindSorted(std::make_unique<ConstantListValueNode>(a),
+                             std::make_unique<ConstantValueNode>(static_cast<int32_t>(1)));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), kMiss);
+}
+
+TEST(ListIndexingTest, FindSortedI32DuplicatesReturnsFirst) {
+  // std::lower_bound naturally returns the first equal element.
+  std::vector<int32_t> a = {10, 20, 20, 20, 30};
+  auto node = MakeFindSorted(std::make_unique<ConstantListValueNode>(a),
+                             std::make_unique<ConstantValueNode>(static_cast<int32_t>(20)));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), 1U);
+}
+
+TEST(ListIndexingTest, FindSortedU64) {
+  std::vector<uint64_t> a = {100, 200, 300, 400};
+  auto node = MakeFindSorted(std::make_unique<ConstantListValueNode>(a),
+                             std::make_unique<ConstantValueNode>(static_cast<uint64_t>(300)));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), 2U);
+}
+
+TEST(ListIndexingTest, FindSortedF64) {
+  std::vector<double> a = {1.5, 2.5, 3.5};
+  auto node = MakeFindSorted(std::make_unique<ConstantListValueNode>(a), std::make_unique<ConstantValueNode>(2.5));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), 1U);
+}
+
+TEST(ListIndexingTest, FindSortedStringHit) {
+  // Strings must be in lexicographic ascending order.
+  std::vector<std::string> a = {"alice", "bob", "carol", "dave"};
+  auto node = MakeFindSorted(std::make_unique<ConstantListValueNode>(a),
+                             std::make_unique<ConstantValueNode>(std::string("carol")));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), 2U);
+}
+
+TEST(ListIndexingTest, FindSortedStringMiss) {
+  std::vector<std::string> a = {"alice", "bob", "carol"};
+  auto node = MakeFindSorted(std::make_unique<ConstantListValueNode>(a),
+                             std::make_unique<ConstantValueNode>(std::string("zoe")));
+  auto result = RunExpr(std::move(node));
+  EXPECT_EQ(std::get<uint32_t>(result), kMiss);
+}
+
+// -----------------------------------------------------------------------------
+// FindMiss: zero-arg constant that equals the lookup-miss sentinel. Intended
+// for DSL-side use so users can write `Find(keys, k) != FindMiss()`.
+// -----------------------------------------------------------------------------
+
+TEST(ListIndexingTest, FindMissEqualsKMiss) {
+  auto result = RunExpr(MakeFindMiss());
+  EXPECT_EQ(std::get<uint32_t>(result), kMiss);
+}
+
+TEST(ListIndexingTest, FindMissMatchesFindMiss) {
+  // Find miss path must return the same sentinel as FindMiss().
+  std::vector<int32_t> a = {10, 20, 30};
+  auto find = MakeFind(std::make_unique<ConstantListValueNode>(a),
+                       std::make_unique<ConstantValueNode>(static_cast<int32_t>(99)));
+  auto find_result = RunExpr(std::move(find));
+  auto miss_result = RunExpr(MakeFindMiss());
+  EXPECT_EQ(std::get<uint32_t>(find_result), std::get<uint32_t>(miss_result));
+}
+
+TEST(ListIndexingTest, FindMissMatchesFindSortedMiss) {
+  std::vector<int32_t> a = {10, 20, 30};
+  auto find = MakeFindSorted(std::make_unique<ConstantListValueNode>(a),
+                             std::make_unique<ConstantValueNode>(static_cast<int32_t>(99)));
+  auto find_result = RunExpr(std::move(find));
+  auto miss_result = RunExpr(MakeFindMiss());
+  EXPECT_EQ(std::get<uint32_t>(find_result), std::get<uint32_t>(miss_result));
 }
