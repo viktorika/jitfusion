@@ -266,7 +266,7 @@ If you find that you have significant overhead in memory allocation, you can per
   Status Execute(ExecContext& exec_ctx, void* entry_arguments, void* result);
 ```
 
-Between two calls that reuse the same `ExecContext`, remember to invoke `exec_ctx.Clear()` — this resets the arena and clears any errors carried over from the previous call.
+When you reuse the same `ExecContext` across multiple `Execute(ExecContext&, ...)` calls, you do **not** need to call `exec_ctx.Clear()` yourself — the engine resets the arena and clears any accumulated errors at the end of each call. As a consequence, any pointer returned via the arena (list / string payloads owned by the previous result) becomes invalid as soon as the next `Execute` returns; copy out anything you need to keep before issuing the next call.
 
 ## Engine options
 

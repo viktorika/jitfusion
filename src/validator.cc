@@ -383,8 +383,6 @@ Status Validator::Visit(IfBlockNode& if_block_node) {
   bool has_else = (num_args % 2 != 0);
   int num_branches = num_args / 2;
 
-  auto type_snapshot = type_scope_stack_.Snapshot();
-
   std::unordered_map<std::string, ValueType> all_shadowed;
 
   for (int i = 0; i < num_branches; ++i) {
@@ -410,17 +408,17 @@ Status Validator::Visit(IfBlockNode& if_block_node) {
                                                  TypeHelper::TypeToString(args[body_idx]->GetReturnType()));
     }
     auto shadowed = type_scope_stack_.GetShadowed();
+    type_scope_stack_.PopScope();
     for (const auto& [name, new_type] : shadowed) {
-      auto it = type_snapshot.find(name);
-      if (it != type_snapshot.end() && it->second != new_type) {
+      ValueType original_type = type_scope_stack_.Lookup(name);
+      if (original_type != ValueType::kUnknown && original_type != new_type) {
         return MakeParseError(
             if_block_node,
             "variable '" + name + "' has incompatible types across if block branches: original type is " +
-                TypeHelper::TypeToString(it->second) + ", but assigned " + TypeHelper::TypeToString(new_type));
+                TypeHelper::TypeToString(original_type) + ", but assigned " + TypeHelper::TypeToString(new_type));
       }
       all_shadowed[name] = new_type;
     }
-    type_scope_stack_.PopScope();
   }
 
   if (has_else) {
@@ -433,17 +431,17 @@ Status Validator::Visit(IfBlockNode& if_block_node) {
                                                      TypeHelper::TypeToString(args[num_args - 1]->GetReturnType()));
     }
     auto shadowed = type_scope_stack_.GetShadowed();
+    type_scope_stack_.PopScope();
     for (const auto& [name, new_type] : shadowed) {
-      auto it = type_snapshot.find(name);
-      if (it != type_snapshot.end() && it->second != new_type) {
+      ValueType original_type = type_scope_stack_.Lookup(name);
+      if (original_type != ValueType::kUnknown && original_type != new_type) {
         return MakeParseError(
             if_block_node,
             "variable '" + name + "' has incompatible types across if block else branch: original type is " +
-                TypeHelper::TypeToString(it->second) + ", but assigned " + TypeHelper::TypeToString(new_type));
+                TypeHelper::TypeToString(original_type) + ", but assigned " + TypeHelper::TypeToString(new_type));
       }
       all_shadowed[name] = new_type;
     }
-    type_scope_stack_.PopScope();
   }
 
   for (const auto& [name, type] : all_shadowed) {
