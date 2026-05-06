@@ -271,3 +271,81 @@ TEST(FunctionTest, CrossJoinEmptyElementTest) {
   std::vector<std::string> expect = {"_", "_b", "a_", "a_b"};
   EXPECT_EQ(got, expect);
 }
+
+namespace {
+// Build the ZipConcat expression node — separated from execution so that
+// error-path tests can inspect Status without going through a helper that
+// asserts ok().
+std::unique_ptr<ExecNode> MakeZipConcatExpr(const std::vector<std::string>& a, const std::vector<std::string>& b,
+                                            const std::string& sep) {
+  auto a_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(a));
+  auto b_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(b));
+  auto sep_node = std::unique_ptr<ExecNode>(new ConstantValueNode(sep));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode);
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(a_node));
+  args_list.emplace_back(std::move(b_node));
+  args_list.emplace_back(std::move(sep_node));
+  args_list.emplace_back(std::move(exec_node));
+  return std::unique_ptr<ExecNode>(new FunctionNode("ZipConcat", std::move(args_list)));
+}
+
+std::vector<std::string> RunZipConcat(const std::vector<std::string>& a, const std::vector<std::string>& b,
+                                      const std::string& sep) {
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto op_node = MakeZipConcatExpr(a, b, sep);
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  EXPECT_TRUE(st.ok()) << st.ToString();
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  return std::get<std::vector<std::string>>(result);
+}
+}  // namespace
+
+TEST(FunctionTest, ZipConcatBasicTest) {
+  // Pair-wise concatenation: a[i] + sep + b[i].
+  auto got = RunZipConcat({"a", "b", "c"}, {"6", "7", "8"}, ":");
+  std::vector<std::string> expect = {"a:6", "b:7", "c:8"};
+  EXPECT_EQ(got, expect);
+}
+
+TEST(FunctionTest, ZipConcatEmptySepTest) {
+  auto got = RunZipConcat({"x", "y", "z"}, {"1", "2", "3"}, "");
+  std::vector<std::string> expect = {"x1", "y2", "z3"};
+  EXPECT_EQ(got, expect);
+}
+
+TEST(FunctionTest, ZipConcatMultiCharSepTest) {
+  auto got = RunZipConcat({"foo", "bar"}, {"baz", "qux"}, "::");
+  std::vector<std::string> expect = {"foo::baz", "bar::qux"};
+  EXPECT_EQ(got, expect);
+}
+
+TEST(FunctionTest, ZipConcatEmptyInputTest) {
+  // Both empty -> empty result, no error.
+  EXPECT_TRUE(RunZipConcat({}, {}, "_").empty());
+}
+
+TEST(FunctionTest, ZipConcatEmptyElementTest) {
+  // Empty strings on either side are valid; only sep remains in output.
+  auto got = RunZipConcat({"", "a", ""}, {"x", "", ""}, "_");
+  std::vector<std::string> expect = {"_x", "a_", "_"};
+  EXPECT_EQ(got, expect);
+}
+
+TEST(FunctionTest, ZipConcatLenMismatchReturnsError) {
+  // Length mismatch must surface as a runtime error via ExecContext::AddError,
+  // matching the convention used by ListAddList / GroupSum / etc.
+  std::unique_ptr<FunctionRegistry> func_registry;
+  ASSERT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto op_node = MakeZipConcatExpr({"a", "b", "c"}, {"1", "2"}, "_");
+  ExecEngine exec_engine;
+  ASSERT_TRUE(exec_engine.Compile(op_node, func_registry).ok());
+  RetType result;
+  Status st = exec_engine.Execute(nullptr, &result);
+  EXPECT_FALSE(st.ok());
+  EXPECT_NE(st.ToString().find("ZipConcat"), std::string::npos);
+  EXPECT_NE(st.ToString().find("len mismatch"), std::string::npos);
+}

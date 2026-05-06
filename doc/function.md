@@ -332,6 +332,20 @@ accepted directly — convert them to `stringlist` first via `CastStringList`.
 
     stringlist CrossJoin(stringlist a, stringlist b, string sep, ptr exec_ctx)
 
+## ZipConcat
+Per-position string concatenation. Pairs up `a[i]` with `b[i]` and produces a
+string list of the same length where `result[i] == a[i] + sep + b[i]`. This is
+the "zip" pattern from Python / Rust / Haskell.
+
+Example: `ZipConcat(["a","b","c"], ["6","7","8"], ":") == ["a:6","b:7","c:8"]`.
+
+The two input lists must have equal length; a length mismatch is reported via
+`ExecContext::AddError` and surfaces as a non-OK Status from `Execute`.
+Numeric lists are not accepted directly — convert them to `stringlist` first
+via `CastStringList`.
+
+    stringlist ZipConcat(stringlist a, stringlist b, string sep, ptr exec_ctx)
+
 ## in
 Check if it is in the list.
 
