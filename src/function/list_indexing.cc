@@ -4,11 +4,13 @@
  * @Last Modified by: victorika
  * @Last Modified time: 2026-05-06 11:15:00
  */
+#include <algorithm>
 #include <cstdint>
 #include <limits>
 #include <string_view>
 #include <unordered_map>
 
+#include "codegen/codegen.h"
 #include "exec_engine.h"
 #include "function_init.h"
 #include "function_registry.h"
@@ -39,6 +41,56 @@ U32ListStruct ListLookupIndex(KList a, KList b, void *exec_context) {
     result.data[i] = (it == table.end()) ? kLookupMiss : it->second;
   }
   return result;
+}
+
+template <typename KList>
+uint32_t Find(KList a, typename KList::CElementType value) {
+  for (uint32_t i = 0; i < a.len; ++i) {
+    if (a.data[i] == value) {
+      return i;
+    }
+  }
+  return kLookupMiss;
+}
+
+uint32_t FindString(StringListStruct a, StringStruct value) {
+  std::string_view needle(value.data, value.len);
+  for (uint32_t i = 0; i < a.len; ++i) {
+    std::string_view sv(a.data[i].data, a.data[i].len);
+    if (sv == needle) {
+      return i;
+    }
+  }
+  return kLookupMiss;
+}
+
+template <typename KList>
+uint32_t FindSorted(KList a, typename KList::CElementType value) {
+  const auto *begin = a.data;
+  const auto *end = a.data + a.len;
+  const auto *it = std::lower_bound(begin, end, value);
+  if (it == end || *it != value) {
+    return kLookupMiss;
+  }
+  return static_cast<uint32_t>(it - begin);
+}
+
+uint32_t FindSortedString(StringListStruct a, StringStruct value) {
+  std::string_view needle(value.data, value.len);
+  const auto *begin = a.data;
+  const auto *end = a.data + a.len;
+  const auto *it = std::lower_bound(begin, end, needle, [](const StringStruct &lhs, std::string_view rhs) {
+    return std::string_view(lhs.data, lhs.len) < rhs;
+  });
+  if (it == end || std::string_view(it->data, it->len) != needle) {
+    return kLookupMiss;
+  }
+  return static_cast<uint32_t>(it - begin);
+}
+
+llvm::Value *CodegenFindMiss(const FunctionSignature & /*sign*/, const std::vector<llvm::Type *> & /*arg_types*/,
+                             const std::vector<llvm::Value *> & /*args*/, IRCodeGenContext &ctx) {
+  return ctx.builder.getInt32(kLookupMiss);
 }
 
 U32ListStruct ListLookupIndexString(StringListStruct a, StringListStruct b, void *exec_context) {
@@ -166,6 +218,85 @@ Status InitListLookupIndexFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+Status InitFindFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("Find", {ValueType::kU8List, ValueType::kU8}, ValueType::kU32),
+                                 reinterpret_cast<void *>(Find<U8ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("Find", {ValueType::kI8List, ValueType::kI8}, ValueType::kU32),
+                                 reinterpret_cast<void *>(Find<I8ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("Find", {ValueType::kU16List, ValueType::kU16}, ValueType::kU32),
+                                 reinterpret_cast<void *>(Find<U16ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("Find", {ValueType::kI16List, ValueType::kI16}, ValueType::kU32),
+                                 reinterpret_cast<void *>(Find<I16ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("Find", {ValueType::kU32List, ValueType::kU32}, ValueType::kU32),
+                                 reinterpret_cast<void *>(Find<U32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("Find", {ValueType::kI32List, ValueType::kI32}, ValueType::kU32),
+                                 reinterpret_cast<void *>(Find<I32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("Find", {ValueType::kU64List, ValueType::kU64}, ValueType::kU32),
+                                 reinterpret_cast<void *>(Find<U64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("Find", {ValueType::kI64List, ValueType::kI64}, ValueType::kU32),
+                                 reinterpret_cast<void *>(Find<I64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("Find", {ValueType::kF32List, ValueType::kF32}, ValueType::kU32),
+                                 reinterpret_cast<void *>(Find<F32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("Find", {ValueType::kF64List, ValueType::kF64}, ValueType::kU32),
+                                 reinterpret_cast<void *>(Find<F64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Find", {ValueType::kStringList, ValueType::kString}, ValueType::kU32),
+      reinterpret_cast<void *>(FindString)));
+  return Status::OK();
+}
+
+Status InitFindSortedFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("FindSorted", {ValueType::kU8List, ValueType::kU8}, ValueType::kU32),
+                                 reinterpret_cast<void *>(FindSorted<U8ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFunc(FunctionSignature("FindSorted", {ValueType::kI8List, ValueType::kI8}, ValueType::kU32),
+                                 reinterpret_cast<void *>(FindSorted<I8ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("FindSorted", {ValueType::kU16List, ValueType::kU16}, ValueType::kU32),
+      reinterpret_cast<void *>(FindSorted<U16ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("FindSorted", {ValueType::kI16List, ValueType::kI16}, ValueType::kU32),
+      reinterpret_cast<void *>(FindSorted<I16ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("FindSorted", {ValueType::kU32List, ValueType::kU32}, ValueType::kU32),
+      reinterpret_cast<void *>(FindSorted<U32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("FindSorted", {ValueType::kI32List, ValueType::kI32}, ValueType::kU32),
+      reinterpret_cast<void *>(FindSorted<I32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("FindSorted", {ValueType::kU64List, ValueType::kU64}, ValueType::kU32),
+      reinterpret_cast<void *>(FindSorted<U64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("FindSorted", {ValueType::kI64List, ValueType::kI64}, ValueType::kU32),
+      reinterpret_cast<void *>(FindSorted<I64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("FindSorted", {ValueType::kF32List, ValueType::kF32}, ValueType::kU32),
+      reinterpret_cast<void *>(FindSorted<F32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("FindSorted", {ValueType::kF64List, ValueType::kF64}, ValueType::kU32),
+      reinterpret_cast<void *>(FindSorted<F64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("FindSorted", {ValueType::kStringList, ValueType::kString}, ValueType::kU32),
+      reinterpret_cast<void *>(FindSortedString)));
+  return Status::OK();
+}
+
+Status InitFindMissFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(FunctionSignature("FindMiss", {}, ValueType::kU32), CodegenFindMiss));
+  return Status::OK();
+}
+
 Status InitListCompactFuncs(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
       FunctionSignature("ListCompactPositions", {ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
@@ -230,6 +361,9 @@ Status InitListGatherFunc(FunctionRegistry *reg) {
 
 Status InitListIndexingFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitListLookupIndexFunc(reg));
+  JF_RETURN_NOT_OK(InitFindFunc(reg));
+  JF_RETURN_NOT_OK(InitFindSortedFunc(reg));
+  JF_RETURN_NOT_OK(InitFindMissFunc(reg));
   JF_RETURN_NOT_OK(InitListCompactFuncs(reg));
   JF_RETURN_NOT_OK(InitListGatherFunc(reg));
   return Status::OK();

@@ -1371,6 +1371,44 @@ The output length always equals `a.len`.
     u32list ListLookupIndex(f64list a, f64list b, ptr exec_ctx)
     u32list ListLookupIndex(stringlist a, stringlist b, ptr exec_ctx)
 
+## Find
+Return the index of the first occurrence of `value` in the list. Returns `u32max` (`std::numeric_limits<uint32_t>::max()`) when the value is not found. This is the scalar counterpart of `ListLookupIndex` and composes naturally with `GetAt`: `GetAt(values, Find(keys, k))` performs a scalar join (miss falls through to `GetAt`'s out-of-bounds default of zero/empty).
+
+    u32 Find(u8list     a, u8     value)
+    u32 Find(i8list     a, i8     value)
+    u32 Find(u16list    a, u16    value)
+    u32 Find(i16list    a, i16    value)
+    u32 Find(u32list    a, u32    value)
+    u32 Find(i32list    a, i32    value)
+    u32 Find(u64list    a, u64    value)
+    u32 Find(i64list    a, i64    value)
+    u32 Find(f32list    a, f32    value)
+    u32 Find(f64list    a, f64    value)
+    u32 Find(stringlist a, string value)
+
+## FindSorted
+Binary-search version of `Find`: O(log n) instead of O(n). The caller **must** guarantee `a` is sorted in ascending order (lexicographic order for `stringlist`); otherwise the result is unspecified. Returns `u32max` (same miss sentinel as `Find`) when `value` is absent, and the index of the first equal element when duplicates exist (same as `std::lower_bound`).
+
+Use this over `Find` when the key list is large and known to be sorted (e.g. a pre-sorted dimension table).
+
+    u32 FindSorted(u8list     a, u8     value)
+    u32 FindSorted(i8list     a, i8     value)
+    u32 FindSorted(u16list    a, u16    value)
+    u32 FindSorted(i16list    a, i16    value)
+    u32 FindSorted(u32list    a, u32    value)
+    u32 FindSorted(i32list    a, i32    value)
+    u32 FindSorted(u64list    a, u64    value)
+    u32 FindSorted(i64list    a, i64    value)
+    u32 FindSorted(f32list    a, f32    value)
+    u32 FindSorted(f64list    a, f64    value)
+    u32 FindSorted(stringlist a, string value)
+
+## FindMiss
+Zero-arg function that returns the lookup-miss sentinel (`u32max`, i.e. `std::numeric_limits<uint32_t>::max()`). Use this instead of spelling out `4294967295u32` when you need to compare against the miss value, e.g. `Find(keys, k) != FindMiss()`. Being a read-only pure function with no inputs, it is constant-folded at JIT time and has zero runtime cost.
+
+    u32 FindMiss()
+
+
 ## ListCompactPositions
 Takes a `u32list` produced by `ListLookupIndex` and returns the positions in `a` that hit (i.e. the indices in the raw list whose value is **not** the miss sentinel `u32max`). Useful for building the filtered a-side of a join.
 
