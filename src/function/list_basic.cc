@@ -225,9 +225,9 @@ inline StringListStruct CrossJoinString(StringListStruct a, StringListStruct b, 
   char *cursor = buf;
   uint32_t out_idx = 0;
   for (uint32_t i = 0; i < a.len; ++i) {
-    const StringStruct &av = a.data[i];
+    const StringStruct av = a.data[i];
     for (uint32_t j = 0; j < b.len; ++j) {
-      const StringStruct &bv = b.data[j];
+      const StringStruct bv = b.data[j];
       char *start = cursor;
       if (av.len > 0) {
         memcpy(cursor, av.data, av.len);
@@ -272,6 +272,65 @@ Status InitCrossJoinFunc(FunctionRegistry *reg) {
                         {ValueType::kStringList, ValueType::kStringList, ValueType::kString, ValueType::kPtr},
                         ValueType::kStringList),
       reinterpret_cast<void *>(CrossJoinString)));
+  return Status::OK();
+}
+
+inline StringListStruct ZipConcatString(StringListStruct a, StringListStruct b, StringStruct sep, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  if (a.len != b.len) {
+    exec_ctx->AddError("ZipConcat: lhs and rhs len mismatch, lhs len: " + std::to_string(a.len) +
+                       ", rhs len: " + std::to_string(b.len));
+    return {nullptr, 0};
+  }
+
+  StringListStruct result;
+  result.len = a.len;
+  if (a.len == 0) {
+    result.data = nullptr;
+    return result;
+  }
+
+  // First pass: total bytes for the output buffer.
+  //   sum_i (|a[i]| + |sep| + |b[i]|) = (sum |a|) + (sum |b|) + n * |sep|
+  uint64_t total_bytes = 0;
+  for (uint32_t i = 0; i < a.len; ++i) {
+    total_bytes += a.data[i].len;
+    total_bytes += b.data[i].len;
+  }
+  total_bytes += static_cast<uint64_t>(a.len) * sep.len;
+
+  result.data = reinterpret_cast<StringStruct *>(exec_ctx->arena.Allocate(a.len * sizeof(StringStruct)));
+  char *buf = total_bytes == 0 ? nullptr : reinterpret_cast<char *>(exec_ctx->arena.Allocate(total_bytes));
+
+  char *cursor = buf;
+  for (uint32_t i = 0; i < a.len; ++i) {
+    const StringStruct av = a.data[i];
+    const StringStruct bv = b.data[i];
+    char *start = cursor;
+    if (av.len > 0) {
+      memcpy(cursor, av.data, av.len);
+      cursor += av.len;
+    }
+    if (sep.len > 0) {
+      memcpy(cursor, sep.data, sep.len);
+      cursor += sep.len;
+    }
+    if (bv.len > 0) {
+      memcpy(cursor, bv.data, bv.len);
+      cursor += bv.len;
+    }
+    result.data[i].data = start;
+    result.data[i].len = static_cast<uint32_t>(cursor - start);
+  }
+  return result;
+}
+
+Status InitZipConcatFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("ZipConcat",
+                        {ValueType::kStringList, ValueType::kStringList, ValueType::kString, ValueType::kPtr},
+                        ValueType::kStringList),
+      reinterpret_cast<void *>(ZipConcatString)));
   return Status::OK();
 }
 
@@ -648,6 +707,7 @@ Status InitListBasicFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitListCastFunc(reg));
   JF_RETURN_NOT_OK(InitUniqueFunc(reg));
   JF_RETURN_NOT_OK(InitCrossJoinFunc(reg));
+  JF_RETURN_NOT_OK(InitZipConcatFunc(reg));
   return Status::OK();
 }
 

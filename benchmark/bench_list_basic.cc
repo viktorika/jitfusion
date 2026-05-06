@@ -212,6 +212,42 @@ void BM_Execute_CrossJoin(benchmark::State& state) {
 }
 BENCHMARK(BM_Execute_CrossJoin)->Arg(16)->Arg(64)->Arg(256);
 
+// ZipConcat(stringlist a, stringlist b, string sep, ctx) — per-position
+// concatenation, output length equals |a| (== |b|). Linear cost in input
+// length, so it shares the standard 256/4096 sweep with the other linear
+// list kernels.
+void BM_Execute_ZipConcat(benchmark::State& state) {
+  const int len = static_cast<int>(state.range(0));
+  auto reg = MakeRegistry();
+  std::vector<std::string> a;
+  std::vector<std::string> b;
+  a.reserve(len);
+  b.reserve(len);
+  for (int i = 0; i < len; ++i) {
+    a.push_back("a" + std::to_string(i));
+    b.push_back("b" + std::to_string(i));
+  }
+  std::vector<std::unique_ptr<ExecNode>> args;
+  args.emplace_back(new ConstantListValueNode(std::move(a)));
+  args.emplace_back(new ConstantListValueNode(std::move(b)));
+  args.emplace_back(new ConstantValueNode(std::string(":")));
+  args.emplace_back(new jitfusion::ExecContextNode());
+  std::unique_ptr<ExecNode> node(new FunctionNode("ZipConcat", std::move(args)));
+
+  auto engine = CompileOrDie(std::move(node), reg);
+  ExecContext ctx(4096);
+  for (auto _ : state) {
+    ctx.Clear();
+    RetType result;
+    auto st = engine->Execute(ctx, nullptr, &result);
+    benchmark::DoNotOptimize(result);
+    if (!st.ok()) {
+      state.SkipWithError("execute failed");
+    }
+  }
+}
+BENCHMARK(BM_Execute_ZipConcat)->Arg(256)->Arg(4096);
+
 // `in(needle, haystack_list)` — scalar-in-list membership test (not list-out).
 void BM_Execute_ListIn(benchmark::State& state) {
   const int len = static_cast<int>(state.range(0));
