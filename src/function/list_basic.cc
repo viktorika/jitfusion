@@ -196,6 +196,59 @@ ListType Unique(ListType a, void *exec_context) {
   return result;
 }
 
+inline StringListStruct CrossJoinString(StringListStruct a, StringListStruct b, StringStruct sep, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  StringListStruct result;
+  uint64_t total_elems = static_cast<uint64_t>(a.len) * static_cast<uint64_t>(b.len);
+  result.len = static_cast<uint32_t>(total_elems);
+  if (total_elems == 0) {
+    result.data = nullptr;
+    return result;
+  }
+
+  uint64_t a_bytes = 0;
+  for (uint32_t i = 0; i < a.len; ++i) {
+    a_bytes += a.data[i].len;
+  }
+  uint64_t b_bytes = 0;
+  for (uint32_t j = 0; j < b.len; ++j) {
+    b_bytes += b.data[j].len;
+  }
+  // Each output element contributes (|a[i]| + |sep| + |b[j]|) bytes; summed:
+  //   sum_i sum_j (|a[i]| + |sep| + |b[j]|)
+  // = b.len * sum_i |a[i]| + a.len * sum_j |b[j]| + a.len * b.len * |sep|
+  uint64_t total_bytes = (a_bytes * b.len) + (b_bytes * a.len) + (total_elems * sep.len);
+
+  result.data = reinterpret_cast<StringStruct *>(exec_ctx->arena.Allocate(total_elems * sizeof(StringStruct)));
+  char *buf = total_bytes == 0 ? nullptr : reinterpret_cast<char *>(exec_ctx->arena.Allocate(total_bytes));
+
+  char *cursor = buf;
+  uint32_t out_idx = 0;
+  for (uint32_t i = 0; i < a.len; ++i) {
+    const StringStruct &av = a.data[i];
+    for (uint32_t j = 0; j < b.len; ++j) {
+      const StringStruct &bv = b.data[j];
+      char *start = cursor;
+      if (av.len > 0) {
+        memcpy(cursor, av.data, av.len);
+        cursor += av.len;
+      }
+      if (sep.len > 0) {
+        memcpy(cursor, sep.data, sep.len);
+        cursor += sep.len;
+      }
+      if (bv.len > 0) {
+        memcpy(cursor, bv.data, bv.len);
+        cursor += bv.len;
+      }
+      result.data[out_idx].data = start;
+      result.data[out_idx].len = static_cast<uint32_t>(cursor - start);
+      ++out_idx;
+    }
+  }
+  return result;
+}
+
 inline StringListStruct UniqueString(StringListStruct a, void *exec_context) {
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
   StringListStruct result;
@@ -211,6 +264,15 @@ inline StringListStruct UniqueString(StringListStruct a, void *exec_context) {
   }
   result.len = idx;
   return result;
+}
+
+Status InitCrossJoinFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("CrossJoin",
+                        {ValueType::kStringList, ValueType::kStringList, ValueType::kString, ValueType::kPtr},
+                        ValueType::kStringList),
+      reinterpret_cast<void *>(CrossJoinString)));
+  return Status::OK();
 }
 
 Status InitUniqueFunc(FunctionRegistry *reg) {
@@ -585,6 +647,7 @@ Status InitListBasicFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitHashFunc(reg));
   JF_RETURN_NOT_OK(InitListCastFunc(reg));
   JF_RETURN_NOT_OK(InitUniqueFunc(reg));
+  JF_RETURN_NOT_OK(InitCrossJoinFunc(reg));
   return Status::OK();
 }
 
