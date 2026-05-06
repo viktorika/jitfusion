@@ -1353,3 +1353,51 @@ Numeric list to string list conversion:
     stringlist CastStringList(i64list src, ptr exec_ctx)
     stringlist CastStringList(f32list src, ptr exec_ctx)
     stringlist CastStringList(f64list src, ptr exec_ctx)
+
+## ListLookupIndex
+Given two lists `a` and `b` of the same element type, for each element in `a` return the position of its first occurrence in `b`. When an element of `a` is not found in `b`, the result entry is set to `u32max` (`std::numeric_limits<uint32_t>::max()`) as a miss sentinel. Internally a hash table over `b` is built, so the per-element lookup is amortised O(1).
+
+The output length always equals `a.len`.
+
+    u32list ListLookupIndex(u8list  a, u8list  b, ptr exec_ctx)
+    u32list ListLookupIndex(i8list  a, i8list  b, ptr exec_ctx)
+    u32list ListLookupIndex(u16list a, u16list b, ptr exec_ctx)
+    u32list ListLookupIndex(i16list a, i16list b, ptr exec_ctx)
+    u32list ListLookupIndex(u32list a, u32list b, ptr exec_ctx)
+    u32list ListLookupIndex(i32list a, i32list b, ptr exec_ctx)
+    u32list ListLookupIndex(u64list a, u64list b, ptr exec_ctx)
+    u32list ListLookupIndex(i64list a, i64list b, ptr exec_ctx)
+    u32list ListLookupIndex(f32list a, f32list b, ptr exec_ctx)
+    u32list ListLookupIndex(f64list a, f64list b, ptr exec_ctx)
+    u32list ListLookupIndex(stringlist a, stringlist b, ptr exec_ctx)
+
+## ListCompactPositions
+Takes a `u32list` produced by `ListLookupIndex` and returns the positions in `a` that hit (i.e. the indices in the raw list whose value is **not** the miss sentinel `u32max`). Useful for building the filtered a-side of a join.
+
+Output length equals the number of hits; preserves the original order.
+
+    u32list ListCompactPositions(u32list raw, ptr exec_ctx)
+
+## ListCompactIndex
+Takes a `u32list` produced by `ListLookupIndex` and returns the looked-up b-side indices themselves, skipping miss entries. Useful for directly gathering a b-side column aligned to the hit subset of a.
+
+Output length equals the number of hits; preserves the original order.
+
+    u32list ListCompactIndex(u32list raw, ptr exec_ctx)
+
+## ListGather
+Element-wise gather from a `values` list using a `u32list` of positions. For each `k`, if `idx[k] < values.len` the output is `values[idx[k]]`, otherwise it is the supplied `default_value`. This is the typical "realign a b-side column to the a-side shape" kernel of a join.
+
+The output length always equals `idx.len`.
+
+    u8list     ListGather(u8list     values, u32list idx, u8     default_value, ptr exec_ctx)
+    i8list     ListGather(i8list     values, u32list idx, i8     default_value, ptr exec_ctx)
+    u16list    ListGather(u16list    values, u32list idx, u16    default_value, ptr exec_ctx)
+    i16list    ListGather(i16list    values, u32list idx, i16    default_value, ptr exec_ctx)
+    u32list    ListGather(u32list    values, u32list idx, u32    default_value, ptr exec_ctx)
+    i32list    ListGather(i32list    values, u32list idx, i32    default_value, ptr exec_ctx)
+    u64list    ListGather(u64list    values, u32list idx, u64    default_value, ptr exec_ctx)
+    i64list    ListGather(i64list    values, u32list idx, i64    default_value, ptr exec_ctx)
+    f32list    ListGather(f32list    values, u32list idx, f32    default_value, ptr exec_ctx)
+    f64list    ListGather(f64list    values, u32list idx, f64    default_value, ptr exec_ctx)
+    stringlist ListGather(stringlist values, u32list idx, string default_value, ptr exec_ctx)
