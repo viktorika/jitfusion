@@ -208,3 +208,66 @@ TEST(FunctionTest, TruncateTest4) {
   std::vector<std::string> expect(data.begin(), data.end());
   EXPECT_EQ(std::get<std::vector<std::string>>(result), expect);
 }
+
+namespace {
+std::vector<std::string> RunCrossJoin(const std::vector<std::string>& a, const std::vector<std::string>& b,
+                                      const std::string& sep) {
+  std::unique_ptr<FunctionRegistry> func_registry;
+  EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
+  auto a_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(a));
+  auto b_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(b));
+  auto sep_node = std::unique_ptr<ExecNode>(new ConstantValueNode(sep));
+  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode);
+  std::vector<std::unique_ptr<ExecNode>> args_list;
+  args_list.emplace_back(std::move(a_node));
+  args_list.emplace_back(std::move(b_node));
+  args_list.emplace_back(std::move(sep_node));
+  args_list.emplace_back(std::move(exec_node));
+  auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("CrossJoin", std::move(args_list)));
+  ExecEngine exec_engine;
+  auto st = exec_engine.Compile(op_node, func_registry);
+  EXPECT_TRUE(st.ok()) << st.ToString();
+  RetType result;
+  EXPECT_TRUE(exec_engine.Execute(nullptr, &result).ok());
+  return std::get<std::vector<std::string>>(result);
+}
+}  // namespace
+
+TEST(FunctionTest, CrossJoinBasicTest) {
+  // Mirrors the spec example: outer-major (a is outer, b is inner).
+  auto got = RunCrossJoin({"1", "2", "3"}, {"a", "b", "c"}, "_");
+  std::vector<std::string> expect = {"1_a", "1_b", "1_c", "2_a", "2_b", "2_c", "3_a", "3_b", "3_c"};
+  EXPECT_EQ(got, expect);
+}
+
+TEST(FunctionTest, CrossJoinEmptySepTest) {
+  auto got = RunCrossJoin({"x", "y"}, {"1", "2"}, "");
+  std::vector<std::string> expect = {"x1", "x2", "y1", "y2"};
+  EXPECT_EQ(got, expect);
+}
+
+TEST(FunctionTest, CrossJoinMultiCharSepTest) {
+  auto got = RunCrossJoin({"foo", "bar"}, {"baz"}, "::");
+  std::vector<std::string> expect = {"foo::baz", "bar::baz"};
+  EXPECT_EQ(got, expect);
+}
+
+TEST(FunctionTest, CrossJoinSingletonTest) {
+  // 1xN and Nx1 shapes.
+  EXPECT_EQ(RunCrossJoin({"a"}, {"x", "y", "z"}, "-"), (std::vector<std::string>{"a-x", "a-y", "a-z"}));
+  EXPECT_EQ(RunCrossJoin({"x", "y", "z"}, {"a"}, "-"), (std::vector<std::string>{"x-a", "y-a", "z-a"}));
+}
+
+TEST(FunctionTest, CrossJoinEmptyInputTest) {
+  // Either side empty -> empty result.
+  EXPECT_TRUE(RunCrossJoin({}, {"a", "b"}, "_").empty());
+  EXPECT_TRUE(RunCrossJoin({"a", "b"}, {}, "_").empty());
+  EXPECT_TRUE(RunCrossJoin({}, {}, "_").empty());
+}
+
+TEST(FunctionTest, CrossJoinEmptyElementTest) {
+  // Empty strings in inputs are valid and should produce sep-only joins.
+  auto got = RunCrossJoin({"", "a"}, {"", "b"}, "_");
+  std::vector<std::string> expect = {"_", "_b", "a_", "a_b"};
+  EXPECT_EQ(got, expect);
+}

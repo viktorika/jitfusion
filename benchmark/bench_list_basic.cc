@@ -175,6 +175,43 @@ void BM_Execute_ListConcat(benchmark::State& state) {
 }
 BENCHMARK(BM_Execute_ListConcat)->Arg(256)->Arg(4096);
 
+// CrossJoin(stringlist a, stringlist b, string sep, ctx) — produces a
+// length-(|a| * |b|) stringlist of "a[i] + sep + b[j]". Output size is
+// quadratic in the input length, so we sweep the per-side length from 16..256
+// (yielding 256..65536 output elements) instead of the usual 256/4096 sweep
+// used for linear-cost kernels.
+void BM_Execute_CrossJoin(benchmark::State& state) {
+  const int len = static_cast<int>(state.range(0));
+  auto reg = MakeRegistry();
+  std::vector<std::string> a;
+  std::vector<std::string> b;
+  a.reserve(len);
+  b.reserve(len);
+  for (int i = 0; i < len; ++i) {
+    a.push_back("a" + std::to_string(i));
+    b.push_back("b" + std::to_string(i));
+  }
+  std::vector<std::unique_ptr<ExecNode>> args;
+  args.emplace_back(new ConstantListValueNode(std::move(a)));
+  args.emplace_back(new ConstantListValueNode(std::move(b)));
+  args.emplace_back(new ConstantValueNode(std::string("_")));
+  args.emplace_back(new jitfusion::ExecContextNode());
+  std::unique_ptr<ExecNode> node(new FunctionNode("CrossJoin", std::move(args)));
+
+  auto engine = CompileOrDie(std::move(node), reg);
+  ExecContext ctx(4096);
+  for (auto _ : state) {
+    ctx.Clear();
+    RetType result;
+    auto st = engine->Execute(ctx, nullptr, &result);
+    benchmark::DoNotOptimize(result);
+    if (!st.ok()) {
+      state.SkipWithError("execute failed");
+    }
+  }
+}
+BENCHMARK(BM_Execute_CrossJoin)->Arg(16)->Arg(64)->Arg(256);
+
 // `in(needle, haystack_list)` — scalar-in-list membership test (not list-out).
 void BM_Execute_ListIn(benchmark::State& state) {
   const int len = static_cast<int>(state.range(0));

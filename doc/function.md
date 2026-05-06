@@ -318,6 +318,20 @@ Concatenating two lists returns a new list.
     f64list    ListConcat(f64list lhs, f64list rhs, ptr exec_ctx)
     stringlist ListConcat(stringlist lhs, stringlist rhs, ptr exec_ctx)
 
+## CrossJoin
+Cartesian-product string concatenation. Given an outer list `a`, an inner list `b`
+and a separator `sep`, produces a string list of length `len(a) * len(b)` where
+`result[i * len(b) + j] == a[i] + sep + b[j]`. The outer list iterates slower,
+the inner list iterates faster (row-major order).
+
+Example: `CrossJoin(["1","2","3"], ["a","b","c"], "_") ==
+["1_a","1_b","1_c","2_a","2_b","2_c","3_a","3_b","3_c"]`.
+
+If either input list is empty, the result is empty. Numeric lists are not
+accepted directly — convert them to `stringlist` first via `CastStringList`.
+
+    stringlist CrossJoin(stringlist a, stringlist b, string sep, ptr exec_ctx)
+
 ## in
 Check if it is in the list.
 
