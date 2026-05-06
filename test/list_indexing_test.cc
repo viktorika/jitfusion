@@ -610,3 +610,138 @@ TEST(ListIndexingTest, FindMissMatchesFindSortedMiss) {
   auto miss_result = RunExpr(MakeFindMiss());
   EXPECT_EQ(std::get<uint32_t>(find_result), std::get<uint32_t>(miss_result));
 }
+
+// ---- Bucketize tests -------------------------------------------------------
+
+namespace {
+
+// Build a Bucketize(values, boundaries, exec_ctx) FunctionNode.
+template <typename T>
+std::unique_ptr<ExecNode> MakeBucketize(const std::vector<T>& values, const std::vector<T>& boundaries) {
+  std::vector<std::unique_ptr<ExecNode>> args;
+  args.emplace_back(std::make_unique<ConstantListValueNode>(values));
+  args.emplace_back(std::make_unique<ConstantListValueNode>(boundaries));
+  args.emplace_back(std::make_unique<ExecContextNode>());
+  return std::make_unique<FunctionNode>("Bucketize", std::move(args));
+}
+
+template <typename T>
+std::vector<uint32_t> RunBucketize(const std::vector<T>& values, const std::vector<T>& boundaries) {
+  auto result = RunExpr(MakeBucketize(values, boundaries));
+  return std::get<std::vector<uint32_t>>(result);
+}
+
+}  // namespace
+
+TEST(ListIndexingTest, BucketizeBasicI32) {
+  // boundaries = [10, 20, 30] -> 4 buckets: (-inf,10) [10,20) [20,30) [30,+inf)
+  std::vector<int32_t> values = {5, 10, 15, 20, 25, 30, 35};
+  std::vector<int32_t> boundaries = {10, 20, 30};
+  std::vector<uint32_t> expect = {0, 1, 1, 2, 2, 3, 3};
+  EXPECT_EQ(RunBucketize(values, boundaries), expect);
+}
+
+TEST(ListIndexingTest, BucketizeLeftClosedRightOpen) {
+  // Element exactly equal to a boundary lands in the bucket starting at it
+  // (left-closed). Element just below stays in the previous bucket.
+  std::vector<int64_t> values = {9, 10, 11, 19, 20, 21};
+  std::vector<int64_t> boundaries = {10, 20};
+  // Layout: (-inf,10)=0, [10,20)=1, [20,+inf)=2
+  std::vector<uint32_t> expect = {0, 1, 1, 1, 2, 2};
+  EXPECT_EQ(RunBucketize(values, boundaries), expect);
+}
+
+TEST(ListIndexingTest, BucketizeOutOfRangeFallsToEndBuckets) {
+  // Below min -> 0; at-or-above max -> len(boundaries).
+  std::vector<int32_t> values = {-1000, 0, 100, 1000};
+  std::vector<int32_t> boundaries = {0, 100};
+  // Layout: (-inf,0)=0, [0,100)=1, [100,+inf)=2
+  std::vector<uint32_t> expect = {0, 1, 2, 2};
+  EXPECT_EQ(RunBucketize(values, boundaries), expect);
+}
+
+TEST(ListIndexingTest, BucketizeEmptyBoundaries) {
+  // No boundaries -> single (-inf,+inf) bucket -> everything is 0.
+  std::vector<int32_t> values = {-1, 0, 1, 2, 3};
+  std::vector<int32_t> boundaries = {};
+  std::vector<uint32_t> expect = {0, 0, 0, 0, 0};
+  EXPECT_EQ(RunBucketize(values, boundaries), expect);
+}
+
+TEST(ListIndexingTest, BucketizeEmptyValues) {
+  std::vector<double> values = {};
+  std::vector<double> boundaries = {1.0, 2.0, 3.0};
+  EXPECT_TRUE(RunBucketize(values, boundaries).empty());
+}
+
+TEST(ListIndexingTest, BucketizeFloat) {
+  // Verify floating-point ordering and a value sitting exactly on a boundary.
+  std::vector<double> values = {0.5, 1.0, 1.5, 2.5, 3.5};
+  std::vector<double> boundaries = {1.0, 2.0, 3.0};
+  std::vector<uint32_t> expect = {0, 1, 1, 2, 3};
+  EXPECT_EQ(RunBucketize(values, boundaries), expect);
+}
+
+TEST(ListIndexingTest, BucketizeNaNGoesToTopBucket) {
+  // NaN compares false against everything, so std::lower_bound walks past
+  // the end and the value is mapped to bucket = len(boundaries). Matches
+  // NumPy / PyTorch behaviour.
+  const double nan = std::numeric_limits<double>::quiet_NaN();
+  std::vector<double> values = {nan, 1.5};
+  std::vector<double> boundaries = {1.0, 2.0};
+  auto got = RunBucketize(values, boundaries);
+  ASSERT_EQ(got.size(), 2u);
+  EXPECT_EQ(got[0], 2u);  // NaN -> top bucket
+  EXPECT_EQ(got[1], 1u);  // 1.5 -> [1.0, 2.0)
+}
+
+TEST(ListIndexingTest, BucketizeUnsigned) {
+  // Sanity check on an unsigned numeric type to confirm the template
+  // instantiates and registers correctly.
+  std::vector<uint64_t> values = {0, 50, 100, 150, 200};
+  std::vector<uint64_t> boundaries = {100, 200};
+  std::vector<uint32_t> expect = {0, 0, 1, 1, 2};
+  EXPECT_EQ(RunBucketize(values, boundaries), expect);
+}
+
+// Internally Bucketize switches between a linear scan and std::upper_bound at
+// kBucketizeLinearThreshold (=16). Verify both paths produce identical output
+// across the threshold boundary, including for the value-equals-boundary case
+// that distinguishes upper_bound from lower_bound.
+TEST(ListIndexingTest, BucketizeLinearAndBinaryPathsAgree) {
+  // Build boundaries 10, 20, ..., 10*N and probe every interesting position:
+  // strictly below, exactly on, strictly between, exactly on the next, ...
+  auto build_case = [](int n_boundaries) {
+    std::vector<int32_t> boundaries;
+    boundaries.reserve(n_boundaries);
+    for (int i = 1; i <= n_boundaries; ++i) {
+      boundaries.push_back(i * 10);
+    }
+    std::vector<int32_t> values;
+    std::vector<uint32_t> expect;
+    // below the smallest boundary
+    values.push_back(0);
+    expect.push_back(0);
+    for (int i = 0; i < n_boundaries; ++i) {
+      // exactly on the i-th boundary -> bucket i+1 (left-closed)
+      values.push_back(boundaries[i]);
+      expect.push_back(static_cast<uint32_t>(i + 1));
+      // strictly between b[i] and b[i+1] -> bucket i+1
+      values.push_back(boundaries[i] + 5);
+      expect.push_back(static_cast<uint32_t>(i + 1));
+    }
+    // way above the top -> bucket n
+    values.push_back(10 * n_boundaries + 1000);
+    expect.push_back(static_cast<uint32_t>(n_boundaries));
+    return std::make_pair(std::move(values), std::pair{std::move(boundaries), std::move(expect)});
+  };
+
+  // n=16: hits the linear scan path (last `<=` threshold value).
+  // n=17: hits the std::upper_bound path (first value above threshold).
+  // n=1 / n=2: tiny edge cases.
+  for (int n : {1, 2, 16, 17, 64}) {
+    auto [values, rest] = build_case(n);
+    auto& [boundaries, expect] = rest;
+    EXPECT_EQ(RunBucketize(values, boundaries), expect) << "n=" << n;
+  }
+}

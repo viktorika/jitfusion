@@ -275,4 +275,48 @@ void BM_Execute_FindSorted_AllMiss(benchmark::State& state) {
 }
 BENCHMARK(BM_Execute_FindSorted_AllMiss)->Arg(256)->Arg(4096);
 
+// Bucketize(values<i64>, boundaries<i64>, ctx). Per-element cost is
+// O(log |boundaries|), so we sweep both axes:
+//   * values  length: 256, 4096 (matches the rest of the file)
+//   * bucket count : 16, 256 (representative for feature-engineering use)
+// Boundaries are evenly spaced and values are spread across the full range so
+// the lower_bound walks both halves of the tree on average.
+void BM_Execute_Bucketize(benchmark::State& state) {
+  const int len = static_cast<int>(state.range(0));
+  const int n_buckets = static_cast<int>(state.range(1));
+  auto reg = MakeRegistry();
+
+  std::vector<int64_t> values;
+  values.reserve(len);
+  for (int i = 0; i < len; ++i) {
+    // Spread values across [0, n_buckets * 100) so each bucket sees
+    // roughly equal traffic regardless of len.
+    values.push_back(static_cast<int64_t>((i * 1315423911LL) % (n_buckets * 100LL)));
+  }
+  std::vector<int64_t> boundaries;
+  boundaries.reserve(n_buckets);
+  for (int i = 1; i <= n_buckets; ++i) {
+    boundaries.push_back(static_cast<int64_t>(i * 100));  // 100, 200, ...
+  }
+
+  std::vector<std::unique_ptr<ExecNode>> args;
+  args.emplace_back(new ConstantListValueNode(std::move(values)));
+  args.emplace_back(new ConstantListValueNode(std::move(boundaries)));
+  args.emplace_back(new jitfusion::ExecContextNode());
+  std::unique_ptr<ExecNode> node(new FunctionNode("Bucketize", std::move(args)));
+
+  auto engine = CompileOrDie(std::move(node), reg);
+  ExecContext ctx(4096);
+  for (auto _ : state) {
+    ctx.Clear();
+    RetType result;
+    auto st = engine->Execute(ctx, nullptr, &result);
+    benchmark::DoNotOptimize(result);
+    if (!st.ok()) {
+      state.SkipWithError("execute failed");
+    }
+  }
+}
+BENCHMARK(BM_Execute_Bucketize)->Args({256, 16})->Args({256, 256})->Args({4096, 16})->Args({4096, 256});
+
 }  // namespace

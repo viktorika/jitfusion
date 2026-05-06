@@ -1467,3 +1467,38 @@ The output length always equals `idx.len`.
     f32list    ListGather(f32list    values, u32list idx, f32    default_value, ptr exec_ctx)
     f64list    ListGather(f64list    values, u32list idx, f64    default_value, ptr exec_ctx)
     stringlist ListGather(stringlist values, u32list idx, string default_value, ptr exec_ctx)
+
+## Bucketize
+Classify each element of `values` into a half-open bin defined by an
+ascending `boundaries` list. Aligned with NumPy `digitize`, TensorFlow /
+PyTorch `bucketize`, PostgreSQL `width_bucket(array)` and Apache Arrow's bin
+kernel.
+
+For `boundaries = [b0, b1, ..., b_{n-1}]` the bin layout is
+
+    bucket 0       : (-inf, b0)
+    bucket i (1..n-1) : [b_{i-1}, b_i)
+    bucket n       : [b_{n-1}, +inf)
+
+i.e. left-closed / right-open. Result has the same length as `values`.
+
+* Out-of-range values land in bucket `0` or bucket `n` (no error).
+* Empty `boundaries` collapses to a single `(-inf, +inf)` bucket — every
+  value returns `0`.
+* For floating-point lists, `NaN` is mapped to the top bucket `n`
+  (matching NumPy / PyTorch).
+* `boundaries` **must** be sorted ascending; like `FindSorted`, the result
+  is unspecified otherwise (no runtime check).
+
+Implementation is `std::lower_bound`, O(log n) per value.
+
+    u32list Bucketize(u8list  values, u8list  boundaries, ptr exec_ctx)
+    u32list Bucketize(i8list  values, i8list  boundaries, ptr exec_ctx)
+    u32list Bucketize(u16list values, u16list boundaries, ptr exec_ctx)
+    u32list Bucketize(i16list values, i16list boundaries, ptr exec_ctx)
+    u32list Bucketize(u32list values, u32list boundaries, ptr exec_ctx)
+    u32list Bucketize(i32list values, i32list boundaries, ptr exec_ctx)
+    u32list Bucketize(u64list values, u64list boundaries, ptr exec_ctx)
+    u32list Bucketize(i64list values, i64list boundaries, ptr exec_ctx)
+    u32list Bucketize(f32list values, f32list boundaries, ptr exec_ctx)
+    u32list Bucketize(f64list values, f64list boundaries, ptr exec_ctx)

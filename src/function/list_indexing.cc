@@ -170,6 +170,42 @@ VList ListGather(VList values, U32ListStruct idx, typename VList::CElementType d
   return result;
 }
 
+constexpr uint32_t kBucketizeLinearThreshold = 16;
+
+template <typename ListType>
+U32ListStruct Bucketize(ListType values, ListType boundaries, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  U32ListStruct result;
+  result.len = values.len;
+  result.data = reinterpret_cast<uint32_t *>(exec_ctx->arena.Allocate(sizeof(uint32_t) * values.len));
+
+  const auto *bbegin = boundaries.data;
+  const uint32_t bn = boundaries.len;
+
+  if (bn <= kBucketizeLinearThreshold) {
+    for (uint32_t i = 0; i < values.len; ++i) {
+      const auto v = values.data[i];
+      uint32_t bucket = 0;
+      // `!(v < b)` is intentional, do NOT simplify to `v >= b` or `b <= v`:
+      // upper_bound uses the same `value < *it` predicate, so for NaN — where
+      // every comparison is false — both paths walk past the end and land in
+      // the top bucket. Switching to `>=` would map NaN to bucket 0 and break
+      // bit-for-bit parity with the binary-search path.
+      while (bucket < bn && !(v < bbegin[bucket])) {
+        ++bucket;
+      }
+      result.data[i] = bucket;
+    }
+  } else {
+    const auto *bend = bbegin + bn;
+    for (uint32_t i = 0; i < values.len; ++i) {
+      const auto *it = std::upper_bound(bbegin, bend, values.data[i]);
+      result.data[i] = static_cast<uint32_t>(it - bbegin);
+    }
+  }
+  return result;
+}
+
 Status InitListLookupIndexFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
       FunctionSignature("ListLookupIndex", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr},
@@ -357,6 +393,40 @@ Status InitListGatherFunc(FunctionRegistry *reg) {
   return Status::OK();
 }
 
+Status InitBucketizeFunc(FunctionRegistry *reg) {
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Bucketize", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(Bucketize<U8ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Bucketize", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(Bucketize<I8ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Bucketize", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(Bucketize<U16ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Bucketize", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(Bucketize<I16ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Bucketize", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(Bucketize<U32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Bucketize", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(Bucketize<I32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Bucketize", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(Bucketize<U64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Bucketize", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(Bucketize<I64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Bucketize", {ValueType::kF32List, ValueType::kF32List, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(Bucketize<F32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature("Bucketize", {ValueType::kF64List, ValueType::kF64List, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(Bucketize<F64ListStruct>)));
+  return Status::OK();
+}
+
 }  // namespace
 
 Status InitListIndexingFunc(FunctionRegistry *reg) {
@@ -366,6 +436,7 @@ Status InitListIndexingFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(InitFindMissFunc(reg));
   JF_RETURN_NOT_OK(InitListCompactFuncs(reg));
   JF_RETURN_NOT_OK(InitListGatherFunc(reg));
+  JF_RETURN_NOT_OK(InitBucketizeFunc(reg));
   return Status::OK();
 }
 
