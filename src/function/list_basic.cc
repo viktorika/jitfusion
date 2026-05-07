@@ -37,28 +37,12 @@ ListType ListConcat(ListType a, ListType b, void *exec_context) {
 
 template <typename ListType>
 uint8_t IsInList(typename ListType::CElementType a, ListType b) {
-  if constexpr (std::is_same_v<float, typename ListType::CElementType>) {
-    for (std::size_t i = 0; i < b.len; ++i) {
-      if (std::abs(a - b.data[i]) < std::numeric_limits<float>::epsilon()) {
-        return 1;
-      }
+  for (std::size_t i = 0; i < b.len; ++i) {
+    if (a == b.data[i]) {
+      return 1;
     }
-    return 0;
-  } else if constexpr (std::is_same_v<double, typename ListType::CElementType>) {
-    for (std::size_t i = 0; i < b.len; ++i) {
-      if (std::abs(a - b.data[i]) < std::numeric_limits<double>::epsilon()) {
-        return 1;
-      }
-    }
-    return 0;
-  } else {
-    for (std::size_t i = 0; i < b.len; ++i) {
-      if (a == b.data[i]) {
-        return 1;
-      }
-    }
-    return 0;
   }
+  return 0;
 }
 
 inline uint8_t IsInStringList(StringStruct a, StringListStruct b) {
