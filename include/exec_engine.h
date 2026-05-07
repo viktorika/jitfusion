@@ -85,16 +85,6 @@ enum class FPMathMode : std::uint8_t {
 };
 
 struct ExecEngineOption {
-  // DEPRECATED since relocatable constant globals landed: constant
-  // list / string payloads now live as Module-level GlobalVariables
-  // (private, unnamed_addr, constant) instead of being copied into an
-  // engine-owned Arena and referenced via `inttoptr <host_addr>`. This
-  // field is therefore unused and exists only to preserve aggregate
-  // initialization ordering for users who wrote
-  // `ExecEngineOption{a, b, dump_ir, fp}`; it will be removed in a
-  // future major version.
-  [[deprecated("Constant payloads are now emitted as Module-level globals; this field is ignored.")]]
-  int64_t const_value_arena_alloc_min_chunk_size{4096};
   int64_t exec_ctx_arena_alloc_min_chunk_size{4096};
   // If true, the fully optimized LLVM IR text will be captured during Compile and made available via GetIRCode().
   // Mainly for debugging: serializing a large Module to text is expensive (can be hundreds of KB and requires a
