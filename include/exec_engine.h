@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-15 10:48:46
  * @Last Modified by: victorika
- * @Last Modified time: 2026-03-31 14:45:31
+ * @Last Modified time: 2026-05-07 16:08:44
  */
 #pragma once
 
@@ -93,6 +93,23 @@ struct ExecEngineOption {
   // See FPMathMode above. Default stays kFast so that existing users'
   // observed numeric behavior does not change when they upgrade.
   FPMathMode fp_math_mode{FPMathMode::kFast};
+  // If true, the raw compiled object bytes are captured during
+  // Compile() / BatchCompile() and retained in the engine so that
+  // SaveCompiled() can serialize them afterwards. Defaults to false
+  // because capturing costs one memcpy and ~KBs-to-MBs of extra
+  // resident memory per engine — pure waste for users who never
+  // persist compiled artifacts.
+  //
+  // Note on lifecycle: the captured bytes are released by the next
+  // Compile()/BatchCompile() (via ResetCompiledState) or when the
+  // engine is destroyed. There is deliberately no "release now" API:
+  // SaveCompiled may legitimately be called multiple times, so the
+  // engine keeps the bytes as long as the compilation is live.
+  //
+  // Must be set before Compile()/BatchCompile(); flipping it after
+  // the fact does NOT retroactively materialize bytes for an already-
+  // compiled engine — you would need to re-Compile().
+  bool enable_save_compiled{false};
 };
 
 // Thread-safety contract:
@@ -153,6 +170,49 @@ class ExecEngine {
 
   [[nodiscard]] std::string_view GetIRCode() const { return ir_code_; }
 
+  // -------------------------------------------------------------------------
+  // Compiled-artifact persistence (serialize / deserialize).
+  //
+  // After a successful Compile() / BatchCompile(), SaveCompiled() packs the
+  // JIT-produced relocatable object file plus a small header (engine mode,
+  // return type(s), target triple, LLVM version, FP mode, ...) into a
+  // self-contained byte string. LoadCompiled() is an alternative entry point
+  // to Compile() that takes such a byte string and a FunctionRegistry and
+  // restores the engine into a state indistinguishable from a fresh Compile()
+  // — i.e. all Execute* overloads work identically afterwards.
+  //
+  // This pair exists so that callers who already have a way to persist bytes
+  // (disk, KV store, network cache) can skip the most expensive parts of
+  // Compile(): IR construction, the O3 pipeline, and backend codegen. A
+  // successful LoadCompiled typically runs in single-digit milliseconds
+  // where Compile() takes tens to hundreds.
+  //
+  // Compatibility contract:
+  //   * A blob saved with one LLVM version / target / CPU can ONLY be loaded
+  //     by a process with the matching LLVM version / target / CPU. Mismatches
+  //     are detected and rejected cleanly (Status::InvalidArgument) rather
+  //     than miscompiled silently.
+  //   * The FunctionRegistry passed to LoadCompiled must register every C
+  //     function referenced by the original ExecNode tree under the same
+  //     FunctionSignature. Addresses may differ across processes (that's the
+  //     whole point of relocatable globals), but names + param/ret types
+  //     must match. Missing symbols surface as lookup failures on first
+  //     Execute*.
+  //   * IR dump (GetIRCode()) is NOT populated after LoadCompiled, because
+  //     the IR is never constructed. This is intentional — getting the IR
+  //     back would require re-running codegen, defeating the purpose.
+  //
+  // SaveCompiled() is only valid immediately after a successful Compile() /
+  // BatchCompile() that ran with ExecEngineOption::enable_save_compiled=true.
+  // It will also fail on a default-constructed or load-restored engine,
+  // because in those cases the engine never captured object bytes to begin
+  // with. The opt-in is deliberate: capturing costs one memcpy of the .o
+  // file (a few KB to a few MB depending on pipeline size), plus the same
+  // again in resident memory until the engine is destroyed or re-compiled,
+  // which is pure overhead for users who never persist artifacts.
+  Status SaveCompiled(std::string* out) const;
+  Status LoadCompiled(std::string_view bytes, const std::unique_ptr<FunctionRegistry>& func_registry);
+
  private:
   Status CreateJitAndOptimize(const std::unique_ptr<FunctionRegistry>& func_registry,
                               std::unique_ptr<llvm::Module> owner, std::unique_ptr<llvm::LLVMContext> llvm_context);
@@ -166,6 +226,12 @@ class ExecEngine {
   std::string ir_code_;
   std::vector<char*> batch_entry_func_ptrs_;
   std::vector<ValueType> batch_ret_types_;
+  // Raw object bytes captured during Compile/BatchCompile. Non-empty only
+  // when the engine produced them itself (we need the bytes to implement
+  // SaveCompiled). Filled in by a hook installed on the IRCompileLayer in
+  // CreateJitAndOptimize.
+  //
+  std::string compiled_object_bytes_;
 };
 
 }  // namespace jitfusion

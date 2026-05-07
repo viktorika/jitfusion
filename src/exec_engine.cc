@@ -2,18 +2,21 @@
  * @Author: victorika
  * @Date: 2025-01-15 10:59:33
  * @Last Modified by: victorika
- * @Last Modified time: 2026-03-31 14:51:40
+ * @Last Modified time: 2026-05-07 16:41:15
  */
 #include "exec_engine.h"
 #include <memory>
 #include <string>
 #include <vector>
 #include "codegen/codegen.h"
+#include "compiled_artifact.h"
 #include "exec_node.h"
 #include "function/function_init.h"
 #include "function_registry.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
+#include "llvm/Config/llvm-config.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
+#include "llvm/ExecutionEngine/Orc/ObjectTransformLayer.h"
 #include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Value.h"
@@ -23,6 +26,7 @@
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/CodeGen.h"
 #include "llvm/Support/DynamicLibrary.h"
+#include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Target/TargetMachine.h"
@@ -255,6 +259,7 @@ void ExecEngine::ResetCompiledState() {
   batch_entry_func_ptrs_.clear();
   batch_ret_types_.clear();
   ir_code_.clear();
+  compiled_object_bytes_.clear();
 }
 
 Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
@@ -486,7 +491,6 @@ Status ExecEngine::BatchCompile(const std::vector<std::unique_ptr<ExecNode>>& ex
     func_ptr += func_offset->getValue();
     batch_entry_func_ptrs_[i] = func_ptr;
   }
-
   return Status::OK();
 }
 
@@ -638,6 +642,16 @@ Status ExecEngine::CreateJitAndOptimize(const std::unique_ptr<FunctionRegistry>&
     return Status::RuntimeError("Failed to create DynamicLibrarySearchGenerator: ", llvm::toString(dlsg.takeError()));
   }
   jd.addGenerator(std::move(*dlsg));
+  if (option_.enable_save_compiled) {
+    jit_->getObjTransformLayer().setTransform(
+        [this](std::unique_ptr<llvm::MemoryBuffer> obj_buf) -> llvm::Expected<std::unique_ptr<llvm::MemoryBuffer>> {
+          if (obj_buf) {
+            llvm::StringRef data = obj_buf->getBuffer();
+            compiled_object_bytes_.assign(data.data(), data.size());
+          }
+          return obj_buf;
+        });
+  }
   // optimize
   jit_->getIRTransformLayer().setTransform(
       [&, this](llvm::orc::ThreadSafeModule tsm, const llvm::orc::MaterializationResponsibility& /*r*/) {
@@ -676,6 +690,131 @@ Status ExecEngine::CreateJitAndOptimize(const std::unique_ptr<FunctionRegistry>&
     return Status::RuntimeError("Failed to add module to JIT: ", llvm::toString(std::move(err)));
   }
   JF_RETURN_NOT_OK(func_registry->MappingToJIT(jit_.get()));
+  return Status::OK();
+}
+
+Status ExecEngine::SaveCompiled(std::string* out) const {
+  if (out == nullptr) {
+    return Status::InvalidArgument("SaveCompiled: out must not be null");
+  }
+  const bool nothing_compiled = (entry_func_ptr_ == nullptr) && batch_entry_func_ptrs_.empty();
+  if (nothing_compiled) {
+    return Status::RuntimeError("SaveCompiled: nothing compiled yet. Call Compile() or BatchCompile() first.");
+  }
+  if (compiled_object_bytes_.empty()) {
+    return Status::RuntimeError(
+        "SaveCompiled: no object bytes captured. Set "
+        "ExecEngineOption::enable_save_compiled=true BEFORE calling Compile() / "
+        "BatchCompile(), then re-compile. (Artifacts loaded via LoadCompiled also "
+        "cannot be re-saved — the loaded bytes are intentionally not retained.)");
+  }
+
+  const bool is_batch = !batch_entry_func_ptrs_.empty();
+  ArtifactHeader header;
+  header.llvm_version = LLVM_VERSION_STRING;
+  header.target_triple = llvm::sys::getProcessTriple();
+  header.cpu_name = llvm::sys::getHostCPUName().str();
+  header.mode = is_batch ? ArtifactMode::kBatch : ArtifactMode::kSingle;
+  header.fp_math_mode =
+      (option_.fp_math_mode == FPMathMode::kFast) ? ArtifactFPMathMode::kFast : ArtifactFPMathMode::kStrict;
+  header.top_ret_type = is_batch ? batch_ret_types_[0] : ret_type_;
+
+  const size_t n = is_batch ? batch_entry_func_ptrs_.size() : 1U;
+  header.per_entry_ret_types.resize(n);
+  for (size_t i = 0; i < n; ++i) {
+    header.per_entry_ret_types[i] = is_batch ? batch_ret_types_[i] : ret_type_;
+  }
+  return SerializeArtifact(header, compiled_object_bytes_, out);
+}
+
+Status ExecEngine::LoadCompiled(std::string_view bytes, const std::unique_ptr<FunctionRegistry>& func_registry) {
+  ArtifactHeader header;
+  std::string_view obj_view;
+  JF_RETURN_NOT_OK(DeserializeArtifact(bytes, &header, &obj_view));
+
+  if (header.llvm_version != LLVM_VERSION_STRING) {
+    return Status::InvalidArgument(
+        "compiled artifact: LLVM version mismatch (artifact=", header.llvm_version, ", runtime=", LLVM_VERSION_STRING,
+        "). LLVM does not guarantee object-file compatibility across versions; regenerate the artifact.");
+  }
+  {
+    const std::string current_triple = llvm::sys::getProcessTriple();
+    if (header.target_triple != current_triple) {
+      return Status::InvalidArgument("compiled artifact: target triple mismatch (artifact=", header.target_triple,
+                                     ", runtime=", current_triple, ")");
+    }
+  }
+  {
+    const std::string current_cpu = llvm::sys::getHostCPUName().str();
+    if (header.cpu_name != current_cpu) {
+      return Status::InvalidArgument("compiled artifact: host CPU mismatch (artifact=", header.cpu_name,
+                                     ", runtime=", current_cpu, "). Regenerate the artifact on this host.");
+    }
+  }
+
+  const bool is_batch = (header.mode == ArtifactMode::kBatch);
+  option_.fp_math_mode = (header.fp_math_mode == ArtifactFPMathMode::kFast) ? FPMathMode::kFast : FPMathMode::kStrict;
+
+  ResetCompiledState();
+
+  static auto machine = LLVMInit();
+  const auto fp_mode = option_.fp_math_mode;
+  auto jit_or_err =
+      llvm::orc::LLJITBuilder()
+          .setCompileFunctionCreator([fp_mode](llvm::orc::JITTargetMachineBuilder jtmb)
+                                         -> llvm::Expected<std::unique_ptr<llvm::orc::IRCompileLayer::IRCompiler>> {
+            jtmb.setCodeGenOptLevel(llvm::CodeGenOptLevel::Aggressive);
+            if (fp_mode == FPMathMode::kFast) {
+              jtmb.getOptions().AllowFPOpFusion = llvm::FPOpFusion::Fast;
+              jtmb.getOptions().UnsafeFPMath = true;
+            }
+            return std::make_unique<llvm::orc::ConcurrentIRCompiler>(std::move(jtmb));
+          })
+          .create();
+  if (!jit_or_err) {
+    return Status::RuntimeError("LoadCompiled: failed to create LLJIT: ", llvm::toString(jit_or_err.takeError()));
+  }
+  jit_ = std::move(*jit_or_err);
+
+  auto dlsg = llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(jit_->getDataLayout().getGlobalPrefix());
+  if (!dlsg) {
+    return Status::RuntimeError("LoadCompiled: failed to create DynamicLibrarySearchGenerator: ",
+                                llvm::toString(dlsg.takeError()));
+  }
+  jit_->getMainJITDylib().addGenerator(std::move(*dlsg));
+  auto obj_buf =
+      llvm::MemoryBuffer::getMemBufferCopy(llvm::StringRef(obj_view.data(), obj_view.size()), "jitfusion.loaded.o");
+  if (auto err = jit_->addObjectFile(std::move(obj_buf))) {
+    return Status::RuntimeError("LoadCompiled: addObjectFile failed: ", llvm::toString(std::move(err)));
+  }
+  JF_RETURN_NOT_OK(func_registry->MappingToJIT(jit_.get()));
+  const size_t num_entries = header.per_entry_ret_types.size();
+  if (is_batch) {
+    batch_ret_types_ = std::move(header.per_entry_ret_types);
+    batch_entry_func_ptrs_.resize(num_entries);
+    for (size_t i = 0; i < num_entries; ++i) {
+      const std::string sym = kEntryFunctionName + std::to_string(i);
+      auto off = jit_->lookup(sym);
+      if (!off) {
+        return Status::RuntimeError("LoadCompiled: entry symbol '", sym,
+                                    "' not found: ", llvm::toString(off.takeError()),
+                                    ". The FunctionRegistry is probably missing a function the artifact depends on.");
+      }
+      char* fp = nullptr;
+      fp += off->getValue();
+      batch_entry_func_ptrs_[i] = fp;
+    }
+  } else {
+    ret_type_ = header.per_entry_ret_types[0];
+    auto off = jit_->lookup(kEntryFunctionName);
+    if (!off) {
+      return Status::RuntimeError("LoadCompiled: entry symbol '", kEntryFunctionName,
+                                  "' not found: ", llvm::toString(off.takeError()),
+                                  ". The FunctionRegistry is probably missing a function the artifact depends on.");
+    }
+    entry_func_ptr_ = nullptr;
+    entry_func_ptr_ += off->getValue();
+  }
   return Status::OK();
 }
 
