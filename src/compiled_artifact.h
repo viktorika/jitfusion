@@ -1,6 +1,6 @@
 /*
- * @Author: victorika 
- * @Date: 2026-05-07 16:13:51 
+ * @Author: victorika
+ * @Date: 2026-05-07 16:13:51
  * @Last Modified by: victorika
  * @Last Modified time: 2026-05-07 16:43:30
  */
@@ -119,8 +119,8 @@ enum class ArtifactExtensionTag : std::uint32_t {
 };
 
 struct ArtifactExtension {
-  std::uint32_t tag;     // raw tag; cast to ArtifactExtensionTag if known
-  std::string payload;   // opaque bytes, length implicit
+  std::uint32_t tag;    // raw tag; cast to ArtifactExtensionTag if known
+  std::string payload;  // opaque bytes, length implicit
 };
 
 // Structured view of everything in a JFCA artifact except the
