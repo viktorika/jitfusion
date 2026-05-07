@@ -1,3 +1,9 @@
+/*
+ * @Author: victorika
+ * @Date: 2026-04-30 16:07:33
+ * @Last Modified by: victorika
+ * @Last Modified time: 2026-04-30 16:07:33
+ */
 // D. ExecContext arena reuse vs fresh.
 // E. Batch execute (ExecuteAll / ExecuteAt loop).
 // F. Hand-written native C++ baselines.

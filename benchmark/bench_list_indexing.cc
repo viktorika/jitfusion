@@ -1,3 +1,9 @@
+/*
+ * @Author: victorika
+ * @Date: 2026-05-06 12:48:50
+ * @Last Modified by: victorika
+ * @Last Modified time: 2026-05-06 12:48:50
+ */
 // K. List indexing kernels: lookup / compact / gather.
 //
 // Kernel overview:
