@@ -491,10 +491,6 @@ Status ExecEngine::BatchCompile(const std::vector<std::unique_ptr<ExecNode>>& ex
     func_ptr += func_offset->getValue();
     batch_entry_func_ptrs_[i] = func_ptr;
   }
-  // Symbol names are deterministic ("entry" / "entryN") and re-derived
-  // inline by LoadCompiled / SaveCompiled; no need to stash func_names
-  // beyond this scope.
-
   return Status::OK();
 }
 
