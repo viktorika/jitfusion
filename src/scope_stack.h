@@ -23,16 +23,6 @@ class ScopeStack {
 
   void Set(const std::string& name, V value) { stack_.back()[name] = std::move(value); }
 
-  void SetOrUpdate(const std::string& name, V value) {
-    for (auto it = stack_.rbegin(); it != stack_.rend(); ++it) {
-      if (auto found = it->find(name); found != it->end()) {
-        found->second = std::move(value);
-        return;
-      }
-    }
-    stack_.back()[name] = std::move(value);
-  }
-
   V Lookup(const std::string& name) const {
     for (auto it = stack_.rbegin(); it != stack_.rend(); ++it) {
       if (auto found = it->find(name); found != it->end()) {
@@ -44,16 +34,6 @@ class ScopeStack {
     } else {
       return V{};
     }
-  }
-
-  std::unordered_map<std::string, V> Snapshot() const {
-    std::unordered_map<std::string, V> result;
-    for (const auto& scope : stack_) {
-      for (const auto& [name, value] : scope) {
-        result[name] = value;
-      }
-    }
-    return result;
   }
 
   std::unordered_map<std::string, V> GetShadowed() const {

@@ -28,7 +28,12 @@ namespace jitfusion {
 // ExecContext; a single ExecEngine can be shared by all of them after Compile().
 // Within one thread, reusing an ExecContext across calls (via the
 // `Execute(ExecContext&, ...)` overloads) avoids re-allocating the arena on
-// each call.
+// each call. The engine resets the arena and clears the error list at the end
+// of every Execute(ExecContext&, ...) call, so callers do NOT need to invoke
+// Clear() manually between calls. As a consequence, any pointer returned
+// through the arena (list / string payloads embedded in the previous result)
+// becomes invalid as soon as the next Execute call returns — copy out anything
+// you need to keep before issuing the next call.
 struct ExecContext {
   explicit ExecContext(int64_t alloc_min_chunk_size) : arena(alloc_min_chunk_size) {}
   Arena arena;
