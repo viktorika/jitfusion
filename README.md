@@ -16,9 +16,15 @@ llvm-config --version
 ```
 
 ## CMake Build
+
+> Note: the repository root contains a Bazel `BUILD` file, so on
+> case-insensitive filesystems (default APFS on macOS, NTFS on Windows)
+> a build tree literally named `build` collides with it. Use a
+> differently-cased directory such as `cmake-build` (used below) or `out`.
+
 ```bash
-cmake -B build
-cmake --build build -j
+cmake -B cmake-build
+cmake --build cmake-build -j
 ```
 
 The build defaults to `Release` (`-O3 -DNDEBUG`) when `CMAKE_BUILD_TYPE` is
@@ -39,9 +45,9 @@ xsimd acceleration is optional. The `HAS_XSIMD` option accepts three values:
 Example:
 
 ```bash
-cmake -B build -DHAS_XSIMD=ON      # require xsimd
-cmake -B build -DHAS_XSIMD=OFF     # disable xsimd
-cmake -B build                     # AUTO (default)
+cmake -B cmake-build -DHAS_XSIMD=ON      # require xsimd
+cmake -B cmake-build -DHAS_XSIMD=OFF     # disable xsimd
+cmake -B cmake-build                     # AUTO (default)
 ```
 
 ### Install
@@ -51,9 +57,9 @@ headers and a CMake package config so that downstream projects can consume
 jitfusion via `find_package`.
 
 ```bash
-cmake -B build
-cmake --build build -j
-cmake --install build --prefix /path/to/install
+cmake -B cmake-build
+cmake --build cmake-build -j
+cmake --install cmake-build --prefix /path/to/install
 ```
 
 Layout of the install tree:
