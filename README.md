@@ -274,7 +274,6 @@ When you reuse the same `ExecContext` across multiple `Execute(ExecContext&, ...
 
 | Field | Default | Purpose |
 | --- | --- | --- |
-| `const_value_arena_alloc_min_chunk_size` | `4096` | Minimum chunk size (in bytes) for the engine-owned arena that backs constant values embedded in the IR. Raise it if you embed large constant lists / strings and want to avoid chunk churn during compilation. |
 | `exec_ctx_arena_alloc_min_chunk_size` | `4096` | Minimum chunk size for the per-execution arena created when you call an `Execute*` overload that does **not** take an explicit `ExecContext`. Ignored for the `ExecContext&` overloads (the caller owns the arena). |
 | `dump_ir` | `false` | When `true`, the fully optimized LLVM IR text is captured during `Compile` / `BatchCompile` and made available via `GetIRCode()`. Useful for debugging; avoid enabling in production because serializing a large Module to text is expensive. |
 | `fp_math_mode` | `FPMathMode::kFast` | Floating-point semantics requested from the JIT backend. `kFast` enables FMA fusion and `-ffast-math`-style algebraic rewrites (1.3x - 2x faster on FP-heavy list kernels). Switch to `kStrict` if you need bit-for-bit IEEE-754 reproducibility (finance / risk / regression tests). |

@@ -2,9 +2,11 @@
  * @Author: victorika
  * @Date: 2025-01-21 16:16:20
  * @Last Modified by: victorika
- * @Last Modified time: 2026-04-03 16:07:20
+ * @Last Modified time: 2026-05-07 14:26:54
  */
 #include "codegen.h"
+#include "codegen/const_global_emit.h"
+#include "llvm/IR/Constants.h"
 #include "llvm/IR/DerivedTypes.h"
 
 namespace jitfusion {
@@ -15,40 +17,37 @@ struct MakeListVisitor {
   IRCodeGenContext &ctx_;
 
   llvm::Value *operator()(const std::vector<std::string> &list) const {
-    StringStruct *data = nullptr;
-    if (!list.empty()) {
-      data = reinterpret_cast<StringStruct *>(ctx_.const_value_arena.Allocate(list.size() * sizeof(StringStruct)));
-      for (std::size_t idx = 0; idx < list.size(); ++idx) {
-        if (list[idx].empty()) {
-          data[idx].data = nullptr;
-        } else {
-          data[idx].data = reinterpret_cast<char *>(ctx_.const_value_arena.Allocate(list[idx].size()));
-          memcpy(data[idx].data, list[idx].data(), list[idx].size() * sizeof(char));
-        }
-        data[idx].len = list[idx].size();
-      }
+    if (list.empty()) {
+      auto *ptr_ty = llvm::PointerType::getUnqual(ctx_.context);
+      return BuildPtrLenStructConstant(ctx_, ctx_.complex_type.stringlist_type, llvm::ConstantPointerNull::get(ptr_ty),
+                                       0U);
     }
-    return EmitPtrLenStruct(data, list.size(), ctx_.complex_type.stringlist_type);
+
+    auto *elem_struct_ty = ctx_.complex_type.string_type;
+    std::vector<llvm::Constant *> elems;
+    elems.reserve(list.size());
+    for (const auto &s : list) {
+      llvm::Constant *payload_ptr = EmitStringPayloadGlobal(ctx_, s);
+      elems.emplace_back(BuildPtrLenStructConstant(ctx_, elem_struct_ty, payload_ptr, static_cast<uint32_t>(s.size())));
+    }
+    auto *arr_ty = llvm::ArrayType::get(elem_struct_ty, elems.size());
+    auto *arr_init = llvm::ConstantArray::get(arr_ty, elems);
+    auto *gv = new llvm::GlobalVariable(ctx_.module, arr_ty, /*isConstant=*/true, llvm::GlobalValue::PrivateLinkage,
+                                        arr_init, "jf.strlist");
+    gv->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+    gv->setAlignment(llvm::Align(alignof(void *)));
+    auto *i32_ty = llvm::Type::getInt32Ty(ctx_.context);
+    auto *gep = llvm::ConstantExpr::getInBoundsGetElementPtr(
+        arr_ty, gv,
+        llvm::ArrayRef<llvm::Constant *>{llvm::ConstantInt::get(i32_ty, 0), llvm::ConstantInt::get(i32_ty, 0)});
+    return BuildPtrLenStructConstant(ctx_, ctx_.complex_type.stringlist_type, gep, static_cast<uint32_t>(list.size()));
   }
 
-  template <typename ValueType>
-  llvm::Value *CreateNumberList(const std::vector<ValueType> &list, llvm::StructType *struct_type) const {
-    void *data = nullptr;
-    if (!list.empty()) {
-      data = ctx_.const_value_arena.Allocate(list.size() * sizeof(ValueType));
-      memcpy(data, list.data(), list.size() * sizeof(ValueType));
-    }
-    return EmitPtrLenStruct(data, list.size(), struct_type);
-  }
-
-  llvm::Value *EmitPtrLenStruct(const void *data, std::size_t len, llvm::StructType *struct_type) const {
-    auto &builder = ctx_.builder;
-    llvm::Value *data_ptr = builder.CreateIntToPtr(builder.getInt64(reinterpret_cast<uintptr_t>(data)),
-                                                   llvm::PointerType::getUnqual(ctx_.context));
-    llvm::Value *ret = llvm::UndefValue::get(struct_type);
-    ret = builder.CreateInsertValue(ret, data_ptr, 0);
-    ret = builder.CreateInsertValue(ret, builder.getInt32(len), 1);
-    return ret;
+  template <typename ElemType>
+  llvm::Value *CreateNumberList(const std::vector<ElemType> &list, llvm::StructType *struct_type) const {
+    llvm::Constant *data_ptr =
+        EmitTypedArrayGlobal(ctx_, llvm::ArrayRef<ElemType>(list.data(), list.size()), alignof(ElemType));
+    return BuildPtrLenStructConstant(ctx_, struct_type, data_ptr, static_cast<uint32_t>(list.size()));
   }
 
   llvm::Value *operator()(const std::vector<uint8_t> &list) const {
