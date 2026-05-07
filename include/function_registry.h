@@ -2,15 +2,15 @@
  * @Author: victorika
  * @Date: 2025-01-15 15:47:48
  * @Last Modified by: victorika
- * @Last Modified time: 2025-03-04 19:02:45
+ * @Last Modified time: 2026-05-07 14:25:38
  */
 #pragma once
 
 #include <functional>
 #include <map>
+#include <string>
 #include <unordered_map>
 #include <vector>
-#include "arena.h"
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
 #include "llvm/IR/Attributes.h"
 #include "llvm/IR/BasicBlock.h"
@@ -55,14 +55,13 @@ constexpr const char *kCommutative = "commutative";
 struct IRCodeGenContext {
   IRCodeGenContext(llvm::LLVMContext &context, llvm::Module &module, llvm::IRBuilder<> &builder,
                    llvm::Function *entry_function, LLVMStructType complex_type,
-                   const std::unique_ptr<FunctionRegistry> &function_registry, Arena &const_value_arena)
+                   const std::unique_ptr<FunctionRegistry> &function_registry)
       : context(context),
         module(module),
         builder(builder),
         entry_function(entry_function),
         complex_type(complex_type),
-        function_registry(function_registry),
-        const_value_arena(const_value_arena) {}
+        function_registry(function_registry) {}
 
   llvm::LLVMContext &context;
   llvm::Module &module;
@@ -70,8 +69,8 @@ struct IRCodeGenContext {
   llvm::Function *entry_function;
   LLVMStructType complex_type;
   std::map<ConstantListValueType, llvm::Value *> const_list_cache;
+  std::map<std::string, llvm::Constant *> const_string_cache;
   const std::unique_ptr<FunctionRegistry> &function_registry;
-  Arena &const_value_arena;
 };
 
 using CodeGenFunc = std::function<llvm::Value *(const FunctionSignature &, const std::vector<llvm::Type *> &,

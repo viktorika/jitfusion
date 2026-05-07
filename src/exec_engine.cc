@@ -193,7 +193,7 @@ struct CommutativeCallCanonicalizerPass : public llvm::PassInfoMixin<Commutative
 Status BuildEntryFunction(llvm::LLVMContext& llvm_context, std::unique_ptr<llvm::Module>& owner,
                           const LLVMStructType& llvm_struct_type, const std::string& func_name, ValueType ret_type,
                           const std::unique_ptr<ExecNode>& exec_node,
-                          const std::unique_ptr<FunctionRegistry>& func_registry, Arena& const_value_arena_) {
+                          const std::unique_ptr<FunctionRegistry>& func_registry) {
   llvm::FunctionCallee entry_func_callee;
   JF_RETURN_NOT_OK(
       GetEntryFunctionCallee(llvm_context, owner, llvm_struct_type, func_name, ret_type, &entry_func_callee));
@@ -208,7 +208,7 @@ Status BuildEntryFunction(llvm::LLVMContext& llvm_context, std::unique_ptr<llvm:
   llvm::BasicBlock* entry_bb = llvm::BasicBlock::Create(llvm_context, "entryBB", entry_function);
   llvm::IRBuilder<> builder(entry_bb);
   std::unique_ptr<IRCodeGenContext> codegen_ctx = std::make_unique<IRCodeGenContext>(
-      llvm_context, *owner, builder, entry_function, llvm_struct_type, func_registry, const_value_arena_);
+      llvm_context, *owner, builder, entry_function, llvm_struct_type, func_registry);
 
   CodeGen codegen(*codegen_ctx);
 
@@ -248,15 +248,13 @@ using return_stringlist_function_type = StringListStruct (*)(void*, void*, void*
 
 }  // namespace
 
-ExecEngine::ExecEngine(ExecEngineOption option)
-    : const_value_arena_(option.const_value_arena_alloc_min_chunk_size), option_(option) {}
+ExecEngine::ExecEngine(ExecEngineOption option) : option_(option) {}
 
 void ExecEngine::ResetCompiledState() {
   jit_.reset();
   batch_entry_func_ptrs_.clear();
   batch_ret_types_.clear();
   ir_code_.clear();
-  const_value_arena_.Reset();
 }
 
 Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
@@ -274,7 +272,7 @@ Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
 
   LLVMStructType llvm_struct_type = CreateLLVMStructType(*llvm_context);
   JF_RETURN_NOT_OK(BuildEntryFunction(*llvm_context, owner, llvm_struct_type, kEntryFunctionName, ret_type_, exec_node,
-                                      func_registry, const_value_arena_));
+                                      func_registry));
   JF_RETURN_NOT_OK(func_registry->SetCFuncAttr(owner.get()));
 
   // verify
@@ -464,7 +462,7 @@ Status ExecEngine::BatchCompile(const std::vector<std::unique_ptr<ExecNode>>& ex
     batch_ret_types_[i] = node_ret_type;
 
     JF_RETURN_NOT_OK(BuildEntryFunction(*llvm_context, owner, llvm_struct_type, func_name, node_ret_type, exec_nodes[i],
-                                        func_registry, const_value_arena_));
+                                        func_registry));
     func_names[i] = std::move(func_name);
   }
   JF_RETURN_NOT_OK(func_registry->SetCFuncAttr(owner.get()));
