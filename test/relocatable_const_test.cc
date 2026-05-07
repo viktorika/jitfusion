@@ -1,4 +1,10 @@
 /*
+ * @Author: victorika
+ * @Date: 2026-05-07 14:30:30
+ * @Last Modified by: victorika
+ * @Last Modified time: 2026-05-07 14:30:30
+ */
+/*
  * Regression tests for the "relocatable constants" refactor.
  *
  * Goal: guarantee that the LLVM Module produced by Compile() /

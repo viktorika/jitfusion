@@ -1,3 +1,9 @@
+/*
+ * @Author: victorika
+ * @Date: 2026-04-30 16:07:33
+ * @Last Modified by: victorika
+ * @Last Modified time: 2026-04-30 16:07:33
+ */
 // J. List comparison / bitmap kernels. See bench_compile.cc for the overview.
 
 #include "benchmark/bench_common.h"

@@ -1,3 +1,9 @@
+/*
+ * @Author: victorika
+ * @Date: 2026-04-30 16:07:33
+ * @Last Modified by: victorika
+ * @Last Modified time: 2026-04-30 16:07:33
+ */
 // Shared AST/registry helpers for JitFusion benchmark TUs.
 //
 // Splitting engine_benchmark.cc into per-category files (bench_compile.cc,

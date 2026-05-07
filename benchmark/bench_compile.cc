@@ -1,3 +1,9 @@
+/*
+ * @Author: victorika
+ * @Date: 2026-04-30 16:07:33
+ * @Last Modified by: victorika
+ * @Last Modified time: 2026-04-30 16:07:33
+ */
 // JitFusion engine benchmarks.
 //
 // Benchmark names, once merged, MUST NOT be renamed — the CI pipeline
