@@ -25,11 +25,19 @@ search:
   heading_level: 3
   previews: 3
 
-# Color scheme and top-right GitHub button.
+# Color scheme and top-right nav buttons. `Benchmarks` points into
+# `dev/bench/`, which is NOT built by Jekyll — it is grafted onto
+# `_site/` by the Pages workflow from the `gh-pages` branch, where
+# benchmark-action/github-action-benchmark keeps publishing history
+# from `benchmark.yml`. Using a site-relative link via `baseurl` keeps
+# the button working on forks too (their Pages URL has a different
+# repo-name segment).
 color_scheme: light
 aux_links:
   "GitHub":
     - "https://github.com/viktorika/JitFusion"
+  "Benchmarks":
+    - "{{ site.baseurl }}/dev/bench/"
 
 # ---------------------------------------------------------------------------
 # What Jekyll should (and must not) process
