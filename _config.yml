@@ -1,0 +1,88 @@
+title: JitFusion
+description: A high-performance execution engine based on LLVM JIT.
+# Served from https://viktorika.github.io/JitFusion/ — the trailing
+# slash matters: links rendered by Jekyll are resolved against this
+# URL, so a missing baseurl would silently produce broken nav on
+# GitHub Pages.
+url: https://viktorika.github.io
+baseurl: /JitFusion
+
+# ---------------------------------------------------------------------------
+# Theme
+# ---------------------------------------------------------------------------
+# We use `just-the-docs` via `remote_theme` so the site does not need a
+# Gemfile / bundler on the runner: GitHub Pages and `actions/jekyll-build-pages`
+# both fetch the gem transparently. If you ever want local preview, do
+# `bundle init && bundle add jekyll just-the-docs webrick` — neither is
+# required in CI.
+remote_theme: just-the-docs/just-the-docs
+
+# Enable the built-in client-side search bundled with just-the-docs. It
+# indexes at build time into a JSON file, so there is no runtime cost or
+# external service.
+search_enabled: true
+search:
+  heading_level: 3
+  previews: 3
+
+# Color scheme and top-right GitHub button.
+color_scheme: light
+aux_links:
+  "GitHub":
+    - "https://github.com/viktorika/JitFusion"
+
+# ---------------------------------------------------------------------------
+# What Jekyll should (and must not) process
+# ---------------------------------------------------------------------------
+# The repo root contains a lot of non-doc content that is either huge
+# (generated parsers), meaningless on a web page (Bazel metadata), or
+# actively harmful if Jekyll tries to render it as Liquid (C++ source
+# with `{{` / `{%` sequences would crash the build). We list every such
+# path here rather than relying on include-lists so that *adding* a new
+# Markdown doc just works without editing this file.
+exclude:
+  - BUILD
+  - MODULE.bazel
+  - WORKSPACE
+  - CMakeLists.txt
+  - LICENSE
+  - llvm_repository.bzl
+  - .bazelversion
+  - .clang-tidy
+  - .gitignore
+  - Gemfile
+  - Gemfile.lock
+  - vendor/
+  - node_modules/
+  - cmake-build/
+  - build/
+  - out/
+  - bazel-bin/
+  - bazel-out/
+  - bazel-testlogs/
+  - bazel-JitFusion/
+  - src/
+  - include/
+  - test/
+  - benchmark/
+  - athena/ast_builder.cc
+  - athena/ast_builder.h
+  - athena/athena.cc
+  - athena/athena.h
+  - athena/dsu.cc
+  - athena/dsu.h
+  - athena/gen_parser.sh
+  - athena/location.hh
+  - athena/parser.cc
+  - athena/parser.hh
+  - athena/parser.yy
+  - athena/pipeline_grouper.cc
+  - athena/pipeline_grouper.h
+  - athena/token.cc
+  - athena/token.ll
+  - athena/test/
+
+# Plugins available on GitHub Pages without a Gemfile.
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
