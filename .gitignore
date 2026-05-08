@@ -8,11 +8,3 @@ MODULE.bazel.lock
 /cmake-build*
 /out
 .bazelrc
-
-# Jekyll (GitHub Pages) — only relevant for local previews; CI builds
-# happen in an ephemeral runner and never commit these back.
-/_site
-/.jekyll-cache
-/.jekyll-metadata
-/vendor
-/Gemfile.lock
