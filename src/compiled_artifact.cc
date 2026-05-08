@@ -291,4 +291,34 @@ Status DeserializeArtifact(std::string_view blob, ArtifactHeader* out_header, st
   return Status::OK();
 }
 
+Status CheckHostCompatibility(const ArtifactHeader& header, const LoadCompiledOptions& opts,
+                              std::string_view host_llvm_version, std::string_view host_target_triple,
+                              std::string_view host_cpu_name, ArtifactMode expected_mode) {
+  if (opts.check_llvm_version && header.llvm_version != host_llvm_version) {
+    return Status::InvalidArgument(
+        "compiled artifact: LLVM version mismatch (artifact=", header.llvm_version, ", runtime=", host_llvm_version,
+        "). LLVM does not guarantee object-file compatibility across versions; regenerate the artifact.");
+  }
+  if (opts.check_target_triple && header.target_triple != host_target_triple) {
+    return Status::InvalidArgument("compiled artifact: target triple mismatch (artifact=", header.target_triple,
+                                   ", runtime=", host_target_triple, ")");
+  }
+  if (opts.check_cpu_name && header.cpu_name != host_cpu_name) {
+    return Status::InvalidArgument("compiled artifact: host CPU mismatch (artifact=", header.cpu_name,
+                                   ", runtime=", host_cpu_name, "). Regenerate the artifact on this host.");
+  }
+  if (header.mode != expected_mode) {
+    // Mode mismatch is not user-suppressible: the other engine's
+    // symbol-naming scheme does not match, so lookup would fail later
+    // with a much worse error anyway. Surface the right guidance up
+    // front.
+    const char* wrong = (expected_mode == ArtifactMode::kSingle) ? "BatchExecEngine" : "ExecEngine";
+    const char* right =
+        (expected_mode == ArtifactMode::kSingle) ? "ExecEngine::LoadCompiled" : "BatchExecEngine::LoadCompiled";
+    return Status::InvalidArgument("compiled artifact: mode mismatch — this blob was saved by ", wrong,
+                                   ". Load it with ", right, " instead.");
+  }
+  return Status::OK();
+}
+
 }  // namespace jitfusion

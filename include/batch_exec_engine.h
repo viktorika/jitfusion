@@ -94,7 +94,10 @@ class BatchExecEngine {
   // FunctionRegistry.
   //
   // Compatibility contract (same as ExecEngine):
-  //   * LLVM version / target triple / CPU must match exactly.
+  //   * LLVM version / target triple / CPU must match exactly by
+  //     default. Individual checks can be relaxed through
+  //     LoadCompiledOptions if the caller knows the divergence is
+  //     safe (see that struct for the hazards).
   //   * FunctionRegistry must re-register every C function the saved
   //     expression depends on under the same FunctionSignature.
   //   * GetIRCode() is empty after LoadCompiled — IR is never rebuilt.
@@ -106,7 +109,8 @@ class BatchExecEngine {
   // blob into ExecEngine (or vice versa) fails cleanly with a mode
   // mismatch message.
   Status SaveCompiled(std::string* out) const;
-  Status LoadCompiled(std::string_view bytes, const std::unique_ptr<FunctionRegistry>& func_registry);
+  Status LoadCompiled(std::string_view bytes, const std::unique_ptr<FunctionRegistry>& func_registry,
+                      const LoadCompiledOptions& opts = {});
 
  private:
   std::unique_ptr<JitCore> core_;

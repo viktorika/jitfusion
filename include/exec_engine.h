@@ -71,7 +71,10 @@ class ExecEngine {
   // on subsequent runs.
   //
   // Compatibility contract:
-  //   * LLVM version / target triple / CPU must match exactly.
+  //   * LLVM version / target triple / CPU must match exactly by
+  //     default. Individual checks can be relaxed through
+  //     LoadCompiledOptions if the caller knows the divergence is
+  //     safe (see that struct for the hazards).
   //   * The FunctionRegistry passed to LoadCompiled must re-register
   //     every C function referenced by the original expression under
   //     the same FunctionSignature; addresses may differ across
@@ -87,7 +90,8 @@ class ExecEngine {
   // ExecEngine (or vice versa) fails cleanly with a mode mismatch
   // message.
   Status SaveCompiled(std::string* out) const;
-  Status LoadCompiled(std::string_view bytes, const std::unique_ptr<FunctionRegistry>& func_registry);
+  Status LoadCompiled(std::string_view bytes, const std::unique_ptr<FunctionRegistry>& func_registry,
+                      const LoadCompiledOptions& opts = {});
 
  private:
   std::unique_ptr<JitCore> core_;
