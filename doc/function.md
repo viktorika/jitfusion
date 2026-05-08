@@ -1,11 +1,3 @@
----
-title: Function Reference
-nav_order: 3
-# This file is large (~1500 lines). just-the-docs renders it as a
-# single long page with a right-hand TOC built from the `##` headings,
-# which is exactly what we want for a function catalog.
----
-
 # function
 
 The following are the currently supported functions:

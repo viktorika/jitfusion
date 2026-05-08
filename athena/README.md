@@ -1,10 +1,3 @@
----
-title: Athena DSL
-nav_order: 2
-# Published under /JitFusion/athena/ — the URL keeps the directory
-# layout so relative links from other pages stay stable.
----
-
 # athena
 
 An execution engine utilizing DSL in combination with jitfusion.
