@@ -115,35 +115,14 @@ Status ExecEngine::SaveCompiled(std::string* out) const {
   return SerializeArtifact(header, obj, out);
 }
 
-Status ExecEngine::LoadCompiled(std::string_view bytes, const std::unique_ptr<FunctionRegistry>& func_registry) {
+Status ExecEngine::LoadCompiled(std::string_view bytes, const std::unique_ptr<FunctionRegistry>& func_registry,
+                                const LoadCompiledOptions& opts) {
   ArtifactHeader header;
   std::string_view obj_view;
   JF_RETURN_NOT_OK(DeserializeArtifact(bytes, &header, &obj_view));
 
-  if (header.llvm_version != LLVM_VERSION_STRING) {
-    return Status::InvalidArgument(
-        "compiled artifact: LLVM version mismatch (artifact=", header.llvm_version, ", runtime=", LLVM_VERSION_STRING,
-        "). LLVM does not guarantee object-file compatibility across versions; regenerate the artifact.");
-  }
-  {
-    const std::string current_triple = llvm::sys::getProcessTriple();
-    if (header.target_triple != current_triple) {
-      return Status::InvalidArgument("compiled artifact: target triple mismatch (artifact=", header.target_triple,
-                                     ", runtime=", current_triple, ")");
-    }
-  }
-  {
-    const std::string current_cpu = llvm::sys::getHostCPUName().str();
-    if (header.cpu_name != current_cpu) {
-      return Status::InvalidArgument("compiled artifact: host CPU mismatch (artifact=", header.cpu_name,
-                                     ", runtime=", current_cpu, "). Regenerate the artifact on this host.");
-    }
-  }
-  if (header.mode != ArtifactMode::kSingle) {
-    return Status::InvalidArgument(
-        "compiled artifact: mode mismatch — this blob was saved by BatchExecEngine. "
-        "Load it with BatchExecEngine::LoadCompiled instead.");
-  }
+  JF_RETURN_NOT_OK(CheckHostCompatibility(header, opts, LLVM_VERSION_STRING, llvm::sys::getProcessTriple(),
+                                          llvm::sys::getHostCPUName().str(), ArtifactMode::kSingle));
 
   // Rebuild a JitCore that reflects the FP mode actually baked into the
   // artifact (FP mode affects codegen flags, but the object bytes are

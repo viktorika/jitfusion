@@ -169,4 +169,27 @@ Status SerializeArtifact(const ArtifactHeader& header, std::string_view object_b
 // level. Deserialize only guarantees the bytes parsed cleanly.
 Status DeserializeArtifact(std::string_view blob, ArtifactHeader* out_header, std::string_view* out_object_bytes);
 
+// Apply the host-compatibility checks shared by ExecEngine::LoadCompiled
+// and BatchExecEngine::LoadCompiled.
+//
+// The three `host_*` strings must be supplied by the caller (usually
+// the engine, which pulls them from llvm::sys::getProcessTriple() and
+// friends). We keep LLVM out of this translation unit on purpose, so
+// the artifact serde stays unit-testable without spinning up a JIT.
+//
+// Each check can be independently suppressed via `opts`. The `mode`
+// check is also performed here but is not user-suppressible: a mode
+// mismatch means the caller reached for the wrong engine class, and
+// loading would fail at symbol lookup anyway with a much worse error.
+//
+// `expected_mode` is the mode the calling engine expects (kSingle for
+// ExecEngine, kBatch for BatchExecEngine); the error message mentions
+// which engine the caller should have used instead.
+//
+// Returns Status::InvalidArgument on mismatch, with a message prefixed
+// "compiled artifact: " so it joins the other artifact errors in logs.
+Status CheckHostCompatibility(const ArtifactHeader& header, const LoadCompiledOptions& opts,
+                              std::string_view host_llvm_version, std::string_view host_target_triple,
+                              std::string_view host_cpu_name, ArtifactMode expected_mode);
+
 }  // namespace jitfusion

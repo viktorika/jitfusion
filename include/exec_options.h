@@ -130,4 +130,46 @@ struct ExecEngineOption {
   bool enable_save_compiled{false};
 };
 
+// Policy knobs controlling which host-compatibility checks
+// ExecEngine::LoadCompiled / BatchExecEngine::LoadCompiled apply to the
+// incoming artifact header before handing the bytes to the JIT.
+//
+// DEFAULTS ARE CONSERVATIVE — every check is on. Flipping any of them
+// to false is a *load-at-your-own-risk* decision: the JIT does not do
+// any of these checks itself, and an artifact produced on an
+// incompatible host can surface as SIGILL (illegal instruction) or
+// silently wrong results the first time a divergent code path runs.
+// Only disable a check when you control both the producer and the
+// consumer, and you are deliberately relaxing the matching rule
+// (e.g. ignoring cpu_name when you know the CPU families are
+// binary-compatible for the feature set your codegen uses).
+//
+// The `mode` check is intentionally NOT exposed as an option: a
+// single-mode blob loaded into BatchExecEngine (or vice versa) fails
+// at symbol lookup regardless, so relaxing it buys nothing and loses
+// the good error message.
+struct LoadCompiledOptions {
+  // Compare LLVM_VERSION_STRING baked into the artifact against the
+  // runtime's. Differing major versions can quietly change IR / object
+  // semantics (intrinsics, runtime helpers, debug info, ...). Keeping
+  // this on is strongly recommended.
+  bool check_llvm_version{true};
+
+  // Compare the target triple (OS / vendor / ABI) baked into the
+  // artifact against llvm::sys::getProcessTriple(). Disabling lets a
+  // linux-gnu blob load into a linux-musl process (or similar); only
+  // safe if the libc / syscall surfaces your registered C functions
+  // touch are actually compatible.
+  bool check_target_triple{true};
+
+  // Compare the host CPU name baked into the artifact against
+  // llvm::sys::getHostCPUName(). The CPU name governs which
+  // instruction-set extensions the codegen was allowed to emit
+  // (AVX-512, SVE, ...). Disabling lets the same blob run across
+  // different CPU SKUs in the same family, but an instruction that is
+  // not supported on the consumer CPU will fault as SIGILL the first
+  // time it executes.
+  bool check_cpu_name{true};
+};
+
 }  // namespace jitfusion
