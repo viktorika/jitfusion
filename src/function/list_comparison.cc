@@ -371,59 +371,51 @@ U8ListStruct GenBitmapList(ListType a, ListType b, void *exec_context) {
   return result;
 }
 
-std::array<std::array<int8_t, 8>, 256> filter_index_table;
-int GenerateFilterIndexTable() {
-  for (int mask = 0; mask < 256; mask++) {
-    int idx = 0;
-    for (int j = 0; j < 8; j++) {
-      if ((mask & (1 << j)) != 0) {
-        filter_index_table[mask][idx++] = j;
-      }
-    }
-    for (; idx < 8; idx++) {
-      filter_index_table[mask][idx] = -1;
-    }
-  }
-  return 0;
-}
-auto gen_filter_index_table_ret = GenerateFilterIndexTable();
-
 template <typename ListType>
 ListType FilterByBitmap(ListType a, U8ListStruct bitmap, uint32_t bits_cnt, void *exec_context) {
+  using T = typename ListType::CElementType;
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
   if ((a.len + 7) / 8 != bitmap.len) {
     exec_ctx->AddError("FilterByBitmap: bitmap len is not corresponding to list len");
     return {nullptr, 0};
   }
   ListType result;
-  result.data = reinterpret_cast<typename ListType::CElementType *>(
-      exec_ctx->arena.Allocate(bits_cnt * sizeof(typename ListType::CElementType)));
+  result.data = reinterpret_cast<T *>(exec_ctx->arena.Allocate((bits_cnt + 1) * sizeof(T)));
   result.len = bits_cnt;
+
   uint32_t cur = 0;
   uint32_t full_bytes = a.len / 8;
-  for (std::size_t i = 0; i < full_bytes; i++) {
+  for (uint32_t i = 0; i < full_bytes; i++) {
     uint8_t mask = bitmap.data[i];
-    const auto &indices = filter_index_table[mask];
-    for (auto idx : indices) {
-      if (-1 == idx) {
-        break;
-      }
-      result.data[cur++] = (a.data[(i * 8) + idx]);
+    if (mask == 0) {
+      continue;
+    }
+    if (mask == 0xFFU) {
+      std::memcpy(result.data + cur, a.data + (i * 8), 8 * sizeof(T));
+      cur += 8;
+      continue;
+    }
+    const T *base = a.data + (i * 8);
+    for (uint32_t k = 0; k < 8; k++) {
+      uint32_t b = (mask >> k) & 1U;
+      result.data[cur] = base[k];
+      cur += b;
     }
   }
+
   if (full_bytes < bitmap.len) {
     uint8_t mask = bitmap.data[full_bytes];
-    const auto &indices = filter_index_table[mask];
-    for (auto idx : indices) {
-      if (-1 == idx) {
-        break;
-      }
-      uint32_t src_idx = (full_bytes * 8) + idx;
-      if (src_idx >= a.len) {
-        exec_ctx->AddError("FilterByBitmap: bitmap len is too long");
-        return {nullptr, 0};
-      }
-      result.data[cur++] = a.data[src_idx];
+    uint32_t base_idx = full_bytes * 8;
+    uint32_t valid = a.len - base_idx;
+    if ((mask >> valid) != 0) {
+      exec_ctx->AddError("FilterByBitmap: bitmap len is too long");
+      return {nullptr, 0};
+    }
+    const T *base = a.data + base_idx;
+    for (uint32_t k = 0; k < valid; k++) {
+      uint32_t b = (mask >> k) & 1U;
+      result.data[cur] = base[k];
+      cur += b;
     }
   }
   if (cur != bits_cnt) {
