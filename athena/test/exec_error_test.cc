@@ -2,7 +2,8 @@
 #include "gtest/gtest.h"
 #include "test_helper.h"
 
-using athena::Athena;
+using athena::AthenaExpression;
+using athena::AthenaPipeline;
 using athena::ExecContext;
 using athena::FunctionRegistry;
 using athena::FunctionRegistryFactory;
@@ -14,7 +15,7 @@ using test::LoadF32;
 using test::StoreF32;
 
 TEST(ExecErrorTest, SingleExpressionRuntimeError) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -30,7 +31,7 @@ TEST(ExecErrorTest, SingleExpressionRuntimeError) {
 }
 
 TEST(ExecErrorTest, WithExecContextRuntimeError) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -48,7 +49,7 @@ TEST(ExecErrorTest, WithExecContextRuntimeError) {
 }
 
 TEST(ExecErrorTest, BatchExecutePartialFailure) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {

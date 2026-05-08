@@ -2,12 +2,16 @@
  * @Author: victorika
  * @Date: 2025-04-09 15:43:45
  * @Last Modified by: victorika
- * @Last Modified time: 2026-03-31 14:56:23
+ * @Last Modified time: 2026-05-08 10:00:00
  */
 #pragma once
 
 #include <memory>
+#include <string>
+#include <string_view>
+#include <vector>
 #include "arena.h"
+#include "batch_exec_engine.h"
 #include "exec_engine.h"
 #include "function_registry.h"
 #include "status.h"
@@ -16,6 +20,7 @@
 namespace athena {
 
 using jitfusion::Arena;
+using jitfusion::BatchExecEngine;
 using jitfusion::BinaryOPType;
 using jitfusion::CodeGenFunc;
 using jitfusion::ConstantListValueType;
@@ -49,42 +54,89 @@ using jitfusion::U8ListStruct;
 using jitfusion::UnaryOPType;
 using jitfusion::ValueType;
 
-// Thread-safety contract (mirrors the underlying ExecEngine):
-// - Compile() is NOT thread-safe and must not run concurrently with any other
-//   method on the same Athena instance.
-// - After a successful Compile(), the Execute() overloads are safe to invoke
-//   concurrently from multiple threads on the same Athena instance, provided
-//   each thread uses its own ExecContext.
-// - The Execute() overloads that do not take an ExecContext internally construct
-//   a fresh one on every call; they are thread-safe but allocate per call.
-//   Prefer the ExecContext& overloads on hot paths to reuse the arena.
-// - A single ExecContext must NOT be shared across threads. Recommended pattern
-//   for parallel execution: 1 Athena + N ExecContexts (one per worker).
-class Athena {
+// AthenaExpression compiles and runs a single DSL expression. The result
+// is returned through the RetType variant. This is the simplest form of
+// usage — "one line of athena DSL, one value out".
+//
+// For multi-statement programs that write data through custom store
+// functions (the pipeline form), use AthenaPipeline below.
+//
+// Thread-safety contract (mirrors ExecEngine):
+// - Compile() is NOT thread-safe.
+// - After a successful Compile(), the Execute() overloads are safe to
+//   invoke concurrently from multiple threads, provided each thread uses
+//   its own ExecContext.
+// - The Execute() overloads that do not take an ExecContext internally
+//   construct a fresh one per call (thread-safe but pay per-call
+//   allocation cost). Prefer the ExecContext& overloads on hot paths.
+// - A single ExecContext must NOT be shared across threads. Recommended
+//   pattern for parallel execution: 1 AthenaExpression + N ExecContexts
+//   (one per worker).
+class AthenaExpression {
  public:
-  explicit Athena(ExecEngineOption option = {}) : exec_engine_(option) {}
-  ~Athena() = default;
-  Athena(const Athena&) = delete;
-  Athena& operator=(const Athena&) = delete;
+  explicit AthenaExpression(ExecEngineOption option = {}) : engine_(option) {}
+  ~AthenaExpression() = default;
+  AthenaExpression(const AthenaExpression&) = delete;
+  AthenaExpression& operator=(const AthenaExpression&) = delete;
 
-  // Applicable to simple scenarios, the program will not actually use a custom store function to write data. Instead,
-  // the result will be returned, similar to expression scenarios.
-  // If you need to optimize the memory allocation issue of ExecContext, you can use the function passed to ExecContext.
+  // Compile a single DSL expression into an executable entry function.
   Status Compile(const std::string& code, const std::unique_ptr<FunctionRegistry>& func_registry);
-  Status Execute(void* entry_arguments, RetType* result);
-  Status Execute(ExecContext& exec_ctx, void* entry_arguments, RetType* result);
 
-  // Applicable to complex scenarios where multiple pipelines are computed simultaneously. Each pipeline writes data
-  // using a custom function, and results are not returned. This is similar to feature processing scenarios.
-  // If you need to optimize the memory allocation issue of ExecContext, you can use the function passed to ExecContext.
-  Status Compile(const std::vector<std::string>& code, const std::unique_ptr<FunctionRegistry>& func_registry);
-  Status Execute(void* entry_arguments, void* result);
-  Status Execute(ExecContext& exec_ctx, void* entry_arguments, void* result);
+  // Run the compiled expression and box the result into RetType.
+  Status Execute(void* entry_arguments, RetType* result) { return engine_.Execute(entry_arguments, result); }
+  Status Execute(ExecContext& exec_ctx, void* entry_arguments, RetType* result) {
+    return engine_.Execute(exec_ctx, entry_arguments, result);
+  }
 
-  [[nodiscard]] std::string_view GetIRCode() const { return exec_engine_.GetIRCode(); }
+  [[nodiscard]] std::string_view GetIRCode() const { return engine_.GetIRCode(); }
 
  private:
-  ExecEngine exec_engine_;
+  ExecEngine engine_;
+};
+
+// AthenaPipeline compiles a multi-statement DSL program into a batch of
+// entry functions that share one JIT module. Pipelines do not return a
+// value through RetType — they write their results via user-supplied
+// store functions registered through RegisterStoreCFunc. This matches
+// feature-processing / columnar-store scenarios.
+//
+// For the simpler "one expression, one return value" form, use
+// AthenaExpression above.
+//
+// Thread-safety contract (mirrors BatchExecEngine):
+// - Compile() is NOT thread-safe.
+// - After a successful Compile(), the Execute() overloads are safe to
+//   invoke concurrently from multiple threads, provided each thread uses
+//   its own ExecContext.
+// - The Execute() overloads that do not take an ExecContext internally
+//   construct a fresh one per call (thread-safe but pay per-call
+//   allocation cost). Prefer the ExecContext& overloads on hot paths.
+// - A single ExecContext must NOT be shared across threads. Recommended
+//   pattern for parallel execution: 1 AthenaPipeline + N ExecContexts
+//   (one per worker).
+class AthenaPipeline {
+ public:
+  explicit AthenaPipeline(ExecEngineOption option = {}) : engine_(option) {}
+  ~AthenaPipeline() = default;
+  AthenaPipeline(const AthenaPipeline&) = delete;
+  AthenaPipeline& operator=(const AthenaPipeline&) = delete;
+
+  // Compile a list of DSL pipeline statements. The grouper merges
+  // statements that share inputs; every group becomes one entry in the
+  // underlying BatchExecEngine.
+  Status Compile(const std::vector<std::string>& code, const std::unique_ptr<FunctionRegistry>& func_registry);
+
+  // Run every compiled entry in order, forwarding `result` to each entry's
+  // user store functions.
+  Status Execute(void* entry_arguments, void* result) { return engine_.ExecuteAll(entry_arguments, result); }
+  Status Execute(ExecContext& exec_ctx, void* entry_arguments, void* result) {
+    return engine_.ExecuteAll(exec_ctx, entry_arguments, result);
+  }
+
+  [[nodiscard]] std::string_view GetIRCode() const { return engine_.GetIRCode(); }
+
+ private:
+  BatchExecEngine engine_;
 };
 
 }  // namespace athena

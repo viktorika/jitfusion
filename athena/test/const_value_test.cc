@@ -2,13 +2,13 @@
 #include "gtest/gtest.h"
 #include "test_helper.h"
 
-using athena::Athena;
+using athena::AthenaExpression;
 using athena::FunctionRegistry;
 using athena::FunctionRegistryFactory;
 using athena::RetType;
 
 TEST(ConstValueTest, Test1) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile("r = 42;", func_registry).ok());
@@ -18,7 +18,7 @@ TEST(ConstValueTest, Test1) {
 }
 
 TEST(ConstValueTest, Test2) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile("r = 42f64;", func_registry).ok());
@@ -28,7 +28,7 @@ TEST(ConstValueTest, Test2) {
 }
 
 TEST(ConstValueTest, Test3) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile("r = [1, 2, 3];", func_registry).ok());
@@ -40,7 +40,7 @@ TEST(ConstValueTest, Test3) {
 }
 
 TEST(ConstValueTest, Test4) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile(R"(r = "abcde";)", func_registry).ok());
@@ -50,7 +50,7 @@ TEST(ConstValueTest, Test4) {
 }
 
 TEST(ConstValueTest, ListMergeOptimizeTest) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -68,7 +68,7 @@ TEST(ConstValueTest, ListMergeOptimizeTest) {
 }
 
 TEST(StringAddTest, Test1) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(

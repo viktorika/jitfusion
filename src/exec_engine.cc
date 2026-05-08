@@ -2,409 +2,55 @@
  * @Author: victorika
  * @Date: 2025-01-15 10:59:33
  * @Last Modified by: victorika
- * @Last Modified time: 2026-05-07 16:41:15
+ * @Last Modified time: 2026-05-07 18:00:00
  */
 #include "exec_engine.h"
+
+#include <cstdint>
 #include <memory>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
-#include "codegen/codegen.h"
 #include "compiled_artifact.h"
 #include "exec_node.h"
-#include "function/function_init.h"
+#include "execute_dispatch.h"
 #include "function_registry.h"
-#include "llvm/Analysis/TargetTransformInfo.h"
+#include "jit_core.h"
 #include "llvm/Config/llvm-config.h"
-#include "llvm/ExecutionEngine/ExecutionEngine.h"
-#include "llvm/ExecutionEngine/Orc/ObjectTransformLayer.h"
-#include "llvm/IR/Intrinsics.h"
-#include "llvm/IR/LegacyPassManager.h"
-#include "llvm/IR/Value.h"
-#include "llvm/IR/Verifier.h"
-#include "llvm/MC/TargetRegistry.h"
-#include "llvm/Passes/PassBuilder.h"
-#include "llvm/Support/Casting.h"
-#include "llvm/Support/CodeGen.h"
-#include "llvm/Support/DynamicLibrary.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/TargetSelect.h"
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/Target/TargetMachine.h"
 #include "llvm/TargetParser/Host.h"
-#include "llvm/Transforms/IPO/AlwaysInliner.h"
-#include "llvm/Transforms/IPO/DeadArgumentElimination.h"
-#include "llvm/Transforms/Scalar.h"
-#include "llvm/Transforms/Scalar/CallSiteSplitting.h"
-#include "llvm/Transforms/Scalar/DCE.h"
-#include "llvm/Transforms/Scalar/EarlyCSE.h"
-#include "llvm/Transforms/Scalar/GVN.h"
-#include "llvm/Transforms/Scalar/MergedLoadStoreMotion.h"
-#include "llvm/Transforms/Scalar/Reassociate.h"
-#include "llvm/Transforms/Vectorize/LoopVectorize.h"
-#include "llvm/Transforms/Vectorize/SLPVectorizer.h"
 #include "status.h"
 #include "type.h"
-#include "validator.h"
 
 namespace jitfusion {
 
-namespace {
+ExecEngine::ExecEngine(ExecEngineOption option) : core_(std::make_unique<JitCore>(option)) {}
+ExecEngine::~ExecEngine() = default;
 
-const std::string kEntryFunctionName = "entry";
-
-struct LLVMInit {
-  LLVMInit() {
-    llvm::InitializeNativeTarget();
-    llvm::InitializeNativeTargetAsmPrinter();
-    llvm::InitializeNativeTargetAsmParser();
-    llvm::InitializeNativeTargetDisassembler();
-    llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
-  }
-};
-
-LLVMStructType CreateLLVMStructType(llvm::LLVMContext& context) {
-  LLVMStructType llvm_struct_type;
-  auto* ptr_ty = llvm::PointerType::getUnqual(context);
-  auto* i32_ty = llvm::Type::getInt32Ty(context);
-  llvm_struct_type.string_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "StringStruct");
-  llvm_struct_type.u8list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "U8ListStruct");
-  llvm_struct_type.u16list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "U16ListStruct");
-  llvm_struct_type.u32list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "U32ListStruct");
-  llvm_struct_type.u64list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "U64ListStruct");
-  llvm_struct_type.i8list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "I8ListStruct");
-  llvm_struct_type.i16list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "I16ListStruct");
-  llvm_struct_type.i32list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "I32ListStruct");
-  llvm_struct_type.i64list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "I64ListStruct");
-  llvm_struct_type.f32list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "F32ListStruct");
-  llvm_struct_type.f64list_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "F64ListStruct");
-  llvm_struct_type.stringlist_type = llvm::StructType::create(context, {ptr_ty, i32_ty}, "StringListStruct");
-  return llvm_struct_type;
-}
-
-Status GetEntryFunctionCallee(llvm::LLVMContext& context, std::unique_ptr<llvm::Module>& m,
-                              const LLVMStructType& llvm_struct_type, const std::string& func_name, ValueType ret_type,
-                              llvm::FunctionCallee* entry_func_callee) {
-  auto* ptr_ty = llvm::PointerType::getUnqual(context);
-  switch (ret_type) {
-    case ValueType::kVoid: {
-      *entry_func_callee = m->getOrInsertFunction(func_name, llvm::Type::getVoidTy(context), ptr_ty, ptr_ty, ptr_ty);
-    } break;
-    case ValueType::kU8:
-    case ValueType::kI8: {
-      *entry_func_callee = m->getOrInsertFunction(func_name, llvm::Type::getInt8Ty(context), ptr_ty, ptr_ty, ptr_ty);
-    } break;
-    case ValueType::kU16:
-    case ValueType::kI16: {
-      *entry_func_callee = m->getOrInsertFunction(func_name, llvm::Type::getInt16Ty(context), ptr_ty, ptr_ty, ptr_ty);
-    } break;
-    case ValueType::kU32:
-    case ValueType::kI32: {
-      *entry_func_callee = m->getOrInsertFunction(func_name, llvm::Type::getInt32Ty(context), ptr_ty, ptr_ty, ptr_ty);
-    } break;
-    case ValueType::kU64:
-    case ValueType::kI64: {
-      *entry_func_callee = m->getOrInsertFunction(func_name, llvm::Type::getInt64Ty(context), ptr_ty, ptr_ty, ptr_ty);
-    } break;
-    case ValueType::kF32: {
-      *entry_func_callee = m->getOrInsertFunction(func_name, llvm::Type::getFloatTy(context), ptr_ty, ptr_ty, ptr_ty);
-    } break;
-    case ValueType::kF64: {
-      *entry_func_callee = m->getOrInsertFunction(func_name, llvm::Type::getDoubleTy(context), ptr_ty, ptr_ty, ptr_ty);
-    } break;
-    case ValueType::kString: {
-      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.string_type, ptr_ty, ptr_ty, ptr_ty);
-    } break;
-    case ValueType::kU8List: {
-      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.u8list_type, ptr_ty, ptr_ty, ptr_ty);
-    } break;
-    case ValueType::kU16List: {
-      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.u16list_type, ptr_ty, ptr_ty, ptr_ty);
-    } break;
-    case ValueType::kU32List: {
-      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.u32list_type, ptr_ty, ptr_ty, ptr_ty);
-    } break;
-    case ValueType::kU64List: {
-      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.u64list_type, ptr_ty, ptr_ty, ptr_ty);
-    } break;
-    case ValueType::kI8List: {
-      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.i8list_type, ptr_ty, ptr_ty, ptr_ty);
-    } break;
-    case ValueType::kI16List: {
-      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.i16list_type, ptr_ty, ptr_ty, ptr_ty);
-    } break;
-    case ValueType::kI32List: {
-      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.i32list_type, ptr_ty, ptr_ty, ptr_ty);
-    } break;
-    case ValueType::kI64List: {
-      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.i64list_type, ptr_ty, ptr_ty, ptr_ty);
-    } break;
-    case ValueType::kF32List: {
-      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.f32list_type, ptr_ty, ptr_ty, ptr_ty);
-    } break;
-    case ValueType::kF64List: {
-      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.f64list_type, ptr_ty, ptr_ty, ptr_ty);
-    } break;
-    case ValueType::kStringList: {
-      *entry_func_callee = m->getOrInsertFunction(func_name, llvm_struct_type.stringlist_type, ptr_ty, ptr_ty, ptr_ty);
-    } break;
-    default:
-      return Status::RuntimeError(
-          "[internal] unknown return type for entry function: ", TypeHelper::TypeToString(ret_type), " (compiler bug)");
-  }
-  return Status::OK();
-}
-
-struct CommutativeCallCanonicalizerPass : public llvm::PassInfoMixin<CommutativeCallCanonicalizerPass> {
-  CommutativeCallCanonicalizerPass() = default;
-
-  static llvm::PreservedAnalyses run(llvm::Function& f, llvm::FunctionAnalysisManager& /*AM*/) {
-    bool changed = false;
-    for (auto& bb : f) {
-      for (auto& i : bb) {
-        if (auto* ci = llvm::dyn_cast<llvm::CallInst>(&i)) {
-          llvm::Function* called_func = ci->getCalledFunction();
-          if (called_func == nullptr) {
-            continue;
-          }
-          if (!called_func->hasFnAttribute(kCommutative)) {
-            continue;
-          }
-          if (ci->arg_size() < 2) {
-            continue;
-          }
-          llvm::Value* arg0 = ci->getArgOperand(0);
-          llvm::Value* arg1 = ci->getArgOperand(1);
-          if (arg0->getType() != arg1->getType()) {
-            continue;
-          }
-          if (ShouldSwapArguments(arg0, arg1)) {
-            ci->setArgOperand(0, arg1);
-            ci->setArgOperand(1, arg0);
-            changed = true;
-          }
-        }
-      }
-    }
-    return changed ? llvm::PreservedAnalyses::none() : llvm::PreservedAnalyses::all();
-  }
-
- private:
-  static bool ShouldSwapArguments(llvm::Value* arg0, llvm::Value* arg1) {
-    return std::greater<llvm::Value*>()(arg0, arg1);
-  }
-};
-
-Status BuildEntryFunction(llvm::LLVMContext& llvm_context, std::unique_ptr<llvm::Module>& owner,
-                          const LLVMStructType& llvm_struct_type, const std::string& func_name, ValueType ret_type,
-                          const std::unique_ptr<ExecNode>& exec_node,
-                          const std::unique_ptr<FunctionRegistry>& func_registry) {
-  llvm::FunctionCallee entry_func_callee;
-  JF_RETURN_NOT_OK(
-      GetEntryFunctionCallee(llvm_context, owner, llvm_struct_type, func_name, ret_type, &entry_func_callee));
-  if (auto* entry_function = llvm::dyn_cast<llvm::Function>(entry_func_callee.getCallee())) {
-    entry_function->addAttributeAtIndex(1, llvm::Attribute::get(llvm_context, llvm::Attribute::NoAlias));
-    entry_function->addAttributeAtIndex(1, llvm::Attribute::get(llvm_context, llvm::Attribute::ReadOnly));
-    entry_function->addAttributeAtIndex(2, llvm::Attribute::get(llvm_context, llvm::Attribute::NoAlias));
-    entry_function->addAttributeAtIndex(3, llvm::Attribute::get(llvm_context, llvm::Attribute::NoAlias));
-  }
-
-  auto* entry_function = llvm::cast<llvm::Function>(entry_func_callee.getCallee());
-  llvm::BasicBlock* entry_bb = llvm::BasicBlock::Create(llvm_context, "entryBB", entry_function);
-  llvm::IRBuilder<> builder(entry_bb);
-  std::unique_ptr<IRCodeGenContext> codegen_ctx = std::make_unique<IRCodeGenContext>(
-      llvm_context, *owner, builder, entry_function, llvm_struct_type, func_registry);
-
-  CodeGen codegen(*codegen_ctx);
-
-  llvm::Value* ret_value;
-  JF_RETURN_NOT_OK(codegen.GetValue(exec_node.get(), &ret_value));
-  if (ValueType::kVoid == ret_type) {
-    builder.CreateRetVoid();
-  } else {
-    builder.CreateRet(ret_value);
-  }
-  return Status::OK();
-}
-
-using return_void_function_type = void (*)(void*, void*, void*);
-using return_u8_function_type = uint8_t (*)(void*, void*, void*);
-using return_u16_function_type = uint16_t (*)(void*, void*, void*);
-using return_u32_function_type = uint32_t (*)(void*, void*, void*);
-using return_u64_function_type = uint64_t (*)(void*, void*, void*);
-using return_i8_function_type = int8_t (*)(void*, void*, void*);
-using return_i16_function_type = int16_t (*)(void*, void*, void*);
-using return_i32_function_type = int32_t (*)(void*, void*, void*);
-using return_i64_function_type = int64_t (*)(void*, void*, void*);
-using return_f32_function_type = float (*)(void*, void*, void*);
-using return_f64_function_type = double (*)(void*, void*, void*);
-using return_string_function_type = StringStruct (*)(void*, void*, void*);
-using return_u8list_function_type = U8ListStruct (*)(void*, void*, void*);
-using return_u16list_function_type = U16ListStruct (*)(void*, void*, void*);
-using return_u32list_function_type = U32ListStruct (*)(void*, void*, void*);
-using return_u64list_function_type = U64ListStruct (*)(void*, void*, void*);
-using return_i8list_function_type = I8ListStruct (*)(void*, void*, void*);
-using return_i16list_function_type = I16ListStruct (*)(void*, void*, void*);
-using return_i32list_function_type = I32ListStruct (*)(void*, void*, void*);
-using return_i64list_function_type = I64ListStruct (*)(void*, void*, void*);
-using return_f32list_function_type = F32ListStruct (*)(void*, void*, void*);
-using return_f64list_function_type = F64ListStruct (*)(void*, void*, void*);
-using return_stringlist_function_type = StringListStruct (*)(void*, void*, void*);
-
-}  // namespace
-
-ExecEngine::ExecEngine(ExecEngineOption option) : option_(option) {}
-
-void ExecEngine::ResetCompiledState() {
-  jit_.reset();
-  batch_entry_func_ptrs_.clear();
-  batch_ret_types_.clear();
-  ir_code_.clear();
-  compiled_object_bytes_.clear();
-}
+std::string_view ExecEngine::GetIRCode() const { return core_->GetIRCode(); }
 
 Status ExecEngine::Compile(const std::unique_ptr<ExecNode>& exec_node,
                            const std::unique_ptr<FunctionRegistry>& func_registry) {
-  // validator
-  Validator validator(func_registry);
-  JF_RETURN_NOT_OK(validator.Validate(exec_node.get()));
-  ret_type_ = exec_node->GetReturnType();
-
-  ResetCompiledState();
-
-  // codegen
-  std::unique_ptr<llvm::LLVMContext> llvm_context = std::make_unique<llvm::LLVMContext>();
-  std::unique_ptr<llvm::Module> owner = std::make_unique<llvm::Module>("module", *llvm_context);
-
-  LLVMStructType llvm_struct_type = CreateLLVMStructType(*llvm_context);
-  JF_RETURN_NOT_OK(BuildEntryFunction(*llvm_context, owner, llvm_struct_type, kEntryFunctionName, ret_type_, exec_node,
-                                      func_registry));
-  JF_RETURN_NOT_OK(func_registry->SetCFuncAttr(owner.get()));
-
-  // verify
-  std::string error_info;
-  llvm::raw_string_ostream error_stream(error_info);
-  if (llvm::verifyModule(*owner, &error_stream)) {
-    return Status::RuntimeError("Module verification failed: ", error_info);
-  }
-  JF_RETURN_NOT_OK(CreateJitAndOptimize(func_registry, std::move(owner), std::move(llvm_context)));
-  auto entry_func_offset = jit_->lookup("entry");
-  if (!entry_func_offset) {
-    return Status::RuntimeError("Failed to find entry function");
-  }
+  // Clear previous compilation state up front so that a failed Compile
+  // leaves the engine in a cleanly-uncompiled state rather than a half-
+  // configured one.
   entry_func_ptr_ = nullptr;
-  entry_func_ptr_ += entry_func_offset->getValue();
+  ret_type_ = ValueType::kUnknown;
 
+  std::vector<ExecNode*> nodes{exec_node.get()};
+  std::vector<std::string> names{kEntryFunctionName};
+  std::vector<char*> func_ptrs;
+  std::vector<ValueType> ret_types;
+  JF_RETURN_NOT_OK(core_->BuildAndLink(nodes, names, func_registry, &func_ptrs, &ret_types));
+
+  entry_func_ptr_ = func_ptrs[0];
+  ret_type_ = ret_types[0];
   return Status::OK();
 }
 
-#define EXPAND_SWITCH_TYPE(func_ptr, ret_type)                                                              \
-  switch (ret_type) {                                                                                       \
-    case ValueType::kVoid: {                                                                                \
-      reinterpret_cast<return_void_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);           \
-    } break;                                                                                                \
-    case ValueType::kU8: {                                                                                  \
-      *result = reinterpret_cast<return_u8_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);   \
-    } break;                                                                                                \
-    case ValueType::kI8: {                                                                                  \
-      *result = reinterpret_cast<return_i8_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);   \
-    } break;                                                                                                \
-    case ValueType::kU16: {                                                                                 \
-      *result = reinterpret_cast<return_u16_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);  \
-    } break;                                                                                                \
-    case ValueType::kI16: {                                                                                 \
-      *result = reinterpret_cast<return_i16_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);  \
-    } break;                                                                                                \
-    case ValueType::kU32: {                                                                                 \
-      *result = reinterpret_cast<return_u32_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);  \
-    } break;                                                                                                \
-    case ValueType::kI32: {                                                                                 \
-      *result = reinterpret_cast<return_i32_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);  \
-    } break;                                                                                                \
-    case ValueType::kU64: {                                                                                 \
-      *result = reinterpret_cast<return_u64_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);  \
-    } break;                                                                                                \
-    case ValueType::kI64: {                                                                                 \
-      *result = reinterpret_cast<return_i64_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);  \
-    } break;                                                                                                \
-    case ValueType::kF32: {                                                                                 \
-      *result = reinterpret_cast<return_f32_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);  \
-    } break;                                                                                                \
-    case ValueType::kF64: {                                                                                 \
-      *result = reinterpret_cast<return_f64_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);  \
-    } break;                                                                                                \
-    case ValueType::kString: {                                                                              \
-      StringStruct string =                                                                                 \
-          reinterpret_cast<return_string_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);     \
-      std::string res(string.data, string.len);                                                             \
-      *result = std::move(res);                                                                             \
-    } break;                                                                                                \
-    case ValueType::kU8List: {                                                                              \
-      U8ListStruct list =                                                                                   \
-          reinterpret_cast<return_u8list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);     \
-      *result = std::vector<uint8_t>(list.data, list.data + list.len);                                      \
-    } break;                                                                                                \
-    case ValueType::kU16List: {                                                                             \
-      U16ListStruct list =                                                                                  \
-          reinterpret_cast<return_u16list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);    \
-      *result = std::vector<uint16_t>(list.data, list.data + list.len);                                     \
-    } break;                                                                                                \
-    case ValueType::kU32List: {                                                                             \
-      U32ListStruct list =                                                                                  \
-          reinterpret_cast<return_u32list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);    \
-      *result = std::vector<uint32_t>(list.data, list.data + list.len);                                     \
-    } break;                                                                                                \
-    case ValueType::kU64List: {                                                                             \
-      U64ListStruct list =                                                                                  \
-          reinterpret_cast<return_u64list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);    \
-      *result = std::vector<uint64_t>(list.data, list.data + list.len);                                     \
-    } break;                                                                                                \
-    case ValueType::kI8List: {                                                                              \
-      I8ListStruct list =                                                                                   \
-          reinterpret_cast<return_i8list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);     \
-      *result = std::vector<int8_t>(list.data, list.data + list.len);                                       \
-    } break;                                                                                                \
-    case ValueType::kI16List: {                                                                             \
-      I16ListStruct list =                                                                                  \
-          reinterpret_cast<return_i16list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);    \
-      *result = std::vector<int16_t>(list.data, list.data + list.len);                                      \
-    } break;                                                                                                \
-    case ValueType::kI32List: {                                                                             \
-      I32ListStruct list =                                                                                  \
-          reinterpret_cast<return_i32list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);    \
-      *result = std::vector<int32_t>(list.data, list.data + list.len);                                      \
-    } break;                                                                                                \
-    case ValueType::kI64List: {                                                                             \
-      I64ListStruct list =                                                                                  \
-          reinterpret_cast<return_i64list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);    \
-      *result = std::vector<int64_t>(list.data, list.data + list.len);                                      \
-    } break;                                                                                                \
-    case ValueType::kF32List: {                                                                             \
-      F32ListStruct list =                                                                                  \
-          reinterpret_cast<return_f32list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);    \
-      *result = std::vector<float>(list.data, list.data + list.len);                                        \
-    } break;                                                                                                \
-    case ValueType::kF64List: {                                                                             \
-      F64ListStruct list =                                                                                  \
-          reinterpret_cast<return_f64list_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr);    \
-      *result = std::vector<double>(list.data, list.data + list.len);                                       \
-    } break;                                                                                                \
-    case ValueType::kStringList: {                                                                          \
-      StringListStruct list =                                                                               \
-          reinterpret_cast<return_stringlist_function_type>(func_ptr)(entry_arguments, &exec_ctx, nullptr); \
-      std::vector<std::string> res;                                                                         \
-      res.reserve(list.len);                                                                                \
-      for (uint32_t i = 0; i < list.len; ++i) {                                                             \
-        res.emplace_back(list.data[i].data, list.data[i].len);                                              \
-      }                                                                                                     \
-      *result = std::move(res);                                                                             \
-    } break;                                                                                                \
-    default:                                                                                                \
-      return Status::RuntimeError("Unsupported return type");                                               \
-  }
-
 Status ExecEngine::Execute(void* entry_arguments, RetType* result) {
-  ExecContext exec_ctx(option_.exec_ctx_arena_alloc_min_chunk_size);
-  EXPAND_SWITCH_TYPE(entry_func_ptr_, ret_type_)
+  ExecContext exec_ctx(core_->GetOption().exec_ctx_arena_alloc_min_chunk_size);
+  JF_EXPAND_SWITCH_TYPE(entry_func_ptr_, ret_type_)
   if (exec_ctx.HasErrors()) {
     return Status::RuntimeError(exec_ctx.GetErrorMessage());
   }
@@ -412,7 +58,7 @@ Status ExecEngine::Execute(void* entry_arguments, RetType* result) {
 }
 
 Status ExecEngine::Execute(ExecContext& exec_ctx, void* entry_arguments, RetType* result) {
-  EXPAND_SWITCH_TYPE(entry_func_ptr_, ret_type_)
+  JF_EXPAND_SWITCH_TYPE(entry_func_ptr_, ret_type_)
   Status ret = Status::OK();
   if (exec_ctx.HasErrors()) {
     ret = Status::RuntimeError(exec_ctx.GetErrorMessage());
@@ -422,8 +68,9 @@ Status ExecEngine::Execute(ExecContext& exec_ctx, void* entry_arguments, RetType
 }
 
 Status ExecEngine::Execute(void* entry_arguments, void* result) {
-  ExecContext exec_ctx(option_.exec_ctx_arena_alloc_min_chunk_size);
-  reinterpret_cast<return_void_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx, result);
+  ExecContext exec_ctx(core_->GetOption().exec_ctx_arena_alloc_min_chunk_size);
+  reinterpret_cast<::jitfusion::execute_dispatch::return_void_function_type>(entry_func_ptr_)(entry_arguments,
+                                                                                              &exec_ctx, result);
   if (exec_ctx.HasErrors()) {
     return Status::RuntimeError(exec_ctx.GetErrorMessage());
   }
@@ -431,300 +78,41 @@ Status ExecEngine::Execute(void* entry_arguments, void* result) {
 }
 
 Status ExecEngine::Execute(ExecContext& exec_ctx, void* entry_arguments, void* result) {
-  reinterpret_cast<return_void_function_type>(entry_func_ptr_)(entry_arguments, &exec_ctx, result);
+  reinterpret_cast<::jitfusion::execute_dispatch::return_void_function_type>(entry_func_ptr_)(entry_arguments,
+                                                                                              &exec_ctx, result);
   Status ret = Status::OK();
   if (exec_ctx.HasErrors()) {
     ret = Status::RuntimeError(exec_ctx.GetErrorMessage());
   }
   exec_ctx.Clear();
   return ret;
-}
-
-Status ExecEngine::BatchCompile(const std::vector<std::unique_ptr<ExecNode>>& exec_nodes,
-                                const std::unique_ptr<FunctionRegistry>& func_registry) {
-  if (exec_nodes.empty()) {
-    return Status::ParseError("BatchCompile: exec_nodes is empty");
-  }
-
-  Validator validator(func_registry);
-  for (const auto& exec_node : exec_nodes) {
-    JF_RETURN_NOT_OK(validator.Validate(exec_node.get()));
-  }
-
-  ResetCompiledState();
-
-  std::unique_ptr<llvm::LLVMContext> llvm_context = std::make_unique<llvm::LLVMContext>();
-  std::unique_ptr<llvm::Module> owner = std::make_unique<llvm::Module>("module", *llvm_context);
-  LLVMStructType llvm_struct_type = CreateLLVMStructType(*llvm_context);
-
-  batch_ret_types_.resize(exec_nodes.size());
-  std::vector<std::string> func_names;
-  func_names.resize(exec_nodes.size());
-
-  for (size_t i = 0; i < exec_nodes.size(); ++i) {
-    std::string func_name = kEntryFunctionName + std::to_string(i);
-    ValueType node_ret_type = exec_nodes[i]->GetReturnType();
-    batch_ret_types_[i] = node_ret_type;
-
-    JF_RETURN_NOT_OK(BuildEntryFunction(*llvm_context, owner, llvm_struct_type, func_name, node_ret_type, exec_nodes[i],
-                                        func_registry));
-    func_names[i] = std::move(func_name);
-  }
-  JF_RETURN_NOT_OK(func_registry->SetCFuncAttr(owner.get()));
-  // verify
-  std::string error_info;
-  llvm::raw_string_ostream error_stream(error_info);
-  if (llvm::verifyModule(*owner, &error_stream)) {
-    return Status::RuntimeError("Module verification failed: ", error_info);
-  }
-
-  JF_RETURN_NOT_OK(CreateJitAndOptimize(func_registry, std::move(owner), std::move(llvm_context)));
-
-  batch_entry_func_ptrs_.resize(func_names.size());
-  for (size_t i = 0; i < func_names.size(); ++i) {
-    auto func_offset = jit_->lookup(func_names[i]);
-    if (!func_offset) {
-      return Status::RuntimeError("Failed to lookup function: ", func_names[i],
-                                  ", error: ", llvm::toString(func_offset.takeError()));
-    }
-    char* func_ptr = nullptr;
-    func_ptr += func_offset->getValue();
-    batch_entry_func_ptrs_[i] = func_ptr;
-  }
-  return Status::OK();
-}
-
-Status ExecEngine::ExecuteAt(size_t index, void* entry_arguments, RetType* result) {
-  if (index >= batch_entry_func_ptrs_.size()) {
-    return Status::RuntimeError("ExecuteAt: index out of range");
-  }
-  ExecContext exec_ctx(option_.exec_ctx_arena_alloc_min_chunk_size);
-  char* func_ptr = batch_entry_func_ptrs_[index];
-  ValueType ret_type = batch_ret_types_[index];
-  EXPAND_SWITCH_TYPE(func_ptr, ret_type)
-  if (exec_ctx.HasErrors()) {
-    return Status::RuntimeError(exec_ctx.GetErrorMessage());
-  }
-  return Status::OK();
-}
-
-Status ExecEngine::ExecuteAt(size_t index, ExecContext& exec_ctx, void* entry_arguments, RetType* result) {
-  if (index >= batch_entry_func_ptrs_.size()) {
-    return Status::RuntimeError("ExecuteAt: index out of range");
-  }
-  char* func_ptr = batch_entry_func_ptrs_[index];
-  ValueType ret_type = batch_ret_types_[index];
-  EXPAND_SWITCH_TYPE(func_ptr, ret_type)
-  Status ret = Status::OK();
-  if (exec_ctx.HasErrors()) {
-    ret = Status::RuntimeError(exec_ctx.GetErrorMessage());
-  }
-  exec_ctx.Clear();
-  return ret;
-}
-
-Status ExecEngine::ExecuteAt(size_t index, void* entry_arguments, void* result) {
-  if (index >= batch_entry_func_ptrs_.size()) {
-    return Status::RuntimeError("ExecuteAt: index out of range");
-  }
-  ExecContext exec_ctx(option_.exec_ctx_arena_alloc_min_chunk_size);
-  reinterpret_cast<return_void_function_type>(batch_entry_func_ptrs_[index])(entry_arguments, &exec_ctx, result);
-  if (exec_ctx.HasErrors()) {
-    return Status::RuntimeError(exec_ctx.GetErrorMessage());
-  }
-  return Status::OK();
-}
-
-Status ExecEngine::ExecuteAt(size_t index, ExecContext& exec_ctx, void* entry_arguments, void* result) {
-  if (index >= batch_entry_func_ptrs_.size()) {
-    return Status::RuntimeError("ExecuteAt: index out of range");
-  }
-  reinterpret_cast<return_void_function_type>(batch_entry_func_ptrs_[index])(entry_arguments, &exec_ctx, result);
-  Status ret = Status::OK();
-  if (exec_ctx.HasErrors()) {
-    ret = Status::RuntimeError(exec_ctx.GetErrorMessage());
-  }
-  exec_ctx.Clear();
-  return ret;
-}
-
-Status ExecEngine::ExecuteAll(void* entry_arguments, std::vector<RetType>* results) {
-  results->resize(batch_entry_func_ptrs_.size());
-  std::string all_errors;
-  for (size_t i = 0; i < batch_entry_func_ptrs_.size(); ++i) {
-    Status st = ExecuteAt(i, entry_arguments, &(*results)[i]);
-    if (!st.ok()) {
-      if (!all_errors.empty()) {
-        all_errors += "| ";
-      }
-      all_errors += st.ToString();
-    }
-  }
-  if (!all_errors.empty()) {
-    return Status::RuntimeError(all_errors);
-  }
-  return Status::OK();
-}
-Status ExecEngine::ExecuteAll(ExecContext& exec_ctx, void* entry_arguments, std::vector<RetType>* results) {
-  results->resize(batch_entry_func_ptrs_.size());
-  std::string all_errors;
-  for (size_t i = 0; i < batch_entry_func_ptrs_.size(); ++i) {
-    Status st = ExecuteAt(i, exec_ctx, entry_arguments, &(*results)[i]);
-    if (!st.ok()) {
-      if (!all_errors.empty()) {
-        all_errors += "| ";
-      }
-      all_errors += st.ToString();
-    }
-  }
-  if (!all_errors.empty()) {
-    return Status::RuntimeError(all_errors);
-  }
-  return Status::OK();
-}
-Status ExecEngine::ExecuteAll(void* entry_arguments, void* results) {
-  std::string all_errors;
-  for (size_t i = 0; i < batch_entry_func_ptrs_.size(); ++i) {
-    Status st = ExecuteAt(i, entry_arguments, results);
-    if (!st.ok()) {
-      if (!all_errors.empty()) {
-        all_errors += "| ";
-      }
-      all_errors += st.ToString();
-    }
-  }
-  if (!all_errors.empty()) {
-    return Status::RuntimeError(all_errors);
-  }
-  return Status::OK();
-}
-Status ExecEngine::ExecuteAll(ExecContext& exec_ctx, void* entry_arguments, void* results) {
-  std::string all_errors;
-  for (size_t i = 0; i < batch_entry_func_ptrs_.size(); ++i) {
-    Status st = ExecuteAt(i, exec_ctx, entry_arguments, results);
-    if (!st.ok()) {
-      if (!all_errors.empty()) {
-        all_errors += "| ";
-      }
-      all_errors += st.ToString();
-    }
-  }
-  if (!all_errors.empty()) {
-    return Status::RuntimeError(all_errors);
-  }
-  return Status::OK();
-}
-
-Status ExecEngine::CreateJitAndOptimize(const std::unique_ptr<FunctionRegistry>& func_registry,
-                                        std::unique_ptr<llvm::Module> owner,
-                                        std::unique_ptr<llvm::LLVMContext> llvm_context) {
-  static auto machine = LLVMInit();
-  const auto fp_mode = option_.fp_math_mode;
-  auto jit_or_err =
-      llvm::orc::LLJITBuilder()
-          .setCompileFunctionCreator([fp_mode](llvm::orc::JITTargetMachineBuilder jtmb)
-                                         -> llvm::Expected<std::unique_ptr<llvm::orc::IRCompileLayer::IRCompiler>> {
-            jtmb.setCodeGenOptLevel(llvm::CodeGenOptLevel::Aggressive);
-            if (fp_mode == FPMathMode::kFast) {
-              jtmb.getOptions().AllowFPOpFusion = llvm::FPOpFusion::Fast;
-              jtmb.getOptions().UnsafeFPMath = true;
-            }
-            return std::make_unique<llvm::orc::ConcurrentIRCompiler>(std::move(jtmb));
-          })
-          .create();
-  if (!jit_or_err) {
-    return Status::RuntimeError("Failed to create LLJIT: ", llvm::toString(jit_or_err.takeError()));
-  }
-  jit_ = std::move(*jit_or_err);
-  auto& jd = jit_->getMainJITDylib();
-  auto dlsg = llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(jit_->getDataLayout().getGlobalPrefix());
-  if (!dlsg) {
-    return Status::RuntimeError("Failed to create DynamicLibrarySearchGenerator: ", llvm::toString(dlsg.takeError()));
-  }
-  jd.addGenerator(std::move(*dlsg));
-  if (option_.enable_save_compiled) {
-    jit_->getObjTransformLayer().setTransform(
-        [this](std::unique_ptr<llvm::MemoryBuffer> obj_buf) -> llvm::Expected<std::unique_ptr<llvm::MemoryBuffer>> {
-          if (obj_buf) {
-            llvm::StringRef data = obj_buf->getBuffer();
-            compiled_object_bytes_.assign(data.data(), data.size());
-          }
-          return obj_buf;
-        });
-  }
-  // optimize
-  jit_->getIRTransformLayer().setTransform(
-      [&, this](llvm::orc::ThreadSafeModule tsm, const llvm::orc::MaterializationResponsibility& /*r*/) {
-        tsm.withModuleDo([this](llvm::Module& module) {
-          llvm::PassBuilder pb;
-
-          llvm::LoopAnalysisManager lam;
-          llvm::FunctionAnalysisManager fam;
-          llvm::CGSCCAnalysisManager cgam;
-          llvm::ModuleAnalysisManager mam;
-
-          pb.registerPeepholeEPCallback([&](llvm::FunctionPassManager& fpm, llvm::OptimizationLevel /*level*/) {
-            fpm.addPass(CommutativeCallCanonicalizerPass());
-          });
-
-          // Register all the basic analyses with the managers.
-          pb.registerModuleAnalyses(mam);
-          pb.registerCGSCCAnalyses(cgam);
-          pb.registerFunctionAnalyses(fam);
-          pb.registerLoopAnalyses(lam);
-
-          pb.crossRegisterProxies(lam, fam, cgam, mam);
-
-          // Create the optimization pipeline.
-          auto mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
-
-          mpm.run(module, mam);
-          if (option_.dump_ir) {
-            llvm::raw_string_ostream string_os(ir_code_);
-            module.print(string_os, nullptr);
-          }
-        });
-        return tsm;
-      });
-  if (auto err = jit_->addIRModule(llvm::orc::ThreadSafeModule(std::move(owner), std::move(llvm_context)))) {
-    return Status::RuntimeError("Failed to add module to JIT: ", llvm::toString(std::move(err)));
-  }
-  JF_RETURN_NOT_OK(func_registry->MappingToJIT(jit_.get()));
-  return Status::OK();
 }
 
 Status ExecEngine::SaveCompiled(std::string* out) const {
   if (out == nullptr) {
     return Status::InvalidArgument("SaveCompiled: out must not be null");
   }
-  const bool nothing_compiled = (entry_func_ptr_ == nullptr) && batch_entry_func_ptrs_.empty();
-  if (nothing_compiled) {
-    return Status::RuntimeError("SaveCompiled: nothing compiled yet. Call Compile() or BatchCompile() first.");
+  if (entry_func_ptr_ == nullptr) {
+    return Status::RuntimeError("SaveCompiled: nothing compiled yet. Call Compile() first.");
   }
-  if (compiled_object_bytes_.empty()) {
+  const std::string_view obj = core_->GetCompiledObjectBytes();
+  if (obj.empty()) {
     return Status::RuntimeError(
         "SaveCompiled: no object bytes captured. Set "
-        "ExecEngineOption::enable_save_compiled=true BEFORE calling Compile() / "
-        "BatchCompile(), then re-compile. (Artifacts loaded via LoadCompiled also "
-        "cannot be re-saved — the loaded bytes are intentionally not retained.)");
+        "ExecEngineOption::enable_save_compiled=true BEFORE calling Compile(), "
+        "then re-compile. (Artifacts loaded via LoadCompiled also cannot be "
+        "re-saved — the loaded bytes are intentionally not retained.)");
   }
 
-  const bool is_batch = !batch_entry_func_ptrs_.empty();
+  const ExecEngineOption& option = core_->GetOption();
   ArtifactHeader header;
   header.llvm_version = LLVM_VERSION_STRING;
   header.target_triple = llvm::sys::getProcessTriple();
   header.cpu_name = llvm::sys::getHostCPUName().str();
-  header.mode = is_batch ? ArtifactMode::kBatch : ArtifactMode::kSingle;
-  header.fp_math_mode =
-      (option_.fp_math_mode == FPMathMode::kFast) ? ArtifactFPMathMode::kFast : ArtifactFPMathMode::kStrict;
-  header.top_ret_type = is_batch ? batch_ret_types_[0] : ret_type_;
-
-  const size_t n = is_batch ? batch_entry_func_ptrs_.size() : 1U;
-  header.per_entry_ret_types.resize(n);
-  for (size_t i = 0; i < n; ++i) {
-    header.per_entry_ret_types[i] = is_batch ? batch_ret_types_[i] : ret_type_;
-  }
-  return SerializeArtifact(header, compiled_object_bytes_, out);
+  header.mode = ArtifactMode::kSingle;
+  header.fp_math_mode = option.fp_math_mode;
+  header.per_entry_ret_types = {ret_type_};
+  return SerializeArtifact(header, obj, out);
 }
 
 Status ExecEngine::LoadCompiled(std::string_view bytes, const std::unique_ptr<FunctionRegistry>& func_registry) {
@@ -751,70 +139,29 @@ Status ExecEngine::LoadCompiled(std::string_view bytes, const std::unique_ptr<Fu
                                      ", runtime=", current_cpu, "). Regenerate the artifact on this host.");
     }
   }
-
-  const bool is_batch = (header.mode == ArtifactMode::kBatch);
-  option_.fp_math_mode = (header.fp_math_mode == ArtifactFPMathMode::kFast) ? FPMathMode::kFast : FPMathMode::kStrict;
-
-  ResetCompiledState();
-
-  static auto machine = LLVMInit();
-  const auto fp_mode = option_.fp_math_mode;
-  auto jit_or_err =
-      llvm::orc::LLJITBuilder()
-          .setCompileFunctionCreator([fp_mode](llvm::orc::JITTargetMachineBuilder jtmb)
-                                         -> llvm::Expected<std::unique_ptr<llvm::orc::IRCompileLayer::IRCompiler>> {
-            jtmb.setCodeGenOptLevel(llvm::CodeGenOptLevel::Aggressive);
-            if (fp_mode == FPMathMode::kFast) {
-              jtmb.getOptions().AllowFPOpFusion = llvm::FPOpFusion::Fast;
-              jtmb.getOptions().UnsafeFPMath = true;
-            }
-            return std::make_unique<llvm::orc::ConcurrentIRCompiler>(std::move(jtmb));
-          })
-          .create();
-  if (!jit_or_err) {
-    return Status::RuntimeError("LoadCompiled: failed to create LLJIT: ", llvm::toString(jit_or_err.takeError()));
+  if (header.mode != ArtifactMode::kSingle) {
+    return Status::InvalidArgument(
+        "compiled artifact: mode mismatch — this blob was saved by BatchExecEngine. "
+        "Load it with BatchExecEngine::LoadCompiled instead.");
   }
-  jit_ = std::move(*jit_or_err);
 
-  auto dlsg = llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(jit_->getDataLayout().getGlobalPrefix());
-  if (!dlsg) {
-    return Status::RuntimeError("LoadCompiled: failed to create DynamicLibrarySearchGenerator: ",
-                                llvm::toString(dlsg.takeError()));
-  }
-  jit_->getMainJITDylib().addGenerator(std::move(*dlsg));
-  auto obj_buf =
-      llvm::MemoryBuffer::getMemBufferCopy(llvm::StringRef(obj_view.data(), obj_view.size()), "jitfusion.loaded.o");
-  if (auto err = jit_->addObjectFile(std::move(obj_buf))) {
-    return Status::RuntimeError("LoadCompiled: addObjectFile failed: ", llvm::toString(std::move(err)));
-  }
-  JF_RETURN_NOT_OK(func_registry->MappingToJIT(jit_.get()));
-  const size_t num_entries = header.per_entry_ret_types.size();
-  if (is_batch) {
-    batch_ret_types_ = std::move(header.per_entry_ret_types);
-    batch_entry_func_ptrs_.resize(num_entries);
-    for (size_t i = 0; i < num_entries; ++i) {
-      const std::string sym = kEntryFunctionName + std::to_string(i);
-      auto off = jit_->lookup(sym);
-      if (!off) {
-        return Status::RuntimeError("LoadCompiled: entry symbol '", sym,
-                                    "' not found: ", llvm::toString(off.takeError()),
-                                    ". The FunctionRegistry is probably missing a function the artifact depends on.");
-      }
-      char* fp = nullptr;
-      fp += off->getValue();
-      batch_entry_func_ptrs_[i] = fp;
-    }
-  } else {
-    ret_type_ = header.per_entry_ret_types[0];
-    auto off = jit_->lookup(kEntryFunctionName);
-    if (!off) {
-      return Status::RuntimeError("LoadCompiled: entry symbol '", kEntryFunctionName,
-                                  "' not found: ", llvm::toString(off.takeError()),
-                                  ". The FunctionRegistry is probably missing a function the artifact depends on.");
-    }
-    entry_func_ptr_ = nullptr;
-    entry_func_ptr_ += off->getValue();
-  }
+  // Rebuild a JitCore that reflects the FP mode actually baked into the
+  // artifact (FP mode affects codegen flags, but the object bytes are
+  // already codegen'd — we only need the LLJIT to match so that any
+  // linker flags stay consistent).
+  ExecEngineOption new_opt = core_->GetOption();
+  new_opt.fp_math_mode = header.fp_math_mode;
+  core_ = std::make_unique<JitCore>(new_opt);
+
+  std::vector<std::string> symbol_names{kEntryFunctionName};
+  std::vector<char*> func_ptrs;
+  JF_RETURN_NOT_OK(core_->LoadObject(obj_view, symbol_names, func_registry, &func_ptrs));
+
+  entry_func_ptr_ = func_ptrs[0];
+  // DeserializeArtifact guarantees per_entry_ret_types is non-empty
+  // (num_entries >= 1, and single-mode blobs specifically have exactly
+  // one entry). Indexing [0] is therefore always safe here.
+  ret_type_ = header.per_entry_ret_types[0];
   return Status::OK();
 }
 

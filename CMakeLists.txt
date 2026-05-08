@@ -245,9 +245,9 @@ if(JITFUSION_INSTALL)
         FILES_MATCHING PATTERN "*.h")
 
     # athena public headers -> <prefix>/include/athena/
-    # Only the files referenced by athena/athena.h (directly or transitively)
-    # are part of the public surface; implementation headers like token.ll
-    # or the generated shell script are excluded.
+    # Only the files referenced by athena.h (directly or transitively) are
+    # part of the public surface; implementation headers like token.ll or
+    # the generated shell script are excluded.
     install(FILES
             "${CMAKE_CURRENT_SOURCE_DIR}/athena/athena.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/athena/ast_builder.h"

@@ -9,7 +9,8 @@
 #include "function_registry.h"
 #include "gtest/gtest.h"
 
-using athena::Athena;
+using athena::AthenaExpression;
+using athena::AthenaPipeline;
 using jitfusion::Diagnostic;
 using jitfusion::FunctionRegistry;
 using jitfusion::FunctionRegistryFactory;
@@ -62,7 +63,7 @@ TEST(DiagnosticTest, RenderWithEmptySourceFallsBack) {
 }
 
 TEST(DiagnosticTest, UndefinedVariableProducesSourceContext) {
-  Athena athena;
+  AthenaExpression athena;
   auto reg = MakeRegistry();
   std::string code = "r = a + 1;";  // 'a' is undefined
   auto st = athena.Compile(code, reg);
@@ -74,7 +75,7 @@ TEST(DiagnosticTest, UndefinedVariableProducesSourceContext) {
 }
 
 TEST(DiagnosticTest, IfBranchTypeMismatchProducesSourceContext) {
-  Athena athena;
+  AthenaExpression athena;
   auto reg = MakeRegistry();
   std::string code = "r = if(1, 2, \"hi\");";
   auto st = athena.Compile(code, reg);
@@ -87,7 +88,7 @@ TEST(DiagnosticTest, IfBranchTypeMismatchProducesSourceContext) {
 }
 
 TEST(DiagnosticTest, DivByZeroProducesSourceContext) {
-  Athena athena;
+  AthenaExpression athena;
   auto reg = MakeRegistry();
   std::string code = "r = 10 / 0;";
   auto st = athena.Compile(code, reg);
@@ -97,7 +98,7 @@ TEST(DiagnosticTest, DivByZeroProducesSourceContext) {
 }
 
 TEST(DiagnosticTest, LogicalOpOnStringsProducesSourceContext) {
-  Athena athena;
+  AthenaExpression athena;
   auto reg = MakeRegistry();
   std::string code = R"(r = "hi" and "world";)";
   auto st = athena.Compile(code, reg);
@@ -110,7 +111,7 @@ TEST(DiagnosticTest, LogicalOpOnStringsProducesSourceContext) {
 }
 
 TEST(DiagnosticTest, BitwiseNotOnFloatProducesSourceContext) {
-  Athena athena;
+  AthenaExpression athena;
   auto reg = MakeRegistry();
   std::string code = "r = ~1.5f32;";
   auto st = athena.Compile(code, reg);
@@ -123,7 +124,7 @@ TEST(DiagnosticTest, BitwiseNotOnFloatProducesSourceContext) {
 }
 
 TEST(DiagnosticTest, UnaryMinusOnStringProducesSourceContext) {
-  Athena athena;
+  AthenaExpression athena;
   auto reg = MakeRegistry();
   std::string code = R"(r = -"hi";)";
   auto st = athena.Compile(code, reg);
@@ -135,7 +136,7 @@ TEST(DiagnosticTest, UnaryMinusOnStringProducesSourceContext) {
 }
 
 TEST(DiagnosticTest, IfWrongArityProducesSourceContext) {
-  Athena athena;
+  AthenaExpression athena;
   auto reg = MakeRegistry();
   std::string code = "r = if(1, 2);";
   auto st = athena.Compile(code, reg);
@@ -147,7 +148,7 @@ TEST(DiagnosticTest, IfWrongArityProducesSourceContext) {
 }
 
 TEST(DiagnosticTest, IfConditionNotNumericProducesSourceContext) {
-  Athena athena;
+  AthenaExpression athena;
   auto reg = MakeRegistry();
   std::string code = R"(r = if("hi", 1, 2);)";
   auto st = athena.Compile(code, reg);
@@ -160,7 +161,7 @@ TEST(DiagnosticTest, IfConditionNotNumericProducesSourceContext) {
 }
 
 TEST(DiagnosticTest, UnknownFunctionProducesSourceContext) {
-  Athena athena;
+  AthenaExpression athena;
   auto reg = MakeRegistry();
   std::string code = "r = definitely_not_a_function(1);";
   auto st = athena.Compile(code, reg);
@@ -172,7 +173,7 @@ TEST(DiagnosticTest, UnknownFunctionProducesSourceContext) {
 }
 
 TEST(DiagnosticTest, RelationalStringVsNumericProducesSourceContext) {
-  Athena athena;
+  AthenaExpression athena;
   auto reg = MakeRegistry();
   std::string code = R"(r = "hi" < 3;)";
   auto st = athena.Compile(code, reg);
@@ -185,7 +186,7 @@ TEST(DiagnosticTest, RelationalStringVsNumericProducesSourceContext) {
 }
 
 TEST(DiagnosticTest, RelationalStringVsListProducesSourceContext) {
-  Athena athena;
+  AthenaExpression athena;
   auto reg = MakeRegistry();
   std::string code = R"(r = "hi" < [1, 2, 3];)";
   auto st = athena.Compile(code, reg);
@@ -196,7 +197,7 @@ TEST(DiagnosticTest, RelationalStringVsListProducesSourceContext) {
 }
 
 TEST(DiagnosticTest, ArithmeticStringSubProducesSourceContext) {
-  Athena athena;
+  AthenaExpression athena;
   auto reg = MakeRegistry();
   std::string code = R"(r = "hi" - "ho";)";
   auto st = athena.Compile(code, reg);
@@ -209,7 +210,7 @@ TEST(DiagnosticTest, ArithmeticStringSubProducesSourceContext) {
 }
 
 TEST(DiagnosticTest, ArithmeticStringMulProducesSourceContext) {
-  Athena athena;
+  AthenaExpression athena;
   auto reg = MakeRegistry();
   std::string code = R"(r = "hi" * 3;)";
   auto st = athena.Compile(code, reg);
@@ -221,7 +222,7 @@ TEST(DiagnosticTest, ArithmeticStringMulProducesSourceContext) {
 }
 
 TEST(DiagnosticTest, BitwiseOnFloatProducesSourceContext) {
-  Athena athena;
+  AthenaExpression athena;
   auto reg = MakeRegistry();
   std::string code = "r = 1 & 1.0f32;";
   auto st = athena.Compile(code, reg);
@@ -234,7 +235,7 @@ TEST(DiagnosticTest, BitwiseOnFloatProducesSourceContext) {
 }
 
 TEST(DiagnosticTest, AddListMismatchProducesSourceContext) {
-  Athena athena;
+  AthenaExpression athena;
   auto reg = MakeRegistry();
   std::string code = "r = [1, 2] + [1.0f32, 2.0f32];";
   auto st = athena.Compile(code, reg);
@@ -245,7 +246,7 @@ TEST(DiagnosticTest, AddListMismatchProducesSourceContext) {
 }
 
 TEST(DiagnosticTest, AddListAndScalarProducesSourceContext) {
-  Athena athena;
+  AthenaExpression athena;
   auto reg = MakeRegistry();
   std::string code = "r = [1, 2] + 3;";
   auto st = athena.Compile(code, reg);
@@ -258,7 +259,7 @@ TEST(DiagnosticTest, AddListAndScalarProducesSourceContext) {
 TEST(DiagnosticTest, DemoRenderedOutput) {
   auto reg = MakeRegistry();
   {
-    Athena athena;
+    AthenaExpression athena;
     std::string code = R"(a = 10;
 b = a + 1;
 c = d + 5;
@@ -270,19 +271,19 @@ c = d + 5;
     EXPECT_NE(st.ToString().find("line 3"), std::string::npos);
   }
   {
-    Athena athena;
+    AthenaExpression athena;
     auto st = athena.Compile("r = if(1, 2, \"hi\");", reg);
     ASSERT_FALSE(st.ok());
     GTEST_LOG_(INFO) << "\n--- if branches mismatch ---\n" << st.ToString();
   }
   {
-    Athena athena;
+    AthenaExpression athena;
     auto st = athena.Compile("r = 10 / 0;", reg);
     ASSERT_FALSE(st.ok());
     GTEST_LOG_(INFO) << "\n--- div by zero ---\n" << st.ToString();
   }
   {
-    Athena athena;
+    AthenaExpression athena;
     auto st = athena.Compile(R"(r = "hi" and "world";)", reg);
     ASSERT_FALSE(st.ok());
     GTEST_LOG_(INFO) << "\n--- logical op on strings ---\n" << st.ToString();
@@ -290,7 +291,7 @@ c = d + 5;
 }
 
 TEST(DiagnosticTest, PipelineUndefinedVariableProducesSourceContext) {
-  Athena athena;
+  AthenaPipeline athena;
   auto reg = MakeRegistry();
   std::string code = R"(a = 10;
 b = a + 1;
@@ -308,7 +309,7 @@ c = d + 5;
 }
 
 TEST(DiagnosticTest, MultiPipelineErrorAnchorsToOwningPipeline) {
-  Athena athena;
+  AthenaPipeline athena;
   auto reg = MakeRegistry();
   std::string ok_code = R"(x = 1;
 y = x + 2;
@@ -330,7 +331,7 @@ q = p + zzz;
 }
 
 TEST(DiagnosticTest, MultiPipelineCompileAndExecuteHappyPath) {
-  Athena athena;
+  AthenaPipeline athena;
   auto reg = MakeRegistry();
   {
     jitfusion::FunctionSignature sign("load", {jitfusion::ValueType::kPtr, jitfusion::ValueType::kI32},
@@ -373,7 +374,7 @@ TEST(DiagnosticTest, MultiPipelineCompileAndExecuteHappyPath) {
 }
 
 TEST(DiagnosticTest, SwitchEvenArityProducesSourceContext) {
-  Athena athena;
+  AthenaExpression athena;
   auto reg = MakeRegistry();
   // switch requires (cond, then, ..., default) -> odd arg count; this has 4.
   std::string code = "r = switch(1, 2, 3, 4);";
@@ -386,7 +387,7 @@ TEST(DiagnosticTest, SwitchEvenArityProducesSourceContext) {
 }
 
 TEST(DiagnosticTest, SwitchConditionNotNumericProducesSourceContext) {
-  Athena athena;
+  AthenaExpression athena;
   auto reg = MakeRegistry();
   std::string code = R"(r = switch("hi", 1, 2);)";
   auto st = athena.Compile(code, reg);
@@ -399,7 +400,7 @@ TEST(DiagnosticTest, SwitchConditionNotNumericProducesSourceContext) {
 }
 
 TEST(DiagnosticTest, SwitchIncompatibleBranchTypesProducesSourceContext) {
-  Athena athena;
+  AthenaExpression athena;
   auto reg = MakeRegistry();
   std::string code = R"(r = switch(1, "hi", 2);)";
   auto st = athena.Compile(code, reg);
@@ -435,7 +436,7 @@ std::unique_ptr<FunctionRegistry> MakeRegistryWithLoadStore() {
 }  // namespace
 
 TEST(DiagnosticTest, IfBlockConditionNotNumericProducesSourceContext) {
-  Athena athena;
+  AthenaPipeline athena;
   auto reg = MakeRegistryWithLoadStore();
   std::string code = R"(r = 0.0f32;
 when "hello" {
@@ -454,7 +455,7 @@ store(output, 0, r);
 }
 
 TEST(DiagnosticTest, IfBlockVariableTypeMismatchProducesSourceContext) {
-  Athena athena;
+  AthenaPipeline athena;
   auto reg = MakeRegistryWithLoadStore();
   std::string code = R"(r = 0.0f32;
 when r > 0.0f32 {

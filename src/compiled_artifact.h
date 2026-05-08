@@ -49,14 +49,12 @@
  *   cpu_name           len-prefixed utf8 str      (sys::getHostCPUName())
  *   mode               uint8                      (0 = single, 1 = batch)
  *   fp_math_mode       uint8                      (FPMathMode enum value)
- *   top_ret_type       uint8                      (ValueType; meaningful in single mode,
- *                                                   duplicates per_entry_ret_types[0])
  *   num_entries        uint32                     (>= 1)
  *   per-entry repeated num_entries times:
  *     ret_type         uint8                      (ValueType)
  *   obj_size           uint64
  *   obj_bytes          raw bytes                  (the relocatable .o)
- *   extension_count    uint32                     (0 in v1)
+ *   extension_count    uint32                     (0 in v2)
  *   per-extension repeated extension_count times:
  *     tag              uint32                     (ArtifactExtensionTag)
  *     payload_len      uint32
@@ -79,23 +77,18 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include "exec_options.h"  // jitfusion::FPMathMode
 #include "status.h"
 #include "type.h"
 
 namespace jitfusion {
 
-// Kept in sync with the FPMathMode in include/exec_engine.h. We do
-// NOT include exec_engine.h here because that file pulls in LLVM —
-// which would defeat the "pure serde, fast to compile" goal of this
-// TU. Duplicating a 2-value enum is a fine tradeoff.
-//
-// Callers at the ExecEngine boundary are responsible for converting
-// between FPMathMode and ArtifactFPMathMode. A static_assert pair in
-// compiled_artifact.cc pins the numeric values to match.
-enum class ArtifactFPMathMode : std::uint8_t {
-  kStrict = 0,
-  kFast = 1,
-};
+// The on-wire FP math mode IS the public FPMathMode enum. They used to
+// be two separate types to avoid pulling LLVM into this serde TU, but
+// the public headers no longer include LLVM, so the split is obsolete.
+// FPMathMode's underlying type and enumerator values are pinned to the
+// on-wire layout; a static_assert pair in compiled_artifact.cc guards
+// this.
 
 enum class ArtifactMode : std::uint8_t {
   kSingle = 0,
@@ -114,7 +107,7 @@ enum class ArtifactMode : std::uint8_t {
 //      an old reader MUST notice (e.g. object bytes got compressed)
 //      is not an extension; bump kArtifactFormatVersion instead.
 enum class ArtifactExtensionTag : std::uint32_t {
-  // No tags defined in v1.
+  // No tags defined in v2.
   // kExampleMetadata = 1,  // payload: <describe layout here>
 };
 
@@ -134,11 +127,11 @@ struct ArtifactHeader {
   std::string target_triple;
   std::string cpu_name;
   ArtifactMode mode{ArtifactMode::kSingle};
-  ArtifactFPMathMode fp_math_mode{ArtifactFPMathMode::kFast};
-  ValueType top_ret_type{ValueType::kUnknown};
+  FPMathMode fp_math_mode{FPMathMode::kFast};
   // Per-entry return types; size doubles as the "num_entries" field
-  // on the wire. Entry symbol names are intentionally NOT stored —
-  // see the "Notable non-field" comment in the file header.
+  // on the wire (always >= 1). Entry symbol names are intentionally
+  // NOT stored — see the "Notable non-field" comment in the file
+  // header. In single mode per_entry_ret_types has size 1.
   std::vector<ValueType> per_entry_ret_types;
 
   // === Forward-compat extension area ===
@@ -149,7 +142,7 @@ struct ArtifactHeader {
 // change that breaks byte-level compatibility with existing readers.
 // Purely additive changes via the extension area do NOT require a
 // version bump.
-constexpr std::uint32_t kArtifactFormatVersion = 1;
+constexpr std::uint32_t kArtifactFormatVersion = 2;
 
 // Serialize `header` + `object_bytes` into a self-contained JFCA
 // blob. Appends to `*out` (does not clear), matching std::string's

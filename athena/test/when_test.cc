@@ -3,7 +3,8 @@
 #include "gtest/gtest.h"
 #include "test_helper.h"
 
-using athena::Athena;
+using athena::AthenaExpression;
+using athena::AthenaPipeline;
 using athena::FunctionRegistry;
 using athena::FunctionRegistryFactory;
 using athena::FunctionSignature;
@@ -13,7 +14,7 @@ using test::LoadF32;
 using test::StoreF32;
 
 TEST(WhenTest, IfElseModifyMultipleVars) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -62,7 +63,7 @@ TEST(WhenTest, IfElseModifyMultipleVars) {
 }
 
 TEST(WhenTest, IfWithoutElse) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -102,7 +103,7 @@ TEST(WhenTest, IfWithoutElse) {
 }
 
 TEST(WhenTest, IfElifElse) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -153,7 +154,7 @@ TEST(WhenTest, IfElifElse) {
 }
 
 TEST(WhenTest, PartialModify) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -200,7 +201,7 @@ TEST(WhenTest, PartialModify) {
 }
 
 TEST(WhenTest, StoreInsideWhenElse) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -240,7 +241,7 @@ TEST(WhenTest, StoreInsideWhenElse) {
 }
 
 TEST(WhenTest, StoreInsideWhenElifElse) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -289,7 +290,7 @@ TEST(WhenTest, StoreInsideWhenElifElse) {
 }
 
 TEST(WhenTest, MixedModifyAndStoreInWhen) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -336,7 +337,7 @@ TEST(WhenTest, MixedModifyAndStoreInWhen) {
 }
 
 TEST(WhenTest, StoreToMultipleOutputsInElifChain) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -391,7 +392,7 @@ TEST(WhenTest, StoreToMultipleOutputsInElifChain) {
 }
 
 TEST(WhenTest, StoreInsideWhenWithoutElse) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -430,7 +431,7 @@ TEST(WhenTest, StoreInsideWhenWithoutElse) {
 }
 
 TEST(WhenTest, CompoundConditionsWithFunctions) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -501,7 +502,7 @@ TEST(WhenTest, CompoundConditionsWithFunctions) {
 }
 
 TEST(WhenTest, IntermediateVarsAndComplexExprInWhen) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -566,7 +567,7 @@ TEST(WhenTest, IntermediateVarsAndComplexExprInWhen) {
 }
 
 TEST(WhenTest, ConsecutiveWhenBlocks) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -622,7 +623,7 @@ TEST(WhenTest, ConsecutiveWhenBlocks) {
 }
 
 TEST(WhenTest, WhenMixedWithIfAndSwitchExpr) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -683,7 +684,7 @@ TEST(WhenTest, WhenMixedWithIfAndSwitchExpr) {
 }
 
 TEST(WhenTest, RateCalculationBusinessScenario) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -778,7 +779,7 @@ TEST(WhenTest, RateCalculationBusinessScenario) {
 }
 
 TEST(WhenTest, FunctionCallInCondition) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -838,7 +839,7 @@ TEST(WhenTest, FunctionCallInCondition) {
 }
 
 TEST(WhenTest, TwoLevelNesting) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -915,7 +916,7 @@ TEST(WhenTest, TwoLevelNesting) {
 }
 
 TEST(WhenTest, TwoLevelWithStoreAndMultipleOutputs) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -993,7 +994,7 @@ TEST(WhenTest, TwoLevelWithStoreAndMultipleOutputs) {
 }
 
 TEST(WhenTest, ThreeLevelNesting) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -1095,7 +1096,7 @@ TEST(WhenTest, ThreeLevelNesting) {
 }
 
 TEST(WhenTest, FourLevelNesting) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -1207,7 +1208,7 @@ TEST(WhenTest, FourLevelNesting) {
 }
 
 TEST(WhenTest, ThreeLevelModifyDifferentVars) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -1312,7 +1313,7 @@ TEST(WhenTest, ThreeLevelModifyDifferentVars) {
 }
 
 TEST(WhenTest, ThreeLevelWithExpressions) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -1377,7 +1378,7 @@ TEST(WhenTest, ThreeLevelWithExpressions) {
 }
 
 TEST(WhenTest, WhenBlockNotAllowedInExpressionMode) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -1400,7 +1401,7 @@ TEST(WhenTest, WhenBlockNotAllowedInExpressionMode) {
 }
 
 TEST(WhenTest, VariableTypeMismatchInWhenBranch) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -1428,7 +1429,7 @@ TEST(WhenTest, VariableTypeMismatchInWhenBranch) {
 }
 
 TEST(WhenTest, VariableTypeMismatchInElseBranch) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -1458,7 +1459,7 @@ TEST(WhenTest, VariableTypeMismatchInElseBranch) {
 }
 
 TEST(WhenTest, StringConditionReject) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
