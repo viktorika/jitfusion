@@ -1,7 +1,8 @@
 #include "gtest/gtest.h"
 #include "test_helper.h"
 
-using athena::Athena;
+using athena::AthenaExpression;
+using athena::AthenaPipeline;
 using athena::FunctionRegistry;
 using athena::FunctionRegistryFactory;
 using athena::FunctionSignature;
@@ -12,7 +13,7 @@ using test::LoadI32List;
 using test::StoreF32;
 
 TEST(MixTest, Test1) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -29,7 +30,7 @@ TEST(MixTest, Test1) {
 }
 
 TEST(ComplexTest, Test1) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -67,7 +68,7 @@ TEST(ComplexTest, Test1) {
 }
 
 TEST(FilterTest, Test1) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32List);
@@ -86,7 +87,7 @@ TEST(FilterTest, Test1) {
 }
 
 TEST(FilterTest, Test2) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32List);
@@ -107,7 +108,7 @@ TEST(FilterTest, Test2) {
 }
 
 TEST(CustomPassTest, CommutativeCallCanonicalizerPass1) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32List);
@@ -128,7 +129,7 @@ TEST(CustomPassTest, CommutativeCallCanonicalizerPass1) {
 }
 
 TEST(CustomPassTest, CommutativeCallCanonicalizerPass2) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32List);
@@ -149,7 +150,7 @@ TEST(CustomPassTest, CommutativeCallCanonicalizerPass2) {
 }
 
 TEST(PipelineGrouperTest, ThreeGroupTest) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -216,7 +217,7 @@ TEST(PipelineGrouperTest, ThreeGroupTest) {
 }
 
 TEST(ComplexTest, TwoStoreInSingleCode) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -247,7 +248,7 @@ TEST(ComplexTest, TwoStoreInSingleCode) {
 }
 
 TEST(IsolatedScopeTest, SameVarNameDifferentComputation) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -285,7 +286,7 @@ TEST(IsolatedScopeTest, SameVarNameDifferentComputation) {
 }
 
 TEST(IsolatedScopeTest, SameIntermediateVarDifferentChain) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -334,7 +335,7 @@ TEST(IsolatedScopeTest, SameIntermediateVarDifferentChain) {
 }
 
 TEST(IsolatedScopeTest, CrossPipelineVarReferenceError) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -364,7 +365,7 @@ TEST(IsolatedScopeTest, CrossPipelineVarReferenceError) {
 }
 
 TEST(IsolatedScopeTest, SameVarNameDifferentLoadIndex) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -407,7 +408,7 @@ TEST(IsolatedScopeTest, SameVarNameDifferentLoadIndex) {
 }
 
 TEST(IsolatedScopeTest, SameVarNameWithWhenBlock) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -449,7 +450,7 @@ TEST(IsolatedScopeTest, SameVarNameWithWhenBlock) {
 }
 
 TEST(IsolatedScopeTest, SameVarNameWithWhenElifElse) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -499,7 +500,7 @@ TEST(IsolatedScopeTest, SameVarNameWithWhenElifElse) {
 }
 
 TEST(IsolatedScopeTest, FourPipelinesSameVarNames) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -553,7 +554,7 @@ TEST(IsolatedScopeTest, FourPipelinesSameVarNames) {
 }
 
 TEST(IsolatedScopeTest, DifferentGroupsSameVarNames) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -606,7 +607,7 @@ TEST(IsolatedScopeTest, DifferentGroupsSameVarNames) {
 }
 
 TEST(IsolatedScopeTest, SameVarNameWithNestedWhen) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -654,7 +655,7 @@ TEST(IsolatedScopeTest, SameVarNameWithNestedWhen) {
 }
 
 TEST(IsolatedScopeTest, SameVarNameStoreInsideWhen) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -696,7 +697,7 @@ TEST(IsolatedScopeTest, SameVarNameStoreInsideWhen) {
 }
 
 TEST(ExecContextTest, ExpressionModeWithExecContext) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -723,7 +724,7 @@ TEST(ExecContextTest, ExpressionModeWithExecContext) {
 }
 
 TEST(ExecContextTest, PipelineModeWithExecContext) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {

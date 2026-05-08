@@ -22,6 +22,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "batch_exec_engine.h"
 #include "exec_engine.h"
 #include "exec_node.h"
 #include "function_registry.h"
@@ -197,20 +198,20 @@ TEST(SaveLoadTest, BatchCompileRoundTrip) {
   nodes.emplace_back(new ConstantValueNode(static_cast<double>(2.5)));
   nodes.emplace_back(new ConstantValueNode(std::string("batched")));
 
-  ExecEngine src(SaveCapableOption());
-  ASSERT_TRUE(src.BatchCompile(nodes, reg).ok());
-  ASSERT_EQ(src.GetBatchFunctionCount(), 3u);
+  BatchExecEngine src(SaveCapableOption());
+  ASSERT_TRUE(src.Compile(nodes, reg).ok());
+  ASSERT_EQ(src.GetFunctionCount(), 3u);
 
   std::string blob;
   ASSERT_TRUE(src.SaveCompiled(&blob).ok());
 
-  ExecEngine dst;
+  BatchExecEngine dst;
   auto reg2 = MakeRegistry();
   ASSERT_TRUE(dst.LoadCompiled(blob, reg2).ok());
-  ASSERT_EQ(dst.GetBatchFunctionCount(), 3u);
-  EXPECT_EQ(dst.GetBatchFunctionReturnType(0), ValueType::kI32);
-  EXPECT_EQ(dst.GetBatchFunctionReturnType(1), ValueType::kF64);
-  EXPECT_EQ(dst.GetBatchFunctionReturnType(2), ValueType::kString);
+  ASSERT_EQ(dst.GetFunctionCount(), 3u);
+  EXPECT_EQ(dst.GetReturnType(0), ValueType::kI32);
+  EXPECT_EQ(dst.GetReturnType(1), ValueType::kF64);
+  EXPECT_EQ(dst.GetReturnType(2), ValueType::kString);
 
   RetType r;
   ASSERT_TRUE(dst.ExecuteAt(0, nullptr, &r).ok());

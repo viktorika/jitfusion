@@ -39,15 +39,16 @@
 #include <utility>
 #include <vector>
 
+#include "batch_exec_engine.h"
 #include "exec_engine.h"
 #include "exec_node.h"
 #include "function_registry.h"
 #include "status.h"
 #include "type.h"
 
-namespace jitfusion {
-namespace bench {
+namespace jitfusion::bench {
 
+using ::jitfusion::BatchExecEngine;
 using ::jitfusion::BinaryOPNode;
 using ::jitfusion::BinaryOPType;
 using ::jitfusion::ConstantListValueNode;
@@ -170,7 +171,7 @@ inline std::unique_ptr<ExecNode> MakeListScalarCtxCall(const std::string& func_n
 // Build `func_name(list<uint64>, scalar<uint64>, exec_ctx)` — bitwise list-scalar.
 // Bitwise kernels are only registered for unsigned integer types.
 inline std::unique_ptr<ExecNode> MakeListScalarCtxCallU64(const std::string& func_name, int list_len,
-                                                         uint64_t scalar_val) {
+                                                          uint64_t scalar_val) {
   std::vector<uint64_t> values;
   values.reserve(list_len);
   for (int i = 0; i < list_len; ++i) {
@@ -251,9 +252,7 @@ inline std::unique_ptr<FunctionRegistry> MakeRegistry() {
 // Must be `inline` so its address is unique across TUs that include this
 // header — the JIT registry stores this address and the generated IR calls
 // it by pointer.
-inline void StoreI32(void* output, int32_t index, int32_t value) {
-  reinterpret_cast<int32_t*>(output)[index] = value;
-}
+inline void StoreI32(void* output, int32_t index, int32_t value) { reinterpret_cast<int32_t*>(output)[index] = value; }
 
 inline std::unique_ptr<FunctionRegistry> MakeRegistryWithStore() {
   auto r = MakeRegistry();
@@ -289,7 +288,6 @@ inline std::unique_ptr<ExecEngine> CompileOrDie(std::unique_ptr<ExecNode> node,
   return engine;
 }
 
-}  // namespace bench
-}  // namespace jitfusion
+}  // namespace jitfusion::bench
 
 #endif  // JITFUSION_BENCHMARK_BENCH_COMMON_H_

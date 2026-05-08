@@ -10,6 +10,7 @@
 #include <string>
 #include <variant>
 #include <vector>
+#include "batch_exec_engine.h"
 #include "exec_engine.h"
 #include "exec_node.h"
 #include "function_registry.h"
@@ -80,8 +81,8 @@ TEST(ExecErrorTest, ExecuteAtReturnsRuntimeError) {
   nodes.emplace_back(MakeSimpleAddNode(1, 2));
   nodes.emplace_back(MakeListAddNode({1, 2, 3}, {4, 5}));
 
-  ExecEngine exec_engine;
-  ASSERT_TRUE(exec_engine.BatchCompile(nodes, func_registry).ok());
+  BatchExecEngine exec_engine;
+  ASSERT_TRUE(exec_engine.Compile(nodes, func_registry).ok());
 
   RetType result0;
   Status st0 = exec_engine.ExecuteAt(0, nullptr, &result0);
@@ -101,8 +102,8 @@ TEST(ExecErrorTest, ExecuteAtWithCtxReturnsRuntimeErrorAndClears) {
   std::vector<std::unique_ptr<ExecNode>> nodes;
   nodes.emplace_back(MakeListAddNode({1, 2, 3}, {4, 5}));
 
-  ExecEngine exec_engine;
-  ASSERT_TRUE(exec_engine.BatchCompile(nodes, func_registry).ok());
+  BatchExecEngine exec_engine;
+  ASSERT_TRUE(exec_engine.Compile(nodes, func_registry).ok());
 
   ExecContext exec_ctx(4096);
   RetType result;
@@ -119,8 +120,8 @@ TEST(ExecErrorTest, ExecuteAtOutOfRange) {
   std::vector<std::unique_ptr<ExecNode>> nodes;
   nodes.emplace_back(MakeSimpleAddNode(1, 2));
 
-  ExecEngine exec_engine;
-  ASSERT_TRUE(exec_engine.BatchCompile(nodes, func_registry).ok());
+  BatchExecEngine exec_engine;
+  ASSERT_TRUE(exec_engine.Compile(nodes, func_registry).ok());
 
   RetType result;
   Status st = exec_engine.ExecuteAt(999, nullptr, &result);
@@ -138,8 +139,8 @@ TEST(ExecErrorTest, ExecuteAllPartialFailureCollectsAllErrors) {
   nodes.emplace_back(MakeSimpleAddNode(100, 200));
   nodes.emplace_back(MakeListAddNode({1}, {4, 5, 6}));
 
-  ExecEngine exec_engine;
-  ASSERT_TRUE(exec_engine.BatchCompile(nodes, func_registry).ok());
+  BatchExecEngine exec_engine;
+  ASSERT_TRUE(exec_engine.Compile(nodes, func_registry).ok());
 
   std::vector<RetType> results;
   Status st = exec_engine.ExecuteAll(nullptr, &results);
@@ -169,8 +170,8 @@ TEST(ExecErrorTest, ExecuteAllWithCtxPartialFailure) {
   nodes.emplace_back(MakeListAddNode({1, 2}, {4, 5, 6}));
   nodes.emplace_back(MakeSimpleAddNode(3, 4));
 
-  ExecEngine exec_engine;
-  ASSERT_TRUE(exec_engine.BatchCompile(nodes, func_registry).ok());
+  BatchExecEngine exec_engine;
+  ASSERT_TRUE(exec_engine.Compile(nodes, func_registry).ok());
 
   ExecContext exec_ctx(4096);
   std::vector<RetType> results;
@@ -218,8 +219,8 @@ TEST(ExecErrorTest, BatchCompileAndExecuteAllSuccess) {
   nodes.emplace_back(MakeSimpleAddNode(100, 200));
   nodes.emplace_back(MakeSimpleAddNode(1000, 2000));
 
-  ExecEngine exec_engine;
-  ASSERT_TRUE(exec_engine.BatchCompile(nodes, func_registry).ok());
+  BatchExecEngine exec_engine;
+  ASSERT_TRUE(exec_engine.Compile(nodes, func_registry).ok());
 
   std::vector<RetType> results;
   Status st = exec_engine.ExecuteAll(nullptr, &results);
@@ -239,8 +240,8 @@ TEST(ExecErrorTest, BatchCompileAndExecuteAllWithCtxSuccess) {
   nodes.emplace_back(MakeSimpleAddNode(5, 7));
   nodes.emplace_back(MakeSimpleAddNode(11, 13));
 
-  ExecEngine exec_engine;
-  ASSERT_TRUE(exec_engine.BatchCompile(nodes, func_registry).ok());
+  BatchExecEngine exec_engine;
+  ASSERT_TRUE(exec_engine.Compile(nodes, func_registry).ok());
 
   ExecContext exec_ctx(4096);
   std::vector<RetType> results;

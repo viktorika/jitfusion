@@ -3,7 +3,18 @@
 An execution engine utilizing DSL in combination with jitfusion.
 
 # How to use
-When using it, you need to <span style="color:red">#include "athena.h"</span> and depend on the <span style="color:red">athena target</span>.
+Athena ships two sibling classes, picked by the shape of your DSL code:
+
+* `AthenaExpression` — "one expression, one return value".
+  `#include "athena.h"`, construct `AthenaExpression athena;`,
+  call `athena.Compile(code, registry)` with a single `std::string`.
+* `AthenaPipeline` — "multiple pipeline statements, writing through custom
+  store functions".
+  `#include "athena.h"`, construct `AthenaPipeline athena;`,
+  call `athena.Compile(codes, registry)` with a `std::vector<std::string>`.
+
+Both classes live in `namespace athena`, are declared in the same header
+`athena/athena.h`, and depend on the <span style="color:red">athena target</span>.
 
 ## DSL Rule
 
@@ -30,13 +41,18 @@ Note: Variables modified inside `when` branches must maintain the same type as t
 * 5.You can obtain the input parameter pointer through the entry_arg name, access the ExecContext via exec_ctx and obtain the output parameter pointer through the output name.
 
 ## Execute Funtion
+
+`AthenaExpression` — expression mode:
 ```c++
   // Applicable to simple scenarios, the program will not actually use a custom store function to write data. Instead,
   // the result will be returned, similar to expression scenarios.
   Status Compile(const std::string& code, const std::unique_ptr<FunctionRegistry>& func_registry);
   Status Execute(void* entry_arguments, RetType* result);
   Status Execute(ExecContext& exec_ctx, void* entry_arguments, RetType* result);
+```
 
+`AthenaPipeline` — pipeline mode:
+```c++
   // Applicable to complex scenarios where multiple pipelines are computed simultaneously. Each pipeline writes data
   // using a custom function, and results are not returned. This is similar to feature processing scenarios.
   Status Compile(const std::vector<std::string>& code, const std::unique_ptr<FunctionRegistry>& func_registry);
@@ -44,7 +60,7 @@ Note: Variables modified inside `when` branches must maintain the same type as t
   Status Execute(ExecContext& exec_ctx, void* entry_arguments, void* result);
 ```
 
-The first set of functions returns a value through the last statement and requires that no write operations occur during the process; otherwise, it results in undefined behavior. The second set of functions can accept multiple sets of code, where the statement requires the user to define a custom store function to write data. The function will perform merge and optimization processing on all the code.
+`AthenaExpression` returns a value through the last statement and requires that no write operations occur during the process; otherwise, it results in undefined behavior. `AthenaPipeline` accepts multiple sets of code; each statement requires the user to define a custom store function to write data. The engine performs merge and optimization processing on all the code.
 
 The `Execute` overloads that accept an `ExecContext&` parameter allow you to reuse a pre-allocated ExecContext, avoiding repeated memory allocation overhead. This is useful for high-performance scenarios where the execution engine is called frequently.
 

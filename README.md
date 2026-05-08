@@ -8,7 +8,7 @@ Environment
   * googletest
   * xsimd-13.2.0 (optional)
 
-First, you need to have <span style="color:red">LLVM 19.1.7</span>; other versions will not work. However, if you can only use other versions, you can modify the exec_engine.cc file to adapt it, and it shouldn't require too many changes.
+First, you need to have <span style="color:red">LLVM 19.1.7</span>; other versions will not work. However, if you can only use other versions, you can modify the `src/jit_core.cc` file (where the LLVM ORC integration lives) to adapt it, and it shouldn't require too many changes.
 
 You can use the following command to check your version.
 ```bash
@@ -150,7 +150,7 @@ I considered how many types of nodes are needed to represent a function in the e
 
 
 
-In jitfusion, there are the following data types: u8, u16, u32, u64, i8, i16, i32, i64, float, double, string, u8list, u16list, u32list, u64list, i8list, i16list, i32list, i64list, floatlist, doublelist, stringlist. The type u8 corresponds to uint8_t in C, and so on. The C structures corresponding to all types can be found in the include/type.h file.
+In jitfusion, there are the following data types: u8, u16, u32, u64, i8, i16, i32, i64, f32, f64, string, u8list, u16list, u32list, u64list, i8list, i16list, i32list, i64list, f32list, f64list, stringlist. The type u8 corresponds to uint8_t in C, f32 corresponds to float, f64 corresponds to double, and so on. The C structures corresponding to all types can be found in the include/type.h file.
 
 
 For example, generally speaking, the process of an execution flow graph might look like this.
@@ -202,16 +202,20 @@ The intermediate processes can all be converted into corresponding op nodes, fun
 
 ## Batch compilation
 
-If you have many small expressions that all operate on the same inputs, you can compile them together into a single LLVM module with `BatchCompile`. All functions share the same JIT engine, so they use fewer memory pages and are slightly faster to initialize overall than compiling each expression in its own `ExecEngine`.
+If you have many small expressions that all operate on the same inputs, you can compile them together into a single LLVM module with `BatchExecEngine`. All functions share the same JIT engine, so they use fewer memory pages and are slightly faster to initialize overall than compiling each expression in its own `ExecEngine`.
+
+`BatchExecEngine` is declared in `<jitfusion/batch_exec_engine.h>` and is a sibling of `ExecEngine` — use the plain `ExecEngine` for one expression, `BatchExecEngine` for N >= 1 expressions sharing one JIT.
 
 ```c++
+#include <jitfusion/batch_exec_engine.h>
+
 std::vector<std::unique_ptr<ExecNode>> nodes;
 nodes.emplace_back(MakeExpr1());
 nodes.emplace_back(MakeExpr2());
 nodes.emplace_back(MakeExpr3());
 
-ExecEngine exec_engine;
-auto st = exec_engine.BatchCompile(nodes, func_registry);
+BatchExecEngine exec_engine;
+auto st = exec_engine.Compile(nodes, func_registry);
 
 // Execute a single one by index:
 RetType r0, r1, r2;
@@ -227,7 +231,7 @@ exec_engine.ExecuteAll(entry_args, &results);
 // use the overloads that take a `void*` result pointer instead.
 ```
 
-Each expression may have its own return type; use `GetBatchFunctionReturnType(index)` to introspect.
+Each expression may have its own return type; use `GetReturnType(index)` to introspect, and `GetFunctionCount()` to query how many entries were compiled.
 
 # Optimize
 It is more recommended to use this interface.
@@ -281,7 +285,7 @@ When you reuse the same `ExecContext` across multiple `Execute(ExecContext&, ...
 | Field | Default | Purpose |
 | --- | --- | --- |
 | `exec_ctx_arena_alloc_min_chunk_size` | `4096` | Minimum chunk size for the per-execution arena created when you call an `Execute*` overload that does **not** take an explicit `ExecContext`. Ignored for the `ExecContext&` overloads (the caller owns the arena). |
-| `dump_ir` | `false` | When `true`, the fully optimized LLVM IR text is captured during `Compile` / `BatchCompile` and made available via `GetIRCode()`. Useful for debugging; avoid enabling in production because serializing a large Module to text is expensive. |
+| `dump_ir` | `false` | When `true`, the fully optimized LLVM IR text is captured during `Compile` and made available via `GetIRCode()`. Useful for debugging; avoid enabling in production because serializing a large Module to text is expensive. |
 | `fp_math_mode` | `FPMathMode::kFast` | Floating-point semantics requested from the JIT backend. `kFast` enables FMA fusion and `-ffast-math`-style algebraic rewrites (1.3x - 2x faster on FP-heavy list kernels). Switch to `kStrict` if you need bit-for-bit IEEE-754 reproducibility (finance / risk / regression tests). |
 
 Example:
@@ -297,8 +301,8 @@ ExecEngine exec_engine(opt);
 
 The library is designed around a "compile once, execute from many threads" pattern.
 
-* `Compile()` / `BatchCompile()` are **not** thread-safe. Call them from exactly one thread and finish them before any `Execute*` call.
-* After a successful compile, the `Execute*` / `ExecuteAt*` / `ExecuteAll*` overloads are safe to invoke concurrently from multiple threads on the same `ExecEngine` — as long as each thread supplies its own `ExecContext`.
+* `Compile()` is **not** thread-safe. Call it from exactly one thread and finish it before any `Execute*` call. The same applies to `BatchExecEngine::Compile()`.
+* After a successful compile, the `Execute*` / `ExecuteAt*` / `ExecuteAll*` overloads are safe to invoke concurrently from multiple threads on the same engine instance — as long as each thread supplies its own `ExecContext`.
 * A single `ExecContext` must **never** be shared across threads.
 * The `Execute*` overloads that do not take an explicit `ExecContext` internally construct a fresh one on every call. They remain thread-safe but pay per-call allocation cost; prefer the `ExecContext&` overloads on hot paths.
 

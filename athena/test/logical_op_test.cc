@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "test_helper.h"
 
-using athena::Athena;
+using athena::AthenaExpression;
 using athena::FunctionRegistry;
 using athena::FunctionRegistryFactory;
 using athena::FunctionSignature;
@@ -11,7 +11,7 @@ using test::LoadF32;
 using test::LoadI32;
 
 TEST(LogicalOpTest, ChainedAnd) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile(R"(r = 1 and 2 and 3;)", func_registry).ok());
@@ -21,7 +21,7 @@ TEST(LogicalOpTest, ChainedAnd) {
 }
 
 TEST(LogicalOpTest, ChainedAndShortCircuit) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile(R"(r = 1 and 0 and 3;)", func_registry).ok());
@@ -31,7 +31,7 @@ TEST(LogicalOpTest, ChainedAndShortCircuit) {
 }
 
 TEST(LogicalOpTest, ChainedOrAllFalse) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile(R"(r = 0 or 0 or 0;)", func_registry).ok());
@@ -41,7 +41,7 @@ TEST(LogicalOpTest, ChainedOrAllFalse) {
 }
 
 TEST(LogicalOpTest, ChainedOrShortCircuit) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile(R"(r = 0 or 5 or 0;)", func_registry).ok());
@@ -51,7 +51,7 @@ TEST(LogicalOpTest, ChainedOrShortCircuit) {
 }
 
 TEST(LogicalOpTest, MixedAndOr1) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile(R"(r = (1 and 0) or (1 and 1);)", func_registry).ok());
@@ -61,7 +61,7 @@ TEST(LogicalOpTest, MixedAndOr1) {
 }
 
 TEST(LogicalOpTest, MixedAndOr2) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile(R"(r = (0 or 1) and (0 or 0);)", func_registry).ok());
@@ -71,7 +71,7 @@ TEST(LogicalOpTest, MixedAndOr2) {
 }
 
 TEST(LogicalOpTest, LogicalWithArithmetic) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -89,7 +89,7 @@ TEST(LogicalOpTest, LogicalWithArithmetic) {
 }
 
 TEST(LogicalOpTest, LogicalWithArithmeticFalse) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -107,7 +107,7 @@ TEST(LogicalOpTest, LogicalWithArithmeticFalse) {
 }
 
 TEST(LogicalOpTest, LogicalWithNot) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile(R"(r = not (1 and 0) or 0;)", func_registry).ok());
@@ -117,7 +117,7 @@ TEST(LogicalOpTest, LogicalWithNot) {
 }
 
 TEST(LogicalOpTest, DeepNestedLogical) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile(R"(r = ((1 and 1) or (0 and 1)) and (0 or 1);)", func_registry).ok());
@@ -127,7 +127,7 @@ TEST(LogicalOpTest, DeepNestedLogical) {
 }
 
 TEST(LogicalOpTest, DeepNestedLogicalAllShortCircuit) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile(R"(r = ((0 and 1) or (0 and 1)) and (1 or 0);)", func_registry).ok());
@@ -137,7 +137,7 @@ TEST(LogicalOpTest, DeepNestedLogicalAllShortCircuit) {
 }
 
 TEST(LogicalOpTest, FloatChainedLogical) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile(R"(r = 1.5 and 2.5 and 0.0;)", func_registry).ok());
@@ -147,7 +147,7 @@ TEST(LogicalOpTest, FloatChainedLogical) {
 }
 
 TEST(LogicalOpTest, FloatChainedOr) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile(R"(r = 0.0 or 0.0 or 3.14;)", func_registry).ok());
@@ -157,7 +157,7 @@ TEST(LogicalOpTest, FloatChainedOr) {
 }
 
 TEST(LogicalOpTest, LogicalResultInArithmetic) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32);
@@ -175,7 +175,7 @@ TEST(LogicalOpTest, LogicalResultInArithmetic) {
 }
 
 TEST(LogicalOpTest, LogicalInIfCondition) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -193,7 +193,7 @@ TEST(LogicalOpTest, LogicalInIfCondition) {
 }
 
 TEST(LogicalOpTest, LogicalInIfConditionFalse) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -211,7 +211,7 @@ TEST(LogicalOpTest, LogicalInIfConditionFalse) {
 }
 
 TEST(LogicalOpTest, LogicalInSwitch) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -229,7 +229,7 @@ TEST(LogicalOpTest, LogicalInSwitch) {
 }
 
 TEST(LogicalOpTest, ComplexMultiVarLogical) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32);
@@ -252,7 +252,7 @@ TEST(LogicalOpTest, ComplexMultiVarLogical) {
 }
 
 TEST(LogicalOpTest, ComplexMultiVarLogical2) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32);
@@ -275,7 +275,7 @@ TEST(LogicalOpTest, ComplexMultiVarLogical2) {
 }
 
 TEST(LogicalOpTest, LongChainComparison) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32);
@@ -295,7 +295,7 @@ TEST(LogicalOpTest, LongChainComparison) {
 }
 
 TEST(LogicalOpTest, LongChainComparisonBreak) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32);
@@ -315,7 +315,7 @@ TEST(LogicalOpTest, LongChainComparisonBreak) {
 }
 
 TEST(LogicalOpTest, LongChainOr) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32);
@@ -335,7 +335,7 @@ TEST(LogicalOpTest, LongChainOr) {
 }
 
 TEST(LogicalOpTest, LongChainOrAllFalse) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32);
@@ -355,7 +355,7 @@ TEST(LogicalOpTest, LongChainOrAllFalse) {
 }
 
 TEST(LogicalOpTest, LogicalWithFunctionCalls) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -373,7 +373,7 @@ TEST(LogicalOpTest, LogicalWithFunctionCalls) {
 }
 
 TEST(LogicalOpTest, LogicalInSwitchMultiConditions) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -396,7 +396,7 @@ TEST(LogicalOpTest, LogicalInSwitchMultiConditions) {
 }
 
 TEST(LogicalOpTest, StringAndReject) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto st = athena.Compile(R"(r = "hello" and "world";)", func_registry);
@@ -405,7 +405,7 @@ TEST(LogicalOpTest, StringAndReject) {
 }
 
 TEST(LogicalOpTest, StringOrReject) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto st = athena.Compile(R"(r = "hello" or "world";)", func_registry);

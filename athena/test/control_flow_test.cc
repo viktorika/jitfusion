@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "test_helper.h"
 
-using athena::Athena;
+using athena::AthenaExpression;
 using athena::FunctionRegistry;
 using athena::FunctionRegistryFactory;
 using athena::FunctionSignature;
@@ -10,7 +10,7 @@ using athena::ValueType;
 using test::LoadF32;
 
 TEST(SwitchTest, Test1) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -28,7 +28,7 @@ TEST(SwitchTest, Test1) {
 }
 
 TEST(SwitchTest, Test2) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -46,7 +46,7 @@ TEST(SwitchTest, Test2) {
 }
 
 TEST(SwitchTest, Test3) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -67,7 +67,7 @@ TEST(SwitchTest, Test3) {
 }
 
 TEST(SwitchTest, Test4) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -80,7 +80,7 @@ TEST(SwitchTest, Test4) {
 }
 
 TEST(NestedIfTest, Test1) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -98,7 +98,7 @@ TEST(NestedIfTest, Test1) {
 }
 
 TEST(NestedIfTest, Test2) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -116,7 +116,7 @@ TEST(NestedIfTest, Test2) {
 }
 
 TEST(NestedIfTest, Test3) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -135,7 +135,7 @@ TEST(NestedIfTest, Test3) {
 }
 
 TEST(NestedIfTest, Test4) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -153,7 +153,7 @@ TEST(NestedIfTest, Test4) {
 }
 
 TEST(NestedSwitchTest, Test1) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -171,7 +171,7 @@ TEST(NestedSwitchTest, Test1) {
 }
 
 TEST(NestedSwitchTest, Test2) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -189,7 +189,7 @@ TEST(NestedSwitchTest, Test2) {
 }
 
 TEST(NestedSwitchTest, Test3) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);

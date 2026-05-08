@@ -30,18 +30,18 @@
 
 namespace {
 
-using ::jitfusion::bench::CompileOrDie;
-using ::jitfusion::bench::MakeDeepNestedIf;
-using ::jitfusion::bench::MakeLinearAddChain;
-using ::jitfusion::bench::MakeListSumExpr;
-using ::jitfusion::bench::MakeManyAbsCalls;
-using ::jitfusion::bench::MakeRegistry;
+using ::jitfusion::BatchExecEngine;
 using ::jitfusion::BinaryOPNode;
 using ::jitfusion::BinaryOPType;
 using ::jitfusion::ConstantValueNode;
 using ::jitfusion::ExecEngine;
 using ::jitfusion::ExecEngineOption;
 using ::jitfusion::ExecNode;
+using ::jitfusion::bench::MakeDeepNestedIf;
+using ::jitfusion::bench::MakeLinearAddChain;
+using ::jitfusion::bench::MakeListSumExpr;
+using ::jitfusion::bench::MakeManyAbsCalls;
+using ::jitfusion::bench::MakeRegistry;
 
 // =============================================================================
 // A. Compile
@@ -139,8 +139,8 @@ void BM_BatchCompile(benchmark::State& state) {
     for (int i = 0; i < n; ++i) {
       nodes.emplace_back(MakeLinearAddChain(8));
     }
-    ExecEngine engine;
-    auto st = engine.BatchCompile(nodes, reg);
+    BatchExecEngine engine;
+    auto st = engine.Compile(nodes, reg);
     benchmark::DoNotOptimize(st);
     if (!st.ok()) {
       state.SkipWithError("batch compile failed");

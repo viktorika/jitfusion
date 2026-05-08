@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "test_helper.h"
 
-using athena::Athena;
+using athena::AthenaExpression;
 using athena::FunctionRegistry;
 using athena::FunctionRegistryFactory;
 using athena::FunctionSignature;
@@ -12,7 +12,7 @@ using test::LoadI32List;
 using test::LoadStringList;
 
 TEST(ListFunctionTest, Test1) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32List);
@@ -31,7 +31,7 @@ TEST(ListFunctionTest, Test1) {
 }
 
 TEST(ListFunctionTest, Test2) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32List);
@@ -50,7 +50,7 @@ TEST(ListFunctionTest, Test2) {
 }
 
 TEST(ListFunctionTest, Test3) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32List);
@@ -69,7 +69,7 @@ TEST(ListFunctionTest, Test3) {
 }
 
 TEST(ListFunctionTest, Test4) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32List);
@@ -87,7 +87,7 @@ TEST(ListFunctionTest, Test4) {
 }
 
 TEST(ListFunctionTest, Test5) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kStringList);
@@ -106,7 +106,7 @@ TEST(ListFunctionTest, Test5) {
 }
 
 TEST(ListFunctionTest, Test6) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kStringList);
@@ -124,7 +124,7 @@ TEST(ListFunctionTest, Test6) {
 }
 
 TEST(ListFunctionTest, Test7) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF64List);
@@ -142,7 +142,7 @@ TEST(ListFunctionTest, Test7) {
 }
 
 TEST(ListFunctionTest, Test8) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF64List);

@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "test_helper.h"
 
-using athena::Athena;
+using athena::AthenaPipeline;
 using athena::FunctionRegistry;
 using athena::FunctionRegistryFactory;
 using athena::FunctionSignature;
@@ -39,7 +39,7 @@ float CountedTransformF32(void* entry_arguments, float a) {
 }  // namespace
 
 TEST(CSETest, SamePipelineRefNodeReuse) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -100,7 +100,7 @@ TEST(CSETest, SamePipelineRefNodeReuse) {
 }
 
 TEST(CSETest, MultiplePipelinesLoadMerge) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -142,7 +142,7 @@ TEST(CSETest, MultiplePipelinesLoadMerge) {
 }
 
 TEST(CSETest, ThreePipelinesLoadMerge) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -185,7 +185,7 @@ TEST(CSETest, ThreePipelinesLoadMerge) {
 }
 
 TEST(CSETest, ReadOnlyComputeFunctionMerge) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -232,7 +232,7 @@ TEST(CSETest, ReadOnlyComputeFunctionMerge) {
 }
 
 TEST(CSETest, DifferentArgsNoMerge) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -270,7 +270,7 @@ TEST(CSETest, DifferentArgsNoMerge) {
 }
 
 TEST(CSETest, ChainedReadOnlyFunctionMerge) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -314,7 +314,7 @@ TEST(CSETest, ChainedReadOnlyFunctionMerge) {
 }
 
 TEST(CSETest, PartialMerge) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {
@@ -370,7 +370,7 @@ TEST(CSETest, PartialMerge) {
 }
 
 TEST(CSETest, ComplexPipelineCSE) {
-  Athena athena;
+  AthenaPipeline athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   {

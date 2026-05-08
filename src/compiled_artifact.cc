@@ -150,12 +150,11 @@ class ArtifactReader {
   std::size_t pos_{};
 };
 
-// Pin the numeric values of ArtifactFPMathMode / ArtifactMode to the
-// on-wire encoding. If someone later reorders these enums, the
-// static_asserts catch it at compile time instead of at Load time on
-// a user's machine.
-static_assert(static_cast<std::uint8_t>(ArtifactFPMathMode::kStrict) == 0, "FPMathMode::kStrict must serialize as 0");
-static_assert(static_cast<std::uint8_t>(ArtifactFPMathMode::kFast) == 1, "FPMathMode::kFast must serialize as 1");
+// Pin the numeric values of FPMathMode / ArtifactMode to the on-wire
+// encoding. If someone later reorders these enums, the static_asserts
+// catch it at compile time instead of at Load time on a user's machine.
+static_assert(static_cast<std::uint8_t>(FPMathMode::kStrict) == 0, "FPMathMode::kStrict must serialize as 0");
+static_assert(static_cast<std::uint8_t>(FPMathMode::kFast) == 1, "FPMathMode::kFast must serialize as 1");
 static_assert(static_cast<std::uint8_t>(ArtifactMode::kSingle) == 0, "ArtifactMode::kSingle must serialize as 0");
 static_assert(static_cast<std::uint8_t>(ArtifactMode::kBatch) == 1, "ArtifactMode::kBatch must serialize as 1");
 
@@ -185,7 +184,6 @@ Status SerializeArtifact(const ArtifactHeader& header, std::string_view object_b
   AppendLenPrefixedStr(*out, header.cpu_name);
   AppendU8(*out, static_cast<std::uint8_t>(header.mode));
   AppendU8(*out, static_cast<std::uint8_t>(header.fp_math_mode));
-  AppendU8(*out, static_cast<std::uint8_t>(header.top_ret_type));
 
   const auto num_entries = static_cast<std::uint32_t>(header.per_entry_ret_types.size());
   AppendU32LE(*out, num_entries);
@@ -242,15 +240,11 @@ Status DeserializeArtifact(std::string_view blob, ArtifactHeader* out_header, st
 
   std::uint8_t fp_byte = 0;
   JF_RETURN_NOT_OK(r.ReadU8(&fp_byte));
-  if (fp_byte != static_cast<std::uint8_t>(ArtifactFPMathMode::kStrict) &&
-      fp_byte != static_cast<std::uint8_t>(ArtifactFPMathMode::kFast)) {
+  if (fp_byte != static_cast<std::uint8_t>(FPMathMode::kStrict) &&
+      fp_byte != static_cast<std::uint8_t>(FPMathMode::kFast)) {
     return Status::InvalidArgument("compiled artifact: unknown fp_math_mode byte ", static_cast<int>(fp_byte));
   }
-  out_header->fp_math_mode = static_cast<ArtifactFPMathMode>(fp_byte);
-
-  std::uint8_t top_ret_type_byte = 0;
-  JF_RETURN_NOT_OK(r.ReadU8(&top_ret_type_byte));
-  out_header->top_ret_type = static_cast<ValueType>(top_ret_type_byte);
+  out_header->fp_math_mode = static_cast<FPMathMode>(fp_byte);
 
   std::uint32_t num_entries = 0;
   JF_RETURN_NOT_OK(r.ReadU32LE(&num_entries));
@@ -265,14 +259,6 @@ Status DeserializeArtifact(std::string_view blob, ArtifactHeader* out_header, st
     std::uint8_t rt_byte = 0;
     JF_RETURN_NOT_OK(r.ReadU8(&rt_byte));
     out_header->per_entry_ret_types[i] = static_cast<ValueType>(rt_byte);
-  }
-  // Cross-check: the top-level ret_type duplicates per_entry[0] in
-  // single mode and exists purely as a defense-in-depth marker.
-  // A mismatch indicates a corrupted or hand-tampered blob.
-  if (out_header->mode == ArtifactMode::kSingle && out_header->top_ret_type != out_header->per_entry_ret_types[0]) {
-    return Status::InvalidArgument(
-        "compiled artifact: inconsistent ret_type (top=", static_cast<int>(out_header->top_ret_type),
-        ", per-entry=", static_cast<int>(out_header->per_entry_ret_types[0]), ")");
   }
 
   std::uint64_t obj_size = 0;

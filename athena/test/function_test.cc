@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "test_helper.h"
 
-using athena::Athena;
+using athena::AthenaExpression;
 using athena::FunctionRegistry;
 using athena::FunctionRegistryFactory;
 using athena::FunctionSignature;
@@ -12,7 +12,7 @@ using test::LoadI32;
 using test::LoadU32;
 
 TEST(FunctionTest, Test1) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -25,7 +25,7 @@ TEST(FunctionTest, Test1) {
 }
 
 TEST(FunctionTest, Test2) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -38,7 +38,7 @@ TEST(FunctionTest, Test2) {
 }
 
 TEST(FunctionTest, Test3) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -51,7 +51,7 @@ TEST(FunctionTest, Test3) {
 }
 
 TEST(FunctionTest, Test4) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -64,7 +64,7 @@ TEST(FunctionTest, Test4) {
 }
 
 TEST(FunctionTest, Test5) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -77,7 +77,7 @@ TEST(FunctionTest, Test5) {
 }
 
 TEST(FunctionTest, Test6) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -90,7 +90,7 @@ TEST(FunctionTest, Test6) {
 }
 
 TEST(FunctionTest, Test7) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -103,7 +103,7 @@ TEST(FunctionTest, Test7) {
 }
 
 TEST(FunctionTest, Test8) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -116,7 +116,7 @@ TEST(FunctionTest, Test8) {
 }
 
 TEST(FunctionTest, Test9) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -129,7 +129,7 @@ TEST(FunctionTest, Test9) {
 }
 
 TEST(FunctionTest, Test10) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -142,7 +142,7 @@ TEST(FunctionTest, Test10) {
 }
 
 TEST(FunctionTest, Test11) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -155,7 +155,7 @@ TEST(FunctionTest, Test11) {
 }
 
 TEST(FunctionTest, Test12) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -168,7 +168,7 @@ TEST(FunctionTest, Test12) {
 }
 
 TEST(FunctionTest, Test13) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
@@ -186,7 +186,7 @@ TEST(FunctionTest, Test13) {
 }
 
 TEST(FunctionTest, Test14) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -199,7 +199,7 @@ TEST(FunctionTest, Test14) {
 }
 
 TEST(FunctionTest, Test15) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
@@ -217,7 +217,7 @@ TEST(FunctionTest, Test15) {
 }
 
 TEST(FunctionTest, Test16) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
@@ -235,7 +235,7 @@ TEST(FunctionTest, Test16) {
 }
 
 TEST(FunctionTest, Test17) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -248,7 +248,7 @@ TEST(FunctionTest, Test17) {
 }
 
 TEST(FunctionTest, Test18) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -265,7 +265,7 @@ TEST(FunctionTest, Test18) {
 }
 
 TEST(FunctionTest, Test19) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -282,7 +282,7 @@ TEST(FunctionTest, Test19) {
 }
 
 TEST(FunctionTest, Test20) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -300,7 +300,7 @@ TEST(FunctionTest, Test20) {
 }
 
 TEST(FunctionTest, Test21) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -313,7 +313,7 @@ TEST(FunctionTest, Test21) {
 }
 
 TEST(FunctionTest, Test22) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -331,7 +331,7 @@ TEST(FunctionTest, Test22) {
 }
 
 TEST(FunctionTest, Test23) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kI32);
@@ -349,7 +349,7 @@ TEST(FunctionTest, Test23) {
 }
 
 TEST(FunctionTest, Test24) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -362,7 +362,7 @@ TEST(FunctionTest, Test24) {
 }
 
 TEST(FunctionTest, Test25) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -380,7 +380,7 @@ TEST(FunctionTest, Test25) {
 }
 
 TEST(FunctionTest, Test26) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);

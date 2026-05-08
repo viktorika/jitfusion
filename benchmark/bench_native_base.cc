@@ -15,14 +15,14 @@
 
 namespace {
 
+using ::jitfusion::BatchExecEngine;
+using ::jitfusion::ExecContext;
+using ::jitfusion::ExecNode;
+using ::jitfusion::RetType;
 using ::jitfusion::bench::CompileOrDie;
 using ::jitfusion::bench::MakeLinearAddChain;
 using ::jitfusion::bench::MakeListUnaryCall;
 using ::jitfusion::bench::MakeRegistry;
-using ::jitfusion::ExecContext;
-using ::jitfusion::ExecEngine;
-using ::jitfusion::ExecNode;
-using ::jitfusion::RetType;
 
 // =============================================================================
 // D. ExecContext reuse — arena allocator cost
@@ -119,8 +119,8 @@ void BM_BatchExecute_All(benchmark::State& state) {
   for (int i = 0; i < n; ++i) {
     nodes.emplace_back(MakeLinearAddChain(8));
   }
-  ExecEngine engine;
-  auto cs = engine.BatchCompile(nodes, reg);
+  BatchExecEngine engine;
+  auto cs = engine.Compile(nodes, reg);
   if (!cs.ok()) {
     state.SkipWithError("batch compile failed");
     return;
@@ -147,8 +147,8 @@ void BM_BatchExecute_AtLoop(benchmark::State& state) {
   for (int i = 0; i < n; ++i) {
     nodes.emplace_back(MakeLinearAddChain(8));
   }
-  ExecEngine engine;
-  auto cs = engine.BatchCompile(nodes, reg);
+  BatchExecEngine engine;
+  auto cs = engine.Compile(nodes, reg);
   if (!cs.ok()) {
     state.SkipWithError("batch compile failed");
     return;

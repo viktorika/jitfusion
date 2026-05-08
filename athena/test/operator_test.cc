@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "test_helper.h"
 
-using athena::Athena;
+using athena::AthenaExpression;
 using athena::FunctionRegistry;
 using athena::FunctionRegistryFactory;
 using athena::FunctionSignature;
@@ -11,7 +11,7 @@ using test::LoadF32;
 using test::LoadU32;
 
 TEST(UnaryOperatorTest, Test1) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile(R"(r = -42;)", func_registry).ok());
@@ -21,7 +21,7 @@ TEST(UnaryOperatorTest, Test1) {
 }
 
 TEST(UnaryOperatorTest, Test2) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile(R"(r = ~42;)", func_registry).ok());
@@ -31,7 +31,7 @@ TEST(UnaryOperatorTest, Test2) {
 }
 
 TEST(UnaryOperatorTest, Test3) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile(R"(r = not 99;)", func_registry).ok());
@@ -41,7 +41,7 @@ TEST(UnaryOperatorTest, Test3) {
 }
 
 TEST(UnaryOperatorTest, Test4) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile(R"(r = !0;)", func_registry).ok());
@@ -51,7 +51,7 @@ TEST(UnaryOperatorTest, Test4) {
 }
 
 TEST(BinaryOperatorTest, Test1) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile(R"(r = 0 and 1;)", func_registry).ok());
@@ -61,7 +61,7 @@ TEST(BinaryOperatorTest, Test1) {
 }
 
 TEST(BinaryOperatorTest, Test2) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ASSERT_TRUE(athena.Compile(R"(r = 0 || 1;)", func_registry).ok());
@@ -71,7 +71,7 @@ TEST(BinaryOperatorTest, Test2) {
 }
 
 TEST(BinaryOperatorTest, Test3) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
@@ -89,7 +89,7 @@ TEST(BinaryOperatorTest, Test3) {
 }
 
 TEST(BinaryOperatorTest, Test4) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -107,7 +107,7 @@ TEST(BinaryOperatorTest, Test4) {
 }
 
 TEST(BinaryOperatorTest, Test5) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -125,7 +125,7 @@ TEST(BinaryOperatorTest, Test5) {
 }
 
 TEST(BinaryOperatorTest, Test6) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kF32);
@@ -143,7 +143,7 @@ TEST(BinaryOperatorTest, Test6) {
 }
 
 TEST(BinaryOperatorTest, Test7) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
@@ -161,7 +161,7 @@ TEST(BinaryOperatorTest, Test7) {
 }
 
 TEST(BinaryOperatorTest, Test8) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
@@ -179,7 +179,7 @@ TEST(BinaryOperatorTest, Test8) {
 }
 
 TEST(BinaryOperatorTest, Test9) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
@@ -197,7 +197,7 @@ TEST(BinaryOperatorTest, Test9) {
 }
 
 TEST(BinaryOperatorTest, Test10) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   FunctionSignature sign("load", {ValueType::kPtr, ValueType::kI32}, ValueType::kU32);
@@ -216,7 +216,7 @@ TEST(BinaryOperatorTest, Test10) {
 }
 
 TEST(BinaryOperatorTest, Test11) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -229,7 +229,7 @@ TEST(BinaryOperatorTest, Test11) {
 }
 
 TEST(BinaryOperatorTest, Test12) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -242,7 +242,7 @@ TEST(BinaryOperatorTest, Test12) {
 }
 
 TEST(BinaryOperatorTest, Test13) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -255,7 +255,7 @@ TEST(BinaryOperatorTest, Test13) {
 }
 
 TEST(BinaryOperatorTest, Test14) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -268,7 +268,7 @@ TEST(BinaryOperatorTest, Test14) {
 }
 
 TEST(BinaryOperatorTest, Test15) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -281,7 +281,7 @@ TEST(BinaryOperatorTest, Test15) {
 }
 
 TEST(BinaryOperatorTest, Test16) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -294,7 +294,7 @@ TEST(BinaryOperatorTest, Test16) {
 }
 
 TEST(BinaryOperatorTest, Test17) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
@@ -307,7 +307,7 @@ TEST(BinaryOperatorTest, Test17) {
 }
 
 TEST(BinaryOperatorTest, Test18) {
-  Athena athena;
+  AthenaExpression athena;
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   std::string code = R"(
