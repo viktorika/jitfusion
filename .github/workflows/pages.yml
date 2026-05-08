@@ -80,18 +80,9 @@ jobs:
       # auto-served, so we have to graft its `dev/` tree onto `_site/`
       # here. Missing branch is tolerated (fresh forks without any
       # benchmark run yet).
-      #
-      # NOTE on the `sudo chown` below: `actions/jekyll-build-pages` is
-      # a Docker action that runs as root inside a container, so
-      # `./_site` is created owned by root. This step runs on the host
-      # as the unprivileged `runner` user, which cannot otherwise write
-      # into `_site/`. Fix up ownership once before touching it; the
-      # upload-pages-artifact step that follows doesn't care about
-      # ownership, only about contents.
       - name: Merge benchmark results from gh-pages
         run: |
           set -euo pipefail
-          sudo chown -R "$(id -u):$(id -g)" ./_site
           if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
             tmp="$(mktemp -d)"
             git clone --depth 1 --branch gh-pages \
