@@ -1,15 +1,17 @@
+/*
+ * @Author: victorika
+ * @Date: 2026-05-09 14:40:12
+ * @Last Modified by: victorika
+ * @Last Modified time: 2026-05-09 14:43:06
+ */
 
 #include "pipeline_grouper.h"
 #include "ast_builder.h"
 #include "gtest/gtest.h"
 #include "test_helper.h"
 
-using athena::FunctionRegistry;
-using athena::FunctionRegistryFactory;
-using athena::FunctionSignature;
 using athena::PipelineGrouper;
 using athena::ProgramAstBuilder;
-using athena::ValueType;
 using jitfusion::ExecNode;
 using jitfusion::NoOPNode;
 
