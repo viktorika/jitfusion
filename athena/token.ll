@@ -104,6 +104,14 @@ blank [ \t\r]
 {blank}+   loc.step ();
 \n+        loc.lines (yyleng); loc.step ();
 
+"//"[^\n]*                    loc.step ();
+"/*"([^*]|\*+[^*/])*\*+"/"   {
+                                for (int i = 0; i < yyleng; ++i) {
+                                  if (yytext[i] == '\n') loc.lines(1);
+                                }
+                                loc.step();
+                              }
+
 "when"        return  athena::Parser::make_WHEN                        (loc);
 "if"          return  athena::Parser::make_IF                          (loc);
 "elif"        return  athena::Parser::make_ELIF                        (loc);
