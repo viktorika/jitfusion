@@ -40,6 +40,24 @@ Note: Variables modified inside `when` branches must maintain the same type as t
 
 * 5.You can obtain the input parameter pointer through the entry_arg name, access the ExecContext via exec_ctx and obtain the output parameter pointer through the output name.
 
+* 6.Comments are supported in two C/C++ styles:
+  * Line comments start with `//` and extend to the end of the line.
+  * Block comments are wrapped in `/* ... */` and may span multiple lines.
+
+  Comments are stripped during lexing and have no effect on AST, type checking
+  or codegen. They are also ignored inside string literals (i.e., `//` and
+  `/*` appearing inside `"..."` / `'...'` are treated as plain characters).
+
+  Example:
+
+  ```
+  // a leading comment
+  a = 1 /* inline */ + 2;   // trailing comment
+  /* a multi-
+     line comment */
+  r = a;
+  ```
+
 ## Execute Funtion
 
 `AthenaExpression` — expression mode:
