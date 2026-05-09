@@ -1,8 +1,8 @@
 /*
  * @Author: victorika
  * @Date: 2026-05-09 14:39:08
- * @Last Modified by:   victorika
- * @Last Modified time: 2026-05-09 14:39:08
+ * @Last Modified by: victorika
+ * @Last Modified time: 2026-05-09 14:45:12
  */
 #include <athena.h>
 #include "gtest/gtest.h"
@@ -23,7 +23,6 @@ std::unique_ptr<FunctionRegistry> MakeRegistry() {
 
 }  // namespace
 
-// 单行注释 // 在表达式末尾
 TEST(CommentTest, LineCommentAtEol) {
   AthenaExpression athena;
   auto reg = MakeRegistry();
@@ -33,7 +32,6 @@ TEST(CommentTest, LineCommentAtEol) {
   EXPECT_EQ(std::get<int32_t>(ret), 42);
 }
 
-// 单行注释独占一行
 TEST(CommentTest, LineCommentWholeLine) {
   AthenaExpression athena;
   auto reg = MakeRegistry();
@@ -48,7 +46,6 @@ TEST(CommentTest, LineCommentWholeLine) {
   EXPECT_EQ(std::get<int32_t>(ret), 3);
 }
 
-// 块注释在表达式中间
 TEST(CommentTest, BlockCommentInline) {
   AthenaExpression athena;
   auto reg = MakeRegistry();
@@ -58,7 +55,6 @@ TEST(CommentTest, BlockCommentInline) {
   EXPECT_EQ(std::get<int32_t>(ret), 3);
 }
 
-// 跨行块注释
 TEST(CommentTest, BlockCommentMultiline) {
   AthenaExpression athena;
   auto reg = MakeRegistry();
@@ -74,7 +70,6 @@ TEST(CommentTest, BlockCommentMultiline) {
   EXPECT_EQ(std::get<int32_t>(ret), 20);
 }
 
-// 块注释中包含 *、/ 不会提前结束
 TEST(CommentTest, BlockCommentWithStars) {
   AthenaExpression athena;
   auto reg = MakeRegistry();
@@ -89,7 +84,6 @@ TEST(CommentTest, BlockCommentWithStars) {
   EXPECT_EQ(std::get<int32_t>(ret), 7);
 }
 
-// 行注释里出现 /* 不会启动块注释
 TEST(CommentTest, LineCommentSwallowsBlockOpen) {
   AthenaExpression athena;
   auto reg = MakeRegistry();
@@ -103,7 +97,6 @@ TEST(CommentTest, LineCommentSwallowsBlockOpen) {
   EXPECT_EQ(std::get<int32_t>(ret), 5);
 }
 
-// 字符串字面量里的 //、/* 不应被当成注释
 TEST(CommentTest, StringLiteralIsNotComment) {
   AthenaExpression athena;
   auto reg = MakeRegistry();
@@ -113,7 +106,6 @@ TEST(CommentTest, StringLiteralIsNotComment) {
   EXPECT_EQ(std::get<std::string>(ret), "a // not comment /* still */ b");
 }
 
-// 多语句、混合注释
 TEST(CommentTest, MixedCommentsBetweenStatements) {
   AthenaExpression athena;
   auto reg = MakeRegistry();
@@ -129,7 +121,6 @@ TEST(CommentTest, MixedCommentsBetweenStatements) {
   EXPECT_EQ(std::get<int32_t>(ret), 3);
 }
 
-// 空块注释 /**/
 TEST(CommentTest, EmptyBlockComment) {
   AthenaExpression athena;
   auto reg = MakeRegistry();
@@ -139,7 +130,6 @@ TEST(CommentTest, EmptyBlockComment) {
   EXPECT_EQ(std::get<int32_t>(ret), 3);
 }
 
-// 仅含注释的代码应当报错（语法上仍需要一个赋值结果）
 TEST(CommentTest, OnlyCommentFails) {
   AthenaExpression athena;
   auto reg = MakeRegistry();
