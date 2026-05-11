@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2026-05-06 11:15:00
  * @Last Modified by: victorika
- * @Last Modified time: 2026-05-11 14:55:04
+ * @Last Modified time: 2026-05-11 16:30:32
  */
 #include <algorithm>
 #include <cstdint>
@@ -91,22 +91,32 @@ constexpr const char *kLookupStringName = "__LookupTableString";
 
 bool IsStringListType(ValueType v) { return v == ValueType::kStringList; }
 
-// Lowering for the user-facing ListLookupIndex(a, b, ctx). Emits two
-// readonly C calls - one to build the hash table over `b`, one to probe
-// the table with `a`. LLVM CSE merges the BuildLookupTable_* call across
-// multiple ListLookupIndex sites that share the same `b`.
+// Lowering for the user-facing ListLookupIndex(a, b). The user-visible
+// signature does NOT include exec_ctx — the helper functions it lowers to
+// are registered via RegisterReadOnlyCFuncWithExecCtx, meaning their C
+// implementations consume a trailing void* ctx but the registry view of
+// the signature does not advertise it. We pull ctx from entry_function's
+// arg(1) ourselves and append it to each call site, so the emitted LLVM
+// `Function` types still match the C ABI (N+1 args, last one ptr).
+//
+// Two readonly C calls are emitted: one to build the hash table over `b`,
+// one to probe the table with `a`. LLVM CSE merges the BuildLookupTable_*
+// call across multiple ListLookupIndex sites that share the same `b`.
 llvm::Value *CodegenListLookupIndex(const FunctionSignature &sign, const std::vector<llvm::Type *> &arg_types,
                                     const std::vector<llvm::Value *> &args, IRCodeGenContext &ctx) {
-  // sign.GetParamTypes() = {KList, KList, kPtr}; args[0]=a, args[1]=b, args[2]=exec_ctx
+  // sign.GetParamTypes() = {KList, KList}; args[0]=a, args[1]=b.
   const auto &param_types = sign.GetParamTypes();
   const ValueType list_vt = param_types[0];
   const bool is_string = IsStringListType(list_vt);
   const char *build_name = is_string ? kBuildStringName : kBuildIntName;
   const char *lookup_name = is_string ? kLookupStringName : kLookupIntName;
 
-  // Each helper has its own *registered* signature (so MappingToJIT and
-  // SetCFuncAttr can find them). Mirror those signatures here when
-  // asking the module for the function declaration.
+  // Mirror the *legacy* ctx-bearing signatures of the helpers (the names
+  // MappingToJIT actually publishes for the underlying C symbols, and the
+  // ones FunctionNode codegen would emit for direct user calls). Using the
+  // ctx-bearing form here means a single LLVM Function declaration is
+  // shared between this sugar's emit and any future direct calls of
+  // BuildLookupTable/LookupTable, letting GVN/CSE merge across both.
   FunctionSignature build_sign(build_name, {list_vt, ValueType::kPtr}, ValueType::kPtr);
   FunctionSignature lookup_sign(lookup_name, {list_vt, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List);
 
@@ -114,15 +124,20 @@ llvm::Value *CodegenListLookupIndex(const FunctionSignature &sign, const std::ve
   llvm::Type *list_ty = arg_types[0];  // matches args[0] / args[1] (KList struct value)
   llvm::Type *u32list_ty = ctx.complex_type.u32list_type;
 
-  // Build call: ptr (KList, ptr)
+  llvm::Value *exec_ctx = ctx.entry_function->getArg(1);
+
+  // Build call: ptr (KList, ptr)  — the ptr at the end is the auto-injected
+  // exec_ctx; the helper's user-visible signature is just (KList).
   auto *build_fty = llvm::FunctionType::get(ptr_ty, {list_ty, ptr_ty}, false);
   llvm::FunctionCallee build_callee = ctx.module.getOrInsertFunction(build_sign.ToString(), build_fty);
-  llvm::Value *table_ptr = ctx.builder.CreateCall(build_callee, {args[1], args[2]}, "call_BuildLookupTable");
+  llvm::Value *table_ptr = ctx.builder.CreateCall(build_callee, {args[1], exec_ctx}, "call_BuildLookupTable");
 
-  // Lookup call: U32List (KList, ptr, ptr)
+  // Lookup call: U32List (KList, ptr, ptr)  — same trick: trailing ptr is
+  // exec_ctx, the user-visible signature is just (KList, ptr) where the
+  // first ptr is the table handle returned above.
   auto *lookup_fty = llvm::FunctionType::get(u32list_ty, {list_ty, ptr_ty, ptr_ty}, false);
   llvm::FunctionCallee lookup_callee = ctx.module.getOrInsertFunction(lookup_sign.ToString(), lookup_fty);
-  llvm::Value *result = ctx.builder.CreateCall(lookup_callee, {args[0], table_ptr, args[2]}, "call_LookupTable");
+  llvm::Value *result = ctx.builder.CreateCall(lookup_callee, {args[0], table_ptr, exec_ctx}, "call_LookupTable");
   return result;
 }
 
@@ -269,89 +284,88 @@ U32ListStruct Bucketize(ListType values, ListType boundaries, void *exec_context
 }
 
 Status InitListLookupIndexFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kBuildIntName, {ValueType::kU8List, ValueType::kPtr}, ValueType::kPtr),
-      reinterpret_cast<void *>(BuildLookupTableInt<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kLookupIntName, {ValueType::kU8List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature(kBuildIntName, {ValueType::kU8List}, ValueType::kPtr),
+                                            reinterpret_cast<void *>(BuildLookupTableInt<U8ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature(kLookupIntName, {ValueType::kU8List, ValueType::kPtr}, ValueType::kU32List),
       reinterpret_cast<void *>(LookupTableInt<U8ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kBuildIntName, {ValueType::kI8List, ValueType::kPtr}, ValueType::kPtr),
-      reinterpret_cast<void *>(BuildLookupTableInt<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kLookupIntName, {ValueType::kI8List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature(kBuildIntName, {ValueType::kI8List}, ValueType::kPtr),
+                                            reinterpret_cast<void *>(BuildLookupTableInt<I8ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature(kLookupIntName, {ValueType::kI8List, ValueType::kPtr}, ValueType::kU32List),
       reinterpret_cast<void *>(LookupTableInt<I8ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kBuildIntName, {ValueType::kU16List, ValueType::kPtr}, ValueType::kPtr),
-      reinterpret_cast<void *>(BuildLookupTableInt<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kLookupIntName, {ValueType::kU16List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature(kBuildIntName, {ValueType::kU16List}, ValueType::kPtr),
+                                            reinterpret_cast<void *>(BuildLookupTableInt<U16ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature(kLookupIntName, {ValueType::kU16List, ValueType::kPtr}, ValueType::kU32List),
       reinterpret_cast<void *>(LookupTableInt<U16ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kBuildIntName, {ValueType::kI16List, ValueType::kPtr}, ValueType::kPtr),
-      reinterpret_cast<void *>(BuildLookupTableInt<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kLookupIntName, {ValueType::kI16List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature(kBuildIntName, {ValueType::kI16List}, ValueType::kPtr),
+                                            reinterpret_cast<void *>(BuildLookupTableInt<I16ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature(kLookupIntName, {ValueType::kI16List, ValueType::kPtr}, ValueType::kU32List),
       reinterpret_cast<void *>(LookupTableInt<I16ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kBuildIntName, {ValueType::kU32List, ValueType::kPtr}, ValueType::kPtr),
-      reinterpret_cast<void *>(BuildLookupTableInt<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kLookupIntName, {ValueType::kU32List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature(kBuildIntName, {ValueType::kU32List}, ValueType::kPtr),
+                                            reinterpret_cast<void *>(BuildLookupTableInt<U32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature(kLookupIntName, {ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
       reinterpret_cast<void *>(LookupTableInt<U32ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kBuildIntName, {ValueType::kI32List, ValueType::kPtr}, ValueType::kPtr),
-      reinterpret_cast<void *>(BuildLookupTableInt<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kLookupIntName, {ValueType::kI32List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature(kBuildIntName, {ValueType::kI32List}, ValueType::kPtr),
+                                            reinterpret_cast<void *>(BuildLookupTableInt<I32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature(kLookupIntName, {ValueType::kI32List, ValueType::kPtr}, ValueType::kU32List),
       reinterpret_cast<void *>(LookupTableInt<I32ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kBuildIntName, {ValueType::kU64List, ValueType::kPtr}, ValueType::kPtr),
-      reinterpret_cast<void *>(BuildLookupTableInt<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kLookupIntName, {ValueType::kU64List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature(kBuildIntName, {ValueType::kU64List}, ValueType::kPtr),
+                                            reinterpret_cast<void *>(BuildLookupTableInt<U64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature(kLookupIntName, {ValueType::kU64List, ValueType::kPtr}, ValueType::kU32List),
       reinterpret_cast<void *>(LookupTableInt<U64ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kBuildIntName, {ValueType::kI64List, ValueType::kPtr}, ValueType::kPtr),
-      reinterpret_cast<void *>(BuildLookupTableInt<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kLookupIntName, {ValueType::kI64List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature(kBuildIntName, {ValueType::kI64List}, ValueType::kPtr),
+                                            reinterpret_cast<void *>(BuildLookupTableInt<I64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature(kLookupIntName, {ValueType::kI64List, ValueType::kPtr}, ValueType::kU32List),
       reinterpret_cast<void *>(LookupTableInt<I64ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kBuildIntName, {ValueType::kF32List, ValueType::kPtr}, ValueType::kPtr),
-      reinterpret_cast<void *>(BuildLookupTableInt<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kLookupIntName, {ValueType::kF32List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature(kBuildIntName, {ValueType::kF32List}, ValueType::kPtr),
+                                            reinterpret_cast<void *>(BuildLookupTableInt<F32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature(kLookupIntName, {ValueType::kF32List, ValueType::kPtr}, ValueType::kU32List),
       reinterpret_cast<void *>(LookupTableInt<F32ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kBuildIntName, {ValueType::kF64List, ValueType::kPtr}, ValueType::kPtr),
-      reinterpret_cast<void *>(BuildLookupTableInt<F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kLookupIntName, {ValueType::kF64List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature(kBuildIntName, {ValueType::kF64List}, ValueType::kPtr),
+                                            reinterpret_cast<void *>(BuildLookupTableInt<F64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature(kLookupIntName, {ValueType::kF64List, ValueType::kPtr}, ValueType::kU32List),
       reinterpret_cast<void *>(LookupTableInt<F64ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kBuildStringName, {ValueType::kStringList, ValueType::kPtr}, ValueType::kPtr),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature(kBuildStringName, {ValueType::kStringList}, ValueType::kPtr),
       reinterpret_cast<void *>(BuildLookupTableString)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature(kLookupStringName, {ValueType::kStringList, ValueType::kPtr, ValueType::kPtr},
-                        ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature(kLookupStringName, {ValueType::kStringList, ValueType::kPtr}, ValueType::kU32List),
       reinterpret_cast<void *>(LookupTableString)));
 
   for (ValueType vt : {ValueType::kU8List, ValueType::kI8List, ValueType::kU16List, ValueType::kI16List,
                        ValueType::kU32List, ValueType::kI32List, ValueType::kU64List, ValueType::kI64List,
                        ValueType::kF32List, ValueType::kF64List, ValueType::kStringList}) {
-    JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-        FunctionSignature("ListLookupIndex", {vt, vt, ValueType::kPtr}, ValueType::kU32List), CodegenListLookupIndex));
+    JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(FunctionSignature("ListLookupIndex", {vt, vt}, ValueType::kU32List),
+                                                   CodegenListLookupIndex));
   }
   return Status::OK();
 }
@@ -436,95 +450,84 @@ Status InitFindMissFunc(FunctionRegistry *reg) {
 }
 
 Status InitListCompactFuncs(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListCompactPositions", {ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListCompactPositions", {ValueType::kU32List}, ValueType::kU32List),
       reinterpret_cast<void *>(ListCompactPositions)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListCompactIndex", {ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListCompactIndex", {ValueType::kU32List}, ValueType::kU32List),
       reinterpret_cast<void *>(ListCompactIndex)));
   return Status::OK();
 }
 
 Status InitListGatherFunc(FunctionRegistry *reg) {
   // Signature: ListGather(values, idx, default, ctx)
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListGather", {ValueType::kU8List, ValueType::kU32List, ValueType::kU8, ValueType::kPtr},
-                        ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListGather", {ValueType::kU8List, ValueType::kU32List, ValueType::kU8}, ValueType::kU8List),
       reinterpret_cast<void *>(ListGather<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListGather", {ValueType::kI8List, ValueType::kU32List, ValueType::kI8, ValueType::kPtr},
-                        ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListGather", {ValueType::kI8List, ValueType::kU32List, ValueType::kI8}, ValueType::kI8List),
       reinterpret_cast<void *>(ListGather<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListGather", {ValueType::kU16List, ValueType::kU32List, ValueType::kU16, ValueType::kPtr},
-                        ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListGather", {ValueType::kU16List, ValueType::kU32List, ValueType::kU16}, ValueType::kU16List),
       reinterpret_cast<void *>(ListGather<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListGather", {ValueType::kI16List, ValueType::kU32List, ValueType::kI16, ValueType::kPtr},
-                        ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListGather", {ValueType::kI16List, ValueType::kU32List, ValueType::kI16}, ValueType::kI16List),
       reinterpret_cast<void *>(ListGather<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListGather", {ValueType::kU32List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListGather", {ValueType::kU32List, ValueType::kU32List, ValueType::kU32}, ValueType::kU32List),
       reinterpret_cast<void *>(ListGather<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListGather", {ValueType::kI32List, ValueType::kU32List, ValueType::kI32, ValueType::kPtr},
-                        ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListGather", {ValueType::kI32List, ValueType::kU32List, ValueType::kI32}, ValueType::kI32List),
       reinterpret_cast<void *>(ListGather<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListGather", {ValueType::kU64List, ValueType::kU32List, ValueType::kU64, ValueType::kPtr},
-                        ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListGather", {ValueType::kU64List, ValueType::kU32List, ValueType::kU64}, ValueType::kU64List),
       reinterpret_cast<void *>(ListGather<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListGather", {ValueType::kI64List, ValueType::kU32List, ValueType::kI64, ValueType::kPtr},
-                        ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListGather", {ValueType::kI64List, ValueType::kU32List, ValueType::kI64}, ValueType::kI64List),
       reinterpret_cast<void *>(ListGather<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListGather", {ValueType::kF32List, ValueType::kU32List, ValueType::kF32, ValueType::kPtr},
-                        ValueType::kF32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListGather", {ValueType::kF32List, ValueType::kU32List, ValueType::kF32}, ValueType::kF32List),
       reinterpret_cast<void *>(ListGather<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListGather", {ValueType::kF64List, ValueType::kU32List, ValueType::kF64, ValueType::kPtr},
-                        ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListGather", {ValueType::kF64List, ValueType::kU32List, ValueType::kF64}, ValueType::kF64List),
       reinterpret_cast<void *>(ListGather<F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListGather",
-                        {ValueType::kStringList, ValueType::kU32List, ValueType::kString, ValueType::kPtr},
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListGather", {ValueType::kStringList, ValueType::kU32List, ValueType::kString},
                         ValueType::kStringList),
       reinterpret_cast<void *>(ListGather<StringListStruct>)));
   return Status::OK();
 }
 
 Status InitBucketizeFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("Bucketize", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("Bucketize", {ValueType::kU8List, ValueType::kU8List}, ValueType::kU32List),
       reinterpret_cast<void *>(Bucketize<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("Bucketize", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("Bucketize", {ValueType::kI8List, ValueType::kI8List}, ValueType::kU32List),
       reinterpret_cast<void *>(Bucketize<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("Bucketize", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("Bucketize", {ValueType::kU16List, ValueType::kU16List}, ValueType::kU32List),
       reinterpret_cast<void *>(Bucketize<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("Bucketize", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("Bucketize", {ValueType::kI16List, ValueType::kI16List}, ValueType::kU32List),
       reinterpret_cast<void *>(Bucketize<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("Bucketize", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("Bucketize", {ValueType::kU32List, ValueType::kU32List}, ValueType::kU32List),
       reinterpret_cast<void *>(Bucketize<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("Bucketize", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("Bucketize", {ValueType::kI32List, ValueType::kI32List}, ValueType::kU32List),
       reinterpret_cast<void *>(Bucketize<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("Bucketize", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("Bucketize", {ValueType::kU64List, ValueType::kU64List}, ValueType::kU32List),
       reinterpret_cast<void *>(Bucketize<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("Bucketize", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("Bucketize", {ValueType::kI64List, ValueType::kI64List}, ValueType::kU32List),
       reinterpret_cast<void *>(Bucketize<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("Bucketize", {ValueType::kF32List, ValueType::kF32List, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("Bucketize", {ValueType::kF32List, ValueType::kF32List}, ValueType::kU32List),
       reinterpret_cast<void *>(Bucketize<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("Bucketize", {ValueType::kF64List, ValueType::kF64List, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("Bucketize", {ValueType::kF64List, ValueType::kF64List}, ValueType::kU32List),
       reinterpret_cast<void *>(Bucketize<F64ListStruct>)));
   return Status::OK();
 }

@@ -62,9 +62,9 @@ TEST(ConstValueTest, ListMergeOptimizeTest) {
   std::string code = R"(
   a = [1, 2, 3];
   b = [1, 2, 3];
-  c = ListAdd(a, b, exec_ctx);
-  d = ListAdd(b, a, exec_ctx);
-  e = ListAdd(c, d, exec_ctx);
+  c = ListAdd(a, b);
+  d = ListAdd(b, a);
+  e = ListAdd(c, d);
   )";
   ASSERT_TRUE(athena.Compile(code, func_registry).ok());
   RetType ret;

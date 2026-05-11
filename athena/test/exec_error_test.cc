@@ -27,7 +27,7 @@ TEST(ExecErrorTest, SingleExpressionRuntimeError) {
   std::string code = R"(
   a = [1, 2, 3];
   b = [4, 5];
-  r = ListAdd(a, b, exec_ctx);
+  r = ListAdd(a, b);
   )";
   ASSERT_TRUE(athena.Compile(code, func_registry).ok());
   RetType ret;
@@ -43,7 +43,7 @@ TEST(ExecErrorTest, WithExecContextRuntimeError) {
   std::string code = R"(
   a = [1, 2, 3];
   b = [4, 5];
-  r = ListAdd(a, b, exec_ctx);
+  r = ListAdd(a, b);
   )";
   ASSERT_TRUE(athena.Compile(code, func_registry).ok());
   ExecContext exec_ctx(4096);
@@ -74,7 +74,7 @@ TEST(ExecErrorTest, BatchExecutePartialFailure) {
   store(output, 0, r);
   )";
   std::string code2 = R"(
-  r = ListAdd([1, 2, 3], [4, 5], exec_ctx);
+  r = ListAdd([1, 2, 3], [4, 5]);
   )";
   std::string code3 = R"(
   a = load(entry_arg, 0);

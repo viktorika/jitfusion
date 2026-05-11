@@ -38,7 +38,7 @@ when condition1 {
 
 Note: Variables modified inside `when` branches must maintain the same type as their original declaration. Nested `when` blocks are also supported.
 
-* 5.You can obtain the input parameter pointer through the entry_arg name, access the ExecContext via exec_ctx and obtain the output parameter pointer through the output name.
+* 5.You can obtain the input parameter pointer through the `entry_arg` name and the output parameter pointer through the `output` name. (The `exec_ctx` identifier is also still recognised as a legacy keyword that materialises the `ExecContext` pointer; new code does not need to pass it because functions registered via `RegisterReadOnlyCFuncWithExecCtx` get it injected by codegen.)
 
 * 6.Comments are supported in two C/C++ styles:
   * Line comments start with `//` and extend to the end of the line.

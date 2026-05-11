@@ -24,11 +24,9 @@ namespace {
 std::unique_ptr<ExecNode> MakeListAddNode(const std::vector<uint32_t>& lhs, const std::vector<uint32_t>& rhs) {
   auto l_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(lhs));
   auto r_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(rhs));
-  auto ctx_node = std::unique_ptr<ExecNode>(new ExecContextNode);
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(l_node));
   args.emplace_back(std::move(r_node));
-  args.emplace_back(std::move(ctx_node));
   return std::unique_ptr<ExecNode>(new FunctionNode("ListAdd", std::move(args)));
 }
 

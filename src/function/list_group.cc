@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2026-04-30 11:35:00
  * @Last Modified by: victorika
- * @Last Modified time: 2026-04-30 11:35:00
+ * @Last Modified time: 2026-05-11 16:32:30
  */
 #include <algorithm>
 #include <cstdint>
@@ -182,38 +182,38 @@ F64ListStruct GroupAvg(VList values, U32ListStruct group_index, uint32_t distinc
 }
 
 Status InitGroupIndexFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupIndex", {ValueType::kU8List, ValueType::kPtr}, ValueType::kU32List),
-      reinterpret_cast<void *>(GroupIndex<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupIndex", {ValueType::kI8List, ValueType::kPtr}, ValueType::kU32List),
-      reinterpret_cast<void *>(GroupIndex<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupIndex", {ValueType::kU16List, ValueType::kPtr}, ValueType::kU32List),
-      reinterpret_cast<void *>(GroupIndex<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupIndex", {ValueType::kI16List, ValueType::kPtr}, ValueType::kU32List),
-      reinterpret_cast<void *>(GroupIndex<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupIndex", {ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
-      reinterpret_cast<void *>(GroupIndex<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupIndex", {ValueType::kI32List, ValueType::kPtr}, ValueType::kU32List),
-      reinterpret_cast<void *>(GroupIndex<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupIndex", {ValueType::kU64List, ValueType::kPtr}, ValueType::kU32List),
-      reinterpret_cast<void *>(GroupIndex<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupIndex", {ValueType::kI64List, ValueType::kPtr}, ValueType::kU32List),
-      reinterpret_cast<void *>(GroupIndex<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupIndex", {ValueType::kF32List, ValueType::kPtr}, ValueType::kU32List),
-      reinterpret_cast<void *>(GroupIndex<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupIndex", {ValueType::kF64List, ValueType::kPtr}, ValueType::kU32List),
-      reinterpret_cast<void *>(GroupIndex<F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupIndex", {ValueType::kStringList, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("GroupIndex", {ValueType::kU8List}, ValueType::kU32List),
+                                            reinterpret_cast<void *>(GroupIndex<U8ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("GroupIndex", {ValueType::kI8List}, ValueType::kU32List),
+                                            reinterpret_cast<void *>(GroupIndex<I8ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("GroupIndex", {ValueType::kU16List}, ValueType::kU32List),
+                                            reinterpret_cast<void *>(GroupIndex<U16ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("GroupIndex", {ValueType::kI16List}, ValueType::kU32List),
+                                            reinterpret_cast<void *>(GroupIndex<I16ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("GroupIndex", {ValueType::kU32List}, ValueType::kU32List),
+                                            reinterpret_cast<void *>(GroupIndex<U32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("GroupIndex", {ValueType::kI32List}, ValueType::kU32List),
+                                            reinterpret_cast<void *>(GroupIndex<I32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("GroupIndex", {ValueType::kU64List}, ValueType::kU32List),
+                                            reinterpret_cast<void *>(GroupIndex<U64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("GroupIndex", {ValueType::kI64List}, ValueType::kU32List),
+                                            reinterpret_cast<void *>(GroupIndex<I64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("GroupIndex", {ValueType::kF32List}, ValueType::kU32List),
+                                            reinterpret_cast<void *>(GroupIndex<F32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("GroupIndex", {ValueType::kF64List}, ValueType::kU32List),
+                                            reinterpret_cast<void *>(GroupIndex<F64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupIndex", {ValueType::kStringList}, ValueType::kU32List),
       reinterpret_cast<void *>(GroupIndexString)));
   return Status::OK();
 }
@@ -225,48 +225,38 @@ Status InitGroupCountFunc(FunctionRegistry *reg) {
 }
 
 Status InitGroupKeysFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupKeys", {ValueType::kU8List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupKeys", {ValueType::kU8List, ValueType::kU32List, ValueType::kU32}, ValueType::kU8List),
       reinterpret_cast<void *>(GroupKeys<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupKeys", {ValueType::kI8List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupKeys", {ValueType::kI8List, ValueType::kU32List, ValueType::kU32}, ValueType::kI8List),
       reinterpret_cast<void *>(GroupKeys<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupKeys", {ValueType::kU16List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupKeys", {ValueType::kU16List, ValueType::kU32List, ValueType::kU32}, ValueType::kU16List),
       reinterpret_cast<void *>(GroupKeys<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupKeys", {ValueType::kI16List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupKeys", {ValueType::kI16List, ValueType::kU32List, ValueType::kU32}, ValueType::kI16List),
       reinterpret_cast<void *>(GroupKeys<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupKeys", {ValueType::kU32List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupKeys", {ValueType::kU32List, ValueType::kU32List, ValueType::kU32}, ValueType::kU32List),
       reinterpret_cast<void *>(GroupKeys<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupKeys", {ValueType::kI32List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupKeys", {ValueType::kI32List, ValueType::kU32List, ValueType::kU32}, ValueType::kI32List),
       reinterpret_cast<void *>(GroupKeys<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupKeys", {ValueType::kU64List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupKeys", {ValueType::kU64List, ValueType::kU32List, ValueType::kU32}, ValueType::kU64List),
       reinterpret_cast<void *>(GroupKeys<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupKeys", {ValueType::kI64List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupKeys", {ValueType::kI64List, ValueType::kU32List, ValueType::kU32}, ValueType::kI64List),
       reinterpret_cast<void *>(GroupKeys<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupKeys", {ValueType::kF32List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kF32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupKeys", {ValueType::kF32List, ValueType::kU32List, ValueType::kU32}, ValueType::kF32List),
       reinterpret_cast<void *>(GroupKeys<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupKeys", {ValueType::kF64List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupKeys", {ValueType::kF64List, ValueType::kU32List, ValueType::kU32}, ValueType::kF64List),
       reinterpret_cast<void *>(GroupKeys<F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupKeys", {ValueType::kStringList, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupKeys", {ValueType::kStringList, ValueType::kU32List, ValueType::kU32},
                         ValueType::kStringList),
       reinterpret_cast<void *>(GroupKeys<StringListStruct>)));
   return Status::OK();
@@ -276,7 +266,7 @@ llvm::Value *EmitGroupKeysSugar(const FunctionSignature &sign, const std::vector
                                 const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
   auto *keys_value = arg_llvm_value_list.at(0);
   auto *group_index_value = arg_llvm_value_list.at(1);
-  auto *exec_context_value = arg_llvm_value_list.at(2);
+  auto *exec_context_value = ctx.entry_function->getArg(1);
   auto *keys_llvm_type = arg_llvm_type_list.at(0);
 
   auto *i32_ty = llvm::Type::getInt32Ty(ctx.context);
@@ -289,6 +279,10 @@ llvm::Value *EmitGroupKeysSugar(const FunctionSignature &sign, const std::vector
       ctx.module.getOrInsertFunction(group_count_sign.ToString(), group_count_func_type);
   llvm::Value *distinct_value = ctx.builder.CreateCall(group_count_callee, {group_index_value}, "group_count");
 
+  // Mirror the *legacy* ctx-bearing signature of GroupKeys so the IR-level
+  // symbol we emit matches what MappingToJIT publishes (and what FunctionNode
+  // codegen would emit for a direct call): the ctx-bearing name lets GVN/CSE
+  // share a single declaration with all other GroupKeys call sites.
   FunctionSignature group_keys_sign("GroupKeys",
                                     {sign.GetParamTypes().at(0), ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
                                     sign.GetRetType());
@@ -302,84 +296,73 @@ llvm::Value *EmitGroupKeysSugar(const FunctionSignature &sign, const std::vector
 
 Status InitGroupKeysSugarFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupKeys", {ValueType::kU8List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU8List),
+      FunctionSignature("GroupKeys", {ValueType::kU8List, ValueType::kU32List}, ValueType::kU8List),
       EmitGroupKeysSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupKeys", {ValueType::kI8List, ValueType::kU32List, ValueType::kPtr}, ValueType::kI8List),
+      FunctionSignature("GroupKeys", {ValueType::kI8List, ValueType::kU32List}, ValueType::kI8List),
       EmitGroupKeysSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupKeys", {ValueType::kU16List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU16List),
+      FunctionSignature("GroupKeys", {ValueType::kU16List, ValueType::kU32List}, ValueType::kU16List),
       EmitGroupKeysSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupKeys", {ValueType::kI16List, ValueType::kU32List, ValueType::kPtr}, ValueType::kI16List),
+      FunctionSignature("GroupKeys", {ValueType::kI16List, ValueType::kU32List}, ValueType::kI16List),
       EmitGroupKeysSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupKeys", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
+      FunctionSignature("GroupKeys", {ValueType::kU32List, ValueType::kU32List}, ValueType::kU32List),
       EmitGroupKeysSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupKeys", {ValueType::kI32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kI32List),
+      FunctionSignature("GroupKeys", {ValueType::kI32List, ValueType::kU32List}, ValueType::kI32List),
       EmitGroupKeysSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupKeys", {ValueType::kU64List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU64List),
+      FunctionSignature("GroupKeys", {ValueType::kU64List, ValueType::kU32List}, ValueType::kU64List),
       EmitGroupKeysSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupKeys", {ValueType::kI64List, ValueType::kU32List, ValueType::kPtr}, ValueType::kI64List),
+      FunctionSignature("GroupKeys", {ValueType::kI64List, ValueType::kU32List}, ValueType::kI64List),
       EmitGroupKeysSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupKeys", {ValueType::kF32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kF32List),
+      FunctionSignature("GroupKeys", {ValueType::kF32List, ValueType::kU32List}, ValueType::kF32List),
       EmitGroupKeysSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupKeys", {ValueType::kF64List, ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
+      FunctionSignature("GroupKeys", {ValueType::kF64List, ValueType::kU32List}, ValueType::kF64List),
       EmitGroupKeysSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupKeys", {ValueType::kStringList, ValueType::kU32List, ValueType::kPtr},
-                        ValueType::kStringList),
+      FunctionSignature("GroupKeys", {ValueType::kStringList, ValueType::kU32List}, ValueType::kStringList),
       EmitGroupKeysSugar));
   return Status::OK();
 }
 
 Status InitGroupSumFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupSum", {ValueType::kI8List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupSum", {ValueType::kI8List, ValueType::kU32List, ValueType::kU32}, ValueType::kI64List),
       reinterpret_cast<void *>(GroupSum<I64ListStruct, I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupSum", {ValueType::kI16List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupSum", {ValueType::kI16List, ValueType::kU32List, ValueType::kU32}, ValueType::kI64List),
       reinterpret_cast<void *>(GroupSum<I64ListStruct, I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupSum", {ValueType::kI32List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupSum", {ValueType::kI32List, ValueType::kU32List, ValueType::kU32}, ValueType::kI64List),
       reinterpret_cast<void *>(GroupSum<I64ListStruct, I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupSum", {ValueType::kI64List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupSum", {ValueType::kI64List, ValueType::kU32List, ValueType::kU32}, ValueType::kI64List),
       reinterpret_cast<void *>(GroupSum<I64ListStruct, I64ListStruct>)));
   // Unsigned integers promote to u64.
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupSum", {ValueType::kU8List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupSum", {ValueType::kU8List, ValueType::kU32List, ValueType::kU32}, ValueType::kU64List),
       reinterpret_cast<void *>(GroupSum<U64ListStruct, U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupSum", {ValueType::kU16List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupSum", {ValueType::kU16List, ValueType::kU32List, ValueType::kU32}, ValueType::kU64List),
       reinterpret_cast<void *>(GroupSum<U64ListStruct, U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupSum", {ValueType::kU32List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupSum", {ValueType::kU32List, ValueType::kU32List, ValueType::kU32}, ValueType::kU64List),
       reinterpret_cast<void *>(GroupSum<U64ListStruct, U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupSum", {ValueType::kU64List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupSum", {ValueType::kU64List, ValueType::kU32List, ValueType::kU32}, ValueType::kU64List),
       reinterpret_cast<void *>(GroupSum<U64ListStruct, U64ListStruct>)));
   // Floating-point promotes to f64.
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupSum", {ValueType::kF32List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupSum", {ValueType::kF32List, ValueType::kU32List, ValueType::kU32}, ValueType::kF64List),
       reinterpret_cast<void *>(GroupSum<F64ListStruct, F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupSum", {ValueType::kF64List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupSum", {ValueType::kF64List, ValueType::kU32List, ValueType::kU32}, ValueType::kF64List),
       reinterpret_cast<void *>(GroupSum<F64ListStruct, F64ListStruct>)));
   return Status::OK();
 }
@@ -388,7 +371,7 @@ llvm::Value *EmitGroupSumSugar(const FunctionSignature &sign, const std::vector<
                                const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
   auto *values_value = arg_llvm_value_list.at(0);
   auto *group_index_value = arg_llvm_value_list.at(1);
-  auto *exec_context_value = arg_llvm_value_list.at(2);
+  auto *exec_context_value = ctx.entry_function->getArg(1);
   auto *values_llvm_type = arg_llvm_type_list.at(0);
 
   auto *i32_ty = llvm::Type::getInt32Ty(ctx.context);
@@ -404,6 +387,10 @@ llvm::Value *EmitGroupSumSugar(const FunctionSignature &sign, const std::vector<
       ctx.module.getOrInsertFunction(group_count_sign.ToString(), group_count_func_type);
   llvm::Value *distinct_value = ctx.builder.CreateCall(group_count_callee, {group_index_value}, "group_count");
 
+  // Mirror the *legacy* ctx-bearing signature of GroupSum so getOrInsertFunction
+  // lands on the same declaration that MappingToJIT publishes (and the same
+  // one FunctionNode codegen emits for direct user calls). That keeps GVN/CSE
+  // happy across sugar / direct call shapes.
   FunctionSignature group_sum_sign("GroupSum",
                                    {sign.GetParamTypes().at(0), ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
                                    sign.GetRetType());
@@ -417,122 +404,102 @@ llvm::Value *EmitGroupSumSugar(const FunctionSignature &sign, const std::vector<
 
 Status InitGroupSumSugarFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupSum", {ValueType::kI8List, ValueType::kU32List, ValueType::kPtr}, ValueType::kI64List),
+      FunctionSignature("GroupSum", {ValueType::kI8List, ValueType::kU32List}, ValueType::kI64List),
       EmitGroupSumSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupSum", {ValueType::kI16List, ValueType::kU32List, ValueType::kPtr}, ValueType::kI64List),
+      FunctionSignature("GroupSum", {ValueType::kI16List, ValueType::kU32List}, ValueType::kI64List),
       EmitGroupSumSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupSum", {ValueType::kI32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kI64List),
+      FunctionSignature("GroupSum", {ValueType::kI32List, ValueType::kU32List}, ValueType::kI64List),
       EmitGroupSumSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupSum", {ValueType::kI64List, ValueType::kU32List, ValueType::kPtr}, ValueType::kI64List),
+      FunctionSignature("GroupSum", {ValueType::kI64List, ValueType::kU32List}, ValueType::kI64List),
       EmitGroupSumSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupSum", {ValueType::kU8List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU64List),
+      FunctionSignature("GroupSum", {ValueType::kU8List, ValueType::kU32List}, ValueType::kU64List),
       EmitGroupSumSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupSum", {ValueType::kU16List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU64List),
+      FunctionSignature("GroupSum", {ValueType::kU16List, ValueType::kU32List}, ValueType::kU64List),
       EmitGroupSumSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupSum", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU64List),
+      FunctionSignature("GroupSum", {ValueType::kU32List, ValueType::kU32List}, ValueType::kU64List),
       EmitGroupSumSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupSum", {ValueType::kU64List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU64List),
+      FunctionSignature("GroupSum", {ValueType::kU64List, ValueType::kU32List}, ValueType::kU64List),
       EmitGroupSumSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupSum", {ValueType::kF32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
+      FunctionSignature("GroupSum", {ValueType::kF32List, ValueType::kU32List}, ValueType::kF64List),
       EmitGroupSumSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupSum", {ValueType::kF64List, ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
+      FunctionSignature("GroupSum", {ValueType::kF64List, ValueType::kU32List}, ValueType::kF64List),
       EmitGroupSumSugar));
   return Status::OK();
 }
 
 Status InitGroupMaxFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMax", {ValueType::kU8List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMax", {ValueType::kU8List, ValueType::kU32List, ValueType::kU32}, ValueType::kU8List),
       reinterpret_cast<void *>(GroupMax<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMax", {ValueType::kI8List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMax", {ValueType::kI8List, ValueType::kU32List, ValueType::kU32}, ValueType::kI8List),
       reinterpret_cast<void *>(GroupMax<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMax", {ValueType::kU16List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMax", {ValueType::kU16List, ValueType::kU32List, ValueType::kU32}, ValueType::kU16List),
       reinterpret_cast<void *>(GroupMax<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMax", {ValueType::kI16List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMax", {ValueType::kI16List, ValueType::kU32List, ValueType::kU32}, ValueType::kI16List),
       reinterpret_cast<void *>(GroupMax<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMax", {ValueType::kU32List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMax", {ValueType::kU32List, ValueType::kU32List, ValueType::kU32}, ValueType::kU32List),
       reinterpret_cast<void *>(GroupMax<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMax", {ValueType::kI32List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMax", {ValueType::kI32List, ValueType::kU32List, ValueType::kU32}, ValueType::kI32List),
       reinterpret_cast<void *>(GroupMax<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMax", {ValueType::kU64List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMax", {ValueType::kU64List, ValueType::kU32List, ValueType::kU32}, ValueType::kU64List),
       reinterpret_cast<void *>(GroupMax<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMax", {ValueType::kI64List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMax", {ValueType::kI64List, ValueType::kU32List, ValueType::kU32}, ValueType::kI64List),
       reinterpret_cast<void *>(GroupMax<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMax", {ValueType::kF32List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kF32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMax", {ValueType::kF32List, ValueType::kU32List, ValueType::kU32}, ValueType::kF32List),
       reinterpret_cast<void *>(GroupMax<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMax", {ValueType::kF64List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMax", {ValueType::kF64List, ValueType::kU32List, ValueType::kU32}, ValueType::kF64List),
       reinterpret_cast<void *>(GroupMax<F64ListStruct>)));
   return Status::OK();
 }
 
 Status InitGroupMinFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMin", {ValueType::kU8List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMin", {ValueType::kU8List, ValueType::kU32List, ValueType::kU32}, ValueType::kU8List),
       reinterpret_cast<void *>(GroupMin<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMin", {ValueType::kI8List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMin", {ValueType::kI8List, ValueType::kU32List, ValueType::kU32}, ValueType::kI8List),
       reinterpret_cast<void *>(GroupMin<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMin", {ValueType::kU16List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMin", {ValueType::kU16List, ValueType::kU32List, ValueType::kU32}, ValueType::kU16List),
       reinterpret_cast<void *>(GroupMin<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMin", {ValueType::kI16List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMin", {ValueType::kI16List, ValueType::kU32List, ValueType::kU32}, ValueType::kI16List),
       reinterpret_cast<void *>(GroupMin<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMin", {ValueType::kU32List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMin", {ValueType::kU32List, ValueType::kU32List, ValueType::kU32}, ValueType::kU32List),
       reinterpret_cast<void *>(GroupMin<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMin", {ValueType::kI32List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMin", {ValueType::kI32List, ValueType::kU32List, ValueType::kU32}, ValueType::kI32List),
       reinterpret_cast<void *>(GroupMin<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMin", {ValueType::kU64List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMin", {ValueType::kU64List, ValueType::kU32List, ValueType::kU32}, ValueType::kU64List),
       reinterpret_cast<void *>(GroupMin<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMin", {ValueType::kI64List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMin", {ValueType::kI64List, ValueType::kU32List, ValueType::kU32}, ValueType::kI64List),
       reinterpret_cast<void *>(GroupMin<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMin", {ValueType::kF32List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kF32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMin", {ValueType::kF32List, ValueType::kU32List, ValueType::kU32}, ValueType::kF32List),
       reinterpret_cast<void *>(GroupMin<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupMin", {ValueType::kF64List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupMin", {ValueType::kF64List, ValueType::kU32List, ValueType::kU32}, ValueType::kF64List),
       reinterpret_cast<void *>(GroupMin<F64ListStruct>)));
   return Status::OK();
 }
@@ -543,7 +510,7 @@ llvm::Value *EmitGroupExtremaSugar(const std::string &kernel_name, const Functio
                                    const char *call_name) {
   auto *values_value = arg_llvm_value_list.at(0);
   auto *group_index_value = arg_llvm_value_list.at(1);
-  auto *exec_context_value = arg_llvm_value_list.at(2);
+  auto *exec_context_value = ctx.entry_function->getArg(1);
   auto *values_llvm_type = arg_llvm_type_list.at(0);
 
   auto *i32_ty = llvm::Type::getInt32Ty(ctx.context);
@@ -556,6 +523,9 @@ llvm::Value *EmitGroupExtremaSugar(const std::string &kernel_name, const Functio
       ctx.module.getOrInsertFunction(group_count_sign.ToString(), group_count_func_type);
   llvm::Value *distinct_value = ctx.builder.CreateCall(group_count_callee, {group_index_value}, "group_count");
 
+  // Mirror the *legacy* ctx-bearing signature of the GroupMin/GroupMax kernel
+  // so the IR-level declaration matches MappingToJIT's published symbol and
+  // FunctionNode codegen's direct-call name.
   FunctionSignature kernel_sign(kernel_name,
                                 {sign.GetParamTypes().at(0), ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
                                 sign.GetRetType());
@@ -578,112 +548,98 @@ llvm::Value *EmitGroupMinSugar(const FunctionSignature &sign, const std::vector<
 
 Status InitGroupMaxSugarFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMax", {ValueType::kU8List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU8List),
+      FunctionSignature("GroupMax", {ValueType::kU8List, ValueType::kU32List}, ValueType::kU8List), EmitGroupMaxSugar));
+  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
+      FunctionSignature("GroupMax", {ValueType::kI8List, ValueType::kU32List}, ValueType::kI8List), EmitGroupMaxSugar));
+  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
+      FunctionSignature("GroupMax", {ValueType::kU16List, ValueType::kU32List}, ValueType::kU16List),
       EmitGroupMaxSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMax", {ValueType::kI8List, ValueType::kU32List, ValueType::kPtr}, ValueType::kI8List),
+      FunctionSignature("GroupMax", {ValueType::kI16List, ValueType::kU32List}, ValueType::kI16List),
       EmitGroupMaxSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMax", {ValueType::kU16List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU16List),
+      FunctionSignature("GroupMax", {ValueType::kU32List, ValueType::kU32List}, ValueType::kU32List),
       EmitGroupMaxSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMax", {ValueType::kI16List, ValueType::kU32List, ValueType::kPtr}, ValueType::kI16List),
+      FunctionSignature("GroupMax", {ValueType::kI32List, ValueType::kU32List}, ValueType::kI32List),
       EmitGroupMaxSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMax", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
+      FunctionSignature("GroupMax", {ValueType::kU64List, ValueType::kU32List}, ValueType::kU64List),
       EmitGroupMaxSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMax", {ValueType::kI32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kI32List),
+      FunctionSignature("GroupMax", {ValueType::kI64List, ValueType::kU32List}, ValueType::kI64List),
       EmitGroupMaxSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMax", {ValueType::kU64List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU64List),
+      FunctionSignature("GroupMax", {ValueType::kF32List, ValueType::kU32List}, ValueType::kF32List),
       EmitGroupMaxSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMax", {ValueType::kI64List, ValueType::kU32List, ValueType::kPtr}, ValueType::kI64List),
-      EmitGroupMaxSugar));
-  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMax", {ValueType::kF32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kF32List),
-      EmitGroupMaxSugar));
-  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMax", {ValueType::kF64List, ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
+      FunctionSignature("GroupMax", {ValueType::kF64List, ValueType::kU32List}, ValueType::kF64List),
       EmitGroupMaxSugar));
   return Status::OK();
 }
 
 Status InitGroupMinSugarFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMin", {ValueType::kU8List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU8List),
+      FunctionSignature("GroupMin", {ValueType::kU8List, ValueType::kU32List}, ValueType::kU8List), EmitGroupMinSugar));
+  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
+      FunctionSignature("GroupMin", {ValueType::kI8List, ValueType::kU32List}, ValueType::kI8List), EmitGroupMinSugar));
+  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
+      FunctionSignature("GroupMin", {ValueType::kU16List, ValueType::kU32List}, ValueType::kU16List),
       EmitGroupMinSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMin", {ValueType::kI8List, ValueType::kU32List, ValueType::kPtr}, ValueType::kI8List),
+      FunctionSignature("GroupMin", {ValueType::kI16List, ValueType::kU32List}, ValueType::kI16List),
       EmitGroupMinSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMin", {ValueType::kU16List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU16List),
+      FunctionSignature("GroupMin", {ValueType::kU32List, ValueType::kU32List}, ValueType::kU32List),
       EmitGroupMinSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMin", {ValueType::kI16List, ValueType::kU32List, ValueType::kPtr}, ValueType::kI16List),
+      FunctionSignature("GroupMin", {ValueType::kI32List, ValueType::kU32List}, ValueType::kI32List),
       EmitGroupMinSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMin", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
+      FunctionSignature("GroupMin", {ValueType::kU64List, ValueType::kU32List}, ValueType::kU64List),
       EmitGroupMinSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMin", {ValueType::kI32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kI32List),
+      FunctionSignature("GroupMin", {ValueType::kI64List, ValueType::kU32List}, ValueType::kI64List),
       EmitGroupMinSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMin", {ValueType::kU64List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU64List),
+      FunctionSignature("GroupMin", {ValueType::kF32List, ValueType::kU32List}, ValueType::kF32List),
       EmitGroupMinSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMin", {ValueType::kI64List, ValueType::kU32List, ValueType::kPtr}, ValueType::kI64List),
-      EmitGroupMinSugar));
-  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMin", {ValueType::kF32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kF32List),
-      EmitGroupMinSugar));
-  JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupMin", {ValueType::kF64List, ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
+      FunctionSignature("GroupMin", {ValueType::kF64List, ValueType::kU32List}, ValueType::kF64List),
       EmitGroupMinSugar));
   return Status::OK();
 }
 
 Status InitGroupAvgFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupAvg", {ValueType::kU8List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupAvg", {ValueType::kU8List, ValueType::kU32List, ValueType::kU32}, ValueType::kF64List),
       reinterpret_cast<void *>(GroupAvg<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupAvg", {ValueType::kI8List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupAvg", {ValueType::kI8List, ValueType::kU32List, ValueType::kU32}, ValueType::kF64List),
       reinterpret_cast<void *>(GroupAvg<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupAvg", {ValueType::kU16List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupAvg", {ValueType::kU16List, ValueType::kU32List, ValueType::kU32}, ValueType::kF64List),
       reinterpret_cast<void *>(GroupAvg<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupAvg", {ValueType::kI16List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupAvg", {ValueType::kI16List, ValueType::kU32List, ValueType::kU32}, ValueType::kF64List),
       reinterpret_cast<void *>(GroupAvg<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupAvg", {ValueType::kU32List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupAvg", {ValueType::kU32List, ValueType::kU32List, ValueType::kU32}, ValueType::kF64List),
       reinterpret_cast<void *>(GroupAvg<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupAvg", {ValueType::kI32List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupAvg", {ValueType::kI32List, ValueType::kU32List, ValueType::kU32}, ValueType::kF64List),
       reinterpret_cast<void *>(GroupAvg<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupAvg", {ValueType::kU64List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupAvg", {ValueType::kU64List, ValueType::kU32List, ValueType::kU32}, ValueType::kF64List),
       reinterpret_cast<void *>(GroupAvg<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupAvg", {ValueType::kI64List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupAvg", {ValueType::kI64List, ValueType::kU32List, ValueType::kU32}, ValueType::kF64List),
       reinterpret_cast<void *>(GroupAvg<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupAvg", {ValueType::kF32List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupAvg", {ValueType::kF32List, ValueType::kU32List, ValueType::kU32}, ValueType::kF64List),
       reinterpret_cast<void *>(GroupAvg<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("GroupAvg", {ValueType::kF64List, ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
-                        ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("GroupAvg", {ValueType::kF64List, ValueType::kU32List, ValueType::kU32}, ValueType::kF64List),
       reinterpret_cast<void *>(GroupAvg<F64ListStruct>)));
   return Status::OK();
 }
@@ -692,7 +648,7 @@ llvm::Value *EmitGroupAvgSugar(const FunctionSignature &sign, const std::vector<
                                const std::vector<llvm::Value *> &arg_llvm_value_list, IRCodeGenContext &ctx) {
   auto *values_value = arg_llvm_value_list.at(0);
   auto *group_index_value = arg_llvm_value_list.at(1);
-  auto *exec_context_value = arg_llvm_value_list.at(2);
+  auto *exec_context_value = ctx.entry_function->getArg(1);
   auto *values_llvm_type = arg_llvm_type_list.at(0);
 
   auto *i32_ty = llvm::Type::getInt32Ty(ctx.context);
@@ -708,6 +664,10 @@ llvm::Value *EmitGroupAvgSugar(const FunctionSignature &sign, const std::vector<
       ctx.module.getOrInsertFunction(group_count_sign.ToString(), group_count_func_type);
   llvm::Value *distinct_value = ctx.builder.CreateCall(group_count_callee, {group_index_value}, "group_count");
 
+  // Mirror the registry view of GroupAvg (no trailing exec_ctx in its
+  // Mirror the *legacy* ctx-bearing signature of GroupAvg so getOrInsertFunction
+  // lands on the same Function* MappingToJIT publishes and FunctionNode codegen
+  // emits for direct user calls.
   FunctionSignature group_avg_sign("GroupAvg",
                                    {sign.GetParamTypes().at(0), ValueType::kU32List, ValueType::kU32, ValueType::kPtr},
                                    sign.GetRetType());
@@ -721,34 +681,34 @@ llvm::Value *EmitGroupAvgSugar(const FunctionSignature &sign, const std::vector<
 
 Status InitGroupAvgSugarFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupAvg", {ValueType::kU8List, ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
+      FunctionSignature("GroupAvg", {ValueType::kU8List, ValueType::kU32List}, ValueType::kF64List),
       EmitGroupAvgSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupAvg", {ValueType::kI8List, ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
+      FunctionSignature("GroupAvg", {ValueType::kI8List, ValueType::kU32List}, ValueType::kF64List),
       EmitGroupAvgSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupAvg", {ValueType::kU16List, ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
+      FunctionSignature("GroupAvg", {ValueType::kU16List, ValueType::kU32List}, ValueType::kF64List),
       EmitGroupAvgSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupAvg", {ValueType::kI16List, ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
+      FunctionSignature("GroupAvg", {ValueType::kI16List, ValueType::kU32List}, ValueType::kF64List),
       EmitGroupAvgSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupAvg", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
+      FunctionSignature("GroupAvg", {ValueType::kU32List, ValueType::kU32List}, ValueType::kF64List),
       EmitGroupAvgSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupAvg", {ValueType::kI32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
+      FunctionSignature("GroupAvg", {ValueType::kI32List, ValueType::kU32List}, ValueType::kF64List),
       EmitGroupAvgSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupAvg", {ValueType::kU64List, ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
+      FunctionSignature("GroupAvg", {ValueType::kU64List, ValueType::kU32List}, ValueType::kF64List),
       EmitGroupAvgSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupAvg", {ValueType::kI64List, ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
+      FunctionSignature("GroupAvg", {ValueType::kI64List, ValueType::kU32List}, ValueType::kF64List),
       EmitGroupAvgSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupAvg", {ValueType::kF32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
+      FunctionSignature("GroupAvg", {ValueType::kF32List, ValueType::kU32List}, ValueType::kF64List),
       EmitGroupAvgSugar));
   JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
-      FunctionSignature("GroupAvg", {ValueType::kF64List, ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
+      FunctionSignature("GroupAvg", {ValueType::kF64List, ValueType::kU32List}, ValueType::kF64List),
       EmitGroupAvgSugar));
   return Status::OK();
 }

@@ -26,11 +26,9 @@ TEST(FunctionTest, FilterByBitmapTest1) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto bitmap_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(bitmap));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(bitmap_node));
-  args_list.emplace_back(std::move(exec_node));
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("FilterByBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -49,11 +47,9 @@ TEST(FunctionTest, FilterByBitmapTest2) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto bitmap_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(bitmap));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(bitmap_node));
-  args_list.emplace_back(std::move(exec_node));
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("FilterByBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -64,9 +60,9 @@ TEST(FunctionTest, FilterByBitmapTest2) {
   EXPECT_EQ(std::get<std::vector<double>>(result), expect);
 }
 
-// Keep one test exercising the 4-arg explicit-bits_cnt kernel directly, so the
+// Keep one test exercising the explicit-bits_cnt kernel directly, so the
 // underlying kernel (and its validation logic) stays under coverage even after
-// the 3-arg sugar became the recommended path.
+// the 2-arg sugar became the recommended path.
 TEST(FunctionTest, FilterByBitmapExplicitBitsCntTest) {
   std::vector<int32_t> data = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16,
                                17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
@@ -76,12 +72,10 @@ TEST(FunctionTest, FilterByBitmapExplicitBitsCntTest) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto bitmap_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(bitmap));
   auto bits_cnt_node = std::unique_ptr<ExecNode>(new ConstantValueNode(12U));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(bitmap_node));
   args_list.emplace_back(std::move(bits_cnt_node));
-  args_list.emplace_back(std::move(exec_node));
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("FilterByBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -100,18 +94,16 @@ TEST(FunctionTest, FilterByBitmapSugarFromGenBitmapTest) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
 
-  // bitmap = GenLargeBitmap(data, 3, exec_ctx)   -> keep elements > 3
+  // bitmap = GenLargeBitmap(data, 3)   -> keep elements > 3
   std::vector<std::unique_ptr<ExecNode>> gen_args;
   gen_args.emplace_back(new ConstantListValueNode(data));
   gen_args.emplace_back(new ConstantValueNode(static_cast<int32_t>(3)));
-  gen_args.emplace_back(new ExecContextNode());
   auto bitmap_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeBitmap", std::move(gen_args)));
 
-  // FilterByBitmap(data, bitmap, exec_ctx) -- sugar, no bits_cnt.
+  // FilterByBitmap(data, bitmap) -- sugar, no bits_cnt.
   std::vector<std::unique_ptr<ExecNode>> filter_args;
   filter_args.emplace_back(new ConstantListValueNode(data));
   filter_args.emplace_back(std::move(bitmap_node));
-  filter_args.emplace_back(new ExecContextNode());
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("FilterByBitmap", std::move(filter_args)));
 
   ExecEngine exec_engine;
@@ -234,10 +226,9 @@ TEST(FunctionTest, UniqueU32Test) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Unique", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -253,10 +244,9 @@ TEST(FunctionTest, UniqueI32Test) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Unique", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -272,10 +262,9 @@ TEST(FunctionTest, UniqueF64Test) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Unique", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -291,10 +280,9 @@ TEST(FunctionTest, UniqueAlreadyUniqueTest) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Unique", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -310,10 +298,9 @@ TEST(FunctionTest, UniqueAllSameTest) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Unique", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -329,10 +316,9 @@ TEST(FunctionTest, UniqueStringTest) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Unique", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -348,10 +334,9 @@ TEST(FunctionTest, UniqueStringAllSameTest) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("Unique", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);

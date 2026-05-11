@@ -81,8 +81,8 @@ TEST(FilterTest, Test1) {
   EXPECT_TRUE(func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(LoadI32List)).ok());
   std::string code = R"(
   a = load(entry_arg, 0);
-  b = GenLargeBitmap(a, 3, exec_ctx);
-  FilterByBitmap(a, b, exec_ctx);
+  b = GenLargeBitmap(a, 3);
+  FilterByBitmap(a, b);
   )";
   ASSERT_TRUE(athena.Compile(code, func_registry).ok());
   RetType ret;
@@ -101,8 +101,8 @@ TEST(FilterTest, Test2) {
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
-  c = GenLargeBitmap(a, b, exec_ctx);
-  FilterByBitmap(a, c, exec_ctx);
+  c = GenLargeBitmap(a, b);
+  FilterByBitmap(a, c);
   )";
   ASSERT_TRUE(athena.Compile(code, func_registry).ok());
   RetType ret;
@@ -122,9 +122,9 @@ TEST(CustomPassTest, CommutativeCallCanonicalizerPass1) {
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
-  c = ListAdd(a, b, exec_ctx);
-  d = ListAdd(b, a, exec_ctx);
-  e = ListAdd(c, d, exec_ctx);
+  c = ListAdd(a, b);
+  d = ListAdd(b, a);
+  e = ListAdd(c, d);
   )";
   ASSERT_TRUE(athena.Compile(code, func_registry).ok());
   RetType ret;
@@ -143,9 +143,9 @@ TEST(CustomPassTest, CommutativeCallCanonicalizerPass2) {
   std::string code = R"(
   a = [1, 2, 3];
   b = [4, 5, 6];
-  c = ListAdd(a, b, exec_ctx);
-  d = ListAdd(b, a, exec_ctx);
-  e = ListAdd(c, d, exec_ctx);
+  c = ListAdd(a, b);
+  d = ListAdd(b, a);
+  e = ListAdd(c, d);
   )";
   ASSERT_TRUE(athena.Compile(code, func_registry).ok());
   RetType ret;

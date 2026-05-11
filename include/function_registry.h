@@ -81,6 +81,13 @@ struct FunctionStructure {
   void *c_func_ptr;
   CodeGenFunc codegen_func;
   std::function<void(llvm::Module *, llvm::Function *)> func_attr_setter{nullptr};
+  // True for kCFunc registrations whose user-visible signature does NOT
+  // include the trailing `void* exec_ctx` argument: the C implementation
+  // still expects exec_ctx as its last parameter, but FunctionNode codegen
+  // injects it automatically (pulled from the entry function's arg(1)).
+  // Lets callers and AST authors write the natural N-arg signature while
+  // keeping the C side ABI (N+1 args, last one is the context) unchanged.
+  bool needs_exec_ctx{false};
 };
 
 class FunctionSignature {
@@ -123,6 +130,16 @@ class FunctionRegistry {
   // Register ReadOnlyCFunc
   Status RegisterReadOnlyCFunc(const FunctionSignature &func_sign, void *c_func_ptr, bool allow_override = false);
 
+  // Register a ReadOnlyCFunc whose C implementation takes a trailing
+  // `void* exec_ctx` argument that the user-visible signature should NOT
+  // expose. The user-supplied `func_sign` describes the natural N-arg
+  // shape (no trailing kPtr); FunctionNode codegen automatically appends
+  // the entry function's exec_ctx as the final actual argument when
+  // emitting the call site. The C function itself must still accept the
+  // trailing void* in its physical signature.
+  Status RegisterReadOnlyCFuncWithExecCtx(const FunctionSignature &func_sign, void *c_func_ptr,
+                                          bool allow_override = false);
+
   // Register StoreCFunc
   // store_args_index is the index of the args in the function signature that is OuputNode
   Status RegisterStoreCFunc(const FunctionSignature &func_sign, void *c_func_ptr, uint32_t store_args_index,
@@ -130,6 +147,13 @@ class FunctionRegistry {
 
   // Register a function that satisfies the commutative property.
   Status RegisterCommutativeCFunc(const FunctionSignature &func_sign, void *c_func_ptr, bool allow_override = false);
+
+  // Register a commutative C function whose user-visible signature does
+  // NOT include the trailing exec_ctx; mirror semantics of
+  // RegisterReadOnlyCFuncWithExecCtx (FunctionNode codegen will inject
+  // the exec_ctx automatically at call sites).
+  Status RegisterCommutativeCFuncWithExecCtx(const FunctionSignature &func_sign, void *c_func_ptr,
+                                             bool allow_override = false);
 
   Status GetFuncBySign(FunctionSignature &func_sign, FunctionStructure *func_struct) const;
 

@@ -635,729 +635,707 @@ ListType ListMax(ListType a, typename ListType::CElementType b, void *exec_conte
 }
 
 Status InitListAddFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListAdd", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr}, ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kU8List, ValueType::kU8}, ValueType::kU8List),
       reinterpret_cast<void *>(ListAdd<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListAdd", {ValueType::kU16List, ValueType::kU16, ValueType::kPtr}, ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kU16List, ValueType::kU16}, ValueType::kU16List),
       reinterpret_cast<void *>(ListAdd<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListAdd", {ValueType::kU32List, ValueType::kU32, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kU32List, ValueType::kU32}, ValueType::kU32List),
       reinterpret_cast<void *>(ListAdd<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListAdd", {ValueType::kU64List, ValueType::kU64, ValueType::kPtr}, ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kU64List, ValueType::kU64}, ValueType::kU64List),
       reinterpret_cast<void *>(ListAdd<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListAdd", {ValueType::kI8List, ValueType::kI8, ValueType::kPtr}, ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kI8List, ValueType::kI8}, ValueType::kI8List),
       reinterpret_cast<void *>(ListAdd<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListAdd", {ValueType::kI16List, ValueType::kI16, ValueType::kPtr}, ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kI16List, ValueType::kI16}, ValueType::kI16List),
       reinterpret_cast<void *>(ListAdd<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListAdd", {ValueType::kI32List, ValueType::kI32, ValueType::kPtr}, ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kI32List, ValueType::kI32}, ValueType::kI32List),
       reinterpret_cast<void *>(ListAdd<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListAdd", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr}, ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kI64List, ValueType::kI64}, ValueType::kI64List),
       reinterpret_cast<void *>(ListAdd<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListAdd", {ValueType::kF32List, ValueType::kF32, ValueType::kPtr}, ValueType::kF32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kF32List, ValueType::kF32}, ValueType::kF32List),
       reinterpret_cast<void *>(ListAdd<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListAdd", {ValueType::kF64List, ValueType::kF64, ValueType::kPtr}, ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kF64List, ValueType::kF64}, ValueType::kF64List),
       reinterpret_cast<void *>(ListAdd<F64ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListAdd", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kU8List, ValueType::kU8List}, ValueType::kU8List),
       reinterpret_cast<void *>(ListAddList<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListAdd", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr}, ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kU16List, ValueType::kU16List}, ValueType::kU16List),
       reinterpret_cast<void *>(ListAddList<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListAdd", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kU32List, ValueType::kU32List}, ValueType::kU32List),
       reinterpret_cast<void *>(ListAddList<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListAdd", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr}, ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kU64List, ValueType::kU64List}, ValueType::kU64List),
       reinterpret_cast<void *>(ListAddList<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListAdd", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr}, ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kI8List, ValueType::kI8List}, ValueType::kI8List),
       reinterpret_cast<void *>(ListAddList<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListAdd", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr}, ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kI16List, ValueType::kI16List}, ValueType::kI16List),
       reinterpret_cast<void *>(ListAddList<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListAdd", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr}, ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kI32List, ValueType::kI32List}, ValueType::kI32List),
       reinterpret_cast<void *>(ListAddList<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListAdd", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr}, ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kI64List, ValueType::kI64List}, ValueType::kI64List),
       reinterpret_cast<void *>(ListAddList<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListAdd", {ValueType::kF32List, ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kF32List, ValueType::kF32List}, ValueType::kF32List),
       reinterpret_cast<void *>(ListAddList<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListAdd", {ValueType::kF64List, ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListAdd", {ValueType::kF64List, ValueType::kF64List}, ValueType::kF64List),
       reinterpret_cast<void *>(ListAddList<F64ListStruct>)));
   return Status::OK();
 }
 
 Status InitListSubFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr}, ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kU8List, ValueType::kU8}, ValueType::kU8List),
       reinterpret_cast<void *>(ListSub<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kU16List, ValueType::kU16, ValueType::kPtr}, ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kU16List, ValueType::kU16}, ValueType::kU16List),
       reinterpret_cast<void *>(ListSub<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kU32List, ValueType::kU32, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kU32List, ValueType::kU32}, ValueType::kU32List),
       reinterpret_cast<void *>(ListSub<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kU64List, ValueType::kU64, ValueType::kPtr}, ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kU64List, ValueType::kU64}, ValueType::kU64List),
       reinterpret_cast<void *>(ListSub<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kI8List, ValueType::kI8, ValueType::kPtr}, ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kI8List, ValueType::kI8}, ValueType::kI8List),
       reinterpret_cast<void *>(ListSub<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kI16List, ValueType::kI16, ValueType::kPtr}, ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kI16List, ValueType::kI16}, ValueType::kI16List),
       reinterpret_cast<void *>(ListSub<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kI32List, ValueType::kI32, ValueType::kPtr}, ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kI32List, ValueType::kI32}, ValueType::kI32List),
       reinterpret_cast<void *>(ListSub<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr}, ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kI64List, ValueType::kI64}, ValueType::kI64List),
       reinterpret_cast<void *>(ListSub<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kF32List, ValueType::kF32, ValueType::kPtr}, ValueType::kF32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kF32List, ValueType::kF32}, ValueType::kF32List),
       reinterpret_cast<void *>(ListSub<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kF64List, ValueType::kF64, ValueType::kPtr}, ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kF64List, ValueType::kF64}, ValueType::kF64List),
       reinterpret_cast<void *>(ListSub<F64ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kU8List, ValueType::kU8List}, ValueType::kU8List),
       reinterpret_cast<void *>(ListSubList<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr}, ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kU16List, ValueType::kU16List}, ValueType::kU16List),
       reinterpret_cast<void *>(ListSubList<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kU32List, ValueType::kU32List}, ValueType::kU32List),
       reinterpret_cast<void *>(ListSubList<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr}, ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kU64List, ValueType::kU64List}, ValueType::kU64List),
       reinterpret_cast<void *>(ListSubList<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr}, ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kI8List, ValueType::kI8List}, ValueType::kI8List),
       reinterpret_cast<void *>(ListSubList<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr}, ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kI16List, ValueType::kI16List}, ValueType::kI16List),
       reinterpret_cast<void *>(ListSubList<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr}, ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kI32List, ValueType::kI32List}, ValueType::kI32List),
       reinterpret_cast<void *>(ListSubList<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr}, ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kI64List, ValueType::kI64List}, ValueType::kI64List),
       reinterpret_cast<void *>(ListSubList<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kF32List, ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kF32List, ValueType::kF32List}, ValueType::kF32List),
       reinterpret_cast<void *>(ListSubList<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListSub", {ValueType::kF64List, ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListSub", {ValueType::kF64List, ValueType::kF64List}, ValueType::kF64List),
       reinterpret_cast<void *>(ListSubList<F64ListStruct>)));
   return Status::OK();
 }
 
 Status InitListMulFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMul", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr}, ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kU8List, ValueType::kU8}, ValueType::kU8List),
       reinterpret_cast<void *>(ListMul<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMul", {ValueType::kU16List, ValueType::kU16, ValueType::kPtr}, ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kU16List, ValueType::kU16}, ValueType::kU16List),
       reinterpret_cast<void *>(ListMul<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMul", {ValueType::kU32List, ValueType::kU32, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kU32List, ValueType::kU32}, ValueType::kU32List),
       reinterpret_cast<void *>(ListMul<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMul", {ValueType::kU64List, ValueType::kU64, ValueType::kPtr}, ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kU64List, ValueType::kU64}, ValueType::kU64List),
       reinterpret_cast<void *>(ListMul<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMul", {ValueType::kI8List, ValueType::kI8, ValueType::kPtr}, ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kI8List, ValueType::kI8}, ValueType::kI8List),
       reinterpret_cast<void *>(ListMul<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMul", {ValueType::kI16List, ValueType::kI16, ValueType::kPtr}, ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kI16List, ValueType::kI16}, ValueType::kI16List),
       reinterpret_cast<void *>(ListMul<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMul", {ValueType::kI32List, ValueType::kI32, ValueType::kPtr}, ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kI32List, ValueType::kI32}, ValueType::kI32List),
       reinterpret_cast<void *>(ListMul<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMul", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr}, ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kI64List, ValueType::kI64}, ValueType::kI64List),
       reinterpret_cast<void *>(ListMul<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMul", {ValueType::kF32List, ValueType::kF32, ValueType::kPtr}, ValueType::kF32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kF32List, ValueType::kF32}, ValueType::kF32List),
       reinterpret_cast<void *>(ListMul<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMul", {ValueType::kF64List, ValueType::kF64, ValueType::kPtr}, ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kF64List, ValueType::kF64}, ValueType::kF64List),
       reinterpret_cast<void *>(ListMul<F64ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListMul", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kU8List, ValueType::kU8List}, ValueType::kU8List),
       reinterpret_cast<void *>(ListMulList<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListMul", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr}, ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kU16List, ValueType::kU16List}, ValueType::kU16List),
       reinterpret_cast<void *>(ListMulList<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListMul", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kU32List, ValueType::kU32List}, ValueType::kU32List),
       reinterpret_cast<void *>(ListMulList<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListMul", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr}, ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kU64List, ValueType::kU64List}, ValueType::kU64List),
       reinterpret_cast<void *>(ListMulList<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListMul", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr}, ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kI8List, ValueType::kI8List}, ValueType::kI8List),
       reinterpret_cast<void *>(ListMulList<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListMul", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr}, ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kI16List, ValueType::kI16List}, ValueType::kI16List),
       reinterpret_cast<void *>(ListMulList<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListMul", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr}, ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kI32List, ValueType::kI32List}, ValueType::kI32List),
       reinterpret_cast<void *>(ListMulList<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListMul", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr}, ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kI64List, ValueType::kI64List}, ValueType::kI64List),
       reinterpret_cast<void *>(ListMulList<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListMul", {ValueType::kF32List, ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kF32List, ValueType::kF32List}, ValueType::kF32List),
       reinterpret_cast<void *>(ListMulList<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListMul", {ValueType::kF64List, ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListMul", {ValueType::kF64List, ValueType::kF64List}, ValueType::kF64List),
       reinterpret_cast<void *>(ListMulList<F64ListStruct>)));
   return Status::OK();
 }
 
 Status InitListDivFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr}, ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kU8List, ValueType::kU8}, ValueType::kU8List),
       reinterpret_cast<void *>(ListDiv<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kU16List, ValueType::kU16, ValueType::kPtr}, ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kU16List, ValueType::kU16}, ValueType::kU16List),
       reinterpret_cast<void *>(ListDiv<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kU32List, ValueType::kU32, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kU32List, ValueType::kU32}, ValueType::kU32List),
       reinterpret_cast<void *>(ListDiv<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kU64List, ValueType::kU64, ValueType::kPtr}, ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kU64List, ValueType::kU64}, ValueType::kU64List),
       reinterpret_cast<void *>(ListDiv<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kI8List, ValueType::kI8, ValueType::kPtr}, ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kI8List, ValueType::kI8}, ValueType::kI8List),
       reinterpret_cast<void *>(ListDiv<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kI16List, ValueType::kI16, ValueType::kPtr}, ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kI16List, ValueType::kI16}, ValueType::kI16List),
       reinterpret_cast<void *>(ListDiv<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kI32List, ValueType::kI32, ValueType::kPtr}, ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kI32List, ValueType::kI32}, ValueType::kI32List),
       reinterpret_cast<void *>(ListDiv<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr}, ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kI64List, ValueType::kI64}, ValueType::kI64List),
       reinterpret_cast<void *>(ListDiv<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kF32List, ValueType::kF32, ValueType::kPtr}, ValueType::kF32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kF32List, ValueType::kF32}, ValueType::kF32List),
       reinterpret_cast<void *>(ListDiv<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kF64List, ValueType::kF64, ValueType::kPtr}, ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kF64List, ValueType::kF64}, ValueType::kF64List),
       reinterpret_cast<void *>(ListDiv<F64ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kU8List, ValueType::kU8List}, ValueType::kU8List),
       reinterpret_cast<void *>(ListDivList<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr}, ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kU16List, ValueType::kU16List}, ValueType::kU16List),
       reinterpret_cast<void *>(ListDivList<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kU32List, ValueType::kU32List}, ValueType::kU32List),
       reinterpret_cast<void *>(ListDivList<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr}, ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kU64List, ValueType::kU64List}, ValueType::kU64List),
       reinterpret_cast<void *>(ListDivList<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr}, ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kI8List, ValueType::kI8List}, ValueType::kI8List),
       reinterpret_cast<void *>(ListDivList<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr}, ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kI16List, ValueType::kI16List}, ValueType::kI16List),
       reinterpret_cast<void *>(ListDivList<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr}, ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kI32List, ValueType::kI32List}, ValueType::kI32List),
       reinterpret_cast<void *>(ListDivList<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr}, ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kI64List, ValueType::kI64List}, ValueType::kI64List),
       reinterpret_cast<void *>(ListDivList<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kF32List, ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kF32List, ValueType::kF32List}, ValueType::kF32List),
       reinterpret_cast<void *>(ListDivList<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListDiv", {ValueType::kF64List, ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListDiv", {ValueType::kF64List, ValueType::kF64List}, ValueType::kF64List),
       reinterpret_cast<void *>(ListDivList<F64ListStruct>)));
   return Status::OK();
 }
 
 Status InitListModFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMod", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr}, ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMod", {ValueType::kU8List, ValueType::kU8}, ValueType::kU8List),
       reinterpret_cast<void *>(ListMod<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMod", {ValueType::kU16List, ValueType::kU16, ValueType::kPtr}, ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMod", {ValueType::kU16List, ValueType::kU16}, ValueType::kU16List),
       reinterpret_cast<void *>(ListMod<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMod", {ValueType::kU32List, ValueType::kU32, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMod", {ValueType::kU32List, ValueType::kU32}, ValueType::kU32List),
       reinterpret_cast<void *>(ListMod<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMod", {ValueType::kU64List, ValueType::kU64, ValueType::kPtr}, ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMod", {ValueType::kU64List, ValueType::kU64}, ValueType::kU64List),
       reinterpret_cast<void *>(ListMod<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMod", {ValueType::kI8List, ValueType::kI8, ValueType::kPtr}, ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMod", {ValueType::kI8List, ValueType::kI8}, ValueType::kI8List),
       reinterpret_cast<void *>(ListMod<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMod", {ValueType::kI16List, ValueType::kI16, ValueType::kPtr}, ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMod", {ValueType::kI16List, ValueType::kI16}, ValueType::kI16List),
       reinterpret_cast<void *>(ListMod<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMod", {ValueType::kI32List, ValueType::kI32, ValueType::kPtr}, ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMod", {ValueType::kI32List, ValueType::kI32}, ValueType::kI32List),
       reinterpret_cast<void *>(ListMod<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMod", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr}, ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMod", {ValueType::kI64List, ValueType::kI64}, ValueType::kI64List),
       reinterpret_cast<void *>(ListMod<I64ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMod", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMod", {ValueType::kU8List, ValueType::kU8List}, ValueType::kU8List),
       reinterpret_cast<void *>(ListModList<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMod", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr}, ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMod", {ValueType::kU16List, ValueType::kU16List}, ValueType::kU16List),
       reinterpret_cast<void *>(ListModList<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMod", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMod", {ValueType::kU32List, ValueType::kU32List}, ValueType::kU32List),
       reinterpret_cast<void *>(ListModList<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMod", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr}, ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMod", {ValueType::kU64List, ValueType::kU64List}, ValueType::kU64List),
       reinterpret_cast<void *>(ListModList<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMod", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr}, ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMod", {ValueType::kI8List, ValueType::kI8List}, ValueType::kI8List),
       reinterpret_cast<void *>(ListModList<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMod", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr}, ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMod", {ValueType::kI16List, ValueType::kI16List}, ValueType::kI16List),
       reinterpret_cast<void *>(ListModList<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMod", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr}, ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMod", {ValueType::kI32List, ValueType::kI32List}, ValueType::kI32List),
       reinterpret_cast<void *>(ListModList<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMod", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr}, ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMod", {ValueType::kI64List, ValueType::kI64List}, ValueType::kI64List),
       reinterpret_cast<void *>(ListModList<I64ListStruct>)));
   return Status::OK();
 }
 
 Status InitListBitwiseAndFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseAnd", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr}, ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kU8List, ValueType::kU8}, ValueType::kU8List),
       reinterpret_cast<void *>(ListBitwiseAnd<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseAnd", {ValueType::kU16List, ValueType::kU16, ValueType::kPtr}, ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kU16List, ValueType::kU16}, ValueType::kU16List),
       reinterpret_cast<void *>(ListBitwiseAnd<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseAnd", {ValueType::kU32List, ValueType::kU32, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kU32List, ValueType::kU32}, ValueType::kU32List),
       reinterpret_cast<void *>(ListBitwiseAnd<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseAnd", {ValueType::kU64List, ValueType::kU64, ValueType::kPtr}, ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kU64List, ValueType::kU64}, ValueType::kU64List),
       reinterpret_cast<void *>(ListBitwiseAnd<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseAnd", {ValueType::kI8List, ValueType::kI8, ValueType::kPtr}, ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kI8List, ValueType::kI8}, ValueType::kI8List),
       reinterpret_cast<void *>(ListBitwiseAnd<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseAnd", {ValueType::kI16List, ValueType::kI16, ValueType::kPtr}, ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kI16List, ValueType::kI16}, ValueType::kI16List),
       reinterpret_cast<void *>(ListBitwiseAnd<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseAnd", {ValueType::kI32List, ValueType::kI32, ValueType::kPtr}, ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kI32List, ValueType::kI32}, ValueType::kI32List),
       reinterpret_cast<void *>(ListBitwiseAnd<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseAnd", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr}, ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kI64List, ValueType::kI64}, ValueType::kI64List),
       reinterpret_cast<void *>(ListBitwiseAnd<I64ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseAnd", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr},
-                        ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kU8List, ValueType::kU8List}, ValueType::kU8List),
       reinterpret_cast<void *>(ListBitwiseAndList<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseAnd", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr},
-                        ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kU16List, ValueType::kU16List}, ValueType::kU16List),
       reinterpret_cast<void *>(ListBitwiseAndList<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseAnd", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr},
-                        ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kU32List, ValueType::kU32List}, ValueType::kU32List),
       reinterpret_cast<void *>(ListBitwiseAndList<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseAnd", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr},
-                        ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kU64List, ValueType::kU64List}, ValueType::kU64List),
       reinterpret_cast<void *>(ListBitwiseAndList<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseAnd", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr},
-                        ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kI8List, ValueType::kI8List}, ValueType::kI8List),
       reinterpret_cast<void *>(ListBitwiseAndList<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseAnd", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr},
-                        ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kI16List, ValueType::kI16List}, ValueType::kI16List),
       reinterpret_cast<void *>(ListBitwiseAndList<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseAnd", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr},
-                        ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kI32List, ValueType::kI32List}, ValueType::kI32List),
       reinterpret_cast<void *>(ListBitwiseAndList<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseAnd", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr},
-                        ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseAnd", {ValueType::kI64List, ValueType::kI64List}, ValueType::kI64List),
       reinterpret_cast<void *>(ListBitwiseAndList<I64ListStruct>)));
   return Status::OK();
 }
 
 Status InitListBitwiseOrFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseOr", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr}, ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseOr", {ValueType::kU8List, ValueType::kU8}, ValueType::kU8List),
       reinterpret_cast<void *>(ListBitwiseOr<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseOr", {ValueType::kU16List, ValueType::kU16, ValueType::kPtr}, ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseOr", {ValueType::kU16List, ValueType::kU16}, ValueType::kU16List),
       reinterpret_cast<void *>(ListBitwiseOr<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseOr", {ValueType::kU32List, ValueType::kU32, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseOr", {ValueType::kU32List, ValueType::kU32}, ValueType::kU32List),
       reinterpret_cast<void *>(ListBitwiseOr<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseOr", {ValueType::kU64List, ValueType::kU64, ValueType::kPtr}, ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseOr", {ValueType::kU64List, ValueType::kU64}, ValueType::kU64List),
       reinterpret_cast<void *>(ListBitwiseOr<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseOr", {ValueType::kI8List, ValueType::kI8, ValueType::kPtr}, ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseOr", {ValueType::kI8List, ValueType::kI8}, ValueType::kI8List),
       reinterpret_cast<void *>(ListBitwiseOr<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseOr", {ValueType::kI16List, ValueType::kI16, ValueType::kPtr}, ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseOr", {ValueType::kI16List, ValueType::kI16}, ValueType::kI16List),
       reinterpret_cast<void *>(ListBitwiseOr<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseOr", {ValueType::kI32List, ValueType::kI32, ValueType::kPtr}, ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseOr", {ValueType::kI32List, ValueType::kI32}, ValueType::kI32List),
       reinterpret_cast<void *>(ListBitwiseOr<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseOr", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr}, ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseOr", {ValueType::kI64List, ValueType::kI64}, ValueType::kI64List),
       reinterpret_cast<void *>(ListBitwiseOr<I64ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseOr", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseOr", {ValueType::kU8List, ValueType::kU8List}, ValueType::kU8List),
       reinterpret_cast<void *>(ListBitwiseOrList<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseOr", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr},
-                        ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseOr", {ValueType::kU16List, ValueType::kU16List}, ValueType::kU16List),
       reinterpret_cast<void *>(ListBitwiseOrList<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseOr", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr},
-                        ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseOr", {ValueType::kU32List, ValueType::kU32List}, ValueType::kU32List),
       reinterpret_cast<void *>(ListBitwiseOrList<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseOr", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr},
-                        ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseOr", {ValueType::kU64List, ValueType::kU64List}, ValueType::kU64List),
       reinterpret_cast<void *>(ListBitwiseOrList<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseOr", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr}, ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseOr", {ValueType::kI8List, ValueType::kI8List}, ValueType::kI8List),
       reinterpret_cast<void *>(ListBitwiseOrList<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseOr", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr},
-                        ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseOr", {ValueType::kI16List, ValueType::kI16List}, ValueType::kI16List),
       reinterpret_cast<void *>(ListBitwiseOrList<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseOr", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr},
-                        ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseOr", {ValueType::kI32List, ValueType::kI32List}, ValueType::kI32List),
       reinterpret_cast<void *>(ListBitwiseOrList<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseOr", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr},
-                        ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseOr", {ValueType::kI64List, ValueType::kI64List}, ValueType::kI64List),
       reinterpret_cast<void *>(ListBitwiseOrList<I64ListStruct>)));
   return Status::OK();
 }
 
 Status InitListBitwiseXorFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseXor", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr}, ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseXor", {ValueType::kU8List, ValueType::kU8}, ValueType::kU8List),
       reinterpret_cast<void *>(ListBitwiseXor<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseXor", {ValueType::kU16List, ValueType::kU16, ValueType::kPtr}, ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseXor", {ValueType::kU16List, ValueType::kU16}, ValueType::kU16List),
       reinterpret_cast<void *>(ListBitwiseXor<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseXor", {ValueType::kU32List, ValueType::kU32, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseXor", {ValueType::kU32List, ValueType::kU32}, ValueType::kU32List),
       reinterpret_cast<void *>(ListBitwiseXor<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseXor", {ValueType::kU64List, ValueType::kU64, ValueType::kPtr}, ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseXor", {ValueType::kU64List, ValueType::kU64}, ValueType::kU64List),
       reinterpret_cast<void *>(ListBitwiseXor<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseXor", {ValueType::kI8List, ValueType::kI8, ValueType::kPtr}, ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseXor", {ValueType::kI8List, ValueType::kI8}, ValueType::kI8List),
       reinterpret_cast<void *>(ListBitwiseXor<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseXor", {ValueType::kI16List, ValueType::kI16, ValueType::kPtr}, ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseXor", {ValueType::kI16List, ValueType::kI16}, ValueType::kI16List),
       reinterpret_cast<void *>(ListBitwiseXor<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseXor", {ValueType::kI32List, ValueType::kI32, ValueType::kPtr}, ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseXor", {ValueType::kI32List, ValueType::kI32}, ValueType::kI32List),
       reinterpret_cast<void *>(ListBitwiseXor<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListBitwiseXor", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr}, ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseXor", {ValueType::kI64List, ValueType::kI64}, ValueType::kI64List),
       reinterpret_cast<void *>(ListBitwiseXor<I64ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseXor", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr},
-                        ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseXor", {ValueType::kU8List, ValueType::kU8List}, ValueType::kU8List),
       reinterpret_cast<void *>(ListBitwiseXorList<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseXor", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr},
-                        ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseXor", {ValueType::kU16List, ValueType::kU16List}, ValueType::kU16List),
       reinterpret_cast<void *>(ListBitwiseXorList<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseXor", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr},
-                        ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseXor", {ValueType::kU32List, ValueType::kU32List}, ValueType::kU32List),
       reinterpret_cast<void *>(ListBitwiseXorList<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseXor", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr},
-                        ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseXor", {ValueType::kU64List, ValueType::kU64List}, ValueType::kU64List),
       reinterpret_cast<void *>(ListBitwiseXorList<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseXor", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr},
-                        ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseXor", {ValueType::kI8List, ValueType::kI8List}, ValueType::kI8List),
       reinterpret_cast<void *>(ListBitwiseXorList<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseXor", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr},
-                        ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseXor", {ValueType::kI16List, ValueType::kI16List}, ValueType::kI16List),
       reinterpret_cast<void *>(ListBitwiseXorList<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseXor", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr},
-                        ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseXor", {ValueType::kI32List, ValueType::kI32List}, ValueType::kI32List),
       reinterpret_cast<void *>(ListBitwiseXorList<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFunc(
-      FunctionSignature("ListBitwiseXor", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr},
-                        ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterCommutativeCFuncWithExecCtx(
+      FunctionSignature("ListBitwiseXor", {ValueType::kI64List, ValueType::kI64List}, ValueType::kI64List),
       reinterpret_cast<void *>(ListBitwiseXorList<I64ListStruct>)));
   return Status::OK();
 }
 
 Status InitListExpFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListExp", {ValueType::kU8List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListExp<U8ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListExp", {ValueType::kU16List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListExp<U16ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListExp", {ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListExp<U32ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListExp", {ValueType::kU64List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListExp<U64ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListExp", {ValueType::kI8List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListExp<I8ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListExp", {ValueType::kI16List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListExp<I16ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListExp", {ValueType::kI32List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListExp<I32ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListExp", {ValueType::kI64List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListExp<I64ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListExp", {ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
-      reinterpret_cast<void *>(ListExp<F32ListStruct, F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListExp", {ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListExp<F64ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListExp", {ValueType::kU8List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListExp<U8ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListExp", {ValueType::kU16List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListExp<U16ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListExp", {ValueType::kU32List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListExp<U32ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListExp", {ValueType::kU64List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListExp<U64ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListExp", {ValueType::kI8List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListExp<I8ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListExp", {ValueType::kI16List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListExp<I16ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListExp", {ValueType::kI32List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListExp<I32ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListExp", {ValueType::kI64List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListExp<I64ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListExp", {ValueType::kF32List}, ValueType::kF32List),
+                                            reinterpret_cast<void *>(ListExp<F32ListStruct, F32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListExp", {ValueType::kF64List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListExp<F64ListStruct, F64ListStruct>)));
   return Status::OK();
 }
 
 Status InitListLogFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog", {ValueType::kU8List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog<U8ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog", {ValueType::kU16List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog<U16ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog", {ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog<U32ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog", {ValueType::kU64List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog<U64ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog", {ValueType::kI8List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog<I8ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog", {ValueType::kI16List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog<I16ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog", {ValueType::kI32List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog<I32ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog", {ValueType::kI64List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog<I64ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog", {ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
-      reinterpret_cast<void *>(ListLog<F32ListStruct, F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog", {ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog<F64ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog", {ValueType::kU8List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog<U8ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog", {ValueType::kU16List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog<U16ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog", {ValueType::kU32List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog<U32ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog", {ValueType::kU64List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog<U64ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog", {ValueType::kI8List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog<I8ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog", {ValueType::kI16List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog<I16ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog", {ValueType::kI32List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog<I32ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog", {ValueType::kI64List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog<I64ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog", {ValueType::kF32List}, ValueType::kF32List),
+                                            reinterpret_cast<void *>(ListLog<F32ListStruct, F32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog", {ValueType::kF64List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog<F64ListStruct, F64ListStruct>)));
   return Status::OK();
 }
 
 Status InitListLog2Func(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog2", {ValueType::kU8List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog2<U8ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog2", {ValueType::kU16List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog2<U16ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog2", {ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog2<U32ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog2", {ValueType::kU64List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog2<U64ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog2", {ValueType::kI8List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog2<I8ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog2", {ValueType::kI16List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog2<I16ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog2", {ValueType::kI32List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog2<I32ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog2", {ValueType::kI64List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog2<I64ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog2", {ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
-      reinterpret_cast<void *>(ListLog2<F32ListStruct, F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog2", {ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog2<F64ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog2", {ValueType::kU8List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog2<U8ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog2", {ValueType::kU16List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog2<U16ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog2", {ValueType::kU32List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog2<U32ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog2", {ValueType::kU64List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog2<U64ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog2", {ValueType::kI8List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog2<I8ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog2", {ValueType::kI16List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog2<I16ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog2", {ValueType::kI32List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog2<I32ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog2", {ValueType::kI64List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog2<I64ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog2", {ValueType::kF32List}, ValueType::kF32List),
+                                            reinterpret_cast<void *>(ListLog2<F32ListStruct, F32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog2", {ValueType::kF64List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog2<F64ListStruct, F64ListStruct>)));
   return Status::OK();
 }
 
 Status InitListLog10Func(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog10", {ValueType::kU8List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog10<U8ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog10", {ValueType::kU16List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog10<U16ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog10", {ValueType::kU32List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog10<U32ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog10", {ValueType::kU64List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog10<U64ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog10", {ValueType::kI8List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog10<I8ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog10", {ValueType::kI16List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog10<I16ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog10", {ValueType::kI32List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog10<I32ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog10", {ValueType::kI64List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog10<I64ListStruct, F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog10", {ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
-      reinterpret_cast<void *>(ListLog10<F32ListStruct, F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLog10", {ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListLog10<F64ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog10", {ValueType::kU8List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog10<U8ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog10", {ValueType::kU16List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog10<U16ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog10", {ValueType::kU32List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog10<U32ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog10", {ValueType::kU64List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog10<U64ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog10", {ValueType::kI8List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog10<I8ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog10", {ValueType::kI16List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog10<I16ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog10", {ValueType::kI32List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog10<I32ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog10", {ValueType::kI64List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog10<I64ListStruct, F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog10", {ValueType::kF32List}, ValueType::kF32List),
+                                            reinterpret_cast<void *>(ListLog10<F32ListStruct, F32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListLog10", {ValueType::kF64List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListLog10<F64ListStruct, F64ListStruct>)));
   return Status::OK();
 }
 
 Status InitListCeilFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListCeil", {ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
-      reinterpret_cast<void *>(ListCeil<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListCeil", {ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListCeil<F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListCeil", {ValueType::kF32List}, ValueType::kF32List),
+                                            reinterpret_cast<void *>(ListCeil<F32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListCeil", {ValueType::kF64List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListCeil<F64ListStruct>)));
   return Status::OK();
 }
 
 Status InitListFloorFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListFloor", {ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
-      reinterpret_cast<void *>(ListFloor<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListFloor", {ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListFloor<F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListFloor", {ValueType::kF32List}, ValueType::kF32List),
+                                            reinterpret_cast<void *>(ListFloor<F32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListFloor", {ValueType::kF64List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListFloor<F64ListStruct>)));
   return Status::OK();
 }
 
 Status InitListRoundFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListRound", {ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
-      reinterpret_cast<void *>(ListRound<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListRound", {ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(ListRound<F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListRound", {ValueType::kF32List}, ValueType::kF32List),
+                                            reinterpret_cast<void *>(ListRound<F32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("ListRound", {ValueType::kF64List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(ListRound<F64ListStruct>)));
   return Status::OK();
 }
 
 Status InitListMinFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMin", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr}, ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMin", {ValueType::kU8List, ValueType::kU8}, ValueType::kU8List),
       reinterpret_cast<void *>(ListMin<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMin", {ValueType::kU16List, ValueType::kU16, ValueType::kPtr}, ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMin", {ValueType::kU16List, ValueType::kU16}, ValueType::kU16List),
       reinterpret_cast<void *>(ListMin<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMin", {ValueType::kU32List, ValueType::kU32, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMin", {ValueType::kU32List, ValueType::kU32}, ValueType::kU32List),
       reinterpret_cast<void *>(ListMin<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMin", {ValueType::kU64List, ValueType::kU64, ValueType::kPtr}, ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMin", {ValueType::kU64List, ValueType::kU64}, ValueType::kU64List),
       reinterpret_cast<void *>(ListMin<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMin", {ValueType::kI8List, ValueType::kI8, ValueType::kPtr}, ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMin", {ValueType::kI8List, ValueType::kI8}, ValueType::kI8List),
       reinterpret_cast<void *>(ListMin<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMin", {ValueType::kI16List, ValueType::kI16, ValueType::kPtr}, ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMin", {ValueType::kI16List, ValueType::kI16}, ValueType::kI16List),
       reinterpret_cast<void *>(ListMin<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMin", {ValueType::kI32List, ValueType::kI32, ValueType::kPtr}, ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMin", {ValueType::kI32List, ValueType::kI32}, ValueType::kI32List),
       reinterpret_cast<void *>(ListMin<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMin", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr}, ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMin", {ValueType::kI64List, ValueType::kI64}, ValueType::kI64List),
       reinterpret_cast<void *>(ListMin<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMin", {ValueType::kF32List, ValueType::kF32, ValueType::kPtr}, ValueType::kF32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMin", {ValueType::kF32List, ValueType::kF32}, ValueType::kF32List),
       reinterpret_cast<void *>(ListMin<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMin", {ValueType::kF64List, ValueType::kF64, ValueType::kPtr}, ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMin", {ValueType::kF64List, ValueType::kF64}, ValueType::kF64List),
       reinterpret_cast<void *>(ListMin<F64ListStruct>)));
   return Status::OK();
 }
 
 Status InitListMaxFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMax", {ValueType::kU8List, ValueType::kU8, ValueType::kPtr}, ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMax", {ValueType::kU8List, ValueType::kU8}, ValueType::kU8List),
       reinterpret_cast<void *>(ListMax<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMax", {ValueType::kU16List, ValueType::kU16, ValueType::kPtr}, ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMax", {ValueType::kU16List, ValueType::kU16}, ValueType::kU16List),
       reinterpret_cast<void *>(ListMax<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMax", {ValueType::kU32List, ValueType::kU32, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMax", {ValueType::kU32List, ValueType::kU32}, ValueType::kU32List),
       reinterpret_cast<void *>(ListMax<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMax", {ValueType::kU64List, ValueType::kU64, ValueType::kPtr}, ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMax", {ValueType::kU64List, ValueType::kU64}, ValueType::kU64List),
       reinterpret_cast<void *>(ListMax<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMax", {ValueType::kI8List, ValueType::kI8, ValueType::kPtr}, ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMax", {ValueType::kI8List, ValueType::kI8}, ValueType::kI8List),
       reinterpret_cast<void *>(ListMax<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMax", {ValueType::kI16List, ValueType::kI16, ValueType::kPtr}, ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMax", {ValueType::kI16List, ValueType::kI16}, ValueType::kI16List),
       reinterpret_cast<void *>(ListMax<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMax", {ValueType::kI32List, ValueType::kI32, ValueType::kPtr}, ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMax", {ValueType::kI32List, ValueType::kI32}, ValueType::kI32List),
       reinterpret_cast<void *>(ListMax<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMax", {ValueType::kI64List, ValueType::kI64, ValueType::kPtr}, ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMax", {ValueType::kI64List, ValueType::kI64}, ValueType::kI64List),
       reinterpret_cast<void *>(ListMax<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMax", {ValueType::kF32List, ValueType::kF32, ValueType::kPtr}, ValueType::kF32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMax", {ValueType::kF32List, ValueType::kF32}, ValueType::kF32List),
       reinterpret_cast<void *>(ListMax<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListMax", {ValueType::kF64List, ValueType::kF64, ValueType::kPtr}, ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListMax", {ValueType::kF64List, ValueType::kF64}, ValueType::kF64List),
       reinterpret_cast<void *>(ListMax<F64ListStruct>)));
   return Status::OK();
 }

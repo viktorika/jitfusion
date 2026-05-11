@@ -25,11 +25,10 @@ TEST(FunctionTest, ListConcatTest) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto l_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(l));
   auto r_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(r));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode);
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(l_node));
   args_list.emplace_back(std::move(r_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListConcat", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -80,10 +79,9 @@ TEST(FunctionTest, SortAscTest1) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
-  auto exec_ctx_node = std::unique_ptr<ExecNode>(new ExecContextNode);
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
-  args_list.emplace_back(std::move(exec_ctx_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("SortAsc", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -100,10 +98,9 @@ TEST(FunctionTest, SortAscTest2) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
-  auto exec_ctx_node = std::unique_ptr<ExecNode>(new ExecContextNode);
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
-  args_list.emplace_back(std::move(exec_ctx_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("SortAsc", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -120,10 +117,9 @@ TEST(FunctionTest, SortAscTest3) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
-  auto exec_ctx_node = std::unique_ptr<ExecNode>(new ExecContextNode);
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
-  args_list.emplace_back(std::move(exec_ctx_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("SortAsc", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -223,12 +219,11 @@ std::vector<std::string> RunCrossJoin(const std::vector<std::string>& a, const s
   auto a_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(a));
   auto b_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(b));
   auto sep_node = std::unique_ptr<ExecNode>(new ConstantValueNode(sep));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode);
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(a_node));
   args_list.emplace_back(std::move(b_node));
   args_list.emplace_back(std::move(sep_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("CrossJoin", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -287,12 +282,11 @@ std::unique_ptr<ExecNode> MakeZipConcatExpr(const std::vector<std::string>& a, c
   auto a_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(a));
   auto b_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(b));
   auto sep_node = std::unique_ptr<ExecNode>(new ConstantValueNode(sep));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode);
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(a_node));
   args_list.emplace_back(std::move(b_node));
   args_list.emplace_back(std::move(sep_node));
-  args_list.emplace_back(std::move(exec_node));
+
   return std::unique_ptr<ExecNode>(new FunctionNode("ZipConcat", std::move(args_list)));
 }
 

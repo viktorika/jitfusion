@@ -2,22 +2,22 @@
  * @Author: victorika
  * @Date: 2026-05-06 12:48:50
  * @Last Modified by: victorika
- * @Last Modified time: 2026-05-06 12:48:50
+ * @Last Modified time: 2026-05-11 16:58:25
  */
 // K. List indexing kernels: lookup / compact / gather.
 //
 // Kernel overview:
-//   ListLookupIndex(a, b, ctx)         : for each element in a, find its first
+//   ListLookupIndex(a, b)              : for each element in a, find its first
 //                                        occurrence in b, return the position
 //                                        (u32max on miss). Built on a hash
 //                                        table over b.
-//   ListCompactPositions(raw, ctx)     : given a U32 list produced by
+//   ListCompactPositions(raw)          : given a U32 list produced by
 //                                        ListLookupIndex, return the positions
 //                                        in `a` that hit (i.e. the indices
 //                                        themselves, filtered by "not miss").
-//   ListCompactIndex(raw, ctx)         : same filter, but returns the looked-up
+//   ListCompactIndex(raw)              : same filter, but returns the looked-up
 //                                        b-side indices directly.
-//   ListGather(values, idx, dflt, ctx) : out[k] = (idx[k] < values.len) ?
+//   ListGather(values, idx, dflt)      : out[k] = (idx[k] < values.len) ?
 //                                        values[idx[k]] : dflt. The typical
 //                                        join-realign kernel.
 
@@ -40,7 +40,7 @@ using ::jitfusion::RetType;
 using ::jitfusion::bench::CompileOrDie;
 using ::jitfusion::bench::MakeRegistry;
 
-// Build `ListLookupIndex(a, b, ctx)` where both are i64 lists of length `len`.
+// Build `ListLookupIndex(a, b)` where both are i64 lists of length `len`.
 // Half of a's keys hit in b (pattern chosen to exercise both hit and miss
 // branches of the inner loop).
 std::unique_ptr<ExecNode> MakeLookupIndexCall(int len) {
@@ -49,13 +49,13 @@ std::unique_ptr<ExecNode> MakeLookupIndexCall(int len) {
   a.reserve(len);
   b.reserve(len);
   for (int i = 0; i < len; ++i) {
-    a.push_back(i);                  // keys 0..len-1
-    b.push_back(i * 2);              // keys 0,2,4,... — only even keys from a will hit
+    a.push_back(i);      // keys 0..len-1
+    b.push_back(i * 2);  // keys 0,2,4,... — only even keys from a will hit
   }
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(new ConstantListValueNode(std::move(a)));
   args.emplace_back(new ConstantListValueNode(std::move(b)));
-  args.emplace_back(new jitfusion::ExecContextNode());
+
   return std::unique_ptr<ExecNode>(new FunctionNode("ListLookupIndex", std::move(args)));
 }
 
@@ -94,7 +94,7 @@ void BM_Execute_ListCompactPositions(benchmark::State& state) {
   auto reg = MakeRegistry();
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(MakeRawLookupList(len));
-  args.emplace_back(new jitfusion::ExecContextNode());
+
   std::unique_ptr<ExecNode> node(new FunctionNode("ListCompactPositions", std::move(args)));
 
   auto engine = CompileOrDie(std::move(node), reg);
@@ -116,7 +116,7 @@ void BM_Execute_ListCompactIndex(benchmark::State& state) {
   auto reg = MakeRegistry();
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(MakeRawLookupList(len));
-  args.emplace_back(new jitfusion::ExecContextNode());
+
   std::unique_ptr<ExecNode> node(new FunctionNode("ListCompactIndex", std::move(args)));
 
   auto engine = CompileOrDie(std::move(node), reg);
@@ -133,7 +133,7 @@ void BM_Execute_ListCompactIndex(benchmark::State& state) {
 }
 BENCHMARK(BM_Execute_ListCompactIndex)->Arg(256)->Arg(4096);
 
-// ListGather(values<i64>, idx<u32>, default<i64>, ctx). `idx` is arranged so
+// ListGather(values<i64>, idx<u32>, default<i64>). `idx` is arranged so
 // every lookup hits (j < values.len) — the common hot path.
 void BM_Execute_ListGather(benchmark::State& state) {
   const int len = static_cast<int>(state.range(0));
@@ -150,7 +150,7 @@ void BM_Execute_ListGather(benchmark::State& state) {
   args.emplace_back(new ConstantListValueNode(std::move(values)));
   args.emplace_back(new ConstantListValueNode(std::move(idx)));
   args.emplace_back(new ConstantValueNode(static_cast<int64_t>(-1)));
-  args.emplace_back(new jitfusion::ExecContextNode());
+
   std::unique_ptr<ExecNode> node(new FunctionNode("ListGather", std::move(args)));
 
   auto engine = CompileOrDie(std::move(node), reg);
@@ -281,7 +281,7 @@ void BM_Execute_FindSorted_AllMiss(benchmark::State& state) {
 }
 BENCHMARK(BM_Execute_FindSorted_AllMiss)->Arg(256)->Arg(4096);
 
-// Bucketize(values<i64>, boundaries<i64>, ctx). Per-element cost is
+// Bucketize(values<i64>, boundaries<i64>). Per-element cost is
 // O(log |boundaries|), so we sweep both axes:
 //   * values  length: 256, 4096 (matches the rest of the file)
 //   * bucket count : 16, 256 (representative for feature-engineering use)
@@ -308,7 +308,7 @@ void BM_Execute_Bucketize(benchmark::State& state) {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(new ConstantListValueNode(std::move(values)));
   args.emplace_back(new ConstantListValueNode(std::move(boundaries)));
-  args.emplace_back(new jitfusion::ExecContextNode());
+
   std::unique_ptr<ExecNode> node(new FunctionNode("Bucketize", std::move(args)));
 
   auto engine = CompileOrDie(std::move(node), reg);

@@ -126,8 +126,9 @@ inline std::unique_ptr<ExecNode> MakeListUnaryCall(const std::string& func_name,
 // Convenience alias kept for readability.
 inline std::unique_ptr<ExecNode> MakeListSumExpr(int list_len) { return MakeListUnaryCall("Sum", list_len); }
 
-// Build `func_name(list, exec_ctx)` — one-arg list kernels that require an
-// ExecContext pointer (arithmetic/basic kernels that allocate output lists).
+// Build `func_name(list)` — one-arg list kernels that allocate output lists.
+// (The C-level kernel still takes a trailing exec_ctx pointer; codegen now
+// auto-injects it, so the user-visible AST has no ctx node.)
 inline std::unique_ptr<ExecNode> MakeListUnaryCtxCall(const std::string& func_name, int list_len) {
   std::vector<int64_t> values;
   values.reserve(list_len);
@@ -136,11 +137,10 @@ inline std::unique_ptr<ExecNode> MakeListUnaryCtxCall(const std::string& func_na
   }
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(new ConstantListValueNode(std::move(values)));
-  args.emplace_back(new jitfusion::ExecContextNode());
   return std::unique_ptr<ExecNode>(new FunctionNode(func_name, std::move(args)));
 }
 
-// Build `func_name(list<f64>, exec_ctx)` — unary kernels that only accept float lists
+// Build `func_name(list<f64>)` — unary kernels that only accept float lists
 // (ListCeil, ListFloor, ListRound).
 inline std::unique_ptr<ExecNode> MakeListUnaryCtxCallF64(const std::string& func_name, int list_len) {
   std::vector<double> values;
@@ -150,11 +150,10 @@ inline std::unique_ptr<ExecNode> MakeListUnaryCtxCallF64(const std::string& func
   }
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(new ConstantListValueNode(std::move(values)));
-  args.emplace_back(new jitfusion::ExecContextNode());
   return std::unique_ptr<ExecNode>(new FunctionNode(func_name, std::move(args)));
 }
 
-// Build `func_name(list<int64>, scalar_int, exec_ctx)` — list-scalar broadcast.
+// Build `func_name(list<int64>, scalar_int)` — list-scalar broadcast.
 inline std::unique_ptr<ExecNode> MakeListScalarCtxCall(const std::string& func_name, int list_len, int64_t scalar_val) {
   std::vector<int64_t> values;
   values.reserve(list_len);
@@ -164,11 +163,10 @@ inline std::unique_ptr<ExecNode> MakeListScalarCtxCall(const std::string& func_n
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(new ConstantListValueNode(std::move(values)));
   args.emplace_back(new ConstantValueNode(scalar_val));
-  args.emplace_back(new jitfusion::ExecContextNode());
   return std::unique_ptr<ExecNode>(new FunctionNode(func_name, std::move(args)));
 }
 
-// Build `func_name(list<uint64>, scalar<uint64>, exec_ctx)` — bitwise list-scalar.
+// Build `func_name(list<uint64>, scalar<uint64>)` — bitwise list-scalar.
 // Bitwise kernels are only registered for unsigned integer types.
 inline std::unique_ptr<ExecNode> MakeListScalarCtxCallU64(const std::string& func_name, int list_len,
                                                           uint64_t scalar_val) {
@@ -180,11 +178,10 @@ inline std::unique_ptr<ExecNode> MakeListScalarCtxCallU64(const std::string& fun
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(new ConstantListValueNode(std::move(values)));
   args.emplace_back(new ConstantValueNode(scalar_val));
-  args.emplace_back(new jitfusion::ExecContextNode());
   return std::unique_ptr<ExecNode>(new FunctionNode(func_name, std::move(args)));
 }
 
-// Build `func_name(list<uint64>, list<uint64>, exec_ctx)` — bitwise list-list.
+// Build `func_name(list<uint64>, list<uint64>)` — bitwise list-list.
 inline std::unique_ptr<ExecNode> MakeListListCtxCallU64(const std::string& func_name, int list_len) {
   std::vector<uint64_t> lhs;
   std::vector<uint64_t> rhs;
@@ -197,11 +194,10 @@ inline std::unique_ptr<ExecNode> MakeListListCtxCallU64(const std::string& func_
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(new ConstantListValueNode(std::move(lhs)));
   args.emplace_back(new ConstantListValueNode(std::move(rhs)));
-  args.emplace_back(new jitfusion::ExecContextNode());
   return std::unique_ptr<ExecNode>(new FunctionNode(func_name, std::move(args)));
 }
 
-// Build `func_name(list<int64>, list<int64>, exec_ctx)` — element-wise list-list.
+// Build `func_name(list<int64>, list<int64>)` — element-wise list-list.
 inline std::unique_ptr<ExecNode> MakeListListCtxCall(const std::string& func_name, int list_len) {
   std::vector<int64_t> lhs;
   std::vector<int64_t> rhs;
@@ -214,11 +210,10 @@ inline std::unique_ptr<ExecNode> MakeListListCtxCall(const std::string& func_nam
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(new ConstantListValueNode(std::move(lhs)));
   args.emplace_back(new ConstantListValueNode(std::move(rhs)));
-  args.emplace_back(new jitfusion::ExecContextNode());
   return std::unique_ptr<ExecNode>(new FunctionNode(func_name, std::move(args)));
 }
 
-// Build `func_name(list<int64>, scalar, scalar, exec_ctx)` — the IfEqual /
+// Build `func_name(list<int64>, scalar, scalar)` — the IfEqual /
 // IfLess / etc. family: "for each element, if cond(elem, pivot) pick a else b".
 inline std::unique_ptr<ExecNode> MakeListIfSelectCall(const std::string& func_name, int list_len) {
   std::vector<int64_t> values;
@@ -230,7 +225,6 @@ inline std::unique_ptr<ExecNode> MakeListIfSelectCall(const std::string& func_na
   args.emplace_back(new ConstantListValueNode(std::move(values)));
   args.emplace_back(new ConstantValueNode(static_cast<int64_t>(list_len / 2)));
   args.emplace_back(new ConstantValueNode(static_cast<int64_t>(-1)));
-  args.emplace_back(new jitfusion::ExecContextNode());
   return std::unique_ptr<ExecNode>(new FunctionNode(func_name, std::move(args)));
 }
 

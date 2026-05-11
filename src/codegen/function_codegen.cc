@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-22 14:25:33
  * @Last Modified by: victorika
- * @Last Modified time: 2025-01-22 16:50:36
+ * @Last Modified time: 2026-05-11 16:17:09
  */
 #include <vector>
 #include "codegen.h"
@@ -32,17 +32,31 @@ Status CodeGen::Visit(FunctionNode& function_node) {
   FunctionSignature sign(function_node.GetFuncName(), args_type_list, ValueType::kUnknown);
   FunctionStructure func_struct;
   JF_RETURN_NOT_OK(ctx_.function_registry->GetFuncBySign(sign, &func_struct));
+
   switch (func_struct.func_type) {
     case FunctionType::kLLVMIntrinicFunc: {
       value_ = func_struct.codegen_func(sign, args_llvm_type_list, args_llvm_value_list, ctx_);
     } break;
     case FunctionType::kCFunc: {
+      std::string call_symbol_name;
+      if (func_struct.needs_exec_ctx) {
+        llvm::Type* ptr_ty = llvm::PointerType::getUnqual(ctx_.context);
+        args_llvm_type_list.emplace_back(ptr_ty);
+        args_llvm_value_list.emplace_back(ctx_.entry_function->getArg(1));
+        std::vector<ValueType> ctx_param_types = sign.GetParamTypes();
+        ctx_param_types.emplace_back(ValueType::kPtr);
+        FunctionSignature ctx_sign(sign.GetName(), std::move(ctx_param_types), sign.GetRetType());
+        call_symbol_name = ctx_sign.ToString();
+      } else {
+        call_symbol_name = sign.ToString();
+      }
+
       llvm::Type* llvm_ret_type;
       JF_RETURN_NOT_OK(ValueTypeToLLVMType(ctx_, function_node.GetReturnType(), &llvm_ret_type));
       llvm::FunctionType* func_type =
           llvm::FunctionType::get(llvm_ret_type, llvm::ArrayRef<llvm::Type*>(args_llvm_type_list), false);
 
-      llvm::FunctionCallee call_func_callee = ctx_.module.getOrInsertFunction(sign.ToString(), func_type);
+      llvm::FunctionCallee call_func_callee = ctx_.module.getOrInsertFunction(call_symbol_name, func_type);
 
       if (function_node.GetReturnType() == ValueType::kVoid) {
         ctx_.builder.CreateCall(call_func_callee, args_llvm_value_list);

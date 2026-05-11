@@ -124,7 +124,7 @@ I considered how many types of nodes are needed to represent a function in the e
 
     EntryArgumentNode: A node used to obtain the entry argument variables of a function.
 
-    ExecContextNode: A node used to obtain the context variables of the execution engine.
+    ExecContextNode: A node used to obtain the context variables of the execution engine. (Legacy — kept for backward compatibility; new code does not need to construct it explicitly because codegen auto-injects exec_ctx for functions registered via `RegisterReadOnlyCFuncWithExecCtx`.)
 
     ConstValueNode: Scalar constant node.
 
@@ -309,9 +309,9 @@ The library is designed around a "compile once, execute from many threads" patte
 Recommended pattern for parallel execution: one shared `ExecEngine` plus one `ExecContext` per worker thread.
 
 # Attention
-1. If you need to allocate memory that you cannot manage yourself and require the execution engine to manage it for you, you need to use the ExecContextNode. The ExecContext structure corresponding to ExecContextNode contains an arena. By using it to allocate memory, the memory will be automatically released when the execution is complete.
+1. If you need to allocate memory that you cannot manage yourself and require the execution engine to manage it for you, register your C function with `RegisterReadOnlyCFuncWithExecCtx`. The function should accept a trailing `void* ctx` parameter (which is the `ExecContext` pointer); the AST does **not** pass it explicitly — codegen automatically forwards the per-execution context. The `ExecContext` carries an arena, so memory allocated through `exec_ctx->arena` is freed automatically when execution ends.
 
-You can refer to test/exec_context_node_test.cc for more details. For example:
+For example:
 
 ```c++
 using namespace jitfusion;
@@ -330,13 +330,14 @@ U32ListStruct CreateU32List(void* ctx) {
 int main() {
   std::unique_ptr<FunctionRegistry> func_registry;
   FunctionRegistryFactory::CreateFunctionRegistry(&func_registry);
-  FunctionSignature sign("create_u32_list", {ValueType::kPtr}, ValueType::kU32List);
-  func_registry->RegisterReadOnlyCFunc(sign, reinterpret_cast<void*>(CreateU32List));
+  // User-visible signature has no trailing kPtr; the trailing exec_ctx is
+  // injected by codegen at every call site.
+  FunctionSignature sign("create_u32_list", {}, ValueType::kU32List);
+  func_registry->RegisterReadOnlyCFuncWithExecCtx(sign, reinterpret_cast<void*>(CreateU32List));
 
-  auto args_node = std::unique_ptr<ExecNode>(new ExecContextNode);
-  std::vector<std::unique_ptr<ExecNode>> create_func_args;
-  create_func_args.emplace_back(std::move(args_node));
-  auto create_func_node = std::unique_ptr<ExecNode>(new FunctionNode("create_u32_list", std::move(create_func_args)));
+  // No ExecContextNode in the AST — codegen wires exec_ctx through.
+  auto create_func_node = std::unique_ptr<ExecNode>(
+      new FunctionNode("create_u32_list", std::vector<std::unique_ptr<ExecNode>>{}));
 
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(create_func_node, func_registry);
