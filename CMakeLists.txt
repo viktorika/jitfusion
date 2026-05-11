@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(jitfusion VERSION 1.3.0 LANGUAGES CXX)
+project(jitfusion VERSION 1.3.1 LANGUAGES CXX)
 
 # GNUInstallDirs defines CMAKE_INSTALL_{LIBDIR,INCLUDEDIR,BINDIR,DOCDIR,...}
 # so we need it before any target_include_directories(... $<INSTALL_INTERFACE:...> ...)
