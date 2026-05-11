@@ -82,7 +82,7 @@ TEST(FilterTest, Test1) {
   std::string code = R"(
   a = load(entry_arg, 0);
   b = GenLargeBitmap(a, 3, exec_ctx);
-  FilterByBitmap(a, b, exec_ctx);
+  FilterByBitmap(a, b);
   )";
   ASSERT_TRUE(athena.Compile(code, func_registry).ok());
   RetType ret;
@@ -102,7 +102,7 @@ TEST(FilterTest, Test2) {
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
   c = GenLargeBitmap(a, b, exec_ctx);
-  FilterByBitmap(a, c, exec_ctx);
+  FilterByBitmap(a, c);
   )";
   ASSERT_TRUE(athena.Compile(code, func_registry).ok());
   RetType ret;

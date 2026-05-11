@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2026-02-09 15:09:08
  * @Last Modified by: victorika
- * @Last Modified time: 2026-04-03 15:37:01
+ * @Last Modified time: 2026-05-11 16:38:55
  */
 #include <algorithm>
 #include <charconv>
@@ -251,9 +251,8 @@ inline StringListStruct UniqueString(StringListStruct a, void *exec_context) {
 }
 
 Status InitCrossJoinFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CrossJoin",
-                        {ValueType::kStringList, ValueType::kStringList, ValueType::kString, ValueType::kPtr},
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("CrossJoin", {ValueType::kStringList, ValueType::kStringList, ValueType::kString},
                         ValueType::kStringList),
       reinterpret_cast<void *>(CrossJoinString)));
   return Status::OK();
@@ -310,9 +309,8 @@ inline StringListStruct ZipConcatString(StringListStruct a, StringListStruct b, 
 }
 
 Status InitZipConcatFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ZipConcat",
-                        {ValueType::kStringList, ValueType::kStringList, ValueType::kString, ValueType::kPtr},
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ZipConcat", {ValueType::kStringList, ValueType::kStringList, ValueType::kString},
                         ValueType::kStringList),
       reinterpret_cast<void *>(ZipConcatString)));
   return Status::OK();
@@ -320,75 +318,74 @@ Status InitZipConcatFunc(FunctionRegistry *reg) {
 
 Status InitUniqueFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(
-      reg->RegisterReadOnlyCFunc(FunctionSignature("Unique", {ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
-                                 reinterpret_cast<void *>(Unique<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("Unique", {ValueType::kU16List, ValueType::kPtr}, ValueType::kU16List),
-      reinterpret_cast<void *>(Unique<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("Unique", {ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
-      reinterpret_cast<void *>(Unique<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("Unique", {ValueType::kU64List, ValueType::kPtr}, ValueType::kU64List),
-      reinterpret_cast<void *>(Unique<U64ListStruct>)));
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("Unique", {ValueType::kU8List}, ValueType::kU8List),
+                                            reinterpret_cast<void *>(Unique<U8ListStruct>)));
   JF_RETURN_NOT_OK(
-      reg->RegisterReadOnlyCFunc(FunctionSignature("Unique", {ValueType::kI8List, ValueType::kPtr}, ValueType::kI8List),
-                                 reinterpret_cast<void *>(Unique<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("Unique", {ValueType::kI16List, ValueType::kPtr}, ValueType::kI16List),
-      reinterpret_cast<void *>(Unique<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("Unique", {ValueType::kI32List, ValueType::kPtr}, ValueType::kI32List),
-      reinterpret_cast<void *>(Unique<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("Unique", {ValueType::kI64List, ValueType::kPtr}, ValueType::kI64List),
-      reinterpret_cast<void *>(Unique<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("Unique", {ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
-      reinterpret_cast<void *>(Unique<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("Unique", {ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(Unique<F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("Unique", {ValueType::kStringList, ValueType::kPtr}, ValueType::kStringList),
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("Unique", {ValueType::kU16List}, ValueType::kU16List),
+                                            reinterpret_cast<void *>(Unique<U16ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("Unique", {ValueType::kU32List}, ValueType::kU32List),
+                                            reinterpret_cast<void *>(Unique<U32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("Unique", {ValueType::kU64List}, ValueType::kU64List),
+                                            reinterpret_cast<void *>(Unique<U64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("Unique", {ValueType::kI8List}, ValueType::kI8List),
+                                            reinterpret_cast<void *>(Unique<I8ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("Unique", {ValueType::kI16List}, ValueType::kI16List),
+                                            reinterpret_cast<void *>(Unique<I16ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("Unique", {ValueType::kI32List}, ValueType::kI32List),
+                                            reinterpret_cast<void *>(Unique<I32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("Unique", {ValueType::kI64List}, ValueType::kI64List),
+                                            reinterpret_cast<void *>(Unique<I64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("Unique", {ValueType::kF32List}, ValueType::kF32List),
+                                            reinterpret_cast<void *>(Unique<F32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("Unique", {ValueType::kF64List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(Unique<F64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("Unique", {ValueType::kStringList}, ValueType::kStringList),
       reinterpret_cast<void *>(UniqueString)));
   return Status::OK();
 }
 
 Status InitListConcatFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListConcat", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListConcat", {ValueType::kU8List, ValueType::kU8List}, ValueType::kU8List),
       reinterpret_cast<void *>(ListConcat<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListConcat", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr}, ValueType::kU16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListConcat", {ValueType::kU16List, ValueType::kU16List}, ValueType::kU16List),
       reinterpret_cast<void *>(ListConcat<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListConcat", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListConcat", {ValueType::kU32List, ValueType::kU32List}, ValueType::kU32List),
       reinterpret_cast<void *>(ListConcat<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListConcat", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr}, ValueType::kU64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListConcat", {ValueType::kU64List, ValueType::kU64List}, ValueType::kU64List),
       reinterpret_cast<void *>(ListConcat<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListConcat", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr}, ValueType::kI8List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListConcat", {ValueType::kI8List, ValueType::kI8List}, ValueType::kI8List),
       reinterpret_cast<void *>(ListConcat<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListConcat", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr}, ValueType::kI16List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListConcat", {ValueType::kI16List, ValueType::kI16List}, ValueType::kI16List),
       reinterpret_cast<void *>(ListConcat<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListConcat", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr}, ValueType::kI32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListConcat", {ValueType::kI32List, ValueType::kI32List}, ValueType::kI32List),
       reinterpret_cast<void *>(ListConcat<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListConcat", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr}, ValueType::kI64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListConcat", {ValueType::kI64List, ValueType::kI64List}, ValueType::kI64List),
       reinterpret_cast<void *>(ListConcat<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListConcat", {ValueType::kF32List, ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListConcat", {ValueType::kF32List, ValueType::kF32List}, ValueType::kF32List),
       reinterpret_cast<void *>(ListConcat<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListConcat", {ValueType::kF64List, ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListConcat", {ValueType::kF64List, ValueType::kF64List}, ValueType::kF64List),
       reinterpret_cast<void *>(ListConcat<F64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListConcat", {ValueType::kStringList, ValueType::kStringList, ValueType::kPtr},
-                        ValueType::kStringList),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("ListConcat", {ValueType::kStringList, ValueType::kStringList}, ValueType::kStringList),
       reinterpret_cast<void *>(ListConcat<StringListStruct>)));
   return Status::OK();
 }
@@ -457,67 +454,67 @@ Status InitLenFunc(FunctionRegistry *reg) {
 }
 
 Status InitSortFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortAsc", {ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
-      reinterpret_cast<void *>(SortAsc<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortAsc", {ValueType::kU16List, ValueType::kPtr}, ValueType::kU16List),
-      reinterpret_cast<void *>(SortAsc<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortAsc", {ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
-      reinterpret_cast<void *>(SortAsc<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortAsc", {ValueType::kU64List, ValueType::kPtr}, ValueType::kU64List),
-      reinterpret_cast<void *>(SortAsc<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortAsc", {ValueType::kI8List, ValueType::kPtr}, ValueType::kI8List),
-      reinterpret_cast<void *>(SortAsc<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortAsc", {ValueType::kI16List, ValueType::kPtr}, ValueType::kI16List),
-      reinterpret_cast<void *>(SortAsc<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortAsc", {ValueType::kI32List, ValueType::kPtr}, ValueType::kI32List),
-      reinterpret_cast<void *>(SortAsc<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortAsc", {ValueType::kI64List, ValueType::kPtr}, ValueType::kI64List),
-      reinterpret_cast<void *>(SortAsc<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortAsc", {ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
-      reinterpret_cast<void *>(SortAsc<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortAsc", {ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(SortAsc<F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortAsc", {ValueType::kU8List}, ValueType::kU8List),
+                                            reinterpret_cast<void *>(SortAsc<U8ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortAsc", {ValueType::kU16List}, ValueType::kU16List),
+                                            reinterpret_cast<void *>(SortAsc<U16ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortAsc", {ValueType::kU32List}, ValueType::kU32List),
+                                            reinterpret_cast<void *>(SortAsc<U32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortAsc", {ValueType::kU64List}, ValueType::kU64List),
+                                            reinterpret_cast<void *>(SortAsc<U64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortAsc", {ValueType::kI8List}, ValueType::kI8List),
+                                            reinterpret_cast<void *>(SortAsc<I8ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortAsc", {ValueType::kI16List}, ValueType::kI16List),
+                                            reinterpret_cast<void *>(SortAsc<I16ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortAsc", {ValueType::kI32List}, ValueType::kI32List),
+                                            reinterpret_cast<void *>(SortAsc<I32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortAsc", {ValueType::kI64List}, ValueType::kI64List),
+                                            reinterpret_cast<void *>(SortAsc<I64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortAsc", {ValueType::kF32List}, ValueType::kF32List),
+                                            reinterpret_cast<void *>(SortAsc<F32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortAsc", {ValueType::kF64List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(SortAsc<F64ListStruct>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortDesc", {ValueType::kU8List, ValueType::kPtr}, ValueType::kU8List),
-      reinterpret_cast<void *>(SortDesc<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortDesc", {ValueType::kU16List, ValueType::kPtr}, ValueType::kU16List),
-      reinterpret_cast<void *>(SortDesc<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortDesc", {ValueType::kU32List, ValueType::kPtr}, ValueType::kU32List),
-      reinterpret_cast<void *>(SortDesc<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortDesc", {ValueType::kU64List, ValueType::kPtr}, ValueType::kU64List),
-      reinterpret_cast<void *>(SortDesc<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortDesc", {ValueType::kI8List, ValueType::kPtr}, ValueType::kI8List),
-      reinterpret_cast<void *>(SortDesc<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortDesc", {ValueType::kI16List, ValueType::kPtr}, ValueType::kI16List),
-      reinterpret_cast<void *>(SortDesc<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortDesc", {ValueType::kI32List, ValueType::kPtr}, ValueType::kI32List),
-      reinterpret_cast<void *>(SortDesc<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortDesc", {ValueType::kI64List, ValueType::kPtr}, ValueType::kI64List),
-      reinterpret_cast<void *>(SortDesc<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortDesc", {ValueType::kF32List, ValueType::kPtr}, ValueType::kF32List),
-      reinterpret_cast<void *>(SortDesc<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("SortDesc", {ValueType::kF64List, ValueType::kPtr}, ValueType::kF64List),
-      reinterpret_cast<void *>(SortDesc<F64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortDesc", {ValueType::kU8List}, ValueType::kU8List),
+                                            reinterpret_cast<void *>(SortDesc<U8ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortDesc", {ValueType::kU16List}, ValueType::kU16List),
+                                            reinterpret_cast<void *>(SortDesc<U16ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortDesc", {ValueType::kU32List}, ValueType::kU32List),
+                                            reinterpret_cast<void *>(SortDesc<U32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortDesc", {ValueType::kU64List}, ValueType::kU64List),
+                                            reinterpret_cast<void *>(SortDesc<U64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortDesc", {ValueType::kI8List}, ValueType::kI8List),
+                                            reinterpret_cast<void *>(SortDesc<I8ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortDesc", {ValueType::kI16List}, ValueType::kI16List),
+                                            reinterpret_cast<void *>(SortDesc<I16ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortDesc", {ValueType::kI32List}, ValueType::kI32List),
+                                            reinterpret_cast<void *>(SortDesc<I32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortDesc", {ValueType::kI64List}, ValueType::kI64List),
+                                            reinterpret_cast<void *>(SortDesc<I64ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortDesc", {ValueType::kF32List}, ValueType::kF32List),
+                                            reinterpret_cast<void *>(SortDesc<F32ListStruct>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("SortDesc", {ValueType::kF64List}, ValueType::kF64List),
+                                            reinterpret_cast<void *>(SortDesc<F64ListStruct>)));
   return Status::OK();
 }
 
@@ -598,8 +595,9 @@ Status RegisterNumericListCast(FunctionRegistry *reg, const std::string &func_na
   if (input_list_vt == output_list_vt) {
     return Status::OK();
   }
-  return reg->RegisterReadOnlyCFunc(FunctionSignature(func_name, {input_list_vt, ValueType::kPtr}, output_list_vt),
-                                    reinterpret_cast<void *>(ListCastNumericToNumeric<InputListType, OutputListType>));
+  return reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature(func_name, {input_list_vt}, output_list_vt),
+      reinterpret_cast<void *>(ListCastNumericToNumeric<InputListType, OutputListType>));
 }
 
 template <typename OutputListType>
@@ -626,9 +624,9 @@ Status RegisterAllInputsForNumericListCast(FunctionRegistry *reg, const std::str
   JF_RETURN_NOT_OK(
       (RegisterNumericListCast<F64ListStruct, OutputListType>(reg, func_name, ValueType::kF64List, output_list_vt)));
   if constexpr (!std::is_floating_point_v<typename OutputListType::CElementType>) {
-    JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-        FunctionSignature(func_name, {ValueType::kStringList, ValueType::kPtr}, output_list_vt),
-        reinterpret_cast<void *>(ListCastStringToNumeric<OutputListType>)));
+    JF_RETURN_NOT_OK(
+        reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature(func_name, {ValueType::kStringList}, output_list_vt),
+                                              reinterpret_cast<void *>(ListCastStringToNumeric<OutputListType>)));
   }
   return Status::OK();
 }
@@ -645,35 +643,35 @@ Status InitListCastFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(RegisterAllInputsForNumericListCast<F32ListStruct>(reg, "CastF32List", ValueType::kF32List));
   JF_RETURN_NOT_OK(RegisterAllInputsForNumericListCast<F64ListStruct>(reg, "CastF64List", ValueType::kF64List));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastStringList", {ValueType::kU8List, ValueType::kPtr}, ValueType::kStringList),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("CastStringList", {ValueType::kU8List}, ValueType::kStringList),
       reinterpret_cast<void *>(ListCastNumericToString<U8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastStringList", {ValueType::kI8List, ValueType::kPtr}, ValueType::kStringList),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("CastStringList", {ValueType::kI8List}, ValueType::kStringList),
       reinterpret_cast<void *>(ListCastNumericToString<I8ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastStringList", {ValueType::kU16List, ValueType::kPtr}, ValueType::kStringList),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("CastStringList", {ValueType::kU16List}, ValueType::kStringList),
       reinterpret_cast<void *>(ListCastNumericToString<U16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastStringList", {ValueType::kI16List, ValueType::kPtr}, ValueType::kStringList),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("CastStringList", {ValueType::kI16List}, ValueType::kStringList),
       reinterpret_cast<void *>(ListCastNumericToString<I16ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastStringList", {ValueType::kU32List, ValueType::kPtr}, ValueType::kStringList),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("CastStringList", {ValueType::kU32List}, ValueType::kStringList),
       reinterpret_cast<void *>(ListCastNumericToString<U32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastStringList", {ValueType::kI32List, ValueType::kPtr}, ValueType::kStringList),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("CastStringList", {ValueType::kI32List}, ValueType::kStringList),
       reinterpret_cast<void *>(ListCastNumericToString<I32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastStringList", {ValueType::kU64List, ValueType::kPtr}, ValueType::kStringList),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("CastStringList", {ValueType::kU64List}, ValueType::kStringList),
       reinterpret_cast<void *>(ListCastNumericToString<U64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastStringList", {ValueType::kI64List, ValueType::kPtr}, ValueType::kStringList),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("CastStringList", {ValueType::kI64List}, ValueType::kStringList),
       reinterpret_cast<void *>(ListCastNumericToString<I64ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastStringList", {ValueType::kF32List, ValueType::kPtr}, ValueType::kStringList),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("CastStringList", {ValueType::kF32List}, ValueType::kStringList),
       reinterpret_cast<void *>(ListCastNumericToString<F32ListStruct>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastStringList", {ValueType::kF64List, ValueType::kPtr}, ValueType::kStringList),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("CastStringList", {ValueType::kF64List}, ValueType::kStringList),
       reinterpret_cast<void *>(ListCastNumericToString<F64ListStruct>)));
 
   return Status::OK();

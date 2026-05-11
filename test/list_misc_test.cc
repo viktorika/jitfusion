@@ -26,11 +26,9 @@ TEST(FunctionTest, FilterByBitmapTest1) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto bitmap_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(bitmap));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(bitmap_node));
-  args_list.emplace_back(std::move(exec_node));
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("FilterByBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -49,11 +47,9 @@ TEST(FunctionTest, FilterByBitmapTest2) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto bitmap_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(bitmap));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(bitmap_node));
-  args_list.emplace_back(std::move(exec_node));
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("FilterByBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -107,11 +103,10 @@ TEST(FunctionTest, FilterByBitmapSugarFromGenBitmapTest) {
   gen_args.emplace_back(new ExecContextNode());
   auto bitmap_node = std::unique_ptr<ExecNode>(new FunctionNode("GenLargeBitmap", std::move(gen_args)));
 
-  // FilterByBitmap(data, bitmap, exec_ctx) -- sugar, no bits_cnt.
+  // FilterByBitmap(data, bitmap) -- sugar, no bits_cnt and no exec_ctx.
   std::vector<std::unique_ptr<ExecNode>> filter_args;
   filter_args.emplace_back(new ConstantListValueNode(data));
   filter_args.emplace_back(std::move(bitmap_node));
-  filter_args.emplace_back(new ExecContextNode());
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("FilterByBitmap", std::move(filter_args)));
 
   ExecEngine exec_engine;

@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2026-05-06 11:20:00
  * @Last Modified by: victorika
- * @Last Modified time: 2026-05-06 11:20:00
+ * @Last Modified time: 2026-05-11 16:35:40
  */
 #include <cstdint>
 #include <limits>
@@ -23,12 +23,13 @@ namespace {
 
 constexpr uint32_t kMiss = std::numeric_limits<uint32_t>::max();
 
-// Build a FunctionNode that takes two lists and an ExecContextNode.
+// Build a FunctionNode that takes two lists. ListLookupIndex is registered
+// as a sugar lowering and its user-visible signature does NOT include the
+// trailing exec_ctx; the codegen pulls ctx from the entry function itself.
 std::unique_ptr<ExecNode> MakeLookup(std::unique_ptr<ExecNode> a, std::unique_ptr<ExecNode> b) {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(a));
   args.emplace_back(std::move(b));
-  args.emplace_back(std::make_unique<ExecContextNode>());
   return std::make_unique<FunctionNode>("ListLookupIndex", std::move(args));
 }
 
@@ -81,7 +82,7 @@ std::unique_ptr<ExecNode> MakeGetAt(std::unique_ptr<ExecNode> values, std::uniqu
   return std::make_unique<FunctionNode>("GetAt", std::move(args));
 }
 
-RetType RunExpr(std::unique_ptr<ExecNode> root, Status *status_out = nullptr) {
+RetType RunExpr(std::unique_ptr<ExecNode> root, Status* status_out = nullptr) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   ExecEngine engine;

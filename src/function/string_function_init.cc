@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-23 12:36:51
  * @Last Modified by: victorika
- * @Last Modified time: 2026-04-03 16:36:37
+ * @Last Modified time: 2026-05-11 16:38:52
  */
 #include <charconv>
 #include <cstring>
@@ -74,8 +74,8 @@ llvm::Value *CallBuiltinStringLenFunction(const FunctionSignature & /*sign*/,
 }  // namespace
 
 Status InitStringInternalFunc(FunctionRegistry *reg) {
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("StringConcat", {ValueType::kString, ValueType::kString, ValueType::kPtr}, ValueType::kString),
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFuncWithExecCtx(
+      FunctionSignature("StringConcat", {ValueType::kString, ValueType::kString}, ValueType::kString),
       reinterpret_cast<void *>(StringConcat)));
   JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
       FunctionSignature("StringCmp", {ValueType::kString, ValueType::kString}, ValueType::kI32),
@@ -86,61 +86,53 @@ Status InitStringInternalFunc(FunctionRegistry *reg) {
       FunctionSignature("StringContains", {ValueType::kString, ValueType::kString}, ValueType::kU8),
       reinterpret_cast<void *>(StringContains)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastString", {ValueType::kU8, ValueType::kPtr}, ValueType::kString),
-      reinterpret_cast<void *>(CastNumericToString<uint8_t>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastString", {ValueType::kI8, ValueType::kPtr}, ValueType::kString),
-      reinterpret_cast<void *>(CastNumericToString<int8_t>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastString", {ValueType::kU16, ValueType::kPtr}, ValueType::kString),
-      reinterpret_cast<void *>(CastNumericToString<uint16_t>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastString", {ValueType::kI16, ValueType::kPtr}, ValueType::kString),
-      reinterpret_cast<void *>(CastNumericToString<int16_t>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastString", {ValueType::kU32, ValueType::kPtr}, ValueType::kString),
-      reinterpret_cast<void *>(CastNumericToString<uint32_t>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastString", {ValueType::kI32, ValueType::kPtr}, ValueType::kString),
-      reinterpret_cast<void *>(CastNumericToString<int32_t>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastString", {ValueType::kU64, ValueType::kPtr}, ValueType::kString),
-      reinterpret_cast<void *>(CastNumericToString<uint64_t>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastString", {ValueType::kI64, ValueType::kPtr}, ValueType::kString),
-      reinterpret_cast<void *>(CastNumericToString<int64_t>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastString", {ValueType::kF32, ValueType::kPtr}, ValueType::kString),
-      reinterpret_cast<void *>(CastNumericToString<float>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastString", {ValueType::kF64, ValueType::kPtr}, ValueType::kString),
-      reinterpret_cast<void *>(CastNumericToString<double>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("CastString", {ValueType::kU8}, ValueType::kString),
+                                            reinterpret_cast<void *>(CastNumericToString<uint8_t>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("CastString", {ValueType::kI8}, ValueType::kString),
+                                            reinterpret_cast<void *>(CastNumericToString<int8_t>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("CastString", {ValueType::kU16}, ValueType::kString),
+                                            reinterpret_cast<void *>(CastNumericToString<uint16_t>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("CastString", {ValueType::kI16}, ValueType::kString),
+                                            reinterpret_cast<void *>(CastNumericToString<int16_t>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("CastString", {ValueType::kU32}, ValueType::kString),
+                                            reinterpret_cast<void *>(CastNumericToString<uint32_t>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("CastString", {ValueType::kI32}, ValueType::kString),
+                                            reinterpret_cast<void *>(CastNumericToString<int32_t>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("CastString", {ValueType::kU64}, ValueType::kString),
+                                            reinterpret_cast<void *>(CastNumericToString<uint64_t>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("CastString", {ValueType::kI64}, ValueType::kString),
+                                            reinterpret_cast<void *>(CastNumericToString<int64_t>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("CastString", {ValueType::kF32}, ValueType::kString),
+                                            reinterpret_cast<void *>(CastNumericToString<float>)));
+  JF_RETURN_NOT_OK(
+      reg->RegisterReadOnlyCFuncWithExecCtx(FunctionSignature("CastString", {ValueType::kF64}, ValueType::kString),
+                                            reinterpret_cast<void *>(CastNumericToString<double>)));
 
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastU8", {ValueType::kString}, ValueType::kU8),
-      reinterpret_cast<void *>(CastStringToNumeric<uint8_t>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastI8", {ValueType::kString}, ValueType::kI8),
-      reinterpret_cast<void *>(CastStringToNumeric<int8_t>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastU16", {ValueType::kString}, ValueType::kU16),
-      reinterpret_cast<void *>(CastStringToNumeric<uint16_t>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastI16", {ValueType::kString}, ValueType::kI16),
-      reinterpret_cast<void *>(CastStringToNumeric<int16_t>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastU32", {ValueType::kString}, ValueType::kU32),
-      reinterpret_cast<void *>(CastStringToNumeric<uint32_t>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastI32", {ValueType::kString}, ValueType::kI32),
-      reinterpret_cast<void *>(CastStringToNumeric<int32_t>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastU64", {ValueType::kString}, ValueType::kU64),
-      reinterpret_cast<void *>(CastStringToNumeric<uint64_t>)));
-  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("CastI64", {ValueType::kString}, ValueType::kI64),
-      reinterpret_cast<void *>(CastStringToNumeric<int64_t>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("CastU8", {ValueType::kString}, ValueType::kU8),
+                                              reinterpret_cast<void *>(CastStringToNumeric<uint8_t>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("CastI8", {ValueType::kString}, ValueType::kI8),
+                                              reinterpret_cast<void *>(CastStringToNumeric<int8_t>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("CastU16", {ValueType::kString}, ValueType::kU16),
+                                              reinterpret_cast<void *>(CastStringToNumeric<uint16_t>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("CastI16", {ValueType::kString}, ValueType::kI16),
+                                              reinterpret_cast<void *>(CastStringToNumeric<int16_t>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("CastU32", {ValueType::kString}, ValueType::kU32),
+                                              reinterpret_cast<void *>(CastStringToNumeric<uint32_t>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("CastI32", {ValueType::kString}, ValueType::kI32),
+                                              reinterpret_cast<void *>(CastStringToNumeric<int32_t>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("CastU64", {ValueType::kString}, ValueType::kU64),
+                                              reinterpret_cast<void *>(CastStringToNumeric<uint64_t>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(FunctionSignature("CastI64", {ValueType::kString}, ValueType::kI64),
+                                              reinterpret_cast<void *>(CastStringToNumeric<int64_t>)));
 
   return Status::OK();
 }

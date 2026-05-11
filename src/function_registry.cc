@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2025-01-15 14:26:36
  * @Last Modified by: victorika
- * @Last Modified time: 2025-03-04 19:03:28
+ * @Last Modified time: 2026-05-11 16:37:39
  */
 #include "function_registry.h"
 #include <type_traits>
@@ -138,6 +138,36 @@ Status FunctionRegistry::RegisterReadOnlyCFunc(const FunctionSignature& func_sig
   return RegisterFunc(func_sign, std::move(func_struct), allow_override);
 }
 
+Status FunctionRegistry::RegisterReadOnlyCFuncWithExecCtx(const FunctionSignature& func_sign, void* c_func_ptr,
+                                                          bool allow_override) {
+  if (nullptr == c_func_ptr) {
+    return Status::InvalidArgument("c_func_ptr is nullptr");
+  }
+  // Modern user-visible signature: no trailing kPtr; codegen auto-injects
+  // exec_ctx when emitting the call so the C ABI (N+1 args) is preserved.
+  {
+    FunctionStructure func_struct;
+    func_struct.func_type = FunctionType::kCFunc;
+    func_struct.c_func_ptr = c_func_ptr;
+    func_struct.func_attr_setter = ReadOnlyFunctionAttributeSetter;
+    func_struct.needs_exec_ctx = true;
+    JF_RETURN_NOT_OK(RegisterFunc(func_sign, std::move(func_struct), allow_override));
+  }
+  // Legacy compatibility signature: with trailing kPtr; behaves exactly
+  // like the old RegisterReadOnlyCFunc registration. Existing callers
+  // (AST builders that still create an ExecContextNode tail arg, or
+  // athena DSL code using `EXEC_CTX`) keep working unchanged.
+  std::vector<ValueType> legacy_params = func_sign.GetParamTypes();
+  legacy_params.emplace_back(ValueType::kPtr);
+  FunctionSignature legacy_sign(func_sign.GetName(), std::move(legacy_params), func_sign.GetRetType());
+  FunctionStructure legacy_struct;
+  legacy_struct.func_type = FunctionType::kCFunc;
+  legacy_struct.c_func_ptr = c_func_ptr;
+  legacy_struct.func_attr_setter = ReadOnlyFunctionAttributeSetter;
+  legacy_struct.needs_exec_ctx = false;
+  return RegisterFunc(legacy_sign, std::move(legacy_struct), allow_override);
+}
+
 Status FunctionRegistry::RegisterStoreCFunc(const FunctionSignature& func_sign, void* c_func_ptr,
                                             uint32_t store_args_index, bool allow_override) {
   if (nullptr == c_func_ptr) {
@@ -162,6 +192,34 @@ Status FunctionRegistry::RegisterCommutativeCFunc(const FunctionSignature& func_
   return RegisterFunc(func_sign, std::move(func_struct), allow_override);
 }
 
+Status FunctionRegistry::RegisterCommutativeCFuncWithExecCtx(const FunctionSignature& func_sign, void* c_func_ptr,
+                                                             bool allow_override) {
+  if (nullptr == c_func_ptr) {
+    return Status::InvalidArgument("c_func_ptr is nullptr");
+  }
+  // Modern user-visible signature: no trailing kPtr; codegen auto-injects.
+  {
+    FunctionStructure func_struct;
+    func_struct.func_type = FunctionType::kCFunc;
+    func_struct.c_func_ptr = c_func_ptr;
+    func_struct.func_attr_setter = CommutantFunctionAttributeSetter;
+    func_struct.needs_exec_ctx = true;
+    JF_RETURN_NOT_OK(RegisterFunc(func_sign, std::move(func_struct), allow_override));
+  }
+  // Legacy compatibility signature: with trailing kPtr; identical to the
+  // old RegisterCommutativeCFunc registration so existing AST/DSL code
+  // that still passes ExecContextNode keeps resolving.
+  std::vector<ValueType> legacy_params = func_sign.GetParamTypes();
+  legacy_params.emplace_back(ValueType::kPtr);
+  FunctionSignature legacy_sign(func_sign.GetName(), std::move(legacy_params), func_sign.GetRetType());
+  FunctionStructure legacy_struct;
+  legacy_struct.func_type = FunctionType::kCFunc;
+  legacy_struct.c_func_ptr = c_func_ptr;
+  legacy_struct.func_attr_setter = CommutantFunctionAttributeSetter;
+  legacy_struct.needs_exec_ctx = false;
+  return RegisterFunc(legacy_sign, std::move(legacy_struct), allow_override);
+}
+
 Status FunctionRegistry::GetFuncBySign(FunctionSignature& func_sign, FunctionStructure* func_struct) const {
   auto iter = signature2funcstruct_.find(func_sign);
   if (iter == signature2funcstruct_.end()) {
@@ -175,6 +233,9 @@ Status FunctionRegistry::GetFuncBySign(FunctionSignature& func_sign, FunctionStr
 Status FunctionRegistry::SetCFuncAttr(llvm::Module* m) {
   for (const auto& [sign, fc] : signature2funcstruct_) {
     if (FunctionType::kLLVMIntrinicFunc == fc.func_type) {
+      continue;
+    }
+    if (fc.needs_exec_ctx) {
       continue;
     }
     auto* func = m->getFunction(sign.ToString());
@@ -194,6 +255,9 @@ Status FunctionRegistry::MappingToJIT(llvm::orc::LLJIT* jit) {
   auto& mainjd = jit->getMainJITDylib();
   for (const auto& [sign, fc] : signature2funcstruct_) {
     if (FunctionType::kLLVMIntrinicFunc == fc.func_type) {
+      continue;
+    }
+    if (fc.needs_exec_ctx) {
       continue;
     }
     auto function_a_address = llvm::orc::ExecutorAddr::fromPtr(fc.c_func_ptr);

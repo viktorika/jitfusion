@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2026-04-30 11:35:00
  * @Last Modified by: victorika
- * @Last Modified time: 2026-04-30 11:35:00
+ * @Last Modified time: 2026-05-11 16:37:04
  */
 #include <cstdint>
 #include <memory>
@@ -123,8 +123,8 @@ TEST(ListGroupTest, GroupIndexU32) {
 }
 
 TEST(ListGroupTest, GroupIndexU64Large) {
-  auto list = std::unique_ptr<ExecNode>(new ConstantListValueNode(
-      std::vector<uint64_t>{0xFFFFFFFFFFFFFFFFULL, 1ULL, 0xFFFFFFFFFFFFFFFFULL, 1ULL, 2ULL}));
+  auto list = std::unique_ptr<ExecNode>(
+      new ConstantListValueNode(std::vector<uint64_t>{0xFFFFFFFFFFFFFFFFULL, 1ULL, 0xFFFFFFFFFFFFFFFFULL, 1ULL, 2ULL}));
   RetType result;
   ASSERT_TRUE(RunGroupIndex(MakeGroupIndexCall(std::move(list)), &result).ok());
   std::vector<uint32_t> expected = {0, 1, 0, 1, 2};
@@ -173,8 +173,7 @@ TEST(ListGroupTest, GroupIndexStringEmpty) {
 }
 
 TEST(ListGroupTest, GroupIndexStringWithEmptyStrings) {
-  auto list = std::unique_ptr<ExecNode>(
-      new ConstantListValueNode(std::vector<std::string>{"", "a", "", "b", "a", ""}));
+  auto list = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<std::string>{"", "a", "", "b", "a", ""}));
   RetType result;
   ASSERT_TRUE(RunGroupIndex(MakeGroupIndexCall(std::move(list)), &result).ok());
   std::vector<uint32_t> expected = {0, 1, 0, 2, 1, 0};
@@ -182,8 +181,8 @@ TEST(ListGroupTest, GroupIndexStringWithEmptyStrings) {
 }
 
 TEST(ListGroupTest, GroupIndexStringDifferentLengths) {
-  auto list = std::unique_ptr<ExecNode>(
-      new ConstantListValueNode(std::vector<std::string>{"ab", "abc", "ab", "abcd", "abc"}));
+  auto list =
+      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<std::string>{"ab", "abc", "ab", "abcd", "abc"}));
   RetType result;
   ASSERT_TRUE(RunGroupIndex(MakeGroupIndexCall(std::move(list)), &result).ok());
   std::vector<uint32_t> expected = {0, 1, 0, 2, 1};
@@ -379,8 +378,8 @@ TEST(ListGroupTest, GroupKeysU32) {
 }
 
 TEST(ListGroupTest, GroupKeysU64Large) {
-  auto list = std::unique_ptr<ExecNode>(new ConstantListValueNode(
-      std::vector<uint64_t>{0xFFFFFFFFFFFFFFFFULL, 1ULL, 0xFFFFFFFFFFFFFFFFULL, 1ULL, 2ULL}));
+  auto list = std::unique_ptr<ExecNode>(
+      new ConstantListValueNode(std::vector<uint64_t>{0xFFFFFFFFFFFFFFFFULL, 1ULL, 0xFFFFFFFFFFFFFFFFULL, 1ULL, 2ULL}));
   RetType result;
   ASSERT_TRUE(RunGroupKeys(MakeGroupKeysCall(std::move(list)), &result).ok());
   std::vector<uint64_t> expected = {0xFFFFFFFFFFFFFFFFULL, 1ULL, 2ULL};
@@ -429,8 +428,7 @@ TEST(ListGroupTest, GroupKeysStringEmpty) {
 }
 
 TEST(ListGroupTest, GroupKeysStringWithEmptyStrings) {
-  auto list = std::unique_ptr<ExecNode>(
-      new ConstantListValueNode(std::vector<std::string>{"", "a", "", "b", "a", ""}));
+  auto list = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<std::string>{"", "a", "", "b", "a", ""}));
   RetType result;
   ASSERT_TRUE(RunGroupKeys(MakeGroupKeysCall(std::move(list)), &result).ok());
   std::vector<std::string> expected = {"", "a", "b"};
@@ -438,8 +436,8 @@ TEST(ListGroupTest, GroupKeysStringWithEmptyStrings) {
 }
 
 TEST(ListGroupTest, GroupKeysStringDifferentLengths) {
-  auto list = std::unique_ptr<ExecNode>(
-      new ConstantListValueNode(std::vector<std::string>{"ab", "abc", "ab", "abcd", "abc"}));
+  auto list =
+      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<std::string>{"ab", "abc", "ab", "abcd", "abc"}));
   RetType result;
   ASSERT_TRUE(RunGroupKeys(MakeGroupKeysCall(std::move(list)), &result).ok());
   std::vector<std::string> expected = {"ab", "abc", "abcd"};
@@ -449,8 +447,8 @@ TEST(ListGroupTest, GroupKeysStringDifferentLengths) {
 TEST(ListGroupTest, GroupKeysPreservesFirstAppearanceOrder) {
   // Distinct keys must come out in the order of their first occurrence, not
   // sorted and not in hash-table order.
-  auto list = std::unique_ptr<ExecNode>(
-      new ConstantListValueNode(std::vector<int32_t>{100, 50, 100, 75, 50, 25, 75, 100}));
+  auto list =
+      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{100, 50, 100, 75, 50, 25, 75, 100}));
   RetType result;
   ASSERT_TRUE(RunGroupKeys(MakeGroupKeysCall(std::move(list)), &result).ok());
   std::vector<int32_t> expected = {100, 50, 75, 25};
@@ -461,8 +459,7 @@ TEST(ListGroupTest, GroupKeysLenMismatchReturnsError) {
   // keys has 4 elements, group_index has 3 -> must surface a runtime error
   // instead of silently truncating.
   auto keys = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{1, 2, 1, 3}));
-  auto bad_group_index =
-      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<uint32_t>{0U, 1U, 0U}));
+  auto bad_group_index = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<uint32_t>{0U, 1U, 0U}));
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(keys));
   args.emplace_back(std::move(bad_group_index));
@@ -479,18 +476,17 @@ TEST(ListGroupTest, GroupKeysLenMismatchReturnsError) {
 
 namespace {
 
-// Builds the 3-arg sugar form: GroupKeys(keys, GroupIndex(keys), exec_ctx).
+// Builds the 2-arg sugar form: GroupKeys(keys, GroupIndex(keys)).
 // This is the user-facing call registered as an LLVM intrinsic that expands
 // at IR time into GroupCount + the canonical 4-arg GroupKeys kernel, letting
 // GVN share the distinct-count computation with other aggregates. The
-// trailing exec_context keeps the call shape consistent with other DSL
-// functions (GroupIndex, etc.).
+// sugar lowering pulls exec_ctx from the entry function on its own, so the
+// user-visible signature does not include it.
 std::unique_ptr<ExecNode> MakeGroupKeysSugarCall(std::unique_ptr<ExecNode> keys_node) {
   auto keys_for_index = keys_node->Clone();
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(keys_node));
   args.emplace_back(MakeGroupIndexCall(std::move(keys_for_index)));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   return std::unique_ptr<ExecNode>(new FunctionNode("GroupKeys", std::move(args)));
 }
 
@@ -576,8 +572,8 @@ TEST(ListGroupTest, GroupKeysSugarU32) {
 }
 
 TEST(ListGroupTest, GroupKeysSugarU64Large) {
-  auto list = std::unique_ptr<ExecNode>(new ConstantListValueNode(
-      std::vector<uint64_t>{0xFFFFFFFFFFFFFFFFULL, 1ULL, 0xFFFFFFFFFFFFFFFFULL, 1ULL, 2ULL}));
+  auto list = std::unique_ptr<ExecNode>(
+      new ConstantListValueNode(std::vector<uint64_t>{0xFFFFFFFFFFFFFFFFULL, 1ULL, 0xFFFFFFFFFFFFFFFFULL, 1ULL, 2ULL}));
   RetType result;
   ASSERT_TRUE(RunGroupKeys(MakeGroupKeysSugarCall(std::move(list)), &result).ok());
   std::vector<uint64_t> expected = {0xFFFFFFFFFFFFFFFFULL, 1ULL, 2ULL};
@@ -629,12 +625,10 @@ TEST(ListGroupTest, GroupKeysSugarLenMismatchReturnsError) {
   // The sugar form forwards exec_context to the 4-arg kernel, which must still
   // surface the same "len mismatch" runtime error path.
   auto keys = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{1, 2, 1, 3}));
-  auto bad_group_index =
-      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<uint32_t>{0U, 1U, 0U}));
+  auto bad_group_index = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<uint32_t>{0U, 1U, 0U}));
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(keys));
   args.emplace_back(std::move(bad_group_index));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   auto expr = std::unique_ptr<ExecNode>(new FunctionNode("GroupKeys", std::move(args)));
 
   RetType result;
@@ -646,16 +640,15 @@ TEST(ListGroupTest, GroupKeysSugarLenMismatchReturnsError) {
 
 namespace {
 
-// Builds: GroupSum(values, GroupIndex(keys), exec_ctx). Sugar form, same call
-// shape as the user-facing DSL -- the IR-level expansion adds GroupCount and
-// routes to the 4-arg kernel. Keys and values are separate nodes because they
-// may be of different element types.
+// Builds: GroupSum(values, GroupIndex(keys)). Sugar form, same call shape
+// as the user-facing DSL -- the IR-level expansion adds GroupCount and
+// routes to the 4-arg kernel. Keys and values are separate nodes because
+// they may be of different element types.
 std::unique_ptr<ExecNode> MakeGroupSumSugarCall(std::unique_ptr<ExecNode> values_node,
                                                 std::unique_ptr<ExecNode> keys_node) {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(values_node));
   args.emplace_back(MakeGroupIndexCall(std::move(keys_node)));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   return std::unique_ptr<ExecNode>(new FunctionNode("GroupSum", std::move(args)));
 }
 
@@ -705,8 +698,7 @@ TEST(ListGroupTest, GroupSumSugarI32) {
 TEST(ListGroupTest, GroupSumSugarI8NegativeValues) {
   // Exercise i8 -> i64 promotion with negative values.
   auto keys = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{1, 1, 2, 1, 2}));
-  auto values =
-      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int8_t>{-10, 20, -30, -40, 50}));
+  auto values = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int8_t>{-10, 20, -30, -40, 50}));
   RetType result;
   ASSERT_TRUE(RunGroupSum(MakeGroupSumSugarCall(std::move(values), std::move(keys)), &result).ok());
   // group 0: -10 + 20 + (-40) = -30; group 1: -30 + 50 = 20
@@ -725,8 +717,8 @@ TEST(ListGroupTest, GroupSumSugarI16) {
 
 TEST(ListGroupTest, GroupSumSugarI64) {
   auto keys = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{1, 2, 1}));
-  auto values = std::unique_ptr<ExecNode>(
-      new ConstantListValueNode(std::vector<int64_t>{1LL << 40, 1LL << 41, -(1LL << 40)}));
+  auto values =
+      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int64_t>{1LL << 40, 1LL << 41, -(1LL << 40)}));
   RetType result;
   ASSERT_TRUE(RunGroupSum(MakeGroupSumSugarCall(std::move(values), std::move(keys)), &result).ok());
   std::vector<int64_t> expected = {0, 1LL << 41};
@@ -745,8 +737,8 @@ TEST(ListGroupTest, GroupSumSugarU8) {
 
 TEST(ListGroupTest, GroupSumSugarU64Large) {
   auto keys = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{0, 0, 1}));
-  auto values = std::unique_ptr<ExecNode>(new ConstantListValueNode(
-      std::vector<uint64_t>{0xFFFFFFFFFFFFFFFEULL, 1ULL, 42ULL}));
+  auto values =
+      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<uint64_t>{0xFFFFFFFFFFFFFFFEULL, 1ULL, 42ULL}));
   RetType result;
   ASSERT_TRUE(RunGroupSum(MakeGroupSumSugarCall(std::move(values), std::move(keys)), &result).ok());
   // Group 0 sums exactly to UINT64_MAX.
@@ -810,8 +802,8 @@ TEST(ListGroupTest, GroupSumSugarStringKeys) {
   // keys are strings, values are numeric. GroupIndex handles the string keys;
   // GroupSum just operates on the resulting u32 group_index, so this exercises
   // the full "keys can be anything, values can be anything" combination.
-  auto keys = std::unique_ptr<ExecNode>(
-      new ConstantListValueNode(std::vector<std::string>{"a", "b", "a", "c", "b", "a"}));
+  auto keys =
+      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<std::string>{"a", "b", "a", "c", "b", "a"}));
   auto values = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{1, 2, 3, 4, 5, 6}));
   RetType result;
   ASSERT_TRUE(RunGroupSum(MakeGroupSumSugarCall(std::move(values), std::move(keys)), &result).ok());
@@ -845,10 +837,10 @@ TEST(ListGroupTest, GroupSumKernelSugarAgreeF64) {
   // inputs -- protects against future divergence (e.g. if sugar starts
   // passing a different `distinct`).
   auto keys_sugar = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{2, 2, 1, 2, 1}));
-  auto values_sugar = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<double>{1.1, 2.2, 3.3, 4.4, 5.5}));
+  auto values_sugar =
+      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<double>{1.1, 2.2, 3.3, 4.4, 5.5}));
   RetType sugar_result;
-  ASSERT_TRUE(
-      RunGroupSum(MakeGroupSumSugarCall(std::move(values_sugar), std::move(keys_sugar)), &sugar_result).ok());
+  ASSERT_TRUE(RunGroupSum(MakeGroupSumSugarCall(std::move(values_sugar), std::move(keys_sugar)), &sugar_result).ok());
 
   auto keys_kernel = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{2, 2, 1, 2, 1}));
   auto values_kernel =
@@ -871,8 +863,7 @@ TEST(ListGroupTest, GroupSumLenMismatchReturnsError) {
   // values has 3 elements, group_index has 4 -> kernel must surface a runtime
   // error, same shape as GroupKeys len-mismatch handling.
   auto values = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{1, 2, 3}));
-  auto bad_group_index =
-      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<uint32_t>{0U, 1U, 0U, 1U}));
+  auto bad_group_index = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<uint32_t>{0U, 1U, 0U, 1U}));
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(values));
   args.emplace_back(std::move(bad_group_index));
@@ -891,12 +882,10 @@ TEST(ListGroupTest, GroupSumSugarLenMismatchReturnsError) {
   // Same kind of mismatch reached through the sugar form, to prove the error
   // propagates across the IR-level expansion.
   auto values = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{1, 2, 3}));
-  auto bad_group_index =
-      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<uint32_t>{0U, 1U, 0U, 1U}));
+  auto bad_group_index = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<uint32_t>{0U, 1U, 0U, 1U}));
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(values));
   args.emplace_back(std::move(bad_group_index));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   auto expr = std::unique_ptr<ExecNode>(new FunctionNode("GroupSum", std::move(args)));
 
   RetType result;
@@ -909,14 +898,14 @@ TEST(ListGroupTest, GroupSumSugarLenMismatchReturnsError) {
 namespace {
 
 // Generic builder for a per-group aggregate sugar call of shape
-// `<func_name>(values, GroupIndex(keys), exec_ctx)`. Used by GroupMax / GroupMin
-// tests and ready to be reused by later aggregates (Avg, ...).
+// `<func_name>(values, GroupIndex(keys))`. Used by GroupMax / GroupMin /
+// GroupAvg sugars. The sugar lowering pulls exec_ctx from the entry
+// function on its own, so the user-visible signature has no trailing ctx.
 std::unique_ptr<ExecNode> MakeGroupAggSugarCall(const std::string &func_name, std::unique_ptr<ExecNode> values_node,
                                                 std::unique_ptr<ExecNode> keys_node) {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(values_node));
   args.emplace_back(MakeGroupIndexCall(std::move(keys_node)));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   return std::unique_ptr<ExecNode>(new FunctionNode(func_name, std::move(args)));
 }
 
@@ -1012,8 +1001,8 @@ TEST(ListGroupTest, GroupMaxSugarEmpty) {
 }
 
 TEST(ListGroupTest, GroupMaxSugarStringKeys) {
-  auto keys = std::unique_ptr<ExecNode>(
-      new ConstantListValueNode(std::vector<std::string>{"a", "b", "a", "c", "b", "a"}));
+  auto keys =
+      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<std::string>{"a", "b", "a", "c", "b", "a"}));
   auto values = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{1, 7, 5, 4, 2, 3}));
   RetType result;
   ASSERT_TRUE(RunGroupAgg(MakeGroupAggSugarCall("GroupMax", std::move(values), std::move(keys)), &result).ok());
@@ -1087,8 +1076,8 @@ TEST(ListGroupTest, GroupMinSugarEmpty) {
 }
 
 TEST(ListGroupTest, GroupMinSugarStringKeys) {
-  auto keys = std::unique_ptr<ExecNode>(
-      new ConstantListValueNode(std::vector<std::string>{"a", "b", "a", "c", "b", "a"}));
+  auto keys =
+      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<std::string>{"a", "b", "a", "c", "b", "a"}));
   auto values = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{1, 7, 5, 4, 2, 3}));
   RetType result;
   ASSERT_TRUE(RunGroupAgg(MakeGroupAggSugarCall("GroupMin", std::move(values), std::move(keys)), &result).ok());
@@ -1137,12 +1126,10 @@ TEST(ListGroupTest, GroupMaxMinConsistency) {
 
 TEST(ListGroupTest, GroupMaxSugarLenMismatchReturnsError) {
   auto values = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{1, 2, 3}));
-  auto bad_group_index =
-      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<uint32_t>{0U, 1U, 0U, 1U}));
+  auto bad_group_index = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<uint32_t>{0U, 1U, 0U, 1U}));
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(values));
   args.emplace_back(std::move(bad_group_index));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   auto expr = std::unique_ptr<ExecNode>(new FunctionNode("GroupMax", std::move(args)));
 
   RetType result;
@@ -1154,12 +1141,10 @@ TEST(ListGroupTest, GroupMaxSugarLenMismatchReturnsError) {
 
 TEST(ListGroupTest, GroupMinSugarLenMismatchReturnsError) {
   auto values = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{1, 2, 3}));
-  auto bad_group_index =
-      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<uint32_t>{0U, 1U, 0U, 1U}));
+  auto bad_group_index = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<uint32_t>{0U, 1U, 0U, 1U}));
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(values));
   args.emplace_back(std::move(bad_group_index));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   auto expr = std::unique_ptr<ExecNode>(new FunctionNode("GroupMin", std::move(args)));
 
   RetType result;
@@ -1197,8 +1182,8 @@ TEST(ListGroupTest, GroupAvgSugarI8NegativeValues) {
   ASSERT_TRUE(RunGroupAgg(MakeGroupAggSugarCall("GroupAvg", std::move(values), std::move(keys)), &result).ok());
   auto &actual = std::get<std::vector<double>>(result);
   ASSERT_EQ(actual.size(), 2U);
-  EXPECT_DOUBLE_EQ(actual[0], 5.0);    // (-10 + 20) / 2
-  EXPECT_DOUBLE_EQ(actual[1], -2.5);   // (-3 + -2) / 2   <-- int would round to -2
+  EXPECT_DOUBLE_EQ(actual[0], 5.0);   // (-10 + 20) / 2
+  EXPECT_DOUBLE_EQ(actual[1], -2.5);  // (-3 + -2) / 2   <-- int would round to -2
 }
 
 TEST(ListGroupTest, GroupAvgSugarU64) {
@@ -1233,8 +1218,8 @@ TEST(ListGroupTest, GroupAvgSugarF64) {
   ASSERT_TRUE(RunGroupAgg(MakeGroupAggSugarCall("GroupAvg", std::move(values), std::move(keys)), &result).ok());
   auto &actual = std::get<std::vector<double>>(result);
   ASSERT_EQ(actual.size(), 3U);
-  EXPECT_DOUBLE_EQ(actual[0], 0.2);    // (0.1 + 0.3) / 2
-  EXPECT_DOUBLE_EQ(actual[1], 0.3);    // (0.2 + 0.4) / 2
+  EXPECT_DOUBLE_EQ(actual[0], 0.2);  // (0.1 + 0.3) / 2
+  EXPECT_DOUBLE_EQ(actual[1], 0.3);  // (0.2 + 0.4) / 2
   EXPECT_DOUBLE_EQ(actual[2], 0.5);
 }
 
@@ -1263,7 +1248,7 @@ TEST(ListGroupTest, GroupAvgSugarAllSameGroup) {
   ASSERT_TRUE(RunGroupAgg(MakeGroupAggSugarCall("GroupAvg", std::move(values), std::move(keys)), &result).ok());
   auto &actual = std::get<std::vector<double>>(result);
   ASSERT_EQ(actual.size(), 1U);
-  EXPECT_DOUBLE_EQ(actual[0], 2.5);    // (1+2+3+4)/4
+  EXPECT_DOUBLE_EQ(actual[0], 2.5);  // (1+2+3+4)/4
 }
 
 TEST(ListGroupTest, GroupAvgSugarAllDistinctGroups) {
@@ -1280,8 +1265,8 @@ TEST(ListGroupTest, GroupAvgSugarAllDistinctGroups) {
 }
 
 TEST(ListGroupTest, GroupAvgSugarStringKeys) {
-  auto keys = std::unique_ptr<ExecNode>(
-      new ConstantListValueNode(std::vector<std::string>{"a", "b", "a", "c", "b", "a"}));
+  auto keys =
+      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<std::string>{"a", "b", "a", "c", "b", "a"}));
   auto values = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{1, 2, 3, 4, 5, 6}));
   RetType result;
   ASSERT_TRUE(RunGroupAgg(MakeGroupAggSugarCall("GroupAvg", std::move(values), std::move(keys)), &result).ok());
@@ -1311,7 +1296,8 @@ TEST(ListGroupTest, GroupAvgKernelSugarAgreeF64) {
   // results given identical inputs. Guards against future divergence (e.g.
   // sugar starting to pass a different `distinct` than GroupCount).
   auto keys_sugar = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{2, 2, 1, 2, 1}));
-  auto values_sugar = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<double>{1.1, 2.2, 3.3, 4.4, 5.5}));
+  auto values_sugar =
+      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<double>{1.1, 2.2, 3.3, 4.4, 5.5}));
   RetType sugar_result;
   ASSERT_TRUE(
       RunGroupAgg(MakeGroupAggSugarCall("GroupAvg", std::move(values_sugar), std::move(keys_sugar)), &sugar_result)
@@ -1359,8 +1345,7 @@ TEST(ListGroupTest, GroupAvgMatchesSumOverCount) {
 
 TEST(ListGroupTest, GroupAvgKernelLenMismatchReturnsError) {
   auto values = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{1, 2, 3}));
-  auto bad_group_index =
-      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<uint32_t>{0U, 1U, 0U, 1U}));
+  auto bad_group_index = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<uint32_t>{0U, 1U, 0U, 1U}));
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(values));
   args.emplace_back(std::move(bad_group_index));
@@ -1377,12 +1362,10 @@ TEST(ListGroupTest, GroupAvgKernelLenMismatchReturnsError) {
 
 TEST(ListGroupTest, GroupAvgSugarLenMismatchReturnsError) {
   auto values = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{1, 2, 3}));
-  auto bad_group_index =
-      std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<uint32_t>{0U, 1U, 0U, 1U}));
+  auto bad_group_index = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<uint32_t>{0U, 1U, 0U, 1U}));
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(values));
   args.emplace_back(std::move(bad_group_index));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   auto expr = std::unique_ptr<ExecNode>(new FunctionNode("GroupAvg", std::move(args)));
 
   RetType result;
