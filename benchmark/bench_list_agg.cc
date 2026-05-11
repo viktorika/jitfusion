@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2026-04-30 16:07:33
  * @Last Modified by: victorika
- * @Last Modified time: 2026-04-30 16:07:33
+ * @Last Modified time: 2026-05-11 16:58:15
  */
 // C. List aggregation + C-group. See bench_compile.cc for the split overview.
 
@@ -10,15 +10,15 @@
 
 namespace {
 
-using ::jitfusion::bench::CompileOrDie;
-using ::jitfusion::bench::MakeListUnaryCall;
-using ::jitfusion::bench::MakeRegistry;
 using ::jitfusion::ConstantListValueNode;
 using ::jitfusion::ConstantValueNode;
 using ::jitfusion::ExecContext;
 using ::jitfusion::ExecNode;
 using ::jitfusion::FunctionNode;
 using ::jitfusion::RetType;
+using ::jitfusion::bench::CompileOrDie;
+using ::jitfusion::bench::MakeListUnaryCall;
+using ::jitfusion::bench::MakeRegistry;
 
 // =============================================================================
 // C. List aggregation — kernel cost vs. list length
@@ -237,12 +237,11 @@ std::unique_ptr<ExecNode> MakeGroupKeysList(int len, int distinct) {
   return std::unique_ptr<ExecNode>(new ConstantListValueNode(std::move(values)));
 }
 
-// Build `GroupIndex(keys_list, exec_ctx)` — the only non-sugar group node in
-// the family; its kernel is the 2-arg form.
+// Build `GroupIndex(keys_list)` — the only non-sugar group node in
+// the family.
 std::unique_ptr<ExecNode> MakeGroupIndexNode(int len, int distinct) {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(MakeGroupKeysList(len, distinct));
-  args.emplace_back(new jitfusion::ExecContextNode());
   return std::unique_ptr<ExecNode>(new FunctionNode("GroupIndex", std::move(args)));
 }
 
@@ -288,7 +287,7 @@ void BM_Execute_GroupCount(benchmark::State& state) {
 }
 BENCHMARK(BM_Execute_GroupCount)->Args({4096, 16})->Args({4096, 256})->Args({4096, 4096});
 
-// Helper: build the sugar-form call `func_name(keys_or_values, GroupIndex(...), exec_ctx)`.
+// Helper: build the sugar-form call `func_name(keys_or_values, GroupIndex(...))`.
 // The keys list drives GroupIndex; the same list is also fed as values/keys
 // to the aggregate under test. That's fine because all aggregates accept
 // integer lists and we measure compute time, not numerical content.
@@ -296,7 +295,6 @@ std::unique_ptr<ExecNode> MakeGroupSugarCall(const std::string& func_name, int l
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(MakeGroupKeysList(len, distinct));
   args.emplace_back(MakeGroupIndexNode(len, distinct));
-  args.emplace_back(new jitfusion::ExecContextNode());
   return std::unique_ptr<ExecNode>(new FunctionNode(func_name, std::move(args)));
 }
 

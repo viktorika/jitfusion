@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2026-04-30 16:07:33
  * @Last Modified by: victorika
- * @Last Modified time: 2026-04-30 16:07:33
+ * @Last Modified time: 2026-05-11 16:58:35
  */
 // G. List basic (shape manipulation) + H. List element-wise unary.
 // See bench_compile.cc for the split overview.
@@ -11,18 +11,18 @@
 
 namespace {
 
-using ::jitfusion::bench::CompileOrDie;
-using ::jitfusion::bench::MakeListListCtxCall;
-using ::jitfusion::bench::MakeListUnaryCall;
-using ::jitfusion::bench::MakeListUnaryCtxCall;
-using ::jitfusion::bench::MakeListUnaryCtxCallF64;
-using ::jitfusion::bench::MakeRegistry;
 using ::jitfusion::ConstantListValueNode;
 using ::jitfusion::ConstantValueNode;
 using ::jitfusion::ExecContext;
 using ::jitfusion::ExecNode;
 using ::jitfusion::FunctionNode;
 using ::jitfusion::RetType;
+using ::jitfusion::bench::CompileOrDie;
+using ::jitfusion::bench::MakeListListCtxCall;
+using ::jitfusion::bench::MakeListUnaryCall;
+using ::jitfusion::bench::MakeListUnaryCtxCall;
+using ::jitfusion::bench::MakeListUnaryCtxCallF64;
+using ::jitfusion::bench::MakeRegistry;
 
 // =============================================================================
 // G. List basic — shape-manipulation kernels
@@ -163,7 +163,7 @@ void BM_Execute_ListMurmurHash3X8632(benchmark::State& state) {
 }
 BENCHMARK(BM_Execute_ListMurmurHash3X8632)->Arg(256)->Arg(4096);
 
-// ListConcat(listA, listB, ctx).
+// ListConcat(listA, listB).
 void BM_Execute_ListConcat(benchmark::State& state) {
   const int len = static_cast<int>(state.range(0));
   auto reg = MakeRegistry();
@@ -181,7 +181,7 @@ void BM_Execute_ListConcat(benchmark::State& state) {
 }
 BENCHMARK(BM_Execute_ListConcat)->Arg(256)->Arg(4096);
 
-// CrossJoin(stringlist a, stringlist b, string sep, ctx) — produces a
+// CrossJoin(stringlist a, stringlist b, string sep) — produces a
 // length-(|a| * |b|) stringlist of "a[i] + sep + b[j]". Output size is
 // quadratic in the input length, so we sweep the per-side length from 16..256
 // (yielding 256..65536 output elements) instead of the usual 256/4096 sweep
@@ -201,7 +201,7 @@ void BM_Execute_CrossJoin(benchmark::State& state) {
   args.emplace_back(new ConstantListValueNode(std::move(a)));
   args.emplace_back(new ConstantListValueNode(std::move(b)));
   args.emplace_back(new ConstantValueNode(std::string("_")));
-  args.emplace_back(new jitfusion::ExecContextNode());
+
   std::unique_ptr<ExecNode> node(new FunctionNode("CrossJoin", std::move(args)));
 
   auto engine = CompileOrDie(std::move(node), reg);
@@ -218,7 +218,7 @@ void BM_Execute_CrossJoin(benchmark::State& state) {
 }
 BENCHMARK(BM_Execute_CrossJoin)->Arg(16)->Arg(64)->Arg(256);
 
-// ZipConcat(stringlist a, stringlist b, string sep, ctx) — per-position
+// ZipConcat(stringlist a, stringlist b, string sep) — per-position
 // concatenation, output length equals |a| (== |b|). Linear cost in input
 // length, so it shares the standard 256/4096 sweep with the other linear
 // list kernels.
@@ -237,7 +237,7 @@ void BM_Execute_ZipConcat(benchmark::State& state) {
   args.emplace_back(new ConstantListValueNode(std::move(a)));
   args.emplace_back(new ConstantListValueNode(std::move(b)));
   args.emplace_back(new ConstantValueNode(std::string(":")));
-  args.emplace_back(new jitfusion::ExecContextNode());
+
   std::unique_ptr<ExecNode> node(new FunctionNode("ZipConcat", std::move(args)));
 
   auto engine = CompileOrDie(std::move(node), reg);
@@ -284,7 +284,7 @@ void BM_Execute_ListIn(benchmark::State& state) {
 BENCHMARK(BM_Execute_ListIn)->Arg(256)->Arg(4096);
 
 // =============================================================================
-// H. List element-wise unary (func(list, ctx) -> list)
+// H. List element-wise unary (func(list) -> list)
 // =============================================================================
 
 #define JITFUSION_DEFINE_LIST_UNARY_BM(NAME)                           \

@@ -27,12 +27,11 @@ TEST(FunctionTest, IfLargeTest1) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto cmp_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(cmp_value));
   auto fill_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(fill_value));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(cmp_value_node));
   args_list.emplace_back(std::move(fill_value_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("IfLarge", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -52,12 +51,11 @@ TEST(FunctionTest, IfLargeTest2) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto cmp_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(cmp_value));
   auto fill_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(fill_value));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(cmp_value_node));
   args_list.emplace_back(std::move(fill_value_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("IfLarge", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -77,12 +75,11 @@ TEST(FunctionTest, IfLargeTest3) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto cmp_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(cmp_value));
   auto fill_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(fill_value));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(cmp_value_node));
   args_list.emplace_back(std::move(fill_value_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("IfLarge", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -102,12 +99,11 @@ TEST(FunctionTest, IfLargeEqualTest) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto cmp_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(cmp_value));
   auto fill_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(fill_value));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(cmp_value_node));
   args_list.emplace_back(std::move(fill_value_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("IfLargeEqual", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -127,12 +123,11 @@ TEST(FunctionTest, IfEqualTest) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto cmp_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(cmp_value));
   auto fill_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(fill_value));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(cmp_value_node));
   args_list.emplace_back(std::move(fill_value_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("IfEqual", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -152,12 +147,11 @@ TEST(FunctionTest, IfELessTest) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto cmp_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(cmp_value));
   auto fill_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(fill_value));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(cmp_value_node));
   args_list.emplace_back(std::move(fill_value_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("IfLess", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -177,12 +171,11 @@ TEST(FunctionTest, IfELessEqualTest) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto cmp_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(cmp_value));
   auto fill_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(fill_value));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(cmp_value_node));
   args_list.emplace_back(std::move(fill_value_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("IfLessEqual", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -202,12 +195,11 @@ TEST(FunctionTest, IfNotEqualTest) {
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto cmp_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(cmp_value));
   auto fill_value_node = std::unique_ptr<ExecNode>(new ConstantValueNode(fill_value));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(cmp_value_node));
   args_list.emplace_back(std::move(fill_value_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("IfNotEqual", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -228,12 +220,11 @@ TEST(FunctionTest, IfByBitmapTest1) {
   auto bitmap_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(bitmap));
   auto lhs_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(lhs));
   auto rhs_node = std::unique_ptr<ExecNode>(new ConstantValueNode(rhs));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(bitmap_node));
   args_list.emplace_back(std::move(lhs_node));
   args_list.emplace_back(std::move(rhs_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("IfByBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -256,12 +247,11 @@ TEST(FunctionTest, IfByBitmapTest2) {
   auto bitmap_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(bitmap));
   auto lhs_node = std::unique_ptr<ExecNode>(new ConstantValueNode(lhs));
   auto rhs_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(rhs));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(bitmap_node));
   args_list.emplace_back(std::move(lhs_node));
   args_list.emplace_back(std::move(rhs_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("IfByBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -285,12 +275,11 @@ TEST(FunctionTest, IfByBitmapTest3) {
   auto bitmap_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(bitmap));
   auto lhs_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(lhs));
   auto rhs_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(rhs));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(bitmap_node));
   args_list.emplace_back(std::move(lhs_node));
   args_list.emplace_back(std::move(rhs_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("IfByBitmap", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);

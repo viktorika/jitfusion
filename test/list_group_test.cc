@@ -23,7 +23,6 @@ namespace {
 std::unique_ptr<ExecNode> MakeGroupIndexCall(std::unique_ptr<ExecNode> list_node) {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(list_node));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   return std::unique_ptr<ExecNode>(new FunctionNode("GroupIndex", std::move(args)));
 }
 
@@ -267,7 +266,7 @@ TEST(ListGroupTest, GroupCountString) {
 
 namespace {
 
-// Builds: GroupKeys(keys, GroupIndex(keys), GroupCount(GroupIndex(keys)), exec_ctx).
+// Builds: GroupKeys(keys, GroupIndex(keys), GroupCount(GroupIndex(keys))).
 // The keys node is cloned so the same logical list feeds every argument,
 // mirroring how CSE would share the GroupIndex / GroupCount sub-expressions
 // with other aggregates in a real pipeline.
@@ -278,7 +277,6 @@ std::unique_ptr<ExecNode> MakeGroupKeysCall(std::unique_ptr<ExecNode> keys_node)
   args.emplace_back(std::move(keys_node));
   args.emplace_back(MakeGroupIndexCall(std::move(keys_for_index)));
   args.emplace_back(MakeGroupCountCall(std::move(keys_for_count)));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   return std::unique_ptr<ExecNode>(new FunctionNode("GroupKeys", std::move(args)));
 }
 
@@ -464,7 +462,6 @@ TEST(ListGroupTest, GroupKeysLenMismatchReturnsError) {
   args.emplace_back(std::move(keys));
   args.emplace_back(std::move(bad_group_index));
   args.emplace_back(std::unique_ptr<ExecNode>(new ConstantValueNode(static_cast<uint32_t>(2U))));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   auto expr = std::unique_ptr<ExecNode>(new FunctionNode("GroupKeys", std::move(args)));
 
   RetType result;
@@ -478,10 +475,8 @@ namespace {
 
 // Builds the 2-arg sugar form: GroupKeys(keys, GroupIndex(keys)).
 // This is the user-facing call registered as an LLVM intrinsic that expands
-// at IR time into GroupCount + the canonical 4-arg GroupKeys kernel, letting
-// GVN share the distinct-count computation with other aggregates. The
-// sugar lowering pulls exec_ctx from the entry function on its own, so the
-// user-visible signature does not include it.
+// at IR time into GroupCount + the canonical GroupKeys kernel, letting
+// GVN share the distinct-count computation with other aggregates.
 std::unique_ptr<ExecNode> MakeGroupKeysSugarCall(std::unique_ptr<ExecNode> keys_node) {
   auto keys_for_index = keys_node->Clone();
   std::vector<std::unique_ptr<ExecNode>> args;
@@ -652,8 +647,8 @@ std::unique_ptr<ExecNode> MakeGroupSumSugarCall(std::unique_ptr<ExecNode> values
   return std::unique_ptr<ExecNode>(new FunctionNode("GroupSum", std::move(args)));
 }
 
-// Builds: GroupSum(values, GroupIndex(keys), GroupCount(GroupIndex(keys)), exec_ctx).
-// Exercises the raw 4-arg kernel directly so its contract is covered
+// Builds: GroupSum(values, GroupIndex(keys), GroupCount(GroupIndex(keys))).
+// Exercises the raw 3-arg kernel directly so its contract is covered
 // independently of the sugar-layer expansion.
 std::unique_ptr<ExecNode> MakeGroupSumKernelCall(std::unique_ptr<ExecNode> values_node,
                                                  std::unique_ptr<ExecNode> keys_node) {
@@ -662,7 +657,6 @@ std::unique_ptr<ExecNode> MakeGroupSumKernelCall(std::unique_ptr<ExecNode> value
   args.emplace_back(std::move(values_node));
   args.emplace_back(MakeGroupIndexCall(std::move(keys_node)));
   args.emplace_back(MakeGroupCountCall(std::move(keys_for_count)));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   return std::unique_ptr<ExecNode>(new FunctionNode("GroupSum", std::move(args)));
 }
 
@@ -868,7 +862,6 @@ TEST(ListGroupTest, GroupSumLenMismatchReturnsError) {
   args.emplace_back(std::move(values));
   args.emplace_back(std::move(bad_group_index));
   args.emplace_back(std::unique_ptr<ExecNode>(new ConstantValueNode(static_cast<uint32_t>(2U))));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   auto expr = std::unique_ptr<ExecNode>(new FunctionNode("GroupSum", std::move(args)));
 
   RetType result;
@@ -899,8 +892,7 @@ namespace {
 
 // Generic builder for a per-group aggregate sugar call of shape
 // `<func_name>(values, GroupIndex(keys))`. Used by GroupMax / GroupMin /
-// GroupAvg sugars. The sugar lowering pulls exec_ctx from the entry
-// function on its own, so the user-visible signature has no trailing ctx.
+// GroupAvg sugars.
 std::unique_ptr<ExecNode> MakeGroupAggSugarCall(const std::string &func_name, std::unique_ptr<ExecNode> values_node,
                                                 std::unique_ptr<ExecNode> keys_node) {
   std::vector<std::unique_ptr<ExecNode>> args;
@@ -909,8 +901,8 @@ std::unique_ptr<ExecNode> MakeGroupAggSugarCall(const std::string &func_name, st
   return std::unique_ptr<ExecNode>(new FunctionNode(func_name, std::move(args)));
 }
 
-// Same as above but for the raw 4-arg kernel:
-//   `<func_name>(values, GroupIndex(keys), GroupCount(GroupIndex(keys)), exec_ctx)`
+// Same as above but for the raw 3-arg kernel:
+//   `<func_name>(values, GroupIndex(keys), GroupCount(GroupIndex(keys)))`
 std::unique_ptr<ExecNode> MakeGroupAggKernelCall(const std::string &func_name, std::unique_ptr<ExecNode> values_node,
                                                  std::unique_ptr<ExecNode> keys_node) {
   auto keys_for_count = keys_node->Clone();
@@ -918,7 +910,6 @@ std::unique_ptr<ExecNode> MakeGroupAggKernelCall(const std::string &func_name, s
   args.emplace_back(std::move(values_node));
   args.emplace_back(MakeGroupIndexCall(std::move(keys_node)));
   args.emplace_back(MakeGroupCountCall(std::move(keys_for_count)));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   return std::unique_ptr<ExecNode>(new FunctionNode(func_name, std::move(args)));
 }
 
@@ -1350,7 +1341,6 @@ TEST(ListGroupTest, GroupAvgKernelLenMismatchReturnsError) {
   args.emplace_back(std::move(values));
   args.emplace_back(std::move(bad_group_index));
   args.emplace_back(std::unique_ptr<ExecNode>(new ConstantValueNode(static_cast<uint32_t>(2U))));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   auto expr = std::unique_ptr<ExecNode>(new FunctionNode("GroupAvg", std::move(args)));
 
   RetType result;

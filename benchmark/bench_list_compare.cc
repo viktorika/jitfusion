@@ -84,7 +84,7 @@ JITFUSION_DEFINE_LIST_IFSELECT_BM(IfLessEqual);
 
 #undef JITFUSION_DEFINE_LIST_IFSELECT_BM
 
-// IfByBitmap(packed_bitmap<u8>, value_list<i64>, alt_scalar<i64>, ctx).
+// IfByBitmap(packed_bitmap<u8>, value_list<i64>, alt_scalar<i64>).
 // For each element i: packed_bitmap bit i set ? value_list[i] : alt_scalar.
 // `packed_bitmap` is a U8List of ceil(len/8) bytes, LSB = first element.
 void BM_Execute_IfByBitmap(benchmark::State& state) {
@@ -100,7 +100,6 @@ void BM_Execute_IfByBitmap(benchmark::State& state) {
   args.emplace_back(new ConstantListValueNode(std::move(bitmap)));
   args.emplace_back(new ConstantListValueNode(std::move(values)));
   args.emplace_back(new ConstantValueNode(static_cast<int64_t>(-1)));
-  args.emplace_back(new jitfusion::ExecContextNode());
   std::unique_ptr<ExecNode> node(new FunctionNode("IfByBitmap", std::move(args)));
 
   auto engine = CompileOrDie(std::move(node), reg);
@@ -117,11 +116,11 @@ void BM_Execute_IfByBitmap(benchmark::State& state) {
 }
 BENCHMARK(BM_Execute_IfByBitmap)->Arg(4096);
 
-// FilterByBitmap(value_list<i64>, packed_bitmap<u8>, ctx) — sugar form.
+// FilterByBitmap(value_list<i64>, packed_bitmap<u8>) — sugar form.
 //
 // The `packed_bitmap` is ceil(values.size() / 8) bytes; each byte encodes 8
 // elements (LSB = first element). 0x55 (0b01010101) gives 4 ones per byte →
-// every other element is kept. The 3-arg sugar auto-derives `bits_cnt` via
+// every other element is kept. The 2-arg sugar auto-derives `bits_cnt` via
 // CountBits(bitmap) at codegen time, so we no longer have to precompute and
 // pass the popcount explicitly (and can no longer get it wrong).
 void BM_Execute_FilterByBitmap(benchmark::State& state) {
@@ -136,7 +135,6 @@ void BM_Execute_FilterByBitmap(benchmark::State& state) {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(new ConstantListValueNode(std::move(values)));
   args.emplace_back(new ConstantListValueNode(std::move(bitmap)));
-  args.emplace_back(new jitfusion::ExecContextNode());
   std::unique_ptr<ExecNode> node(new FunctionNode("FilterByBitmap", std::move(args)));
 
   auto engine = CompileOrDie(std::move(node), reg);

@@ -35,31 +35,28 @@ Status RunExpr(std::unique_ptr<ExecNode> expr, RetType* result) {
   return engine.Execute(nullptr, result);
 }
 
-// Build: <FuncName>(<list>, exec_ctx)  for nullary-over-list ops.
+// Build: <FuncName>(<list>)  for nullary-over-list ops.
 std::unique_ptr<ExecNode> MakeUnaryListCall(const std::string& func_name, std::unique_ptr<ExecNode> list_node) {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(list_node));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   return std::unique_ptr<ExecNode>(new FunctionNode(func_name, std::move(args)));
 }
 
-// Build: <FuncName>(<list>, <scalar>, exec_ctx)
+// Build: <FuncName>(<list>, <scalar>)
 std::unique_ptr<ExecNode> MakeListScalarCall(const std::string& func_name, std::unique_ptr<ExecNode> list_node,
                                              std::unique_ptr<ExecNode> scalar_node) {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(list_node));
   args.emplace_back(std::move(scalar_node));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   return std::unique_ptr<ExecNode>(new FunctionNode(func_name, std::move(args)));
 }
 
-// Build: <FuncName>(<lhs>, <rhs>, exec_ctx)  for list-list ops.
+// Build: <FuncName>(<lhs>, <rhs>)  for list-list ops.
 std::unique_ptr<ExecNode> MakeListListCall(const std::string& func_name, std::unique_ptr<ExecNode> lhs,
                                            std::unique_ptr<ExecNode> rhs) {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(lhs));
   args.emplace_back(std::move(rhs));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   return std::unique_ptr<ExecNode>(new FunctionNode(func_name, std::move(args)));
 }
 
@@ -221,7 +218,7 @@ TEST(EmptyListRuntimeTest, GenNotEqualBitmapListEmptyVsEmpty) {
 // ---- list_comparison.cc: IfXxx on empty list -------------------------------
 
 TEST(EmptyListRuntimeTest, IfLargeOnEmptyList) {
-  // IfLarge(list, cmp_value, target_value, exec_ctx)
+  // IfLarge(list, cmp_value, target_value)
   auto list = std::unique_ptr<ExecNode>(new ConstantListValueNode(std::vector<int32_t>{}));
   auto cmp = std::unique_ptr<ExecNode>(new ConstantValueNode(int32_t{5}));
   auto target = std::unique_ptr<ExecNode>(new ConstantValueNode(int32_t{99}));
@@ -229,7 +226,6 @@ TEST(EmptyListRuntimeTest, IfLargeOnEmptyList) {
   args.emplace_back(std::move(list));
   args.emplace_back(std::move(cmp));
   args.emplace_back(std::move(target));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   auto expr = std::unique_ptr<ExecNode>(new FunctionNode("IfLarge", std::move(args)));
   RetType result;
   ASSERT_TRUE(RunExpr(std::move(expr), &result).ok());
@@ -244,7 +240,6 @@ TEST(EmptyListRuntimeTest, StringConcatTwoEmptyStrings) {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(a));
   args.emplace_back(std::move(b));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   auto expr = std::unique_ptr<ExecNode>(new FunctionNode("StringConcat", std::move(args)));
   RetType result;
   ASSERT_TRUE(RunExpr(std::move(expr), &result).ok());
@@ -257,7 +252,6 @@ TEST(EmptyListRuntimeTest, StringConcatEmptyWithNonEmpty) {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(a));
   args.emplace_back(std::move(b));
-  args.emplace_back(std::unique_ptr<ExecNode>(new ExecContextNode()));
   auto expr = std::unique_ptr<ExecNode>(new FunctionNode("StringConcat", std::move(args)));
   RetType result;
   ASSERT_TRUE(RunExpr(std::move(expr), &result).ok());

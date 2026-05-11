@@ -322,11 +322,10 @@ TEST(FunctionTest, StringConcatTest) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto l_node = std::unique_ptr<ExecNode>(new ConstantValueNode(l));
   auto r_node = std::unique_ptr<ExecNode>(new ConstantValueNode(r));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode);
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(l_node));
   args_list.emplace_back(std::move(r_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("StringConcat", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -449,10 +448,9 @@ TEST(FunctionTest, CastStringFromI32Test) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(arg));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode);
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("CastString", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -467,10 +465,9 @@ TEST(FunctionTest, CastStringFromU64Test) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(arg));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode);
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("CastString", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -485,10 +482,9 @@ TEST(FunctionTest, CastStringFromF64Test) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(arg));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode);
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("CastString", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -503,10 +499,9 @@ TEST(FunctionTest, CastStringFromU8Test) {
   std::unique_ptr<FunctionRegistry> func_registry;
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantValueNode(arg));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode);
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("CastString", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);

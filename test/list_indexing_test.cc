@@ -36,14 +36,14 @@ std::unique_ptr<ExecNode> MakeLookup(std::unique_ptr<ExecNode> a, std::unique_pt
 std::unique_ptr<ExecNode> MakeCompactPositions(std::unique_ptr<ExecNode> raw) {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(raw));
-  args.emplace_back(std::make_unique<ExecContextNode>());
+
   return std::make_unique<FunctionNode>("ListCompactPositions", std::move(args));
 }
 
 std::unique_ptr<ExecNode> MakeCompactIndex(std::unique_ptr<ExecNode> raw) {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::move(raw));
-  args.emplace_back(std::make_unique<ExecContextNode>());
+
   return std::make_unique<FunctionNode>("ListCompactIndex", std::move(args));
 }
 
@@ -53,7 +53,7 @@ std::unique_ptr<ExecNode> MakeGather(std::unique_ptr<ExecNode> values, std::uniq
   args.emplace_back(std::move(values));
   args.emplace_back(std::move(idx));
   args.emplace_back(std::move(default_value));
-  args.emplace_back(std::make_unique<ExecContextNode>());
+
   return std::make_unique<FunctionNode>("ListGather", std::move(args));
 }
 
@@ -616,13 +616,13 @@ TEST(ListIndexingTest, FindMissMatchesFindSortedMiss) {
 
 namespace {
 
-// Build a Bucketize(values, boundaries, exec_ctx) FunctionNode.
+// Build a Bucketize(values, boundaries) FunctionNode.
 template <typename T>
 std::unique_ptr<ExecNode> MakeBucketize(const std::vector<T>& values, const std::vector<T>& boundaries) {
   std::vector<std::unique_ptr<ExecNode>> args;
   args.emplace_back(std::make_unique<ConstantListValueNode>(values));
   args.emplace_back(std::make_unique<ConstantListValueNode>(boundaries));
-  args.emplace_back(std::make_unique<ExecContextNode>());
+
   return std::make_unique<FunctionNode>("Bucketize", std::move(args));
 }
 

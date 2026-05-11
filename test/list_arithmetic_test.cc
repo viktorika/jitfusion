@@ -25,11 +25,10 @@ TEST(FunctionTest, ListAddTest1) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto add_node = std::unique_ptr<ExecNode>(new ConstantValueNode(add));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(add_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListAdd", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -47,11 +46,10 @@ TEST(FunctionTest, ListAddTest2) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto add_node = std::unique_ptr<ExecNode>(new ConstantValueNode(add));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(add_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListAdd", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -69,11 +67,10 @@ TEST(FunctionTest, ListAddTest3) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto add_node = std::unique_ptr<ExecNode>(new ConstantValueNode(add));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(add_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListAdd", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -91,11 +88,10 @@ TEST(FunctionTest, ListAddTest4) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto data1_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
   auto data2_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(data1_node));
   args_list.emplace_back(std::move(data2_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListAdd", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -113,11 +109,10 @@ TEST(FunctionTest, ListAddTest5) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto data1_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
   auto data2_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(data1_node));
   args_list.emplace_back(std::move(data2_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListAdd", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -135,11 +130,10 @@ TEST(FunctionTest, ListAddTest6) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto data1_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
   auto data2_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(data1_node));
   args_list.emplace_back(std::move(data2_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListAdd", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -157,11 +151,10 @@ TEST(FunctionTest, ListSubTest1) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto sub_node = std::unique_ptr<ExecNode>(new ConstantValueNode(sub));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(sub_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListSub", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -179,11 +172,10 @@ TEST(FunctionTest, ListSubTest2) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto sub_node = std::unique_ptr<ExecNode>(new ConstantValueNode(sub));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(sub_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListSub", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -201,11 +193,10 @@ TEST(FunctionTest, ListSubTest3) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto sub_node = std::unique_ptr<ExecNode>(new ConstantValueNode(sub));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(sub_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListSub", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -223,11 +214,10 @@ TEST(FunctionTest, ListSubTest4) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto data1_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
   auto data2_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(data1_node));
   args_list.emplace_back(std::move(data2_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListSub", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -245,11 +235,10 @@ TEST(FunctionTest, ListSubTest5) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto data1_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
   auto data2_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(data1_node));
   args_list.emplace_back(std::move(data2_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListSub", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -267,11 +256,10 @@ TEST(FunctionTest, ListSubTest6) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto data1_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
   auto data2_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(data1_node));
   args_list.emplace_back(std::move(data2_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListSub", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -289,11 +277,10 @@ TEST(FunctionTest, ListMulTest1) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto mul_node = std::unique_ptr<ExecNode>(new ConstantValueNode(mul));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(mul_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMul", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -311,11 +298,10 @@ TEST(FunctionTest, ListMulTest2) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto mul_node = std::unique_ptr<ExecNode>(new ConstantValueNode(mul));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(mul_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMul", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -333,11 +319,10 @@ TEST(FunctionTest, ListMulTest3) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto mul_node = std::unique_ptr<ExecNode>(new ConstantValueNode(mul));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(mul_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMul", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -355,11 +340,10 @@ TEST(FunctionTest, ListMulTest4) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
   auto mul_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(mul_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMul", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -377,11 +361,10 @@ TEST(FunctionTest, ListMulTest5) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
   auto mul_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(mul_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMul", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -399,11 +382,10 @@ TEST(FunctionTest, ListMulTest6) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
   auto mul_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(mul_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMul", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -421,11 +403,10 @@ TEST(FunctionTest, ListDivTest1) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto div_node = std::unique_ptr<ExecNode>(new ConstantValueNode(div));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(div_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListDiv", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -443,11 +424,10 @@ TEST(FunctionTest, ListDivTest2) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto div_node = std::unique_ptr<ExecNode>(new ConstantValueNode(div));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(div_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListDiv", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -465,11 +445,10 @@ TEST(FunctionTest, ListDivTest3) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto div_node = std::unique_ptr<ExecNode>(new ConstantValueNode(div));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(div_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListDiv", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -487,11 +466,10 @@ TEST(FunctionTest, ListDivTest4) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
   auto div_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(div_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListDiv", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -509,11 +487,10 @@ TEST(FunctionTest, ListDivTest5) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
   auto div_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(div_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListDiv", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -531,11 +508,10 @@ TEST(FunctionTest, ListDivTest6) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
   auto div_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(div_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListDiv", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -553,11 +529,10 @@ TEST(FunctionTest, ListModTest1) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto mod_node = std::unique_ptr<ExecNode>(new ConstantValueNode(mod));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(mod_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMod", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -575,11 +550,10 @@ TEST(FunctionTest, ListModTest2) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto mod_node = std::unique_ptr<ExecNode>(new ConstantValueNode(mod));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(mod_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMod", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -597,11 +571,10 @@ TEST(FunctionTest, ListModTest3) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
   auto mod_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(mod_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMod", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -619,11 +592,10 @@ TEST(FunctionTest, ListModTest4) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
   auto mod_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(mod_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListMod", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);

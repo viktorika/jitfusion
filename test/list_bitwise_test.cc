@@ -25,11 +25,10 @@ TEST(FunctionTest, ListBitwiseAndTest1) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto and_data_node = std::unique_ptr<ExecNode>(new ConstantValueNode(and_data));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(and_data_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseAnd", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -47,11 +46,10 @@ TEST(FunctionTest, ListBitwiseAndTest2) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto and_data_node = std::unique_ptr<ExecNode>(new ConstantValueNode(and_data));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(and_data_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseAnd", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -69,11 +67,10 @@ TEST(FunctionTest, ListBitwiseAndTest3) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto data1_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
   auto data2_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(data1_node));
   args_list.emplace_back(std::move(data2_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseAnd", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -91,11 +88,10 @@ TEST(FunctionTest, ListBitwiseAndTest4) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto data1_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data1));
   auto data2_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data2));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(data1_node));
   args_list.emplace_back(std::move(data2_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseAnd", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -114,11 +110,10 @@ TEST(FunctionTest, ListBitwiseOrTest1) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto or_data_node = std::unique_ptr<ExecNode>(new ConstantValueNode(or_data));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(or_data_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseOr", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -136,11 +131,10 @@ TEST(FunctionTest, ListBitwiseOrTest2) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto or_data_node = std::unique_ptr<ExecNode>(new ConstantValueNode(or_data));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(or_data_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseOr", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -158,11 +152,10 @@ TEST(FunctionTest, ListBitwiseOrTest3) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto or_data_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(or_data));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(or_data_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseOr", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -180,11 +173,10 @@ TEST(FunctionTest, ListBitwiseOrTest4) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto or_data_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(or_data));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(or_data_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseOr", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -203,11 +195,10 @@ TEST(FunctionTest, ListBitwiseXorTest1) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto xor_data_node = std::unique_ptr<ExecNode>(new ConstantValueNode(xor_data));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(xor_data_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseXor", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -225,11 +216,10 @@ TEST(FunctionTest, ListBitwiseXorTest2) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto xor_data_node = std::unique_ptr<ExecNode>(new ConstantValueNode(xor_data));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(xor_data_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseXor", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -247,11 +237,10 @@ TEST(FunctionTest, ListBitwiseXorTest3) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto xor_data_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(xor_data));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(xor_data_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseXor", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
@@ -269,11 +258,10 @@ TEST(FunctionTest, ListBitwiseXorTest4) {
   EXPECT_TRUE(FunctionRegistryFactory::CreateFunctionRegistry(&func_registry).ok());
   auto args_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(data));
   auto xor_data_node = std::unique_ptr<ExecNode>(new ConstantListValueNode(xor_data));
-  auto exec_node = std::unique_ptr<ExecNode>(new ExecContextNode());
   std::vector<std::unique_ptr<ExecNode>> args_list;
   args_list.emplace_back(std::move(args_node));
   args_list.emplace_back(std::move(xor_data_node));
-  args_list.emplace_back(std::move(exec_node));
+
   auto op_node = std::unique_ptr<ExecNode>(new FunctionNode("ListBitwiseXor", std::move(args_list)));
   ExecEngine exec_engine;
   auto st = exec_engine.Compile(op_node, func_registry);
