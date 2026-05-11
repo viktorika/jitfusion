@@ -282,7 +282,7 @@ TEST(RefNodeTest, RefNodeWithListOperations) {
   std::string code = R"(
   a = load(entry_arg, 0);
   b = load(entry_arg, 1);
-  c = ListAdd(a, b, exec_ctx);
+  c = ListAdd(a, b);
   d = Len(c);
   e = Len(a) + Len(b);
   store(output, 0, CastF32(d));
