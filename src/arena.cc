@@ -112,6 +112,12 @@ void Arena::Reset() {
     return;
   }
 
+  // Run finalizers BEFORE we reclaim / reuse chunks. The finalizer nodes
+  // and the objects they reference all live inside the chunks we are
+  // about to either free or recycle, so once chunks are reset the bytes
+  // backing those records are logically gone and must not be revisited.
+  RunFinalizers();
+
   // Release all but the first chunk.
   if (chunks_.size() > 1) {
     ReleaseChunks(true);
@@ -131,6 +137,18 @@ void Arena::ReleaseChunks(bool retain_first) {
     }
     Free(chunk.buf_);
   }
+}
+
+void Arena::RunFinalizers() noexcept {
+  // Reverse walk: most recently registered finalizer runs first (LIFO),
+  // matching C++ stack-unwinding semantics. clear() at the end preserves
+  // the vector's capacity so subsequent Reset/Execute cycles register
+  // their finalizers without further heap traffic once the steady-state
+  // count is reached.
+  for (auto it = finalizers_.rbegin(); it != finalizers_.rend(); ++it) {
+    it->fn(it->obj);
+  }
+  finalizers_.clear();
 }
 
 }  // namespace jitfusion

@@ -2,7 +2,7 @@
  * @Author: victorika
  * @Date: 2026-05-06 11:15:00
  * @Last Modified by: victorika
- * @Last Modified time: 2026-05-09 14:41:06
+ * @Last Modified time: 2026-05-11 14:55:04
  */
 #include <algorithm>
 #include <cstdint>
@@ -24,22 +24,105 @@ namespace {
 constexpr uint32_t kLookupMiss = std::numeric_limits<uint32_t>::max();
 
 template <typename KList>
-U32ListStruct ListLookupIndex(KList a, KList b, void *exec_context) {
+using IntLookupTable = std::unordered_map<typename KList::CElementType, uint32_t>;
+using StringLookupTable = std::unordered_map<std::string_view, uint32_t>;
+
+template <typename KList>
+void *BuildLookupTableInt(KList b, void *exec_context) {
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  IntLookupTable<KList> seed;
+  seed.reserve(static_cast<size_t>(b.len) * 2);
+  for (uint32_t j = 0; j < b.len; ++j) {
+    seed.try_emplace(b.data[j], j);
+  }
+  return exec_ctx->arena.Create<IntLookupTable<KList>>(std::move(seed));
+}
+
+void *BuildLookupTableString(StringListStruct b, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  StringLookupTable seed;
+  seed.reserve(static_cast<size_t>(b.len) * 2);
+  for (uint32_t j = 0; j < b.len; ++j) {
+    std::string_view sv(b.data[j].data, b.data[j].len);
+    seed.try_emplace(sv, j);
+  }
+  return exec_ctx->arena.Create<StringLookupTable>(std::move(seed));
+}
+
+template <typename KList>
+U32ListStruct LookupTableInt(KList a, void *table_ptr, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  const auto *table = reinterpret_cast<const IntLookupTable<KList> *>(table_ptr);
+
   U32ListStruct result;
   result.len = a.len;
   result.data = reinterpret_cast<uint32_t *>(exec_ctx->arena.Allocate(sizeof(uint32_t) * a.len));
-
-  std::unordered_map<typename KList::CElementType, uint32_t> table;
-  table.reserve(static_cast<size_t>(b.len) * 2);
-  for (uint32_t j = 0; j < b.len; ++j) {
-    table.try_emplace(b.data[j], j);
-  }
-
   for (uint32_t i = 0; i < a.len; ++i) {
-    auto it = table.find(a.data[i]);
-    result.data[i] = (it == table.end()) ? kLookupMiss : it->second;
+    auto it = table->find(a.data[i]);
+    result.data[i] = (it == table->end()) ? kLookupMiss : it->second;
   }
+  return result;
+}
+
+U32ListStruct LookupTableString(StringListStruct a, void *table_ptr, void *exec_context) {
+  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
+  const auto *table = reinterpret_cast<const StringLookupTable *>(table_ptr);
+
+  U32ListStruct result;
+  result.len = a.len;
+  result.data = reinterpret_cast<uint32_t *>(exec_ctx->arena.Allocate(sizeof(uint32_t) * a.len));
+  for (uint32_t i = 0; i < a.len; ++i) {
+    std::string_view sv(a.data[i].data, a.data[i].len);
+    auto it = table->find(sv);
+    result.data[i] = (it == table->end()) ? kLookupMiss : it->second;
+  }
+  return result;
+}
+
+// Internal symbol names exposed on FunctionRegistry. They are not meant
+// to be invoked directly from user expressions (the user-facing API is
+// `ListLookupIndex`); the lowering function below references them via
+// these exact names, and `MappingToJIT` resolves the names to the C
+// pointers registered alongside.
+constexpr const char *kBuildIntName = "__BuildLookupTableInt";
+constexpr const char *kBuildStringName = "__BuildLookupTableString";
+constexpr const char *kLookupIntName = "__LookupTableInt";
+constexpr const char *kLookupStringName = "__LookupTableString";
+
+bool IsStringListType(ValueType v) { return v == ValueType::kStringList; }
+
+// Lowering for the user-facing ListLookupIndex(a, b, ctx). Emits two
+// readonly C calls - one to build the hash table over `b`, one to probe
+// the table with `a`. LLVM CSE merges the BuildLookupTable_* call across
+// multiple ListLookupIndex sites that share the same `b`.
+llvm::Value *CodegenListLookupIndex(const FunctionSignature &sign, const std::vector<llvm::Type *> &arg_types,
+                                    const std::vector<llvm::Value *> &args, IRCodeGenContext &ctx) {
+  // sign.GetParamTypes() = {KList, KList, kPtr}; args[0]=a, args[1]=b, args[2]=exec_ctx
+  const auto &param_types = sign.GetParamTypes();
+  const ValueType list_vt = param_types[0];
+  const bool is_string = IsStringListType(list_vt);
+  const char *build_name = is_string ? kBuildStringName : kBuildIntName;
+  const char *lookup_name = is_string ? kLookupStringName : kLookupIntName;
+
+  // Each helper has its own *registered* signature (so MappingToJIT and
+  // SetCFuncAttr can find them). Mirror those signatures here when
+  // asking the module for the function declaration.
+  FunctionSignature build_sign(build_name, {list_vt, ValueType::kPtr}, ValueType::kPtr);
+  FunctionSignature lookup_sign(lookup_name, {list_vt, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List);
+
+  llvm::Type *ptr_ty = llvm::PointerType::getUnqual(ctx.context);
+  llvm::Type *list_ty = arg_types[0];  // matches args[0] / args[1] (KList struct value)
+  llvm::Type *u32list_ty = ctx.complex_type.u32list_type;
+
+  // Build call: ptr (KList, ptr)
+  auto *build_fty = llvm::FunctionType::get(ptr_ty, {list_ty, ptr_ty}, false);
+  llvm::FunctionCallee build_callee = ctx.module.getOrInsertFunction(build_sign.ToString(), build_fty);
+  llvm::Value *table_ptr = ctx.builder.CreateCall(build_callee, {args[1], args[2]}, "call_BuildLookupTable");
+
+  // Lookup call: U32List (KList, ptr, ptr)
+  auto *lookup_fty = llvm::FunctionType::get(u32list_ty, {list_ty, ptr_ty, ptr_ty}, false);
+  llvm::FunctionCallee lookup_callee = ctx.module.getOrInsertFunction(lookup_sign.ToString(), lookup_fty);
+  llvm::Value *result = ctx.builder.CreateCall(lookup_callee, {args[0], table_ptr, args[2]}, "call_LookupTable");
   return result;
 }
 
@@ -91,27 +174,6 @@ uint32_t FindSortedString(StringListStruct a, StringStruct value) {
 llvm::Value *CodegenFindMiss(const FunctionSignature & /*sign*/, const std::vector<llvm::Type *> & /*arg_types*/,
                              const std::vector<llvm::Value *> & /*args*/, IRCodeGenContext &ctx) {
   return ctx.builder.getInt32(kLookupMiss);
-}
-
-U32ListStruct ListLookupIndexString(StringListStruct a, StringListStruct b, void *exec_context) {
-  auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
-  U32ListStruct result;
-  result.len = a.len;
-  result.data = reinterpret_cast<uint32_t *>(exec_ctx->arena.Allocate(sizeof(uint32_t) * a.len));
-
-  std::unordered_map<std::string_view, uint32_t> table;
-  table.reserve(static_cast<size_t>(b.len) * 2);
-  for (uint32_t j = 0; j < b.len; ++j) {
-    std::string_view sv(b.data[j].data, b.data[j].len);
-    table.try_emplace(sv, j);
-  }
-
-  for (uint32_t i = 0; i < a.len; ++i) {
-    std::string_view sv(a.data[i].data, a.data[i].len);
-    auto it = table.find(sv);
-    result.data[i] = (it == table.end()) ? kLookupMiss : it->second;
-  }
-  return result;
 }
 
 U32ListStruct ListCompactPositions(U32ListStruct raw, void *exec_context) {
@@ -208,49 +270,89 @@ U32ListStruct Bucketize(ListType values, ListType boundaries, void *exec_context
 
 Status InitListLookupIndexFunc(FunctionRegistry *reg) {
   JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLookupIndex", {ValueType::kU8List, ValueType::kU8List, ValueType::kPtr},
-                        ValueType::kU32List),
-      reinterpret_cast<void *>(ListLookupIndex<U8ListStruct>)));
+      FunctionSignature(kBuildIntName, {ValueType::kU8List, ValueType::kPtr}, ValueType::kPtr),
+      reinterpret_cast<void *>(BuildLookupTableInt<U8ListStruct>)));
   JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLookupIndex", {ValueType::kI8List, ValueType::kI8List, ValueType::kPtr},
-                        ValueType::kU32List),
-      reinterpret_cast<void *>(ListLookupIndex<I8ListStruct>)));
+      FunctionSignature(kLookupIntName, {ValueType::kU8List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(LookupTableInt<U8ListStruct>)));
+
   JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLookupIndex", {ValueType::kU16List, ValueType::kU16List, ValueType::kPtr},
-                        ValueType::kU32List),
-      reinterpret_cast<void *>(ListLookupIndex<U16ListStruct>)));
+      FunctionSignature(kBuildIntName, {ValueType::kI8List, ValueType::kPtr}, ValueType::kPtr),
+      reinterpret_cast<void *>(BuildLookupTableInt<I8ListStruct>)));
   JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLookupIndex", {ValueType::kI16List, ValueType::kI16List, ValueType::kPtr},
-                        ValueType::kU32List),
-      reinterpret_cast<void *>(ListLookupIndex<I16ListStruct>)));
+      FunctionSignature(kLookupIntName, {ValueType::kI8List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(LookupTableInt<I8ListStruct>)));
+
   JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLookupIndex", {ValueType::kU32List, ValueType::kU32List, ValueType::kPtr},
-                        ValueType::kU32List),
-      reinterpret_cast<void *>(ListLookupIndex<U32ListStruct>)));
+      FunctionSignature(kBuildIntName, {ValueType::kU16List, ValueType::kPtr}, ValueType::kPtr),
+      reinterpret_cast<void *>(BuildLookupTableInt<U16ListStruct>)));
   JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLookupIndex", {ValueType::kI32List, ValueType::kI32List, ValueType::kPtr},
-                        ValueType::kU32List),
-      reinterpret_cast<void *>(ListLookupIndex<I32ListStruct>)));
+      FunctionSignature(kLookupIntName, {ValueType::kU16List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(LookupTableInt<U16ListStruct>)));
+
   JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLookupIndex", {ValueType::kU64List, ValueType::kU64List, ValueType::kPtr},
-                        ValueType::kU32List),
-      reinterpret_cast<void *>(ListLookupIndex<U64ListStruct>)));
+      FunctionSignature(kBuildIntName, {ValueType::kI16List, ValueType::kPtr}, ValueType::kPtr),
+      reinterpret_cast<void *>(BuildLookupTableInt<I16ListStruct>)));
   JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLookupIndex", {ValueType::kI64List, ValueType::kI64List, ValueType::kPtr},
-                        ValueType::kU32List),
-      reinterpret_cast<void *>(ListLookupIndex<I64ListStruct>)));
+      FunctionSignature(kLookupIntName, {ValueType::kI16List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(LookupTableInt<I16ListStruct>)));
+
   JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLookupIndex", {ValueType::kF32List, ValueType::kF32List, ValueType::kPtr},
-                        ValueType::kU32List),
-      reinterpret_cast<void *>(ListLookupIndex<F32ListStruct>)));
+      FunctionSignature(kBuildIntName, {ValueType::kU32List, ValueType::kPtr}, ValueType::kPtr),
+      reinterpret_cast<void *>(BuildLookupTableInt<U32ListStruct>)));
   JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLookupIndex", {ValueType::kF64List, ValueType::kF64List, ValueType::kPtr},
-                        ValueType::kU32List),
-      reinterpret_cast<void *>(ListLookupIndex<F64ListStruct>)));
+      FunctionSignature(kLookupIntName, {ValueType::kU32List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(LookupTableInt<U32ListStruct>)));
+
   JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
-      FunctionSignature("ListLookupIndex", {ValueType::kStringList, ValueType::kStringList, ValueType::kPtr},
+      FunctionSignature(kBuildIntName, {ValueType::kI32List, ValueType::kPtr}, ValueType::kPtr),
+      reinterpret_cast<void *>(BuildLookupTableInt<I32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature(kLookupIntName, {ValueType::kI32List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(LookupTableInt<I32ListStruct>)));
+
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature(kBuildIntName, {ValueType::kU64List, ValueType::kPtr}, ValueType::kPtr),
+      reinterpret_cast<void *>(BuildLookupTableInt<U64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature(kLookupIntName, {ValueType::kU64List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(LookupTableInt<U64ListStruct>)));
+
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature(kBuildIntName, {ValueType::kI64List, ValueType::kPtr}, ValueType::kPtr),
+      reinterpret_cast<void *>(BuildLookupTableInt<I64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature(kLookupIntName, {ValueType::kI64List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(LookupTableInt<I64ListStruct>)));
+
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature(kBuildIntName, {ValueType::kF32List, ValueType::kPtr}, ValueType::kPtr),
+      reinterpret_cast<void *>(BuildLookupTableInt<F32ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature(kLookupIntName, {ValueType::kF32List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(LookupTableInt<F32ListStruct>)));
+
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature(kBuildIntName, {ValueType::kF64List, ValueType::kPtr}, ValueType::kPtr),
+      reinterpret_cast<void *>(BuildLookupTableInt<F64ListStruct>)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature(kLookupIntName, {ValueType::kF64List, ValueType::kPtr, ValueType::kPtr}, ValueType::kU32List),
+      reinterpret_cast<void *>(LookupTableInt<F64ListStruct>)));
+
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature(kBuildStringName, {ValueType::kStringList, ValueType::kPtr}, ValueType::kPtr),
+      reinterpret_cast<void *>(BuildLookupTableString)));
+  JF_RETURN_NOT_OK(reg->RegisterReadOnlyCFunc(
+      FunctionSignature(kLookupStringName, {ValueType::kStringList, ValueType::kPtr, ValueType::kPtr},
                         ValueType::kU32List),
-      reinterpret_cast<void *>(ListLookupIndexString)));
+      reinterpret_cast<void *>(LookupTableString)));
+
+  for (ValueType vt : {ValueType::kU8List, ValueType::kI8List, ValueType::kU16List, ValueType::kI16List,
+                       ValueType::kU32List, ValueType::kI32List, ValueType::kU64List, ValueType::kI64List,
+                       ValueType::kF32List, ValueType::kF64List, ValueType::kStringList}) {
+    JF_RETURN_NOT_OK(reg->RegisterLLVMIntrinicFunc(
+        FunctionSignature("ListLookupIndex", {vt, vt, ValueType::kPtr}, ValueType::kU32List), CodegenListLookupIndex));
+  }
   return Status::OK();
 }
 

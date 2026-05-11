@@ -309,4 +309,132 @@ TEST(ArenaTest, AllocateZeroAfterReset) {
   ASSERT_NE(p, nullptr);
 }
 
+// ============================================================================
+// Create<T>() / finalizer tests
+// ============================================================================
+
+TEST(ArenaTest, CreateTrivialType) {
+  Arena arena;
+  int* p = arena.Create<int>(42);
+  ASSERT_NE(p, nullptr);
+  EXPECT_EQ(*p, 42);
+  EXPECT_TRUE(IsAligned(p, alignof(int)));
+
+  // Trivially destructible types must not register a finalizer; we cannot
+  // observe the list directly, but we can at least exercise Reset on an
+  // arena that holds many trivial Create<T>() objects.
+  for (int i = 0; i < 1000; ++i) {
+    (void)arena.Create<int>(i);
+  }
+  arena.Reset();
+  SUCCEED();
+}
+
+namespace {
+struct DtorCounter {
+  int* counter;
+  explicit DtorCounter(int* c) : counter(c) {}
+  ~DtorCounter() { ++*counter; }
+};
+}  // namespace
+
+TEST(ArenaTest, CreateRunsDestructorOnReset) {
+  int counter = 0;
+  Arena arena;
+  for (int i = 0; i < 7; ++i) {
+    (void)arena.Create<DtorCounter>(&counter);
+  }
+  EXPECT_EQ(counter, 0);
+  arena.Reset();
+  EXPECT_EQ(counter, 7);
+  // Reset must clear the finalizer list, so a second Reset must NOT run
+  // them again (would otherwise be use-after-free on the bytes the
+  // dtor just touched).
+  arena.Reset();
+  EXPECT_EQ(counter, 7);
+}
+
+TEST(ArenaTest, CreateRunsDestructorOnDestruction) {
+  int counter = 0;
+  {
+    Arena arena;
+    for (int i = 0; i < 5; ++i) {
+      (void)arena.Create<DtorCounter>(&counter);
+    }
+    EXPECT_EQ(counter, 0);
+  }  // ~Arena()
+  EXPECT_EQ(counter, 5);
+}
+
+namespace {
+struct OrderRecorder {
+  std::vector<int>* order;
+  int id;
+  OrderRecorder(std::vector<int>* o, int i) : order(o), id(i) {}
+  ~OrderRecorder() { order->push_back(id); }
+};
+}  // namespace
+
+TEST(ArenaTest, CreateDestructionOrderIsLIFO) {
+  std::vector<int> destruction_order;
+  Arena arena;
+  for (int i = 0; i < 5; ++i) {
+    (void)arena.Create<OrderRecorder>(&destruction_order, i);
+  }
+  arena.Reset();
+  ASSERT_EQ(destruction_order.size(), 5U);
+  EXPECT_EQ(destruction_order, (std::vector<int>{4, 3, 2, 1, 0}));
+}
+
+TEST(ArenaTest, CreateNonTrivialWithHeapState) {
+  // The whole point: an arena-resident object that itself holds heap
+  // memory (here, std::vector's element buffer) must have its
+  // destructor run so the heap memory is freed. Run it under a leak
+  // sanitizer to actually catch a regression.
+  Arena arena;
+  auto* v = arena.Create<std::vector<int>>();
+  ASSERT_NE(v, nullptr);
+  for (int i = 0; i < 1024; ++i) {
+    v->push_back(i);
+  }
+  EXPECT_EQ(v->size(), 1024U);
+  // ~Arena() must run ~vector(), which frees the heap-allocated buffer.
+}
+
+TEST(ArenaTest, CreateAlignmentRespected) {
+  struct alignas(64) Wide {
+    int x;
+  };
+  Arena arena(/*min_chunk_size=*/16);
+  Wide* w = arena.Create<Wide>();
+  ASSERT_NE(w, nullptr);
+  EXPECT_TRUE(IsAligned(w, 64));
+}
+
+TEST(ArenaTest, CreateAfterResetReusesFirstChunkAndStillFinalizes) {
+  int counter = 0;
+  Arena arena(/*min_chunk_size=*/256);
+  (void)arena.Create<DtorCounter>(&counter);
+  arena.Reset();
+  EXPECT_EQ(counter, 1);
+
+  // Second round on the recycled first chunk: finalizer list must have
+  // been cleared so this is a fresh registration, not a stale one.
+  (void)arena.Create<DtorCounter>(&counter);
+  arena.Reset();
+  EXPECT_EQ(counter, 2);
+}
+
+TEST(ArenaTest, CreateMixedTrivialAndNonTrivial) {
+  int counter = 0;
+  Arena arena;
+  for (int i = 0; i < 16; ++i) {
+    (void)arena.Create<int>(i);
+    (void)arena.Create<DtorCounter>(&counter);
+    (void)arena.Allocate(13);  // raw bytes interleaved
+  }
+  arena.Reset();
+  EXPECT_EQ(counter, 16);
+}
+
 }  // namespace jitfusion
