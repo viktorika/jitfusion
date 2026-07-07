@@ -34,7 +34,7 @@ U32ListStruct GroupIndex(KList keys, void *exec_context) {
   result.data = reinterpret_cast<uint32_t *>(exec_ctx->arena.Allocate(sizeof(uint32_t) * keys.len));
 
   std::unordered_map<typename KList::CElementType, uint32_t> table;
-  table.reserve(keys.len * 2);
+  table.reserve(keys.len);
   uint32_t next_id = 0;
   for (uint32_t i = 0; i < keys.len; ++i) {
     auto [it, inserted] = table.try_emplace(keys.data[i], next_id);
@@ -53,7 +53,7 @@ U32ListStruct GroupIndexString(StringListStruct keys, void *exec_context) {
   result.data = reinterpret_cast<uint32_t *>(exec_ctx->arena.Allocate(sizeof(uint32_t) * keys.len));
 
   std::unordered_map<std::string_view, uint32_t> table;
-  table.reserve(static_cast<size_t>(keys.len) * 2);
+  table.reserve(static_cast<size_t>(keys.len));
   uint32_t next_id = 0;
   for (uint32_t i = 0; i < keys.len; ++i) {
     std::string_view sv(keys.data[i].data, keys.data[i].len);
