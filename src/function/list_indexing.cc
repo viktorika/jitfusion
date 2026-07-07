@@ -31,7 +31,7 @@ template <typename KList>
 void *BuildLookupTableInt(KList b, void *exec_context) {
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
   IntLookupTable<KList> seed;
-  seed.reserve(static_cast<size_t>(b.len) * 2);
+  seed.reserve(static_cast<size_t>(b.len));
   for (uint32_t j = 0; j < b.len; ++j) {
     seed.try_emplace(b.data[j], j);
   }
@@ -41,7 +41,7 @@ void *BuildLookupTableInt(KList b, void *exec_context) {
 void *BuildLookupTableString(StringListStruct b, void *exec_context) {
   auto *exec_ctx = reinterpret_cast<ExecContext *>(exec_context);
   StringLookupTable seed;
-  seed.reserve(static_cast<size_t>(b.len) * 2);
+  seed.reserve(static_cast<size_t>(b.len));
   for (uint32_t j = 0; j < b.len; ++j) {
     std::string_view sv(b.data[j].data, b.data[j].len);
     seed.try_emplace(sv, j);
