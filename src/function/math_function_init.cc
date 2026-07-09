@@ -417,15 +417,20 @@ Status InitMaxFunc(FunctionRegistry *reg) {
 }
 
 Status InitCastFunc(FunctionRegistry *reg) {
-  static const std::vector<ValueType> kTypeVec{ValueType::kU8,  ValueType::kI8,  ValueType::kU16, ValueType::kI16,
-                                               ValueType::kU32, ValueType::kI32, ValueType::kU64, ValueType::kI64,
-                                               ValueType::kF32, ValueType::kF64};
+  static const std::array<ValueType, 10> kTypeVec{ValueType::kU8,  ValueType::kI8,  ValueType::kU16, ValueType::kI16,
+                                                  ValueType::kU32, ValueType::kI32, ValueType::kU64, ValueType::kI64,
+                                                  ValueType::kF32, ValueType::kF64};
 
-  static const std::vector<std::pair<std::string, ValueType>> kNameWithType{
-      {"CastU8", ValueType::kU8},   {"CastI8", ValueType::kI8},   {"CastU16", ValueType::kU16},
-      {"CastI16", ValueType::kI16}, {"CastU32", ValueType::kU32}, {"CastI32", ValueType::kI32},
-      {"CastU64", ValueType::kU64}, {"CastI64", ValueType::kI64}, {"CastF32", ValueType::kF32},
-      {"CastF64", ValueType::kF64}};
+  static const std::array<std::pair<std::string, ValueType>, 10> kNameWithType{{{"CastU8", ValueType::kU8},
+                                                                                {"CastI8", ValueType::kI8},
+                                                                                {"CastU16", ValueType::kU16},
+                                                                                {"CastI16", ValueType::kI16},
+                                                                                {"CastU32", ValueType::kU32},
+                                                                                {"CastI32", ValueType::kI32},
+                                                                                {"CastU64", ValueType::kU64},
+                                                                                {"CastI64", ValueType::kI64},
+                                                                                {"CastF32", ValueType::kF32},
+                                                                                {"CastF64", ValueType::kF64}}};
 
   for (const auto &[func_name, ret_type] : kNameWithType) {
     for (auto args_type : kTypeVec) {
