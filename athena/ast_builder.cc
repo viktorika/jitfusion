@@ -65,7 +65,6 @@ Status ProgramAstBuilder::BuildPipeline(const std::string& code, std::unique_ptr
 std::unique_ptr<ExecNode> ProgramAstBuilder::MakeRefNode(const std::string& var_name, int begin_line, int begin_col,
                                                          int end_line, int end_col) {
   if (auto it = var2index_.find(var_name); it != var2index_.end()) {
-    statements_[it->second].has_dependency = true;
     if (build_mode_ == BuildMode::kPipeline) {
       return std::make_unique<RefNode>(var_name);
     }
@@ -73,7 +72,6 @@ std::unique_ptr<ExecNode> ProgramAstBuilder::MakeRefNode(const std::string& var_
   }
   for (auto it = block_stack_.rbegin(); it != block_stack_.rend(); ++it) {
     if (auto found = it->var2index.find(var_name); found != it->var2index.end()) {
-      it->statements[found->second].has_dependency = true;
       if (build_mode_ == BuildMode::kPipeline) {
         return std::make_unique<RefNode>(var_name);
       }
