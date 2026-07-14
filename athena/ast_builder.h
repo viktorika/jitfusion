@@ -24,15 +24,14 @@ using jitfusion::Status;
 struct Statement {
   Statement() = default;
   Statement(std::string vname, std::unique_ptr<jitfusion::ExecNode> exp)
-      : var_name(std::move(vname)), expression(std::move(exp)), has_dependency(false) {}
-  explicit Statement(std::unique_ptr<jitfusion::ExecNode> exp) : expression(std::move(exp)), has_dependency(false) {}
+      : var_name(std::move(vname)), expression(std::move(exp)) {}
+  explicit Statement(std::unique_ptr<jitfusion::ExecNode> exp) : expression(std::move(exp)) {}
   ~Statement() = default;
   Statement(Statement&& s) = default;
   Statement& operator=(Statement&& other) = default;
 
   std::string var_name;
   std::unique_ptr<jitfusion::ExecNode> expression;
-  bool has_dependency;
 };
 
 class ProgramAstBuilder {
