@@ -24,9 +24,31 @@ Status MakeParseError(const ExecNode& node, std::string message, Notes&&... note
   return Status::ParseError(diag.Render());
 }
 
+std::string TypeMismatchMessage(const std::string& name, ValueType old_type, ValueType new_type) {
+  return "cannot assign " + TypeHelper::TypeToString(new_type) + " to variable '" + name + "' of type " +
+         TypeHelper::TypeToString(old_type);
+}
+
 }  // namespace
 
 Status Validator::Validate(ExecNode* node) { return node->Accept(this); }
+
+SetVarResult Validator::TrySetVar(const std::string& name, ValueType type, bool is_const) {
+  auto entry = type_scope_stack_.Lookup(name);
+  if (entry.has_value()) {
+    if (entry->is_const) {
+      return SetVarResult::kConstReassign;
+    }
+    if (is_const) {
+      return SetVarResult::kRedeclare;
+    }
+    if (entry->type != type) {
+      return SetVarResult::kTypeMismatch;
+    }
+  }
+  type_scope_stack_.Set(name, {type, is_const});
+  return SetVarResult::kOk;
+}
 
 Status Validator::Visit(EntryArgumentNode& entry_argument_node) {
   entry_argument_node.SetReturnType(ValueType::kPtr);
@@ -267,7 +289,7 @@ Status Validator::Visit(FunctionNode& function_node) {
 }
 
 Status Validator::Visit(NoOPNode& no_op_node) {
-  const auto& names = no_op_node.GetNames();
+  const auto& var_infos = no_op_node.GetVarInfos();
   const auto& args = no_op_node.GetArgs();
   const bool isolated = no_op_node.IsIsolated();
   for (size_t i = 0; i < args.size(); ++i) {
@@ -282,8 +304,19 @@ Status Validator::Visit(NoOPNode& no_op_node) {
       type_scope_stack_.PushScope();
     }
     JF_RETURN_NOT_OK(args[i]->Accept(this));
-    if (!names[i].empty()) {
-      type_scope_stack_.Set(names[i], args[i]->GetReturnType());
+    if (!var_infos[i].name.empty()) {
+      auto result = TrySetVar(var_infos[i].name, args[i]->GetReturnType(), var_infos[i].is_const);
+      if (result == SetVarResult::kConstReassign) {
+        return MakeParseError(*args[i], "cannot reassign const variable '" + var_infos[i].name + "'");
+      }
+      if (result == SetVarResult::kRedeclare) {
+        return MakeParseError(*args[i], "cannot redeclare variable '" + var_infos[i].name + "' with let");
+      }
+      if (result == SetVarResult::kTypeMismatch) {
+        auto old_entry = type_scope_stack_.Lookup(var_infos[i].name);
+        return MakeParseError(*args[i],
+                              TypeMismatchMessage(var_infos[i].name, old_entry->type, args[i]->GetReturnType()));
+      }
     }
     if (isolated) {
       type_scope_stack_.PopScope();
@@ -409,15 +442,8 @@ Status Validator::Visit(IfBlockNode& if_block_node) {
     }
     auto shadowed = type_scope_stack_.GetShadowed();
     type_scope_stack_.PopScope();
-    for (const auto& [name, new_type] : shadowed) {
-      ValueType original_type = type_scope_stack_.Lookup(name);
-      if (original_type != ValueType::kUnknown && original_type != new_type) {
-        return MakeParseError(
-            if_block_node,
-            "variable '" + name + "' has incompatible types across if block branches: original type is " +
-                TypeHelper::TypeToString(original_type) + ", but assigned " + TypeHelper::TypeToString(new_type));
-      }
-      all_shadowed[name] = new_type;
+    for (const auto& [name, new_entry] : shadowed) {
+      all_shadowed[name] = new_entry.type;
     }
   }
 
@@ -432,20 +458,13 @@ Status Validator::Visit(IfBlockNode& if_block_node) {
     }
     auto shadowed = type_scope_stack_.GetShadowed();
     type_scope_stack_.PopScope();
-    for (const auto& [name, new_type] : shadowed) {
-      ValueType original_type = type_scope_stack_.Lookup(name);
-      if (original_type != ValueType::kUnknown && original_type != new_type) {
-        return MakeParseError(
-            if_block_node,
-            "variable '" + name + "' has incompatible types across if block else branch: original type is " +
-                TypeHelper::TypeToString(original_type) + ", but assigned " + TypeHelper::TypeToString(new_type));
-      }
-      all_shadowed[name] = new_type;
+    for (const auto& [name, new_entry] : shadowed) {
+      all_shadowed[name] = new_entry.type;
     }
   }
 
   for (const auto& [name, type] : all_shadowed) {
-    type_scope_stack_.Set(name, type);
+    type_scope_stack_.Set(name, {type, false});
   }
 
   if_block_node.SetReturnType(ValueType::kVoid);
@@ -453,11 +472,11 @@ Status Validator::Visit(IfBlockNode& if_block_node) {
 }
 
 Status Validator::Visit(RefNode& ref_node) {
-  ValueType type = type_scope_stack_.Lookup(ref_node.GetName());
-  if (type == ValueType::kUnknown) {
+  auto entry = type_scope_stack_.Lookup(ref_node.GetName());
+  if (!entry.has_value()) {
     return MakeParseError(ref_node, "variable '" + ref_node.GetName() + "' is not defined");
   }
-  ref_node.SetReturnType(type);
+  ref_node.SetReturnType(entry->type);
   return Status::OK();
 }
 

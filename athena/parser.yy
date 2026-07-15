@@ -63,6 +63,7 @@ YY_DECL;
 
 %define api.token.prefix {TOK_}
 %token
+  LET                         "let"
   WHEN                        "when"
   IF                          "if"
   ELIF                        "elif"
@@ -188,6 +189,7 @@ program:
 
 statement: 
   IDENTIFIER "=" expr ";" { $$ = Statement(std::move($1), std::move($3)); }
+| "let" IDENTIFIER "=" expr ";" { $$ = Statement(std::move($2), std::move($4), true); }
 | expr ";" { $$ = Statement(std::move($1)); }
 | when_block { $$ = Statement(std::move($1)); }
 

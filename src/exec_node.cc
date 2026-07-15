@@ -125,8 +125,14 @@ std::unique_ptr<ExecNode> FunctionNode::CloneImpl() {
 std::string NoOPNode::ToStringImpl(const std::string& prefix) {
   std::string result = prefix + "|--no_op\n";
   for (size_t i = 0; i < args_.size(); ++i) {
-    if (!names_[i].empty()) {
-      result += prefix + "|   |--[" + names_[i] + "]\n";
+    if (!var_infos_[i].name.empty()) {
+      result += prefix;
+      result += "|   |--[";
+      if (var_infos_[i].is_const) {
+        result += "let ";
+      }
+      result += var_infos_[i].name;
+      result += "]\n";
     }
     result += args_[i]->ToString(prefix + "|   ");
   }
@@ -136,11 +142,15 @@ std::string NoOPNode::ToStringImpl(const std::string& prefix) {
 Status NoOPNode::Accept(Visitor* visitor) { return visitor->Visit(*this); }
 ExecNodeType NoOPNode::GetExecNodeType() { return ExecNodeType::kNoOPNode; }
 void NoOPNode::AppendArgs(std::unique_ptr<ExecNode>&& arg) {
-  names_.emplace_back();
+  var_infos_.emplace_back();
   args_.emplace_back(std::move(arg));
 }
 void NoOPNode::AppendArgs(std::string name, std::unique_ptr<ExecNode>&& arg) {
-  names_.emplace_back(std::move(name));
+  var_infos_.emplace_back(std::move(name), false);
+  args_.emplace_back(std::move(arg));
+}
+void NoOPNode::AppendArgs(std::string name, std::unique_ptr<ExecNode>&& arg, bool is_const) {
+  var_infos_.emplace_back(std::move(name), is_const);
   args_.emplace_back(std::move(arg));
 }
 
@@ -150,7 +160,7 @@ std::unique_ptr<ExecNode> NoOPNode::CloneImpl() {
   for (const auto& arg : args_) {
     args.emplace_back(arg->Clone());
   }
-  return std::make_unique<NoOPNode>(names_, std::move(args), isolated_);
+  return std::make_unique<NoOPNode>(var_infos_, std::move(args), isolated_);
 }
 
 std::string IfNode::ToStringImpl(const std::string& prefix) {

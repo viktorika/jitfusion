@@ -468,5 +468,5 @@ store(output, 0, r);
   ASSERT_FALSE(st.ok());
   const std::string msg = st.ToString();
   EXPECT_NE(msg.find("variable 'r'"), std::string::npos) << msg;
-  EXPECT_NE(msg.find("incompatible types across if block"), std::string::npos) << msg;
+  EXPECT_NE(msg.find("cannot assign"), std::string::npos) << msg;
 }

@@ -10,12 +10,12 @@
 namespace jitfusion {
 
 Status CodeGen::Visit(RefNode& ref_node) {
-  llvm::Value* val = scope_stack_.Lookup(ref_node.GetName());
-  if (nullptr == val) {
+  auto val = scope_stack_.Lookup(ref_node.GetName());
+  if (!val.has_value()) {
     return Status::RuntimeError("[internal] variable not found in codegen scope: ", ref_node.GetName(),
                                 " (should be caught by validator)");
   }
-  value_ = val;
+  value_ = *val;
   return Status::OK();
 }
 

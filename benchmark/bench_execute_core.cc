@@ -11,11 +11,6 @@
 
 namespace {
 
-using ::jitfusion::bench::CompileOrDie;
-using ::jitfusion::bench::MakeLinearAddChain;
-using ::jitfusion::bench::MakeRegistry;
-using ::jitfusion::bench::MakeRegistryWithStore;
-using ::jitfusion::bench::MakeStoreI32;
 using ::jitfusion::BinaryOPNode;
 using ::jitfusion::BinaryOPType;
 using ::jitfusion::ConstantValueNode;
@@ -28,6 +23,11 @@ using ::jitfusion::NoOPNode;
 using ::jitfusion::RefNode;
 using ::jitfusion::RetType;
 using ::jitfusion::SwitchNode;
+using ::jitfusion::bench::CompileOrDie;
+using ::jitfusion::bench::MakeLinearAddChain;
+using ::jitfusion::bench::MakeRegistry;
+using ::jitfusion::bench::MakeRegistryWithStore;
+using ::jitfusion::bench::MakeStoreI32;
 
 // =============================================================================
 // B. Execute
@@ -162,7 +162,7 @@ void BM_Execute_IfBlock(benchmark::State& state) {
   auto reg = MakeRegistryWithStore();
 
   auto make_block = [](int32_t v) {
-    auto block = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+    auto block = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
     static_cast<NoOPNode*>(block.get())->AppendArgs("result", std::unique_ptr<ExecNode>(new ConstantValueNode(v)));
     return block;
   };
@@ -179,7 +179,7 @@ void BM_Execute_IfBlock(benchmark::State& state) {
   // `result` must be declared in the outer scope so RefNode("result") can
   // resolve it after the IfBlock; this matches the pattern used in
   // test/if_block_test.cc.
-  auto root = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+  auto root = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
   static_cast<NoOPNode*>(root.get())
       ->AppendArgs("result", std::unique_ptr<ExecNode>(new ConstantValueNode(static_cast<int32_t>(0))));
   static_cast<NoOPNode*>(root.get())->AppendArgs(std::move(if_block));
@@ -217,11 +217,11 @@ void BM_Execute_RefNode(benchmark::State& state) {
   auto product = std::unique_ptr<ExecNode>(new BinaryOPNode(
       BinaryOPType::kMul, std::unique_ptr<ExecNode>(new RefNode("x")), std::unique_ptr<ExecNode>(new RefNode("x"))));
 
-  std::vector<std::string> names = {"x", ""};
+  std::vector<jitfusion::VarInfo> var_infos = {{"x", false}, {"", false}};
   std::vector<std::unique_ptr<ExecNode>> items;
   items.emplace_back(std::move(inner));
   items.emplace_back(MakeStoreI32(0, std::move(product)));
-  std::unique_ptr<ExecNode> node(new NoOPNode(std::move(names), std::move(items)));
+  std::unique_ptr<ExecNode> node(new NoOPNode(std::move(var_infos), std::move(items)));
 
   auto engine = CompileOrDie(std::move(node), reg);
   ExecContext ctx(4096);

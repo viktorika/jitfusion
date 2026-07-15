@@ -36,7 +36,7 @@ Status ProgramAstBuilder::BuildExpression(const std::string& code, std::unique_p
 }
 
 Status ProgramAstBuilder::BuildPipeline(const std::string& code, std::unique_ptr<ExecNode>* result) {
-  std::vector<std::string> names;
+  std::vector<jitfusion::VarInfo> var_infos;
   std::vector<std::unique_ptr<ExecNode>> args;
   statements_.clear();
   var2index_.clear();
@@ -51,13 +51,13 @@ Status ProgramAstBuilder::BuildPipeline(const std::string& code, std::unique_ptr
   if (!custom_error_message_.empty()) {
     return Status::ParseError(custom_error_message_);
   }
-  names.reserve(statements_.size());
+  var_infos.reserve(statements_.size());
   args.reserve(statements_.size());
   for (auto& statement : statements_) {
-    names.emplace_back(std::move(statement.var_name));
+    var_infos.emplace_back(std::move(statement.var_name), statement.is_const);
     args.emplace_back(std::move(statement.expression));
   }
-  auto root = std::unique_ptr<ExecNode>(new NoOPNode(std::move(names), std::move(args)));
+  auto root = std::unique_ptr<ExecNode>(new NoOPNode(std::move(var_infos), std::move(args)));
   *result = std::move(root);
   return Status::OK();
 }
@@ -102,15 +102,15 @@ void ProgramAstBuilder::EnterBlock() {
 }
 
 std::unique_ptr<ExecNode> ProgramAstBuilder::LeaveBlock() {
-  std::vector<std::string> names;
+  std::vector<jitfusion::VarInfo> var_infos;
   std::vector<std::unique_ptr<ExecNode>> args;
-  names.reserve(statements_.size());
+  var_infos.reserve(statements_.size());
   args.reserve(statements_.size());
   for (auto& stmt : statements_) {
-    names.emplace_back(std::move(stmt.var_name));
+    var_infos.emplace_back(std::move(stmt.var_name), stmt.is_const);
     args.emplace_back(std::move(stmt.expression));
   }
-  auto block_node = std::unique_ptr<ExecNode>(new NoOPNode(std::move(names), std::move(args)));
+  auto block_node = std::unique_ptr<ExecNode>(new NoOPNode(std::move(var_infos), std::move(args)));
 
   auto& outer = block_stack_.back();
   statements_ = std::move(outer.statements);

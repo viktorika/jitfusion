@@ -76,10 +76,10 @@ TEST(IfBlockTest, WhenElseModifyAndStore) {
   {
     auto cond = MakeBinaryOP(BinaryOPType::kLarge, MakeRef("a"), MakeConstF32(0.0F));
     auto body_expr = MakeBinaryOP(BinaryOPType::kAdd, MakeRef("a"), MakeConstF32(1.0F));
-    auto body_noop = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+    auto body_noop = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
     static_cast<NoOPNode*>(body_noop.get())->AppendArgs("result", std::move(body_expr));
     auto else_expr = MakeBinaryOP(BinaryOPType::kSub, MakeRef("a"), MakeConstF32(1.0F));
-    auto else_noop = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+    auto else_noop = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
     static_cast<NoOPNode*>(else_noop.get())->AppendArgs("result", std::move(else_expr));
     std::vector<std::unique_ptr<ExecNode>> if_args;
     if_args.emplace_back(std::move(cond));
@@ -87,7 +87,7 @@ TEST(IfBlockTest, WhenElseModifyAndStore) {
     if_args.emplace_back(std::move(else_noop));
     auto if_block = std::unique_ptr<ExecNode>(new IfBlockNode(std::move(if_args)));
     auto store_node = MakeStoreF32(0, MakeRef("result"));
-    auto root = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+    auto root = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
     static_cast<NoOPNode*>(root.get())->AppendArgs("a", std::move(load_a));
     static_cast<NoOPNode*>(root.get())->AppendArgs("result", std::move(init_result));
     static_cast<NoOPNode*>(root.get())->AppendArgs(std::move(if_block));
@@ -117,14 +117,14 @@ TEST(IfBlockTest, WhenElifElseModifyAndStore) {
   auto init_result = MakeConstF32(0.0f);
 
   auto cond1 = MakeBinaryOP(BinaryOPType::kLarge, MakeRef("a"), MakeConstF32(100.0F));
-  auto body1 = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+  auto body1 = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
   static_cast<NoOPNode*>(body1.get())->AppendArgs("result", MakeConstF32(3.0F));
 
   auto cond2 = MakeBinaryOP(BinaryOPType::kLarge, MakeRef("a"), MakeConstF32(10.0F));
-  auto body2 = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+  auto body2 = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
   static_cast<NoOPNode*>(body2.get())->AppendArgs("result", MakeConstF32(2.0F));
 
-  auto else_body = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+  auto else_body = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
   static_cast<NoOPNode*>(else_body.get())->AppendArgs("result", MakeConstF32(1.0F));
 
   std::vector<std::unique_ptr<ExecNode>> if_args;
@@ -137,7 +137,7 @@ TEST(IfBlockTest, WhenElifElseModifyAndStore) {
 
   auto store_node = MakeStoreF32(0, MakeRef("result"));
 
-  auto root = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+  auto root = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
   static_cast<NoOPNode*>(root.get())->AppendArgs("a", std::move(load_a));
   static_cast<NoOPNode*>(root.get())->AppendArgs("result", std::move(init_result));
   static_cast<NoOPNode*>(root.get())->AppendArgs(std::move(if_block));
@@ -175,7 +175,7 @@ TEST(IfBlockTest, WhenWithoutElsePartialModify) {
   auto init_result = MakeConstF32(99.0F);
 
   auto cond = MakeBinaryOP(BinaryOPType::kLarge, MakeRef("a"), MakeConstF32(10.0F));
-  auto body = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+  auto body = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
   static_cast<NoOPNode*>(body.get())
       ->AppendArgs("result", MakeBinaryOP(BinaryOPType::kMul, MakeRef("a"), MakeConstF32(2.0F)));
 
@@ -186,7 +186,7 @@ TEST(IfBlockTest, WhenWithoutElsePartialModify) {
 
   auto store_node = MakeStoreF32(0, MakeRef("result"));
 
-  auto root = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+  auto root = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
   static_cast<NoOPNode*>(root.get())->AppendArgs("a", std::move(load_a));
   static_cast<NoOPNode*>(root.get())->AppendArgs("result", std::move(init_result));
   static_cast<NoOPNode*>(root.get())->AppendArgs(std::move(if_block));
@@ -220,11 +220,11 @@ TEST(IfBlockTest, MultipleVarsModifyAndStore) {
 
   auto cond = MakeBinaryOP(BinaryOPType::kLarge, MakeRef("a"), MakeConstF32(0.0F));
 
-  auto body = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+  auto body = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
   static_cast<NoOPNode*>(body.get())->AppendArgs("r1", MakeBinaryOP(BinaryOPType::kAdd, MakeRef("a"), MakeRef("b")));
   static_cast<NoOPNode*>(body.get())->AppendArgs("r2", MakeBinaryOP(BinaryOPType::kMul, MakeRef("a"), MakeRef("b")));
 
-  auto else_body = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+  auto else_body = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
   static_cast<NoOPNode*>(else_body.get())
       ->AppendArgs("r1", MakeBinaryOP(BinaryOPType::kSub, MakeRef("a"), MakeRef("b")));
   static_cast<NoOPNode*>(else_body.get())
@@ -239,7 +239,7 @@ TEST(IfBlockTest, MultipleVarsModifyAndStore) {
   auto store_r1 = MakeStoreF32(0, MakeRef("r1"));
   auto store_r2 = MakeStoreF32(1, MakeRef("r2"));
 
-  auto root = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+  auto root = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
   static_cast<NoOPNode*>(root.get())->AppendArgs("a", std::move(load_a));
   static_cast<NoOPNode*>(root.get())->AppendArgs("b", std::move(load_b));
   static_cast<NoOPNode*>(root.get())->AppendArgs("r1", std::move(init_r1));
@@ -275,10 +275,10 @@ TEST(IfBlockTest, StoreInsideWhenBlock) {
 
   auto cond = MakeBinaryOP(BinaryOPType::kLarge, MakeRef("a"), MakeConstF32(0.0F));
 
-  auto body = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+  auto body = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
   static_cast<NoOPNode*>(body.get())
       ->AppendArgs(MakeStoreF32(0, MakeBinaryOP(BinaryOPType::kMul, MakeRef("a"), MakeConstF32(2.0F))));
-  auto else_body = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+  auto else_body = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
   static_cast<NoOPNode*>(else_body.get())
       ->AppendArgs(MakeStoreF32(0, MakeBinaryOP(BinaryOPType::kMul, MakeRef("a"), MakeConstF32(-1.0F))));
 
@@ -288,7 +288,7 @@ TEST(IfBlockTest, StoreInsideWhenBlock) {
   if_args.emplace_back(std::move(else_body));
   auto if_block = std::unique_ptr<ExecNode>(new IfBlockNode(std::move(if_args)));
 
-  auto root = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+  auto root = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
   static_cast<NoOPNode*>(root.get())->AppendArgs("a", std::move(load_a));
   static_cast<NoOPNode*>(root.get())->AppendArgs(std::move(if_block));
 
@@ -318,13 +318,13 @@ TEST(IfBlockTest, PartialModifyAndStore) {
   auto init_r2 = MakeConstF32(100.0F);
 
   auto cond = MakeBinaryOP(BinaryOPType::kLarge, MakeRef("a"), MakeConstF32(0.0F));
-  auto body = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+  auto body = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
   static_cast<NoOPNode*>(body.get())
       ->AppendArgs("r1", MakeBinaryOP(BinaryOPType::kAdd, MakeRef("a"), MakeConstF32(1.0F)));
   static_cast<NoOPNode*>(body.get())
       ->AppendArgs("r2", MakeBinaryOP(BinaryOPType::kAdd, MakeRef("a"), MakeConstF32(2.0F)));
 
-  auto else_body = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+  auto else_body = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
   static_cast<NoOPNode*>(else_body.get())
       ->AppendArgs("r1", MakeBinaryOP(BinaryOPType::kSub, MakeRef("a"), MakeConstF32(1.0F)));
 
@@ -337,7 +337,7 @@ TEST(IfBlockTest, PartialModifyAndStore) {
   auto store_r1 = MakeStoreF32(0, MakeRef("r1"));
   auto store_r2 = MakeStoreF32(1, MakeRef("r2"));
 
-  auto root = std::unique_ptr<ExecNode>(new NoOPNode({}, {}));
+  auto root = std::unique_ptr<ExecNode>(new NoOPNode(std::vector<std::unique_ptr<ExecNode>>{}));
   static_cast<NoOPNode*>(root.get())->AppendArgs("a", std::move(load_a));
   static_cast<NoOPNode*>(root.get())->AppendArgs("r1", std::move(init_r1));
   static_cast<NoOPNode*>(root.get())->AppendArgs("r2", std::move(init_r2));

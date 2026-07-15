@@ -1431,7 +1431,7 @@ TEST(WhenTest, VariableTypeMismatchInWhenBranch) {
   std::vector<std::string> codes = {code};
   auto status = athena.Compile(codes, func_registry);
   EXPECT_FALSE(status.ok());
-  EXPECT_NE(status.ToString().find("incompatible types"), std::string::npos);
+  EXPECT_NE(status.ToString().find("cannot assign"), std::string::npos);
 }
 
 TEST(WhenTest, VariableTypeMismatchInElseBranch) {
@@ -1461,7 +1461,7 @@ TEST(WhenTest, VariableTypeMismatchInElseBranch) {
   std::vector<std::string> codes = {code};
   auto status = athena.Compile(codes, func_registry);
   EXPECT_FALSE(status.ok());
-  EXPECT_NE(status.ToString().find("incompatible types"), std::string::npos);
+  EXPECT_NE(status.ToString().find("cannot assign"), std::string::npos);
 }
 
 TEST(WhenTest, StringConditionReject) {

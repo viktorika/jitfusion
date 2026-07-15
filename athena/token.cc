@@ -550,8 +550,8 @@ static void yynoreturn yy_fatal_error ( const char* msg , yyscan_t yyscanner );
 	yyg->yy_hold_char = *yy_cp; \
 	*yy_cp = '\0'; \
 	yyg->yy_c_buf_p = yy_cp;
-#define YY_NUM_RULES 62
-#define YY_END_OF_BUFFER 63
+#define YY_NUM_RULES 63
+#define YY_END_OF_BUFFER 64
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -559,24 +559,24 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static const flex_int16_t yy_accept[143] =
+static const flex_int16_t yy_accept[146] =
     {   0,
-        0,    0,   63,   62,    1,    2,   14,   62,   25,   28,
-       62,   23,   24,   21,   20,   37,   19,   62,   22,   46,
-       12,   33,   31,   35,   45,   38,   39,   27,   45,   45,
-       45,   45,   45,   45,   45,   45,   45,   10,   26,   11,
-       29,    1,    2,   32,    0,   60,    0,   15,    0,   61,
-        0,   55,    0,    3,   55,   46,    0,    0,    0,   40,
-       34,   30,   36,   41,   45,   45,   45,   45,   45,   45,
-        6,   13,   45,   16,   45,   45,   45,   45,   16,    0,
-        0,    0,    3,   55,    0,    0,    0,    0,    0,   51,
-        0,    0,    0,   47,   15,   45,   45,   45,   45,   45,
+        0,    0,   64,   63,    1,    2,   15,   63,   26,   29,
+       63,   24,   25,   22,   21,   38,   20,   63,   23,   47,
+       13,   34,   32,   36,   46,   39,   40,   28,   46,   46,
+       46,   46,   46,   46,   46,   46,   46,   46,   11,   27,
+       12,   30,    1,    2,   33,    0,   61,    0,   16,    0,
+       62,    0,   56,    0,    3,   56,   47,    0,    0,    0,
+       41,   35,   31,   37,   42,   46,   46,   46,   46,   46,
+       46,    7,   14,   46,   46,   17,   46,   46,   46,   46,
+       17,    0,    0,    0,    3,   56,    0,    0,    0,    0,
+        0,   52,    0,    0,    0,   48,   16,   46,   46,   46,
 
-       14,   45,   45,   45,   45,    0,    0,    4,   58,   59,
-       52,   53,   54,   48,   49,   50,    7,    8,   45,   45,
-       45,   45,   45,   17,    5,   56,   57,   45,   45,   18,
-       45,   45,   45,   45,   44,    9,   45,   45,   45,   43,
-       42,    0
+       46,   46,    5,   15,   46,   46,   46,   46,    0,    0,
+        4,   59,   60,   53,   54,   55,   49,   50,   51,    8,
+        9,   46,   46,   46,   46,   46,   18,    6,   57,   58,
+       46,   46,   19,   46,   46,   46,   46,   45,   10,   46,
+       46,   46,   44,   43,    0
     } ;
 
 static const YY_CHAR yy_ec[256] =
@@ -621,81 +621,83 @@ static const YY_CHAR yy_meta[57] =
         5,    5,    1,    1,    1,    1
     } ;
 
-static const flex_int16_t yy_base[149] =
+static const flex_int16_t yy_base[152] =
     {   0,
-        0,    0,  217,  218,  214,  212,  188,   52,  218,  206,
-       50,  218,  218,  218,  218,  218,  218,   42,   55,   52,
-      218,   43,  186,   46,    0,  218,  218,  218,  168,   32,
-      176,   38,  165,   38,  158,  161,  166,  218,  151,  218,
-      218,  202,  200,  218,   72,  218,  199,  218,   70,  218,
-      198,   86,  189,    0,   93,   79,   66,  103,  112,  218,
-      218,  218,  218,  218,    0,  163,   38,  150,  160,  154,
-        0,    0,  147,    0,  146,  152,  143,  154,  218,   69,
-      179,   81,    0,  119,  170,  167,  165,  167,  164,  218,
-      162,  164,  161,  218,    0,  140,  119,  109,  119,  106,
+        0,    0,  219,  220,  216,  214,  190,   52,  220,  208,
+       50,  220,  220,  220,  220,  220,  220,   42,   55,   52,
+      220,   43,  188,   46,    0,  220,  220,  220,  170,   32,
+      178,   38,  174,  166,   38,  159,  162,  167,  220,  152,
+      220,  220,  203,  201,  220,   72,  220,  200,  220,   70,
+      220,  199,   86,  190,    0,   93,   79,   66,  103,  112,
+      220,  220,  220,  220,  220,    0,  164,   38,  151,  161,
+      155,    0,    0,  148,  147,    0,  146,  152,  143,  154,
+      220,   69,  179,   81,    0,  119,  170,  167,  165,  167,
+      164,  220,  162,  164,  161,  220,    0,  140,  119,  109,
 
-        0,  107,  103,  113,  106,  129,  126,  218,  218,  218,
-      218,  218,  218,  218,  218,  218,    0,    0,   94,  112,
-      107,   94,   98,    0,    0,  218,  218,   96,   92,    0,
-       74,   79,   84,   51,    0,    0,   52,   45,   56,    0,
-        0,  218,  157,  162,  165,  166,  171,  176
+      119,  106,    0,    0,  107,  103,  113,  106,  129,  126,
+      220,  220,  220,  220,  220,  220,  220,  220,  220,    0,
+        0,   94,  112,  107,   94,   98,    0,    0,  220,  220,
+       96,   92,    0,   74,   79,   84,   51,    0,    0,   52,
+       45,   56,    0,    0,  220,  157,  162,  165,  166,  171,
+      176
     } ;
 
-static const flex_int16_t yy_def[149] =
+static const flex_int16_t yy_def[152] =
     {   0,
-      142,    1,  142,  142,  142,  142,  142,  143,  142,  142,
-      144,  142,  142,  142,  142,  142,  142,  142,  142,  145,
-      142,  142,  142,  142,  146,  142,  142,  142,  146,  146,
-      146,  146,  146,  146,  146,  146,  146,  142,  142,  142,
-      142,  142,  142,  142,  143,  142,  143,  142,  144,  142,
-      144,  142,  147,  148,  142,  145,  142,  142,  142,  142,
-      142,  142,  142,  142,  146,  146,  146,  146,  146,  146,
-      146,  146,  146,  146,  146,  146,  146,  146,  142,  142,
-      147,  147,  148,  142,  142,  142,  142,  142,  142,  142,
-      142,  142,  142,  142,  146,  146,  146,  146,  146,  146,
+      145,    1,  145,  145,  145,  145,  145,  146,  145,  145,
+      147,  145,  145,  145,  145,  145,  145,  145,  145,  148,
+      145,  145,  145,  145,  149,  145,  145,  145,  149,  149,
+      149,  149,  149,  149,  149,  149,  149,  149,  145,  145,
+      145,  145,  145,  145,  145,  146,  145,  146,  145,  147,
+      145,  147,  145,  150,  151,  145,  148,  145,  145,  145,
+      145,  145,  145,  145,  145,  149,  149,  149,  149,  149,
+      149,  149,  149,  149,  149,  149,  149,  149,  149,  149,
+      145,  145,  150,  150,  151,  145,  145,  145,  145,  145,
+      145,  145,  145,  145,  145,  145,  149,  149,  149,  149,
 
-      146,  146,  146,  146,  146,  142,  142,  142,  142,  142,
-      142,  142,  142,  142,  142,  142,  146,  146,  146,  146,
-      146,  146,  146,  146,  146,  142,  142,  146,  146,  146,
-      146,  146,  146,  146,  146,  146,  146,  146,  146,  146,
-      146,    0,  142,  142,  142,  142,  142,  142
+      149,  149,  149,  149,  149,  149,  149,  149,  145,  145,
+      145,  145,  145,  145,  145,  145,  145,  145,  145,  149,
+      149,  149,  149,  149,  149,  149,  149,  149,  145,  145,
+      149,  149,  149,  149,  149,  149,  149,  149,  149,  149,
+      149,  149,  149,  149,    0,  145,  145,  145,  145,  145,
+      145
     } ;
 
-static const flex_int16_t yy_nxt[275] =
+static const flex_int16_t yy_nxt[277] =
     {   0,
         4,    5,    6,    7,    8,    9,   10,   11,   12,   13,
        14,   15,   16,   17,   18,   19,   20,   20,   20,   20,
        20,   20,   20,   21,   22,   23,   24,   25,   26,    4,
        27,   28,    4,   29,   25,   25,   30,   31,   25,   25,
-       32,   25,   33,   34,   25,   25,   35,   36,   25,   37,
-       25,   25,   38,   39,   40,   41,   46,   50,   52,   52,
-       52,   52,   52,   52,   52,   53,   55,   60,   61,   44,
-       54,   63,   64,   67,   68,   71,   46,   50,   96,   51,
-       72,   47,   69,   74,   97,   85,   75,   86,  106,   57,
-      107,   82,   58,   55,  141,  140,  108,  139,  138,   51,
+       32,   33,   34,   35,   25,   25,   36,   37,   25,   38,
+       25,   25,   39,   40,   41,   42,   47,   51,   53,   53,
+       53,   53,   53,   53,   53,   54,   56,   61,   62,   45,
+       55,   64,   65,   68,   69,   72,   47,   51,   98,   52,
+       73,   48,   70,   76,   99,   87,   77,   88,  109,   58,
+      110,   84,   59,   56,  144,  143,  111,  142,  141,   52,
 
-       59,   47,   52,   52,   52,   52,   52,   52,   52,   84,
-       84,   84,   84,   84,   84,   84,   57,  137,  136,   58,
-       87,  135,   88,   80,   89,   90,  134,   59,  133,   91,
-       80,   92,  132,   93,   94,   84,   84,   84,   84,   84,
-       84,   84,  131,  130,  129,  128,  127,  126,  125,  124,
-      123,  122,  121,  120,  119,  118,   80,   45,   45,   45,
-       45,   45,   49,   49,   49,   49,   49,   56,   56,   65,
-       65,   81,   81,   81,   81,   81,   83,  117,   83,   83,
-       83,  116,  115,  114,  113,  112,  111,  110,  109,   82,
-      105,  104,  103,  102,  101,  100,   99,   98,   95,   82,
+       60,   48,   53,   53,   53,   53,   53,   53,   53,   86,
+       86,   86,   86,   86,   86,   86,   58,  140,  139,   59,
+       89,  138,   90,   82,   91,   92,  137,   60,  136,   93,
+       82,   94,  135,   95,   96,   86,   86,   86,   86,   86,
+       86,   86,  134,  133,  132,  131,  130,  129,  128,  127,
+      126,  125,  124,  123,  122,  121,   82,   46,   46,   46,
+       46,   46,   50,   50,   50,   50,   50,   57,   57,   66,
+       66,   83,   83,   83,   83,   83,   85,  120,   85,   85,
+       85,  119,  118,  117,  116,  115,  114,  113,  112,   84,
+      108,  107,  106,  105,  104,  103,  102,  101,  100,   97,
 
-      142,  142,   43,   42,   79,   78,   77,   76,   73,   70,
-       66,   62,   48,   44,   43,   42,  142,    3,  142,  142,
-      142,  142,  142,  142,  142,  142,  142,  142,  142,  142,
-      142,  142,  142,  142,  142,  142,  142,  142,  142,  142,
-      142,  142,  142,  142,  142,  142,  142,  142,  142,  142,
-      142,  142,  142,  142,  142,  142,  142,  142,  142,  142,
-      142,  142,  142,  142,  142,  142,  142,  142,  142,  142,
-      142,  142,  142,  142
+       84,  145,  145,   44,   43,   81,   80,   79,   78,   75,
+       74,   71,   67,   63,   49,   45,   44,   43,  145,    3,
+      145,  145,  145,  145,  145,  145,  145,  145,  145,  145,
+      145,  145,  145,  145,  145,  145,  145,  145,  145,  145,
+      145,  145,  145,  145,  145,  145,  145,  145,  145,  145,
+      145,  145,  145,  145,  145,  145,  145,  145,  145,  145,
+      145,  145,  145,  145,  145,  145,  145,  145,  145,  145,
+      145,  145,  145,  145,  145,  145
     } ;
 
-static const flex_int16_t yy_chk[275] =
+static const flex_int16_t yy_chk[277] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -704,29 +706,29 @@ static const flex_int16_t yy_chk[275] =
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    8,   11,   18,   18,
        18,   18,   18,   18,   18,   19,   20,   22,   22,   22,
-       19,   24,   24,   30,   30,   32,   45,   49,   67,   11,
-       32,    8,   30,   34,   67,   57,   34,   57,   80,   20,
-       80,   82,   20,   56,  139,  138,   82,  137,  134,   49,
+       19,   24,   24,   30,   30,   32,   46,   50,   68,   11,
+       32,    8,   30,   35,   68,   58,   35,   58,   82,   20,
+       82,   84,   20,   57,  142,  141,   84,  140,  137,   50,
 
-       20,   45,   52,   52,   52,   52,   52,   52,   52,   55,
-       55,   55,   55,   55,   55,   55,   56,  133,  132,   56,
-       58,  131,   58,   52,   58,   58,  129,   56,  128,   59,
-       55,   59,  123,   59,   59,   84,   84,   84,   84,   84,
-       84,   84,  122,  121,  120,  119,  107,  106,  105,  104,
-      103,  102,  100,   99,   98,   97,   84,  143,  143,  143,
-      143,  143,  144,  144,  144,  144,  144,  145,  145,  146,
-      146,  147,  147,  147,  147,  147,  148,   96,  148,  148,
-      148,   93,   92,   91,   89,   88,   87,   86,   85,   81,
-       78,   77,   76,   75,   73,   70,   69,   68,   66,   53,
+       20,   46,   53,   53,   53,   53,   53,   53,   53,   56,
+       56,   56,   56,   56,   56,   56,   57,  136,  135,   57,
+       59,  134,   59,   53,   59,   59,  132,   57,  131,   60,
+       56,   60,  126,   60,   60,   86,   86,   86,   86,   86,
+       86,   86,  125,  124,  123,  122,  110,  109,  108,  107,
+      106,  105,  102,  101,  100,   99,   86,  146,  146,  146,
+      146,  146,  147,  147,  147,  147,  147,  148,  148,  149,
+      149,  150,  150,  150,  150,  150,  151,   98,  151,  151,
+      151,   95,   94,   93,   91,   90,   89,   88,   87,   83,
+       80,   79,   78,   77,   75,   74,   71,   70,   69,   67,
 
-       51,   47,   43,   42,   39,   37,   36,   35,   33,   31,
-       29,   23,   10,    7,    6,    5,    3,  142,  142,  142,
-      142,  142,  142,  142,  142,  142,  142,  142,  142,  142,
-      142,  142,  142,  142,  142,  142,  142,  142,  142,  142,
-      142,  142,  142,  142,  142,  142,  142,  142,  142,  142,
-      142,  142,  142,  142,  142,  142,  142,  142,  142,  142,
-      142,  142,  142,  142,  142,  142,  142,  142,  142,  142,
-      142,  142,  142,  142
+       54,   52,   48,   44,   43,   40,   38,   37,   36,   34,
+       33,   31,   29,   23,   10,    7,    6,    5,    3,  145,
+      145,  145,  145,  145,  145,  145,  145,  145,  145,  145,
+      145,  145,  145,  145,  145,  145,  145,  145,  145,  145,
+      145,  145,  145,  145,  145,  145,  145,  145,  145,  145,
+      145,  145,  145,  145,  145,  145,  145,  145,  145,  145,
+      145,  145,  145,  145,  145,  145,  145,  145,  145,  145,
+      145,  145,  145,  145,  145,  145
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -745,7 +747,7 @@ static const flex_int16_t yy_chk[275] =
 #include <climits>
 #include <cstdlib>
 #include <cstring>
-#line 748 "token.cc"
+#line 750 "token.cc"
 #line 15 "token.ll"
 #if defined __clang__
 # define CLANG_VERSION (__clang_major__ * 100 + __clang_minor__)
@@ -816,13 +818,13 @@ static const flex_int16_t yy_chk[275] =
 #if defined GCC_VERSION && 900 <= GCC_VERSION
 # pragma GCC diagnostic ignored "-Wuseless-cast"
 #endif
-#line 819 "token.cc"
+#line 821 "token.cc"
 #define YY_NO_INPUT 1
 #line 94 "token.ll"
   // Code run each time a pattern is matched.
   # define YY_USER_ACTION  loc.columns (yyleng);
-#line 824 "token.cc"
-#line 825 "token.cc"
+#line 826 "token.cc"
+#line 827 "token.cc"
 
 #define INITIAL 0
 
@@ -1089,7 +1091,7 @@ YY_DECL
   // Code run each time yylex is called.
   loc.step ();
 
-#line 1092 "token.cc"
+#line 1094 "token.cc"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1116,13 +1118,13 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 143 )
+				if ( yy_current_state >= 146 )
 					yy_c = yy_meta[yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 			++yy_cp;
 			}
-		while ( yy_current_state != 142 );
+		while ( yy_current_state != 145 );
 		yy_cp = yyg->yy_last_accepting_cpos;
 		yy_current_state = yyg->yy_last_accepting_state;
 
@@ -1172,283 +1174,282 @@ YY_RULE_SETUP
 case 5:
 YY_RULE_SETUP
 #line 116 "token.ll"
-return  athena::Parser::make_WHEN                        (loc);
+return  athena::Parser::make_LET                         (loc);
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
 #line 117 "token.ll"
-return  athena::Parser::make_IF                          (loc);
+return  athena::Parser::make_WHEN                        (loc);
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
 #line 118 "token.ll"
-return  athena::Parser::make_ELIF                        (loc);
+return  athena::Parser::make_IF                          (loc);
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
 #line 119 "token.ll"
-return  athena::Parser::make_ELSE                        (loc);
+return  athena::Parser::make_ELIF                        (loc);
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 120 "token.ll"
-return  athena::Parser::make_SWITCH                      (loc);
+return  athena::Parser::make_ELSE                        (loc);
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 121 "token.ll"
-return  athena::Parser::make_LBRACE                      (loc);
+return  athena::Parser::make_SWITCH                      (loc);
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
 #line 122 "token.ll"
-return  athena::Parser::make_RBRACE                      (loc);
+return  athena::Parser::make_LBRACE                      (loc);
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 123 "token.ll"
-return  athena::Parser::make_SEMI                        (loc);
+return  athena::Parser::make_RBRACE                      (loc);
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 125 "token.ll"
-return  athena::Parser::make_IN                          (loc);      
+#line 124 "token.ll"
+return  athena::Parser::make_SEMI                        (loc);
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 126 "token.ll"
-return  athena::Parser::make_NOT                         (loc);     
+return  athena::Parser::make_IN                          (loc);      
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 127 "token.ll"
-return  athena::Parser::make_AND                         (loc);     
+return  athena::Parser::make_NOT                         (loc);     
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 128 "token.ll"
-return  athena::Parser::make_OR                          (loc);      
+return  athena::Parser::make_AND                         (loc);     
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 129 "token.ll"
-return  athena::Parser::make_TRUE                        (loc);      
+return  athena::Parser::make_OR                          (loc);      
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 130 "token.ll"
-return  athena::Parser::make_FALSE                       (loc);      
+return  athena::Parser::make_TRUE                        (loc);      
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
 #line 131 "token.ll"
-return  athena::Parser::make_MINUS                       (loc);   
+return  athena::Parser::make_FALSE                       (loc);      
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
 #line 132 "token.ll"
-return  athena::Parser::make_PLUS                        (loc);    
+return  athena::Parser::make_MINUS                       (loc);   
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
 #line 133 "token.ll"
-return  athena::Parser::make_STAR                        (loc);    
+return  athena::Parser::make_PLUS                        (loc);    
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
 #line 134 "token.ll"
-return  athena::Parser::make_SLASH                       (loc);   
+return  athena::Parser::make_STAR                        (loc);    
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
 #line 135 "token.ll"
-return  athena::Parser::make_LPAREN                      (loc);  
+return  athena::Parser::make_SLASH                       (loc);   
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
 #line 136 "token.ll"
-return  athena::Parser::make_RPAREN                      (loc);  
+return  athena::Parser::make_LPAREN                      (loc);  
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
 #line 137 "token.ll"
-return  athena::Parser::make_MODOLO                      (loc);  
+return  athena::Parser::make_RPAREN                      (loc);  
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
 #line 138 "token.ll"
-return  athena::Parser::make_BITWISE_OR                  (loc);
+return  athena::Parser::make_MODOLO                      (loc);  
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
 #line 139 "token.ll"
-return  athena::Parser::make_BITWISE_XOR                 (loc);
+return  athena::Parser::make_BITWISE_OR                  (loc);
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
 #line 140 "token.ll"
-return  athena::Parser::make_BITWISE_AND                 (loc);
+return  athena::Parser::make_BITWISE_XOR                 (loc);
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
 #line 141 "token.ll"
-return  athena::Parser::make_BITWISE_NOT                 (loc);
+return  athena::Parser::make_BITWISE_AND                 (loc);
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
 #line 142 "token.ll"
-return  athena::Parser::make_EQUAL                       (loc);
+return  athena::Parser::make_BITWISE_NOT                 (loc);
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
 #line 143 "token.ll"
-return  athena::Parser::make_ASSIGNMENT                  (loc);
+return  athena::Parser::make_EQUAL                       (loc);
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
 #line 144 "token.ll"
-return  athena::Parser::make_NOT_EQUAL                   (loc);
+return  athena::Parser::make_ASSIGNMENT                  (loc);
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
 #line 145 "token.ll"
-return  athena::Parser::make_LESS_THAN                   (loc);
+return  athena::Parser::make_NOT_EQUAL                   (loc);
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
 #line 146 "token.ll"
-return  athena::Parser::make_LESS_THAN_OR_EQUAL_TO       (loc);
+return  athena::Parser::make_LESS_THAN                   (loc);
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
 #line 147 "token.ll"
-return  athena::Parser::make_GREATER_THAN                (loc);
+return  athena::Parser::make_LESS_THAN_OR_EQUAL_TO       (loc);
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
 #line 148 "token.ll"
-return  athena::Parser::make_GREATER_THAN_OR_EQUAL_TO    (loc);
+return  athena::Parser::make_GREATER_THAN                (loc);
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
 #line 149 "token.ll"
-return  athena::Parser::make_COMMA                       (loc);
+return  athena::Parser::make_GREATER_THAN_OR_EQUAL_TO    (loc);
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
 #line 150 "token.ll"
-return  athena::Parser::make_LBRACKET                    (loc);
+return  athena::Parser::make_COMMA                       (loc);
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
 #line 151 "token.ll"
-return  athena::Parser::make_RBRACKET                    (loc);
+return  athena::Parser::make_LBRACKET                    (loc);
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
 #line 152 "token.ll"
-return  athena::Parser::make_BITWISE_LEFT                (loc);
+return  athena::Parser::make_RBRACKET                    (loc);
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
 #line 153 "token.ll"
-return  athena::Parser::make_BITWISE_RIGHT               (loc);
+return  athena::Parser::make_BITWISE_LEFT                (loc);
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 155 "token.ll"
-return  athena::Parser::make_ENTRY_ARG   (loc);
+#line 154 "token.ll"
+return  athena::Parser::make_BITWISE_RIGHT               (loc);
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
 #line 156 "token.ll"
-return  athena::Parser::make_EXEC_CTX    (loc);
+return  athena::Parser::make_ENTRY_ARG   (loc);
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
 #line 157 "token.ll"
-return  athena::Parser::make_OUTPUT        (loc);
+return  athena::Parser::make_EXEC_CTX    (loc);
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 159 "token.ll"
-return  athena::Parser::make_IDENTIFIER (std::string(yytext), loc);
+#line 158 "token.ll"
+return  athena::Parser::make_OUTPUT        (loc);
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 161 "token.ll"
-return  athena::Parser::make_I32 (std::stoull(yytext), loc);
+#line 160 "token.ll"
+return  athena::Parser::make_IDENTIFIER (std::string(yytext), loc);
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
 #line 162 "token.ll"
-return  athena::Parser::make_U8 (std::stoull(yytext), loc);
+return  athena::Parser::make_I32 (std::stoull(yytext), loc);
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
 #line 163 "token.ll"
-return  athena::Parser::make_U16 (std::stoull(yytext), loc);
+return  athena::Parser::make_U8 (std::stoull(yytext), loc);
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
 #line 164 "token.ll"
-return  athena::Parser::make_U32 (std::stoull(yytext), loc);
+return  athena::Parser::make_U16 (std::stoull(yytext), loc);
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
 #line 165 "token.ll"
-return  athena::Parser::make_U64 (std::stoull(yytext), loc);
+return  athena::Parser::make_U32 (std::stoull(yytext), loc);
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
 #line 166 "token.ll"
-return  athena::Parser::make_I8 (std::stoull(yytext), loc);
+return  athena::Parser::make_U64 (std::stoull(yytext), loc);
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
 #line 167 "token.ll"
-return  athena::Parser::make_I16 (std::stoull(yytext), loc);
+return  athena::Parser::make_I8 (std::stoull(yytext), loc);
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
 #line 168 "token.ll"
-return  athena::Parser::make_I32 (std::stoull(yytext), loc);
+return  athena::Parser::make_I16 (std::stoull(yytext), loc);
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
 #line 169 "token.ll"
-return  athena::Parser::make_I64 (std::stoull(yytext), loc);
+return  athena::Parser::make_I32 (std::stoull(yytext), loc);
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 171 "token.ll"
-return  athena::Parser::make_F64 (std::stod(yytext), loc);
+#line 170 "token.ll"
+return  athena::Parser::make_I64 (std::stoull(yytext), loc);
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
 #line 172 "token.ll"
-return  athena::Parser::make_F32 (std::stof(yytext), loc);
+return  athena::Parser::make_F64 (std::stod(yytext), loc);
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
 #line 173 "token.ll"
-return  athena::Parser::make_F64 (std::stod(yytext), loc);
+return  athena::Parser::make_F32 (std::stof(yytext), loc);
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
 #line 174 "token.ll"
-return  athena::Parser::make_F32 (std::stof(yytext), loc);
+return  athena::Parser::make_F64 (std::stod(yytext), loc);
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
 #line 175 "token.ll"
-return  athena::Parser::make_F64 (std::stod(yytext), loc);
+return  athena::Parser::make_F32 (std::stof(yytext), loc);
 	YY_BREAK
 case 60:
-/* rule 60 can match eol */
 YY_RULE_SETUP
-#line 178 "token.ll"
-return  athena::Parser::make_STRING (std::string(yytext + 1, yyleng - 2), loc);
+#line 176 "token.ll"
+return  athena::Parser::make_F64 (std::stod(yytext), loc);
 	YY_BREAK
 case 61:
 /* rule 61 can match eol */
@@ -1456,16 +1457,22 @@ YY_RULE_SETUP
 #line 179 "token.ll"
 return  athena::Parser::make_STRING (std::string(yytext + 1, yyleng - 2), loc);
 	YY_BREAK
+case 62:
+/* rule 62 can match eol */
+YY_RULE_SETUP
+#line 180 "token.ll"
+return  athena::Parser::make_STRING (std::string(yytext + 1, yyleng - 2), loc);
+	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 181 "token.ll"
+#line 182 "token.ll"
 return  athena::Parser::make_YYEOF (loc);
 	YY_BREAK
-case 62:
+case 63:
 YY_RULE_SETUP
-#line 182 "token.ll"
+#line 183 "token.ll"
 ECHO;
 	YY_BREAK
-#line 1468 "token.cc"
+#line 1475 "token.cc"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1763,7 +1770,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 143 )
+			if ( yy_current_state >= 146 )
 				yy_c = yy_meta[yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
@@ -1792,11 +1799,11 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 143 )
+		if ( yy_current_state >= 146 )
 			yy_c = yy_meta[yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
-	yy_is_jam = (yy_current_state == 142);
+	yy_is_jam = (yy_current_state == 145);
 
 	(void)yyg;
 	return yy_is_jam ? 0 : yy_current_state;
@@ -2595,7 +2602,7 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 182 "token.ll"
+#line 183 "token.ll"
 
 
 jitfusion::Status athena::ProgramAstBuilder::Scan(const std::string &code) {

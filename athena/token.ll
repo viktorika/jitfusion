@@ -112,6 +112,7 @@ blank [ \t\r]
                                 loc.step();
                               }
 
+"let"         return  athena::Parser::make_LET                         (loc);
 "when"        return  athena::Parser::make_WHEN                        (loc);
 "if"          return  athena::Parser::make_IF                          (loc);
 "elif"        return  athena::Parser::make_ELIF                        (loc);
