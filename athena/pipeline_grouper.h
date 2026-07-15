@@ -31,7 +31,7 @@ using jitfusion::Visitor;
 class PipelineGrouper : jitfusion::Visitor {
  public:
   PipelineGrouper() = default;
-  ~PipelineGrouper() = default;
+  ~PipelineGrouper() override = default;
 
   // Merge the pipeline ASTs by category into new pipeline ASTs, where the root node of each new pipeline is a NoOp
   // node, and the original pipeline ASTs will be cleared.
