@@ -126,8 +126,13 @@ std::string NoOPNode::ToStringImpl(const std::string& prefix) {
   std::string result = prefix + "|--no_op\n";
   for (size_t i = 0; i < args_.size(); ++i) {
     if (!var_infos_[i].name.empty()) {
-      std::string const_prefix = var_infos_[i].is_const ? "let " : "";
-      result += prefix + "|   |--[" + const_prefix + var_infos_[i].name + "]\n";
+      result += prefix;
+      result += "|   |--[";
+      if (var_infos_[i].is_const) {
+        result += "let ";
+      }
+      result += var_infos_[i].name;
+      result += "]\n";
     }
     result += args_[i]->ToString(prefix + "|   ");
   }
