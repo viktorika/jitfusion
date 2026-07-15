@@ -25,6 +25,8 @@ struct Statement {
   Statement() = default;
   Statement(std::string vname, std::unique_ptr<jitfusion::ExecNode> exp)
       : var_name(std::move(vname)), expression(std::move(exp)) {}
+  Statement(std::string vname, std::unique_ptr<jitfusion::ExecNode> exp, bool is_const_var)
+      : var_name(std::move(vname)), expression(std::move(exp)), is_const(is_const_var) {}
   explicit Statement(std::unique_ptr<jitfusion::ExecNode> exp) : expression(std::move(exp)) {}
   ~Statement() = default;
   Statement(Statement&& s) = default;
@@ -32,6 +34,7 @@ struct Statement {
 
   std::string var_name;
   std::unique_ptr<jitfusion::ExecNode> expression;
+  bool is_const{false};
 };
 
 class ProgramAstBuilder {

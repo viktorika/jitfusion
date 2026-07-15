@@ -10,6 +10,7 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <vector>
 #include "status.h"
 #include "type.h"
 
@@ -175,23 +176,31 @@ class FunctionNode : public ExecNode {
   std::vector<std::unique_ptr<ExecNode>> args_;
 };
 
+struct VarInfo {
+  VarInfo() = default;
+  VarInfo(std::string name, bool is_const) : name(std::move(name)), is_const(is_const) {}
+  std::string name;
+  bool is_const{false};
+};
+
 class NoOPNode : public ExecNode {
  public:
   NoOPNode() = delete;
-  explicit NoOPNode(std::vector<std::unique_ptr<ExecNode>> args) : names_(args.size()), args_(std::move(args)) {}
+  explicit NoOPNode(std::vector<std::unique_ptr<ExecNode>> args) : var_infos_(args.size()), args_(std::move(args)) {}
   NoOPNode(std::vector<std::unique_ptr<ExecNode>> args, bool isolated)
-      : names_(args.size()), args_(std::move(args)), isolated_(isolated) {}
-  NoOPNode(std::vector<std::string> names, std::vector<std::unique_ptr<ExecNode>> args)
-      : names_(std::move(names)), args_(std::move(args)) {}
-  NoOPNode(std::vector<std::string> names, std::vector<std::unique_ptr<ExecNode>> args, bool isolated)
-      : names_(std::move(names)), args_(std::move(args)), isolated_(isolated) {}
+      : var_infos_(args.size()), args_(std::move(args)), isolated_(isolated) {}
+  NoOPNode(std::vector<VarInfo> var_infos, std::vector<std::unique_ptr<ExecNode>> args)
+      : var_infos_(std::move(var_infos)), args_(std::move(args)) {}
+  NoOPNode(std::vector<VarInfo> var_infos, std::vector<std::unique_ptr<ExecNode>> args, bool isolated)
+      : var_infos_(std::move(var_infos)), args_(std::move(args)), isolated_(isolated) {}
   Status Accept(Visitor* visitor) override;
   ExecNodeType GetExecNodeType() override;
   void AppendArgs(std::unique_ptr<ExecNode>&& arg);
   void AppendArgs(std::string name, std::unique_ptr<ExecNode>&& arg);
+  void AppendArgs(std::string name, std::unique_ptr<ExecNode>&& arg, bool is_const);
 
   [[nodiscard]] const std::vector<std::unique_ptr<ExecNode>>& GetArgs() const { return args_; }
-  [[nodiscard]] const std::vector<std::string>& GetNames() const { return names_; }
+  [[nodiscard]] const std::vector<VarInfo>& GetVarInfos() const { return var_infos_; }
 
   [[nodiscard]] bool IsIsolated() const { return isolated_; }
 
@@ -199,7 +208,7 @@ class NoOPNode : public ExecNode {
   std::string ToStringImpl(const std::string& prefix) override;
   std::unique_ptr<ExecNode> CloneImpl() override;
 
-  std::vector<std::string> names_;
+  std::vector<VarInfo> var_infos_;
   std::vector<std::unique_ptr<ExecNode>> args_;
   bool isolated_{false};
 };

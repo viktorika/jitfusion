@@ -578,59 +578,60 @@ namespace athena {
     TOK_YYEOF = 0,                 // "end of file"
     TOK_YYerror = 1,               // error
     TOK_YYUNDEF = 2,               // "invalid token"
-    TOK_WHEN = 3,                  // "when"
-    TOK_IF = 4,                    // "if"
-    TOK_ELIF = 5,                  // "elif"
-    TOK_ELSE = 6,                  // "else"
-    TOK_SWITCH = 7,                // "switch"
-    TOK_IN = 8,                    // "in"
-    TOK_NOT = 9,                   // "not"
-    TOK_AND = 10,                  // "and"
-    TOK_OR = 11,                   // "or"
-    TOK_TRUE = 12,                 // "true"
-    TOK_FALSE = 13,                // "false"
-    TOK_MINUS = 14,                // "-"
-    TOK_PLUS = 15,                 // "+"
-    TOK_STAR = 16,                 // "*"
-    TOK_SLASH = 17,                // "/"
-    TOK_LPAREN = 18,               // "("
-    TOK_RPAREN = 19,               // ")"
-    TOK_MODOLO = 20,               // "%"
-    TOK_BITWISE_OR = 21,           // "|"
-    TOK_BITWISE_XOR = 22,          // "^"
-    TOK_BITWISE_AND = 23,          // "&"
-    TOK_BITWISE_NOT = 24,          // "~"
-    TOK_BITWISE_LEFT = 25,         // "<<"
-    TOK_BITWISE_RIGHT = 26,        // ">>"
-    TOK_EQUAL = 27,                // "=="
-    TOK_ASSIGNMENT = 28,           // "="
-    TOK_NOT_EQUAL = 29,            // "!="
-    TOK_LESS_THAN = 30,            // "<"
-    TOK_LESS_THAN_OR_EQUAL_TO = 31, // "<="
-    TOK_GREATER_THAN = 32,         // ">"
-    TOK_GREATER_THAN_OR_EQUAL_TO = 33, // ">="
-    TOK_COMMA = 34,                // ","
-    TOK_LBRACKET = 35,             // "["
-    TOK_RBRACKET = 36,             // "]"
-    TOK_SEMI = 37,                 // ";"
-    TOK_LBRACE = 38,               // "{"
-    TOK_RBRACE = 39,               // "}"
-    TOK_ENTRY_ARG = 40,            // "entry_arg"
-    TOK_EXEC_CTX = 41,             // "exec_ctx"
-    TOK_OUTPUT = 42,               // "output"
-    TOK_IDENTIFIER = 43,           // "identifier"
-    TOK_I8 = 44,                   // "int8"
-    TOK_I16 = 45,                  // "int16"
-    TOK_I32 = 46,                  // "int32"
-    TOK_I64 = 47,                  // "int64"
-    TOK_U8 = 48,                   // "uint8"
-    TOK_U16 = 49,                  // "uint16"
-    TOK_U32 = 50,                  // "uint32"
-    TOK_U64 = 51,                  // "uint64"
-    TOK_F32 = 52,                  // "float"
-    TOK_F64 = 53,                  // "double"
-    TOK_STRING = 54,               // "string"
-    TOK_NEG = 55                   // NEG
+    TOK_LET = 3,                   // "let"
+    TOK_WHEN = 4,                  // "when"
+    TOK_IF = 5,                    // "if"
+    TOK_ELIF = 6,                  // "elif"
+    TOK_ELSE = 7,                  // "else"
+    TOK_SWITCH = 8,                // "switch"
+    TOK_IN = 9,                    // "in"
+    TOK_NOT = 10,                  // "not"
+    TOK_AND = 11,                  // "and"
+    TOK_OR = 12,                   // "or"
+    TOK_TRUE = 13,                 // "true"
+    TOK_FALSE = 14,                // "false"
+    TOK_MINUS = 15,                // "-"
+    TOK_PLUS = 16,                 // "+"
+    TOK_STAR = 17,                 // "*"
+    TOK_SLASH = 18,                // "/"
+    TOK_LPAREN = 19,               // "("
+    TOK_RPAREN = 20,               // ")"
+    TOK_MODOLO = 21,               // "%"
+    TOK_BITWISE_OR = 22,           // "|"
+    TOK_BITWISE_XOR = 23,          // "^"
+    TOK_BITWISE_AND = 24,          // "&"
+    TOK_BITWISE_NOT = 25,          // "~"
+    TOK_BITWISE_LEFT = 26,         // "<<"
+    TOK_BITWISE_RIGHT = 27,        // ">>"
+    TOK_EQUAL = 28,                // "=="
+    TOK_ASSIGNMENT = 29,           // "="
+    TOK_NOT_EQUAL = 30,            // "!="
+    TOK_LESS_THAN = 31,            // "<"
+    TOK_LESS_THAN_OR_EQUAL_TO = 32, // "<="
+    TOK_GREATER_THAN = 33,         // ">"
+    TOK_GREATER_THAN_OR_EQUAL_TO = 34, // ">="
+    TOK_COMMA = 35,                // ","
+    TOK_LBRACKET = 36,             // "["
+    TOK_RBRACKET = 37,             // "]"
+    TOK_SEMI = 38,                 // ";"
+    TOK_LBRACE = 39,               // "{"
+    TOK_RBRACE = 40,               // "}"
+    TOK_ENTRY_ARG = 41,            // "entry_arg"
+    TOK_EXEC_CTX = 42,             // "exec_ctx"
+    TOK_OUTPUT = 43,               // "output"
+    TOK_IDENTIFIER = 44,           // "identifier"
+    TOK_I8 = 45,                   // "int8"
+    TOK_I16 = 46,                  // "int16"
+    TOK_I32 = 47,                  // "int32"
+    TOK_I64 = 48,                  // "int64"
+    TOK_U8 = 49,                   // "uint8"
+    TOK_U16 = 50,                  // "uint16"
+    TOK_U32 = 51,                  // "uint32"
+    TOK_U64 = 52,                  // "uint64"
+    TOK_F32 = 53,                  // "float"
+    TOK_F64 = 54,                  // "double"
+    TOK_STRING = 55,               // "string"
+    TOK_NEG = 56                   // NEG
       };
       /// Backward compatibility alias (Bison 3.6).
       typedef token_kind_type yytokentype;
@@ -647,92 +648,93 @@ namespace athena {
     {
       enum symbol_kind_type
       {
-        YYNTOKENS = 56, ///< Number of tokens.
+        YYNTOKENS = 57, ///< Number of tokens.
         S_YYEMPTY = -2,
         S_YYEOF = 0,                             // "end of file"
         S_YYerror = 1,                           // error
         S_YYUNDEF = 2,                           // "invalid token"
-        S_WHEN = 3,                              // "when"
-        S_IF = 4,                                // "if"
-        S_ELIF = 5,                              // "elif"
-        S_ELSE = 6,                              // "else"
-        S_SWITCH = 7,                            // "switch"
-        S_IN = 8,                                // "in"
-        S_NOT = 9,                               // "not"
-        S_AND = 10,                              // "and"
-        S_OR = 11,                               // "or"
-        S_TRUE = 12,                             // "true"
-        S_FALSE = 13,                            // "false"
-        S_MINUS = 14,                            // "-"
-        S_PLUS = 15,                             // "+"
-        S_STAR = 16,                             // "*"
-        S_SLASH = 17,                            // "/"
-        S_LPAREN = 18,                           // "("
-        S_RPAREN = 19,                           // ")"
-        S_MODOLO = 20,                           // "%"
-        S_BITWISE_OR = 21,                       // "|"
-        S_BITWISE_XOR = 22,                      // "^"
-        S_BITWISE_AND = 23,                      // "&"
-        S_BITWISE_NOT = 24,                      // "~"
-        S_BITWISE_LEFT = 25,                     // "<<"
-        S_BITWISE_RIGHT = 26,                    // ">>"
-        S_EQUAL = 27,                            // "=="
-        S_ASSIGNMENT = 28,                       // "="
-        S_NOT_EQUAL = 29,                        // "!="
-        S_LESS_THAN = 30,                        // "<"
-        S_LESS_THAN_OR_EQUAL_TO = 31,            // "<="
-        S_GREATER_THAN = 32,                     // ">"
-        S_GREATER_THAN_OR_EQUAL_TO = 33,         // ">="
-        S_COMMA = 34,                            // ","
-        S_LBRACKET = 35,                         // "["
-        S_RBRACKET = 36,                         // "]"
-        S_SEMI = 37,                             // ";"
-        S_LBRACE = 38,                           // "{"
-        S_RBRACE = 39,                           // "}"
-        S_ENTRY_ARG = 40,                        // "entry_arg"
-        S_EXEC_CTX = 41,                         // "exec_ctx"
-        S_OUTPUT = 42,                           // "output"
-        S_IDENTIFIER = 43,                       // "identifier"
-        S_I8 = 44,                               // "int8"
-        S_I16 = 45,                              // "int16"
-        S_I32 = 46,                              // "int32"
-        S_I64 = 47,                              // "int64"
-        S_U8 = 48,                               // "uint8"
-        S_U16 = 49,                              // "uint16"
-        S_U32 = 50,                              // "uint32"
-        S_U64 = 51,                              // "uint64"
-        S_F32 = 52,                              // "float"
-        S_F64 = 53,                              // "double"
-        S_STRING = 54,                           // "string"
-        S_NEG = 55,                              // NEG
-        S_YYACCEPT = 56,                         // $accept
-        S_program = 57,                          // program
-        S_statement = 58,                        // statement
-        S_expr = 59,                             // expr
-        S_term = 60,                             // term
-        S_literal = 61,                          // literal
-        S_list = 62,                             // list
-        S_i8_list = 63,                          // i8_list
-        S_i16_list = 64,                         // i16_list
-        S_i32_list = 65,                         // i32_list
-        S_i64_list = 66,                         // i64_list
-        S_u8_list = 67,                          // u8_list
-        S_u16_list = 68,                         // u16_list
-        S_u32_list = 69,                         // u32_list
-        S_u64_list = 70,                         // u64_list
-        S_f32_list = 71,                         // f32_list
-        S_f64_list = 72,                         // f64_list
-        S_string_list = 73,                      // string_list
-        S_function = 74,                         // function
-        S_infix_function = 75,                   // infix_function
-        S_named_function = 76,                   // named_function
-        S_when_block = 77,                       // when_block
-        S_elif_chain = 78,                       // elif_chain
-        S_block = 79,                            // block
-        S_80_1 = 80,                             // $@1
-        S_args = 81,                             // args
-        S_arg = 82,                              // arg
-        S_boolean = 83                           // boolean
+        S_LET = 3,                               // "let"
+        S_WHEN = 4,                              // "when"
+        S_IF = 5,                                // "if"
+        S_ELIF = 6,                              // "elif"
+        S_ELSE = 7,                              // "else"
+        S_SWITCH = 8,                            // "switch"
+        S_IN = 9,                                // "in"
+        S_NOT = 10,                              // "not"
+        S_AND = 11,                              // "and"
+        S_OR = 12,                               // "or"
+        S_TRUE = 13,                             // "true"
+        S_FALSE = 14,                            // "false"
+        S_MINUS = 15,                            // "-"
+        S_PLUS = 16,                             // "+"
+        S_STAR = 17,                             // "*"
+        S_SLASH = 18,                            // "/"
+        S_LPAREN = 19,                           // "("
+        S_RPAREN = 20,                           // ")"
+        S_MODOLO = 21,                           // "%"
+        S_BITWISE_OR = 22,                       // "|"
+        S_BITWISE_XOR = 23,                      // "^"
+        S_BITWISE_AND = 24,                      // "&"
+        S_BITWISE_NOT = 25,                      // "~"
+        S_BITWISE_LEFT = 26,                     // "<<"
+        S_BITWISE_RIGHT = 27,                    // ">>"
+        S_EQUAL = 28,                            // "=="
+        S_ASSIGNMENT = 29,                       // "="
+        S_NOT_EQUAL = 30,                        // "!="
+        S_LESS_THAN = 31,                        // "<"
+        S_LESS_THAN_OR_EQUAL_TO = 32,            // "<="
+        S_GREATER_THAN = 33,                     // ">"
+        S_GREATER_THAN_OR_EQUAL_TO = 34,         // ">="
+        S_COMMA = 35,                            // ","
+        S_LBRACKET = 36,                         // "["
+        S_RBRACKET = 37,                         // "]"
+        S_SEMI = 38,                             // ";"
+        S_LBRACE = 39,                           // "{"
+        S_RBRACE = 40,                           // "}"
+        S_ENTRY_ARG = 41,                        // "entry_arg"
+        S_EXEC_CTX = 42,                         // "exec_ctx"
+        S_OUTPUT = 43,                           // "output"
+        S_IDENTIFIER = 44,                       // "identifier"
+        S_I8 = 45,                               // "int8"
+        S_I16 = 46,                              // "int16"
+        S_I32 = 47,                              // "int32"
+        S_I64 = 48,                              // "int64"
+        S_U8 = 49,                               // "uint8"
+        S_U16 = 50,                              // "uint16"
+        S_U32 = 51,                              // "uint32"
+        S_U64 = 52,                              // "uint64"
+        S_F32 = 53,                              // "float"
+        S_F64 = 54,                              // "double"
+        S_STRING = 55,                           // "string"
+        S_NEG = 56,                              // NEG
+        S_YYACCEPT = 57,                         // $accept
+        S_program = 58,                          // program
+        S_statement = 59,                        // statement
+        S_expr = 60,                             // expr
+        S_term = 61,                             // term
+        S_literal = 62,                          // literal
+        S_list = 63,                             // list
+        S_i8_list = 64,                          // i8_list
+        S_i16_list = 65,                         // i16_list
+        S_i32_list = 66,                         // i32_list
+        S_i64_list = 67,                         // i64_list
+        S_u8_list = 68,                          // u8_list
+        S_u16_list = 69,                         // u16_list
+        S_u32_list = 70,                         // u32_list
+        S_u64_list = 71,                         // u64_list
+        S_f32_list = 72,                         // f32_list
+        S_f64_list = 73,                         // f64_list
+        S_string_list = 74,                      // string_list
+        S_function = 75,                         // function
+        S_infix_function = 76,                   // infix_function
+        S_named_function = 77,                   // named_function
+        S_when_block = 78,                       // when_block
+        S_elif_chain = 79,                       // elif_chain
+        S_block = 80,                            // block
+        S_81_1 = 81,                             // $@1
+        S_args = 82,                             // args
+        S_arg = 83,                              // arg
+        S_boolean = 84                           // boolean
       };
     };
 
@@ -2009,6 +2011,21 @@ switch (yykind)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
+      make_LET (location_type l)
+      {
+        return symbol_type (token::TOK_LET, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_LET (const location_type& l)
+      {
+        return symbol_type (token::TOK_LET, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
       make_WHEN (location_type l)
       {
         return symbol_type (token::TOK_WHEN, std::move (l));
@@ -3145,9 +3162,9 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 439,     ///< Last index in yytable_.
+      yylast_ = 441,     ///< Last index in yytable_.
       yynnts_ = 28,  ///< Number of nonterminal symbols.
-      yyfinal_ = 71 ///< Termination state number.
+      yyfinal_ = 73 ///< Termination state number.
     };
 
 
@@ -3520,7 +3537,7 @@ switch (yykind)
 
 #line 10 "parser.yy"
 } // athena
-#line 3524 "parser.hh"
+#line 3541 "parser.hh"
 
 
 // "%code provides" blocks.
@@ -3531,7 +3548,7 @@ switch (yykind)
 // ... and declare it for the parser's sake.
 YY_DECL;
 
-#line 3535 "parser.hh"
+#line 3552 "parser.hh"
 
 
 #endif // !YY_YY_PARSER_HH_INCLUDED

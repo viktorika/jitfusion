@@ -113,7 +113,7 @@ Status CodeGen::Visit(IfBlockNode &if_block_node) {
     }
 
     for (const auto &var_name : all_modified_vars) {
-      llvm::Value *original_value = scope_stack_.Lookup(var_name);
+      llvm::Value *original_value = *scope_stack_.Lookup(var_name);
       llvm::PHINode *phi = ctx_.builder.CreatePHI(original_value->getType(), num_incoming, var_name + ".phi");
       for (const auto &info : branch_infos) {
         auto it = info.modified.find(var_name);

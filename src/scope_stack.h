@@ -6,8 +6,8 @@
  */
 #pragma once
 
+#include <optional>
 #include <string>
-#include <type_traits>
 #include <unordered_map>
 #include <vector>
 
@@ -23,17 +23,13 @@ class ScopeStack {
 
   void Set(const std::string& name, V value) { stack_.back()[name] = std::move(value); }
 
-  V Lookup(const std::string& name) const {
+  std::optional<V> Lookup(const std::string& name) const {
     for (auto it = stack_.rbegin(); it != stack_.rend(); ++it) {
       if (auto found = it->find(name); found != it->end()) {
         return found->second;
       }
     }
-    if constexpr (std::is_pointer_v<V>) {
-      return nullptr;
-    } else {
-      return V{};
-    }
+    return std::nullopt;
   }
 
   std::unordered_map<std::string, V> GetShadowed() const {

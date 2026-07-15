@@ -13,6 +13,13 @@
 
 namespace jitfusion {
 
+struct VarEntry {
+  ValueType type{ValueType::kUnknown};
+  bool is_const{false};
+};
+
+enum class SetVarResult : uint8_t { kOk, kConstReassign, kRedeclare, kTypeMismatch };
+
 class Validator : public Visitor {
  public:
   explicit Validator(const std::unique_ptr<FunctionRegistry>& func_registry) : func_registry_(func_registry) {}
@@ -34,8 +41,10 @@ class Validator : public Visitor {
   Status Visit(RefNode& ref_node) override;
 
  private:
+  SetVarResult TrySetVar(const std::string& name, ValueType type, bool is_const);
+
   const std::unique_ptr<FunctionRegistry>& func_registry_;
-  ScopeStack<ValueType> type_scope_stack_;
+  ScopeStack<VarEntry> type_scope_stack_;
 };
 
 }  // namespace jitfusion
